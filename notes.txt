@@ -1,0 +1,4 @@
+next steps:
+- read from feed
+- fix up adding posts (handle duplicates, image uploading for context)
+- setup python server and postgres database

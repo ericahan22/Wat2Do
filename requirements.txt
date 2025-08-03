@@ -1,4 +1,5 @@
 instaloader
 python-dotenv
 requests
-beautifulsoup4 
+beautifulsoup4
+openai 
