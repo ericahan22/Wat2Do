@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --radius: 0.625rem;
+
+  /* Custom Color System - Blue and Green ranges */
+  --primary-1: #dbeafe; /* Light Blue */
+  --primary-2: #93c5fd; /* Blue 300 */
+  --primary-3: #3b82f6; /* Blue 500 */
+  --primary-4: #1d4ed8; /* Blue 700 */
+  --primary-5: #1e3a8a; /* Blue 800 */
+  --primary-6: #1e40af; /* Dark Blue */
+
+  --secondary-1: #dcfce7; /* Light Green */
+  --secondary-2: #86efac; /* Green 300 */
+  --secondary-3: #22c55e; /* Green 500 */
+  --secondary-4: #15803d; /* Green 700 */
+  --secondary-5: #14532d; /* Green 800 */
+  --secondary-6: #166534; /* Dark Green */
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #f3f4f6;
+}
+
+.dark button:hover {
+  background-color: #1f2937; 
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+  body {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  }
+}

@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import csv
 from ai_client import parse_caption_for_event
+import inspect
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,9 +20,9 @@ IG_DID = os.getenv("IG_DID")
 
 def update_event_csv(event_data, club_name, url):
     """
-    Update the event_info.csv file with new event data. 
+    Update the event_info.csv file with new event data.
     """
-    csv_file = "event_info.csv" 
+    csv_file = "event_info.csv"
 
     required_fields = ["name", "date", "start_time", "location"]
 
@@ -68,6 +69,14 @@ def process_instagram_posts(max_posts=10):
             "ig_did": IG_DID,
         },
     )
+    try:
+        for post in L.get_feed_posts():
+            continue
+            # print(post.caption)
+    except Exception as e:
+        print(f"Error: {e}")
+    return
+
     club_name = "uw.wealthmanagement"
 
     profile = Profile.from_username(L.context, club_name)

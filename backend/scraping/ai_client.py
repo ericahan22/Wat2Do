@@ -7,12 +7,13 @@ from dotenv import load_dotenv
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+
 def parse_caption_for_event(caption_text):
     """
     Parse an Instagram caption to extract event information.
     Returns a consistent JSON format with all required fields.
     """
-    
+
     prompt = f"""
     Analyze the following Instagram caption and extract event information if it's an event post.
     
@@ -34,18 +35,18 @@ def parse_caption_for_event(caption_text):
     - Be consistent with the exact field names
     - Return ONLY the JSON object, no additional text
     """
-    
+
     try:
         response = client.responses.create(
             model="gpt-4o-mini",
             instructions="You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
             input=prompt,
-            temperature=0.1
+            temperature=0.1,
         )
-        
+
         # Extract the JSON response
         response_text = response.output_text.strip()
-        
+
         # Try to parse the JSON response
         try:
             # Remove any markdown formatting if present
@@ -53,19 +54,18 @@ def parse_caption_for_event(caption_text):
                 response_text = response_text[7:]
             if response_text.endswith("```"):
                 response_text = response_text[:-3]
-            
+
             event_data = json.loads(response_text.strip())
-            
+
             # Ensure all required fields are present
-            required_fields = ["name", "date", 
-                             "start_time", "end_time", "location"]
-            
+            required_fields = ["name", "date", "start_time", "end_time", "location"]
+
             for field in required_fields:
                 if field not in event_data:
                     event_data[field] = ""
-            
+
             return event_data
-            
+
         except json.JSONDecodeError as e:
             print(f"Error parsing JSON response: {e}")
             print(f"Response text: {response_text}")
@@ -75,9 +75,9 @@ def parse_caption_for_event(caption_text):
                 "date": "",
                 "start_time": "",
                 "end_time": "",
-                "location": ""
+                "location": "",
             }
-            
+
     except Exception as e:
         print(f"Error calling OpenAI API: {e}")
         # Return default structure if API call fails
@@ -86,5 +86,5 @@ def parse_caption_for_event(caption_text):
             "date": "",
             "start_time": "",
             "end_time": "",
-            "location": ""
-        } 
+            "location": "",
+        }
