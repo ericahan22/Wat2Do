@@ -35,9 +35,26 @@ def health(request):
 
 @api_view(["GET"])
 def get_events(request):
-    """Get all events from database"""
+    """Get events from database with pagination and search support"""
     try:
-        events = Events.objects.all()
+        # Get pagination parameters
+        limit = int(request.GET.get('limit', 20))  # Default 20 events per page
+        offset = int(request.GET.get('offset', 0))  # Default offset 0
+        search_term = request.GET.get('search', '').strip()  # Get search term
+        
+        # Limit the maximum number of events per request
+        limit = min(limit, 100)  # Max 100 events per request
+        
+        # Build queryset with search filter
+        queryset = Events.objects.all()
+        if search_term:
+            queryset = queryset.filter(name__icontains=search_term)
+        
+        # Get total count (after search filter)
+        total_count = queryset.count()
+        
+        # Get paginated events
+        events = queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
         events_data = []
@@ -53,9 +70,18 @@ def get_events(request):
                 'location': event.location,
             })
         
+        # Check if there are more events to load
+        has_more = offset + limit < total_count
+        next_offset = offset + limit if has_more else None
+        
         return Response({
-            "count": len(events_data), 
-            "events": events_data
+            "count": len(events_data),
+            "total_count": total_count,
+            "events": events_data,
+            "has_more": has_more,
+            "next_offset": next_offset,
+            "current_offset": offset,
+            "limit": limit
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -63,20 +89,26 @@ def get_events(request):
 
 @api_view(["GET"])
 def get_clubs(request):
-    """Get clubs from database with pagination support"""
+    """Get clubs from database with pagination and search support"""
     try:
         # Get pagination parameters
         limit = int(request.GET.get('limit', 20))  # Default 20 clubs per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
+        search_term = request.GET.get('search', '').strip()  # Get search term
         
         # Limit the maximum number of clubs per request
         limit = min(limit, 100)  # Max 100 clubs per request
         
-        # Get total count
-        total_count = Clubs.objects.count()
+        # Build queryset with search filter
+        queryset = Clubs.objects.all()
+        if search_term:
+            queryset = queryset.filter(club_name__icontains=search_term)
+        
+        # Get total count (after search filter)
+        total_count = queryset.count()
         
         # Get paginated clubs
-        clubs = Clubs.objects.all()[offset:offset + limit]
+        clubs = queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
         clubs_data = []
