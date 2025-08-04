@@ -1,95 +1,26 @@
-import { useState, useMemo, useEffect } from 'react'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import { useInView } from 'react-intersection-observer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Bookmark, ExternalLink, Instagram, MessageCircle } from 'lucide-react'
-
-interface Club {
-  id: number
-  club_name: string
-  categories: string[]
-  club_page: string
-  ig: string
-  discord: string
-}
-
-interface ClubsResponse {
-  clubs: Club[]
-  count: number
-  total_count: number
-  has_more: boolean
-  next_offset: number | null
-  current_offset: number
-  limit: number
-}
-
-const fetchClubs = async ({ pageParam = 0 }): Promise<ClubsResponse> => {
-  const response = await fetch(`http://localhost:8000/api/clubs/?limit=20&offset=${pageParam}`)
-  if (!response.ok) {
-    throw new Error('Failed to fetch clubs')
-  }
-  const data: ClubsResponse = await response.json()
-  return data
-}
+import { useClubs } from '@/hooks'
 
 export default function ClubsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('all')
-
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
+    allClubs,
+    filteredClubs,
+    uniqueCategories,
+    searchTerm,
+    setSearchTerm,
+    categoryFilter,
+    setCategoryFilter,
     isLoading,
     error,
-  } = useInfiniteQuery({
-    queryKey: ['clubs'],
-    queryFn: fetchClubs,
-    getNextPageParam: (lastPage) => lastPage.has_more ? lastPage.next_offset : undefined,
-    initialPageParam: 0,
-  })
-
-  // Flatten all pages into a single array of clubs
-  const allClubs = useMemo(() => {
-    return data?.pages.flatMap(page => page.clubs) || []
-  }, [data])
-
-  const filteredClubs = useMemo(() => {
-    return allClubs.filter((club: Club) => {
-      const matchesSearch = !searchTerm || 
-        club.club_name.toLowerCase().includes(searchTerm.toLowerCase())
-      
-      const matchesCategory = categoryFilter === 'all' || 
-        club.categories.some(category => 
-          category.toLowerCase().includes(categoryFilter.toLowerCase())
-        )
-      
-      return matchesSearch && matchesCategory
-    })
-  }, [allClubs, searchTerm, categoryFilter])
-
-  const uniqueCategories = useMemo(() => {
-    return [...new Set(
-      allClubs.flatMap((club: Club) => club.categories || [])
-    )].sort()
-  }, [allClubs])
-
-  // Intersection observer for infinite scrolling
-  const { ref, inView } = useInView({
-    threshold: 0,
-    rootMargin: '100px',
-  })
-
-  // Fetch next page when the element comes into view
-  useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
+    hasNextPage,
+    isFetchingNextPage,
+    infiniteScrollRef,
+    totalCount,
+  } = useClubs()
 
   if (isLoading) {
     return (
@@ -143,8 +74,8 @@ export default function ClubsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Showing {filteredClubs.length} of {allClubs.length} clubs
-            {data?.pages[0]?.total_count && allClubs.length < data.pages[0].total_count && (
-              <span className="ml-1">({data.pages[0].total_count} total available)</span>
+            {totalCount && allClubs.length < totalCount && (
+              <span className="ml-1">({totalCount} total available)</span>
             )}
           </p>
         </div>
@@ -221,7 +152,7 @@ export default function ClubsPage() {
 
       {/* Loading indicator for next page */}
       {hasNextPage && (
-        <div ref={ref} className="flex items-center justify-center py-8">
+        <div ref={infiniteScrollRef} className="flex items-center justify-center py-8">
           {isFetchingNextPage ? (
             <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>

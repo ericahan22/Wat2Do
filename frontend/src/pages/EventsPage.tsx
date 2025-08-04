@@ -1,117 +1,25 @@
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, MapPin, ExternalLink, Eye, EyeOff } from 'lucide-react'
-
-interface Event {
-  id: number
-  club_handle: string
-  url: string
-  name: string
-  date: string
-  start_time: string
-  end_time: string
-  location: string
-}
-
-interface EventsResponse {
-  events: Event[]
-}
-
-const fetchEvents = async (): Promise<Event[]> => {
-  const response = await fetch('http://localhost:8000/api/events/')
-  if (!response.ok) {
-    throw new Error('Failed to fetch events')
-  }
-  const data: EventsResponse = await response.json()
-  return data.events || []
-}
+import { useEvents } from '@/hooks'
 
 export default function EventsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [timeFilter, setTimeFilter] = useState('today')
-  const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set())
-
-  const { data: events = [], isLoading, error } = useQuery({
-    queryKey: ['events'],
-    queryFn: fetchEvents,
-  })
-
-  const filteredEvents = events.filter((event: Event) => {
-    const matchesSearch = !searchTerm || 
-      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      event.club_handle.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    // Time-based filtering
-    if (!event.date) return matchesSearch
-    
-    const eventDate = new Date(event.date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - today.getDay())
-    
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    const startOfYear = new Date(today.getFullYear(), 0, 1)
-    
-    let matchesTime = true
-    switch (timeFilter) {
-      case 'today':
-        matchesTime = eventDate.getTime() === today.getTime()
-        break
-      case 'week':
-        matchesTime = eventDate >= startOfWeek && eventDate <= today
-        break
-      case 'month':
-        matchesTime = eventDate >= startOfMonth && eventDate <= today
-        break
-      case 'year':
-        matchesTime = eventDate >= startOfYear && eventDate <= today
-        break
-      case 'all':
-        matchesTime = true
-        break
-    }
-    
-    return matchesSearch && matchesTime
-  })
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'TBD'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
-
-  const formatTime = (timeString: string) => {
-    if (!timeString) return 'TBD'
-    const time = new Date(`2000-01-01T${timeString}`)
-    return time.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
-  }
-
-  const toggleEventExpansion = (eventId: number) => {
-    const newExpanded = new Set(expandedEvents)
-    if (newExpanded.has(eventId)) {
-      newExpanded.delete(eventId)
-    } else {
-      newExpanded.add(eventId)
-    }
-    setExpandedEvents(newExpanded)
-  }
-
-
+  const {
+    events,
+    filteredEvents,
+    searchTerm,
+    setSearchTerm,
+    timeFilter,
+    setTimeFilter,
+    expandedEvents,
+    isLoading,
+    error,
+    formatDate,
+    formatTime,
+    toggleEventExpansion,
+  } = useEvents()
 
   if (isLoading) {
     return (
@@ -168,7 +76,7 @@ export default function EventsPage() {
 
       {/* Events Grid */}
       <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 sm:gap-6">
-        {filteredEvents.map((event, index) => {
+        {filteredEvents.map((event) => {
           const isExpanded = expandedEvents.has(event.id)
           
           return (
