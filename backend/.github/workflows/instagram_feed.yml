@@ -1,0 +1,36 @@
+name: Scrape Instagram and Store Events
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # Once per day at 07:00 UTC
+  workflow_dispatch:      # Optional manual trigger
+
+jobs:
+  instagram_feed:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      USERNAME: ${{ secrets.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      SESSIONID: ${{ secrets.SESSIONID }}
+      CSRFTOKEN: ${{ secrets.CSRFTOKEN }}
+      DS_USER_ID: ${{ secrets.DS_USER_ID }}
+      IG_DID: ${{ secrets.IG_DID }}
+      MID: ${{ secrets.MID }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DOC_ID: ${{ secrets.DOC_ID }}
+      USER_AGENT: ${{ secrets.USER_AGENT }}
+      X_IG_APP_ID: ${{ secrets.X_IG_APP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python instagram_feed.py

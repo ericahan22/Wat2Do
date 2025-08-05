@@ -9,7 +9,7 @@ pandas==2.0.3
 numpy==1.24.3
 
 # Scraping and web utilities
-instaloader
+git+https://github.com/ericahan22/instaloader.git@master#egg=instaloader
 python-dotenv
 requests==2.31.0
 beautifulsoup4

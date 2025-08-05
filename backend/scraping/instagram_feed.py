@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 import os
 import csv
 from ai_client import parse_caption_for_event
-import inspect
+from datetime import datetime, timedelta, timezone
+import psycopg2
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,9 +21,9 @@ IG_DID = os.getenv("IG_DID")
 
 def update_event_csv(event_data, club_name, url):
     """
-    Update the event_info.csv file with new event data.
+    Update the event_info.csv file with new event data. 
     """
-    csv_file = "event_info.csv"
+    csv_file = "event_info.csv" 
 
     required_fields = ["name", "date", "start_time", "location"]
 
@@ -58,25 +59,6 @@ def process_instagram_posts(max_posts=10):
     """
     Process Instagram posts and extract event information.
     """
-    L = Instaloader()
-    L.load_session(
-        USERNAME,
-        {
-            "csrftoken": CSRFTOKEN,
-            "sessionid": SESSIONID,
-            "ds_user_id": DS_USER_ID,
-            "mid": MID,
-            "ig_did": IG_DID,
-        },
-    )
-    try:
-        for post in L.get_feed_posts():
-            continue
-            # print(post.caption)
-    except Exception as e:
-        print(f"Error: {e}")
-    return
-
     club_name = "uw.wealthmanagement"
 
     profile = Profile.from_username(L.context, club_name)
@@ -105,5 +87,71 @@ def process_instagram_posts(max_posts=10):
     print(f"Added {events_added} events to CSV")
 
 
+def insert_event_to_db(event_data, club_ig, post_url):
+    conn = psycopg2.connect(os.getenv("SUPABASE_DB_URL"))
+    cur = conn.cursor()
+    query = """
+    INSERT INTO events (club_handle, url, name, date, start_time, end_time, location)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT DO NOTHING;
+    """
+    cur.execute(query, (
+        club_ig,
+        post_url,
+        event_data["name"],
+        event_data["date"],
+        event_data["start_time"],
+        event_data["end_time"] or None,
+        event_data["location"],
+    ))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return True
+
+
+def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1)):
+    events_added = 0
+    for post in L.get_feed_posts():
+        post_time = post.date_utc.replace(tzinfo=timezone.utc)
+        if post_time >= cutoff:
+            # print(post.date_utc, post.shortcode, post.owner_username)
+            print(f"\n--- Processing post ---")
+            if post.caption:
+                print(f"Caption: {post.caption[:100]}...")
+                event_data = parse_caption_for_event(post.caption)
+                post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                if update_event_csv(event_data, post.owner_username, post_url):
+                    if insert_event_to_db(event_data, post.owner_username, post_url):
+                        events_added += 1
+            else:
+                print("No caption found, skipping...")
+
+    print(f"\n--- Summary ---")
+    print(f"Added {events_added} event(s) to Supabase")
+
+
+def session():
+    L = Instaloader()
+    try:
+        L.load_session(
+            USERNAME,
+            {
+                "csrftoken": CSRFTOKEN,
+                "sessionid": SESSIONID,
+                "ds_user_id": DS_USER_ID,
+                "mid": MID,
+                "ig_did": IG_DID,
+            },
+        )
+        print("Successfully logged in")
+        return L
+    except Exception as e:
+        print(f"Failed to load session: {e}")
+        raise
+
+
 if __name__ == "__main__":
-    process_instagram_posts(max_posts=10)
+    # process_instagram_posts(max_posts=10)
+    L = session()
+    process_recent_feed()
