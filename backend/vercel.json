@@ -18,10 +18,5 @@
   ],
   "env": {
     "DJANGO_SETTINGS_MODULE": "core.settings"
-  },
-  "functions": {
-    "core/wsgi.py": {
-      "maxDuration": 30
-    }
   }
 }
