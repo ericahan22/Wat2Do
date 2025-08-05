@@ -23,6 +23,9 @@ interface EventsResponse {
   limit: number;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+
 const fetchEvents = async ({
   pageParam = 0,
   queryKey,
@@ -36,7 +39,7 @@ const fetchEvents = async ({
     : "";
 
   const response = await fetch(
-    `http://localhost:8000/api/events/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/api/events/?limit=50&offset=${pageParam}${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");

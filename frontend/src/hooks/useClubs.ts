@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
+import debounce from "lodash/debounce";
 
 export interface Club {
   id: number;
@@ -21,31 +22,32 @@ interface ClubsResponse {
   limit: number;
 }
 
-const fetchClubs = async ({
-  pageParam = 0,
-  queryKey,
-}: {
-  pageParam?: number;
-  queryKey: any[];
-}): Promise<ClubsResponse> => {
-  const searchTerm = queryKey[1] || "";
-  const searchParam = searchTerm
-    ? `&search=${encodeURIComponent(searchTerm)}`
-    : "";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
+const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any[] }): Promise<ClubsResponse> => {
+  const searchTerm = queryKey[1] || ""; // Get search term from queryKey
+  const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
+  
   const response = await fetch(
-    `http://localhost:8000/api/clubs/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/api/clubs/?limit=50&offset=${pageParam}${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch clubs");
   }
-  return response.json();
+  const data: ClubsResponse = await response.json();
+  return data;
 };
 
 export function useClubs() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => setDebouncedSearchTerm(value), 300),
+    []
+  );
 
   const {
     data,
@@ -55,7 +57,7 @@ export function useClubs() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["clubs", searchTerm],
+    queryKey: ["clubs", debouncedSearchTerm], // Include search term in queryKey
     queryFn: fetchClubs,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
@@ -71,6 +73,7 @@ export function useClubs() {
   }, [data]);
 
   const filteredClubs = useMemo(() => {
+    // Since search is now handled server-side, we only need to filter by category
     return allClubs.filter((club: Club) => {
       const matchesCategory =
         categoryFilter === "all" ||
@@ -84,19 +87,9 @@ export function useClubs() {
 
   const uniqueCategories = useMemo(() => {
     return [
-      "Academic",
-      "Business and Entrepreneurial",
-      "Charitable, Community Service & International Development",
-      "Creative Arts, Dance and Music",
-      "Cultural",
-      "Environmental and Sustainability",
-      "Games, Recreational and Social",
-      "Health Promotion",
-      "Media, Publications and Web Development",
-      "Political and Social Awareness",
-      "Religious and Spiritual",
-    ];
-  }, []);
+      ...new Set(allClubs.flatMap((club: Club) => club.categories || [])),
+    ].sort();
+  }, [allClubs]);
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -112,10 +105,6 @@ export function useClubs() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, isLoadingMore, fetchNextPage]);
 
-  const handleSearch = (searchValue: string) => {
-    setSearchTerm(searchValue);
-  };
-
   return {
     // Data
     allClubs,
@@ -124,7 +113,10 @@ export function useClubs() {
 
     // State
     searchTerm,
-    handleSearch,
+    setSearchTerm: (value: string) => {
+      setSearchTerm(value);
+      debouncedSetSearch(value);
+    },
     categoryFilter,
     setCategoryFilter,
 
