@@ -1,7 +1,6 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import debounce from "lodash/debounce";
 
 export interface Club {
   id: number;
@@ -56,7 +55,7 @@ export function useClubs() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["clubs", searchTerm],  
+    queryKey: ["clubs", searchTerm],
     queryFn: fetchClubs,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
@@ -65,8 +64,6 @@ export function useClubs() {
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
-
-  console.log('clubs data', data)
 
   // Flatten all pages into a single array of clubs
   const allClubs = useMemo(() => {
@@ -100,7 +97,7 @@ export function useClubs() {
       "Religious and Spiritual",
     ];
   }, []);
-  
+
   const { ref, inView } = useInView({
     threshold: 0,
     rootMargin: "200px",

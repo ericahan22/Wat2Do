@@ -1,12 +1,16 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useClubs } from '@/hooks'
-import ClubsGrid from '@/components/ClubsGrid'
-import SearchInput from '@/components/SearchInput'
-import { useRef, useEffect, memo } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useClubs } from "@/hooks";
+import ClubsGrid from "@/components/ClubsGrid";
+import SearchInput from "@/components/SearchInput";
+import { memo } from "react";
 
 const ClubsPage = memo(() => {
-  const totalCountRef = useRef<number>(0)
-  
   const {
     allClubs,
     filteredClubs,
@@ -20,31 +24,27 @@ const ClubsPage = memo(() => {
     isFetchingNextPage,
     infiniteScrollRef,
     totalCount,
-  } = useClubs()
-
-  // Store the initial total count and only update it once
-  useEffect(() => {
-    if (totalCount && totalCountRef.current === 0) {
-      totalCountRef.current = totalCount
-    }
-  }, [totalCount])
-
+  } = useClubs();
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center sm:text-left">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Clubs</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Clubs
+        </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Explore {totalCountRef.current} student clubs and organizations
+          {totalCount
+            ? `Explore ${totalCount} student clubs and organizations`
+            : "Loading clubs..."}
         </p>
       </div>
-      
+
       {/* Filters */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchInput onSearch={handleSearch} placeholder="Search clubs..." />
-          
+
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-full sm:w-auto">
               <SelectValue placeholder="Filter by category" />
@@ -64,11 +64,15 @@ const ClubsPage = memo(() => {
       {/* Content Area - Shows loading, error, or clubs grid */}
       {isLoading ? (
         <div className="flex items-center justify-center min-h-64">
-          <div className="text-lg text-gray-900 dark:text-gray-100">Loading clubs...</div>
+          <div className="text-lg text-gray-900 dark:text-gray-100">
+            Loading clubs...
+          </div>
         </div>
       ) : error ? (
         <div className="flex items-center justify-center min-h-64">
-          <div className="text-lg text-red-600 dark:text-red-400">Error loading clubs: {error.message}</div>
+          <div className="text-lg text-red-600 dark:text-red-400">
+            Error loading clubs: {error.message}
+          </div>
         </div>
       ) : (
         <ClubsGrid
@@ -80,9 +84,9 @@ const ClubsPage = memo(() => {
         />
       )}
     </div>
-  )
-})
+  );
+});
 
-ClubsPage.displayName = 'ClubsPage'
+ClubsPage.displayName = "ClubsPage";
 
-export default ClubsPage 
+export default ClubsPage;

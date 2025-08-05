@@ -8,11 +8,9 @@ import {
 import { useEvents } from "@/hooks";
 import EventsGrid from "@/components/EventsGrid";
 import SearchInput from "@/components/SearchInput";
-import { useRef, useEffect, memo } from "react";
+import { memo } from "react";
 
 const EventsPage = memo(() => {
-  const totalCountRef = useRef<number>(0);
-
   const {
     allEvents,
     filteredEvents,
@@ -30,13 +28,6 @@ const EventsPage = memo(() => {
     formatTime,
   } = useEvents();
 
-  // Store the initial total count and only update it once
-  useEffect(() => {
-    if (totalCount && totalCountRef.current === 0) {
-      totalCountRef.current = totalCount;
-    }
-  }, [totalCount]);
-
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -45,7 +36,9 @@ const EventsPage = memo(() => {
           Events
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Discover {totalCountRef.current} upcoming events and activities
+          {totalCount
+            ? `Discover ${totalCount} events and activities`
+            : "Loading events..."}
         </p>
       </div>
 
