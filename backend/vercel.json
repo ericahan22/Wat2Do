@@ -23,6 +23,5 @@
     "core/wsgi.py": {
       "maxDuration": 30
     }
-  },
-  "buildCommand": "chmod +x vercel-build.sh && ./vercel-build.sh"
+  }
 }
