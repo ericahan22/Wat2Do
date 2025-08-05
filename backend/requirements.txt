@@ -1,3 +1,4 @@
+setuptools==65.5.0
 # Django and core dependencies
 Django==4.2.7
 djangorestframework==3.14.0
