@@ -47,4 +47,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run scraper
-        run: python instagram_feed.py
+        run: python scraping/instagram_feed.py
