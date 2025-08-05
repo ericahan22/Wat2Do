@@ -1,17 +1,28 @@
 {
   "version": 2,
-  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
-  "routes": [
+  "builds": [
     {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
+      "src": "core/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.10",
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
+  "routes": [
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/admin/(.*)", "dest": "core/wsgi.py" },
+    { "src": "/api/(.*)", "dest": "core/wsgi.py" },
+    { "src": "/(.*)", "dest": "core/wsgi.py" }
+  ],
   "env": {
-    "NODE_ENV": "production"
-  }
+    "DJANGO_SETTINGS_MODULE": "core.settings"
+  },
+  "functions": {
+    "core/wsgi.py": {
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "chmod +x vercel-build.sh && ./vercel-build.sh"
 }
