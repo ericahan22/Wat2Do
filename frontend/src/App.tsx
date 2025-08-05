@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from './lib/theme'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
