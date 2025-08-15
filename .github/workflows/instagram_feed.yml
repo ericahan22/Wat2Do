@@ -47,4 +47,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run scraper
-        run: python scraping/instagram_feed.py
+        run: |
+          set -o pipefail
+          python scraping/instagram_feed.py | tee scraper_output.txt
+          if grep -q "Oops, an error occurred." scraper_output.txt; then
+          echo "Error detected in scraper output."
+          exit 1
+        fi
