@@ -11,9 +11,8 @@
     }
   ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/static/$1" },
-    { "src": "/admin/(.*)", "dest": "core/wsgi.py" },
     { "src": "/api/(.*)", "dest": "core/wsgi.py" },
+    { "src": "/admin/(.*)", "dest": "core/wsgi.py" },
     { "src": "/(.*)", "dest": "core/wsgi.py" }
   ],
   "env": {
