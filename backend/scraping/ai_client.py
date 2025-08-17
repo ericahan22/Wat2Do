@@ -2,6 +2,12 @@ import os
 import json
 from openai import OpenAI
 from dotenv import load_dotenv
+import logging
+import traceback
+
+
+logger = logging.getLogger(__name__)
+
 
 # Load API key from .env file
 load_dotenv()
@@ -36,6 +42,8 @@ def parse_caption_for_event(caption_text):
     """
     
     try:
+        logger.debug(f"Parsing caption of length: {len(caption_text)}")
+        logger.debug(f"Caption preview: {caption_text[:200]}...")
         response = client.responses.create(
             model="gpt-4o-mini",
             instructions="You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
@@ -59,7 +67,6 @@ def parse_caption_for_event(caption_text):
             # Ensure all required fields are present
             required_fields = ["name", "date", 
                              "start_time", "end_time", "location"]
-            
             for field in required_fields:
                 if field not in event_data:
                     event_data[field] = ""
@@ -79,7 +86,9 @@ def parse_caption_for_event(caption_text):
             }
             
     except Exception as e:
-        print(f"Error calling OpenAI API: {e}")
+        logger.error(f"Error parsing caption: {str(e)}")
+        logger.error(f"Caption text: {caption_text}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         # Return default structure if API call fails
         return {
             "name": "",

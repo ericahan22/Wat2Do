@@ -5,6 +5,38 @@ import csv
 from ai_client import parse_caption_for_event
 from datetime import datetime, timedelta, timezone
 import psycopg2
+import logging
+import traceback
+from datetime import datetime
+import sys
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('scraping.log', encoding='utf-8'),
+    ]
+)
+logger = logging.getLogger(__name__)
+
+def handle_instagram_errors(func):
+    # Handle common Instagram errors?
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            error_msg = str(e).lower()
+            if any(kw in error_msg for kw in ['login', 'csrf', 'session', 'unauthorized', 'forbidden']):
+                logger.error("--- Instagram auth error ---")
+                logger.error("Try refreshing CSRF token and/or session ID, update secrets")
+                logger.error("----------------------------")
+            logger.error(f"Full error: {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
+    return wrapper
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -88,52 +120,94 @@ def process_instagram_posts(max_posts=10):
 
 
 def insert_event_to_db(event_data, club_ig, post_url):
-    conn = psycopg2.connect(os.getenv("SUPABASE_DB_URL"))
-    cur = conn.cursor()
-    query = """
-    INSERT INTO events (club_handle, url, name, date, start_time, end_time, location)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT DO NOTHING;
-    """
-    cur.execute(query, (
-        club_ig,
-        post_url,
-        event_data["name"],
-        event_data["date"],
-        event_data["start_time"],
-        event_data["end_time"] or None,
-        event_data["location"],
-    ))
-    conn.commit()
-    cur.close()
-    conn.close()
-    return True
+    try:
+        logger.debug(f"Adding event: {event_data.get('name')} from {club_ig}")
+        conn = psycopg2.connect(os.getenv("SUPABASE_DB_URL"))
+        cur = conn.cursor()
+        query = """
+        INSERT INTO events (club_handle, url, name, date, start_time, end_time, location)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT DO NOTHING;
+        """
+        cur.execute(query, (
+            club_ig,
+            post_url,
+            event_data["name"],
+            event_data["date"],
+            event_data["start_time"],
+            event_data["end_time"] or None,
+            event_data["location"],
+        ))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.error(f"Database error: {str(e)}")
+        logger.error(f"Event data: {event_data}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        if 'conn' in locals():
+            conn.close()
+        return False
 
 
-def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1)):
-    events_added = 0
-    for post in L.get_feed_posts():
-        post_time = post.date_utc.replace(tzinfo=timezone.utc)
-        if post_time >= cutoff:
-            # print(post.date_utc, post.shortcode, post.owner_username)
-            print(f"\n--- Processing post ---")
-            if post.caption:
-                print(f"Caption: {post.caption[:100]}...")
-                event_data = parse_caption_for_event(post.caption)
-                post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                if update_event_csv(event_data, post.owner_username, post_url):
-                    if insert_event_to_db(event_data, post.owner_username, post_url):
-                        events_added += 1
-            else:
-                print("No caption found, skipping...")
+def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), max_posts=100, max_consec_old_posts=10):
+    # Process Instagram feed posts and extract event info. Stops
+    #   scraping once posts become older than cutoff.
+    try:
+        logger.info(f"Starting feed processing with cutoff: {cutoff}")
+        events_added = 0
+        posts_processed = 0
+        consec_old_posts = 0
+        for post in L.get_feed_posts():
+            try:
+                posts_processed += 1
+                logger.debug(f"Processing post: {post.shortcode} by {post.owner_username}")
+                post_time = post.date_utc.replace(tzinfo=timezone.utc)
+                if post_time < cutoff:
+                    consec_old_posts += 1
+                    logger.info(f"Post {post.shortcode} is older than cutoff ({post_time}), consecutive old posts: {consec_old_posts}")
+                    if consec_old_posts >= max_consec_old_posts:
+                        logger.info(f"Reached {max_consec_old_posts} consecutive old posts, stopping.")
+                        break
+                    continue # to next post
+                consec_old_posts = 0
+                if posts_processed >= max_posts:
+                    logger.info(f"Reached max post limit of {max_posts}, stopping.")
+                    break
 
-    print(f"\n--- Summary ---")
-    print(f"Added {events_added} event(s) to Supabase")
+                if post.caption:
+                    logger.debug(f"Caption: {len(post.caption)}")
+                    event_data = parse_caption_for_event(post.caption)
+                    if event_data is None:
+                        logger.warning(f"AI client returned None for post {post.shortcode}")
+                        continue
+                    post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                    if update_event_csv(event_data, post.owner_username, post_url):
+                        if insert_event_to_db(event_data, post.owner_username, post_url):
+                            events_added += 1
+                            logger.info(f"Successfully added event from {post.owner_username}")
+                else:
+                    logger.debug(f"No caption for post {post.shortcode}, skipping...")
+                    print("No caption found, skipping...")
+            except Exception as e:
+                logger.error(f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}")
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                continue # with next post
+        print(f"\n--- Summary ---")
+        print(f"Added {events_added} event(s) to Supabase")
+        logger.info(f"Feed processing completed. Processed {posts_processed} posts, added {events_added} events")
+    except Exception as e:
+        logger.error(f"Error in process_recent_feed: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise
 
 
+@handle_instagram_errors
 def session():
     L = Instaloader()
     try:
+        logger.info("Attemping to load Instagram session...")
         L.load_session(
             USERNAME,
             {
@@ -144,10 +218,11 @@ def session():
                 "ig_did": IG_DID,
             },
         )
-        print("Successfully logged in")
+        logger.info("Session created successfully")
         return L
     except Exception as e:
-        print(f"Failed to load session: {e}")
+        logger.error(f"Failed to load session: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise
 
 

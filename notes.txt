@@ -3,3 +3,4 @@ next steps:
 - fix up adding posts (handle duplicates, image uploading for context)
 - setup python server and postgres database
 - if you get oops, an error occurred, go on instagram and refresh csrftoken and sessionid in secrets
+- add date/time event added in supabase
