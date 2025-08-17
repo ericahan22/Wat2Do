@@ -1,6 +1,5 @@
 """
-Vercel API entry point for Django application.
-This file is used by Vercel to serve the Django API.
+Minimal Vercel API entry point to test Django compatibility.
 """
 
 import os
@@ -14,11 +13,27 @@ sys.path.insert(0, str(backend_dir))
 # Set Django settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 
-# Import Django and get the WSGI application
-from django.core.wsgi import get_wsgi_application
+# Simple test function
+def handler(request):
+    """
+    Simple test handler to see if Django can load.
+    """
+    try:
+        # Try to import Django
+        import django
+        django.setup()
+        
+        # Try to import a simple Django component
+        from django.http import HttpResponse
+        
+        return HttpResponse("Django loaded successfully!", content_type="text/plain")
+        
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": f"Error loading Django: {str(e)}",
+            "headers": {"Content-Type": "text/plain"}
+        }
 
-# Vercel expects this variable
-app = get_wsgi_application()
-
-# Alternative variable name
-handler = app
+# Vercel expects these variables
+app = handler
