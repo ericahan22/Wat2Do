@@ -32,7 +32,7 @@ const fetchEvents = async ({ pageParam = 0, queryKey }: { pageParam?: number; qu
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
 
   const response = await fetch(
-    `${API_BASE_URL}/api/events/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/events/?limit=50&offset=${pageParam}${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
