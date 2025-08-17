@@ -1,22 +1,8 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "runtime": "python3.12",
-        "maxLambdaSize": "15mb"
-      }
-    }
-  ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "api/index.py" },
-    { "src": "/admin/(.*)", "dest": "api/index.py" },
-    { "src": "/(.*)", "dest": "api/index.py" }
-  ],
-  "env": {
-    "DJANGO_SETTINGS_MODULE": "core.settings"
-  },
-  "buildCommand": "bash vercel-build.sh"
+    {
+      "src": "/(.*)",
+      "dest": "api/wsgi.py"
+    }
+  ]
 }
