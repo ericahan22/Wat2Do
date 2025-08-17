@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "core/wsgi.py",
+      "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
         "runtime": "python3.12",
@@ -11,9 +11,9 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "core/wsgi.py" },
-    { "src": "/admin/(.*)", "dest": "core/wsgi.py" },
-    { "src": "/(.*)", "dest": "core/wsgi.py" }
+    { "src": "/api/(.*)", "dest": "api/index.py" },
+    { "src": "/admin/(.*)", "dest": "api/index.py" },
+    { "src": "/(.*)", "dest": "api/index.py" }
   ],
   "env": {
     "DJANGO_SETTINGS_MODULE": "core.settings"

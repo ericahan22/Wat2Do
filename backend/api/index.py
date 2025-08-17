@@ -1,10 +1,6 @@
 """
-WSGI config for core project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
+Vercel API entry point for Django application.
+This file is used by Vercel to serve the Django API.
 """
 
 import os
@@ -21,9 +17,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
 # Import Django and get the WSGI application
 from django.core.wsgi import get_wsgi_application
 
-# Standard Django application
-application = get_wsgi_application()
+# Vercel expects this variable
+app = get_wsgi_application()
 
-# Vercel expects these variables
-app = application
-handler = application
+# Alternative variable name
+handler = app
