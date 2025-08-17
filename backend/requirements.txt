@@ -5,12 +5,12 @@ psycopg2-binary==2.9.10
 django-cors-headers==4.3.1
 
 # Data processing
-pandas==2.0.3
-numpy==1.24.3
+pandas>=2.1.0
+numpy>=1.26.0
 
 # Scraping and web utilities
 --find-links=./wheels
-setuptools==65.5.0
+setuptools>=65.5.0
 instaloader==4.14.2+custom1
 python-dotenv
 requests==2.31.0

@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import debounce from "lodash/debounce";
+import { useSearchParams } from "react-router-dom";
 
 export interface Club {
   id: number;
@@ -24,10 +24,10 @@ interface ClubsResponse {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: any[] }): Promise<ClubsResponse> => {
+const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: string[] }): Promise<ClubsResponse> => {
   const searchTerm = queryKey[1] || ""; // Get search term from queryKey
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
-  
+
   const response = await fetch(
     `${API_BASE_URL}/api/clubs/?limit=50&offset=${pageParam}${searchParam}`
   );
@@ -39,15 +39,10 @@ const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; que
 };
 
 export function useClubs() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchParams] = useSearchParams();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  const debouncedSetSearch = useCallback(
-    debounce((value: string) => setDebouncedSearchTerm(value), 300),
-    []
-  );
+  const searchTerm = searchParams.get("search") || "";
+  const categoryFilter = searchParams.get("category") || "all";
 
   const {
     data,
@@ -57,13 +52,11 @@ export function useClubs() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["clubs", debouncedSearchTerm], // Include search term in queryKey
+    queryKey: ["clubs", searchTerm],  
     queryFn: fetchClubs,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
     initialPageParam: 0,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -106,30 +99,14 @@ export function useClubs() {
   }, [inView, hasNextPage, isFetchingNextPage, isLoadingMore, fetchNextPage]);
 
   return {
-    // Data
     allClubs,
     filteredClubs,
-    uniqueCategories,
-
-    // State
-    searchTerm,
-    setSearchTerm: (value: string) => {
-      setSearchTerm(value);
-      debouncedSetSearch(value);
-    },
-    categoryFilter,
-    setCategoryFilter,
-
-    // Query state
+    uniqueCategories,    
     isLoading,
     error,
     hasNextPage,
     isFetchingNextPage,
-
-    // Infinite scrolling
     infiniteScrollRef: ref,
-
-    // Metadata
     totalCount: data?.pages[0]?.total_count,
   };
 }

@@ -1,19 +1,18 @@
+import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Bookmark, ExternalLink, Instagram, MessageCircle } from 'lucide-react'
 import { useClubs } from '@/hooks'
+import { useSearchParam } from '@/hooks/useSearchParam'
+import { useCategoryParam } from '@/hooks/useCategoryParam'
 
-export default function ClubsPage() {
+function ClubsPage() {
   const {
     allClubs,
     filteredClubs,
     uniqueCategories,
-    searchTerm,
-    setSearchTerm,
-    categoryFilter,
-    setCategoryFilter,
     isLoading,
     error,
     hasNextPage,
@@ -21,6 +20,9 @@ export default function ClubsPage() {
     infiniteScrollRef,
     totalCount,
   } = useClubs()
+
+  const { searchValue, setSearchValue } = useSearchParam()
+  const { categoryParam, setCategoryParam } = useCategoryParam()
 
   if (isLoading) {
     return (
@@ -51,12 +53,12 @@ export default function ClubsPage() {
         <div className="flex flex-col sm:flex-row gap-4">
           <Input
             placeholder="Search clubs..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             className="flex-1"
           />
           
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select value={categoryParam} onValueChange={setCategoryParam}>
             <SelectTrigger className="w-full sm:w-auto">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
@@ -181,4 +183,6 @@ export default function ClubsPage() {
       )}
     </div>
   )
-} 
+}
+
+export default React.memo(ClubsPage) 

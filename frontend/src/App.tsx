@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import { useTheme } from './lib/theme'
+import { useTheme } from './hooks/useTheme'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import EventsPage from './pages/EventsPage'
