@@ -9,6 +9,7 @@ import logging
 import traceback
 from datetime import datetime
 import sys
+from fuzzywuzzy import fuzz
 
 
 logging.basicConfig(
@@ -119,36 +120,57 @@ def process_instagram_posts(max_posts=10):
     print(f"Added {events_added} events to CSV")
 
 
-def insert_event_to_db(event_data, club_ig, post_url):
+def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
+    # Check if an event already exists in db and insert it if not
+    event_name = event_data.get("name").lower()
+    event_date = event_data.get("date")
+    event_location = event_data.get("location").lower()
+    conn = None
     try:
-        logger.debug(f"Adding event: {event_data.get('name')} from {club_ig}")
         conn = psycopg2.connect(os.getenv("SUPABASE_DB_URL"))
         cur = conn.cursor()
-        query = """
+        
+        # Check duplicates
+        logger.debug(f"Checking for duplicates: {event_data}")
+        query = "SELECT name, location FROM events WHERE date = %s"
+        cur.execute(query, (event_date,))
+        existing_events = cur.fetchall()
+        for existing_name, existing_location in existing_events:
+            existing_name = existing_name.lower()
+            existing_location = existing_location.lower()
+            
+            # Check similarity
+            name_sim = fuzz.ratio(event_name, existing_name)
+            location_sim = fuzz.ratio(event_location, existing_location)
+            if name_sim >= sim_threshold and location_sim >= sim_threshold:
+                logger.debug(f"Duplicate event found: {existing_name} at {existing_location}")
+                return False
+            
+        insert_query = """
         INSERT INTO events (club_handle, url, name, date, start_time, end_time, location)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT DO NOTHING;
         """
-        cur.execute(query, (
+        cur.execute(insert_query, (
             club_ig,
             post_url,
-            event_data["name"],
-            event_data["date"],
+            event_name,
+            event_date,
             event_data["start_time"],
             event_data["end_time"] or None,
-            event_data["location"],
+            event_location,
         ))
         conn.commit()
-        cur.close()
-        conn.close()
+        logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
         return True
     except Exception as e:
         logger.error(f"Database error: {str(e)}")
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
-        if 'conn' in locals():
-            conn.close()
         return False
+    finally:
+        if conn:
+            conn.close()
 
 
 def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), max_posts=100, max_consec_old_posts=10):
@@ -183,10 +205,13 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), m
                         logger.warning(f"AI client returned None for post {post.shortcode}")
                         continue
                     post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                    if update_event_csv(event_data, post.owner_username, post_url):
+                    if event_data.get("name") and event_data.get("date") and event_data.get("location"):
                         if insert_event_to_db(event_data, post.owner_username, post_url):
                             events_added += 1
                             logger.info(f"Successfully added event from {post.owner_username}")
+                    else:
+                        missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
+                        logger.warning(f"Missing required fields: {missing_fields}, skipping event")
                 else:
                     logger.debug(f"No caption for post {post.shortcode}, skipping...")
                     print("No caption found, skipping...")

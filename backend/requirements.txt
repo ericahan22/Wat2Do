@@ -16,6 +16,8 @@ python-dotenv
 requests==2.31.0
 beautifulsoup4
 openai
+fuzzywuzzy
+python-Levenshtein
 
 # Development and deployment
 gunicorn==21.2.0 
