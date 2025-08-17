@@ -17,5 +17,6 @@
   ],
   "env": {
     "DJANGO_SETTINGS_MODULE": "core.settings"
-  }
+  },
+  "buildCommand": "bash vercel-build.sh"
 }
