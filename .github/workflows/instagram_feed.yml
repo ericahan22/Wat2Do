@@ -47,12 +47,13 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Create logs directory
+        working-directory: ..
         run: mkdir -p logs
 
       - name: Run scraper
+        working-directory: scraping
         run: |
-          cd backend/scraping
-          python -u instagram_feed.py 2>&1 | tee ../../logs/scraping.log
+          python -u instagram_feed.py 2>&1 | tee ../logs/scraping.log
         continue-on-error: true
 
       - name: Upload logs as artifacts
@@ -60,7 +61,7 @@ jobs:
         with:
           name: scraping-logs-${{ github.run_number }}
           path: |
-            logs/
+            ../logs/
             backend/scraping/*.log
             backend/scraping/*.csv
           retention-days: 30
