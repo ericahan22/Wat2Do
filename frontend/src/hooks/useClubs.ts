@@ -29,7 +29,7 @@ const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; que
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
 
   const response = await fetch(
-    `${API_BASE_URL}/api/clubs/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/clubs/?limit=50&offset=${pageParam}${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch clubs");
