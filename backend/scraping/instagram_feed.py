@@ -17,7 +17,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('scraping.log', encoding='utf-8'),
+        logging.FileHandler('logs/scraping.log', encoding='utf-8'),
     ]
 )
 logger = logging.getLogger(__name__)
@@ -184,11 +184,12 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), m
         for post in L.get_feed_posts():
             try:
                 posts_processed += 1
-                logger.debug(f"Processing post: {post.shortcode} by {post.owner_username}")
+                logger.info("\n" + "-" * 50)
+                logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
                 post_time = post.date_utc.replace(tzinfo=timezone.utc)
                 if post_time < cutoff:
                     consec_old_posts += 1
-                    logger.info(f"Post {post.shortcode} is older than cutoff ({post_time}), consecutive old posts: {consec_old_posts}")
+                    logger.debug(f"Post {post.shortcode} is older than cutoff ({post_time}), consecutive old posts: {consec_old_posts}")
                     if consec_old_posts >= max_consec_old_posts:
                         logger.info(f"Reached {max_consec_old_posts} consecutive old posts, stopping.")
                         break
@@ -199,7 +200,6 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), m
                     break
 
                 if post.caption:
-                    logger.debug(f"Caption: {len(post.caption)}")
                     event_data = parse_caption_for_event(post.caption)
                     if event_data is None:
                         logger.warning(f"AI client returned None for post {post.shortcode}")

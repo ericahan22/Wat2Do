@@ -43,7 +43,7 @@ def parse_caption_for_event(caption_text):
     
     try:
         logger.debug(f"Parsing caption of length: {len(caption_text)}")
-        logger.debug(f"Caption preview: {caption_text[:200]}...")
+        logger.debug(f"Caption preview: {caption_text[:100]}...")
         response = client.responses.create(
             model="gpt-4o-mini",
             instructions="You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
