@@ -205,7 +205,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), m
                         logger.warning(f"AI client returned None for post {post.shortcode}")
                         continue
                     post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                    if event_data.get("name") and event_data.get("date") and event_data.get("location"):
+                    if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
                         if insert_event_to_db(event_data, post.owner_username, post_url):
                             events_added += 1
                             logger.info(f"Successfully added event from {post.owner_username}")
