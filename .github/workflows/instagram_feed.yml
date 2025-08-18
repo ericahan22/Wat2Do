@@ -53,15 +53,15 @@ jobs:
       - name: Run scraper
         working-directory: backend/scraping
         run: |
-          python -u instagram_feed.py 2>&1 | tee ../../logs/scraping.log
-        continue-on-error: true
+          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
+        continue-on-error: false
 
       - name: Upload logs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: scraping-logs-${{ github.run_number }}
           path: |
-            logs/
+            backend/scraping/logs/
             backend/scraping/*.log
             backend/scraping/*.csv
           retention-days: 30
