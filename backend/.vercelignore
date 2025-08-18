@@ -40,4 +40,4 @@ Dockerfile
 docker-compose.yml
 
 # Wheels directory (will be installed during build)
-wheels/
+<!-- wheels/ -->
