@@ -10,6 +10,7 @@ import traceback
 from datetime import datetime
 import sys
 from fuzzywuzzy import fuzz
+import time
 
 
 logging.basicConfig(
@@ -173,7 +174,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             conn.close()
 
 
-def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), max_posts=100, max_consec_old_posts=10):
+def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), max_posts=100, max_consec_old_posts=3):
     # Process Instagram feed posts and extract event info. Stops
     #   scraping once posts become older than cutoff.
     try:
@@ -215,6 +216,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=1), m
                 else:
                     logger.debug(f"No caption for post {post.shortcode}, skipping...")
                     print("No caption found, skipping...")
+                time.sleep(5)
             except Exception as e:
                 logger.error(f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}")
                 logger.error(f"Traceback: {traceback.format_exc()}")
