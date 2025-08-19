@@ -1,0 +1,215 @@
+/* Container for the calendar */
+.events-calendar-container {
+  height: 600px;
+  background-color: #ffffff; /* Light mode */
+  color: #111827; /* Light mode text */
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for light mode */
+  display: flex; /* Ensure the container centers its content */
+  justify-content: center; /* Center the calendar horizontally */
+  align-items: center; /* Center the calendar vertically */
+}
+
+.dark .events-calendar-container {
+  background-color: var(--color-gray-900); /* Dark mode */
+  color: #f9fafb; /* Dark mode text */
+  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1); /* Subtle shadow for dark mode */
+}
+
+/* Calendar styles */
+.rbc-calendar {
+  height: 100%;
+  width: 100%; /* Ensure the calendar takes the full width of the container */
+  max-width: 100%; /* Prevent overflow */
+  margin: 0 auto; /* Center the calendar */
+}
+
+/* Month view container */
+.rbc-month-view {
+  background-color: #ffffff; /* Light mode */
+  border: 1px solid #e5e7eb; /* Light mode */
+  width: 100%; /* Ensure the month view spans the full width */
+  box-sizing: border-box; /* Include padding and borders in the width calculation */
+}
+
+.dark .rbc-month-view {
+  background-color: var(--color-gray-900); /* Match webpage background in dark mode */
+  border: 1px solid #4a5568; /* Dark mode (slightly lighter for better contrast) */
+  width: 100%; /* Ensure the month view spans the full width */
+  box-sizing: border-box; /* Include padding and borders in the width calculation */
+}
+
+/* Header row for days of the week */
+.rbc-row.rbc-month-header {
+  border-bottom: 1px solid #e5e7eb; /* Light mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  display: flex; /* Use flexbox for consistent spacing */
+  width: 100%; /* Ensure headers span the full width */
+  padding: 0; /* Remove extra padding */
+}
+
+.dark .rbc-row.rbc-month-header {
+  border-bottom: 1px solid #4a5568; /* Dark mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  display: flex; /* Use flexbox for consistent spacing */
+  width: 100%; /* Ensure headers span the full width */
+  padding: 0; /* Remove extra padding */
+}
+
+/* Rows in the month view */
+.rbc-month-row {
+  border-top: 1px solid #e5e7eb; /* Light mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  display: flex; /* Use flexbox for consistent spacing */
+  width: 100%; /* Ensure rows span the full width */
+  padding: 0; /* Remove extra padding */
+}
+
+.dark .rbc-month-row {
+  border-top: 1px solid #4a5568; /* Dark mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  display: flex; /* Use flexbox for consistent spacing */
+  width: 100%; /* Ensure rows span the full width */
+  padding: 0; /* Remove extra padding */
+}
+
+/* Ensure consistent column widths */
+.rbc-header,
+.rbc-day-bg {
+  flex: 1 1 0%; /* Ensure all columns take up equal space */
+  box-sizing: border-box; /* Include borders in width calculations */
+}
+
+/* Header row for days of the week */
+.rbc-header {
+  border-bottom: 1px solid #e5e7eb; /* Light mode */
+  border-left: 1px solid #e5e7eb; /* Light mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  flex: 1 1 0%; /* Ensure all headers take up equal space */
+}
+
+.dark .rbc-header {
+  border-bottom: 1px solid #4a5568; /* Dark mode */
+  border-left: 1px solid #4a5568; /* Dark mode */
+  box-sizing: border-box; /* Include borders in width calculations */
+  flex: 1 1 0%; /* Ensure all headers take up equal space */
+}
+
+/* General background for calendar days */
+.rbc-day-bg {
+  background-color: #ffffff; /* Light mode */
+  border-left: 1px solid #e5e7eb; /* Light mode vertical bars */
+  box-sizing: border-box; /* Include borders in width calculations */
+  flex: 1 1 0%; /* Ensure all days take up equal space */
+}
+
+.dark .rbc-day-bg {
+  background-color: var(--color-gray-900); /* Match webpage background in dark mode */
+  border-left: 1px solid #4a5568; /* Dark mode vertical bars */
+  box-sizing: border-box; /* Include borders in width calculations */
+  flex: 1 1 0%; /* Ensure all days take up equal space */
+}
+
+/* Background for days outside the current month */
+.rbc-off-range-bg {
+  background-color: #f3f4f6; /* Light mode */
+}
+
+.dark .rbc-off-range-bg {
+  background-color: #1c2533; /* Dark mode */
+}
+
+/* Highlight for today's date */
+.rbc-today {
+  background-color: #e0f2fe; /* Light blue background for light mode */
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for light mode */
+}
+
+.dark .rbc-today {
+  background-color: #334155; /* Muted dark gray for dark mode */
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Subtle shadow for dark mode */
+  color: #e2e8f0; /* Light gray text for readability */
+}
+
+.rbc-toolbar .rbc-btn-group {
+    flex: 1;
+}
+
+/* Remove the second .rbc-btn-group */
+.rbc-toolbar .rbc-btn-group:last-of-type {
+  visibility: hidden; /* Hide the second button group */
+}
+
+/* Toolbar label (e.g., "Month", "Week", "Day") */
+.rbc-toolbar-label {
+  font-size: 1.25rem; /* Larger font size for better visibility */
+  font-weight: 600; /* Make it bold */
+  color: #111827; /* Light mode text */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for light mode */
+}
+
+.dark .rbc-toolbar-label {
+  color: #f9fafb; /* Light text for dark mode */
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.2); /* Subtle shadow for dark mode */
+}
+
+/* Adjust toolbar layout to center the label */
+.rbc-toolbar {
+  display: flex; /* Use flexbox for layout */
+  justify-content: center;
+  align-items: center; /* Center items vertically */
+}
+
+/* Buttons (e.g., navigation buttons) */
+.rbc-toolbar button {
+  background-color: #ffffff; /* Light mode */
+  color: #000000; /* Light mode text */
+  border: 1px solid #d1d5db; /* Light mode border */
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark .rbc-toolbar button {
+  background-color: #374151; /* Dark mode */
+  color: #f9fafb; /* Dark mode text */
+  border: 1px solid #4b5563; /* Dark mode border */
+}
+
+.rbc-toolbar button:hover {
+  background-color: #f3f4f6; /* Light mode hover */
+  color: #111827; /* Light mode hover text */
+}
+
+.dark .rbc-toolbar button:hover {
+  background-color: #4b5563; /* Dark mode hover */
+  color: #ffffff; /* Dark mode hover text */
+}
+
+/* Bold text for .rbc-button-link only on the current date */
+.rbc-date-cell.rbc-now.rbc-current .rbc-button-link {
+  font-weight: bold; /* Make the text bold */
+}
+
+/* Event boxes */
+.rbc-event {
+  border-radius: 4px; /* Rounded corners */
+  padding: 4px; /* Smaller padding */
+  font-size: 0.75rem; /* Decrease font size */
+  margin-left: 2px; /* Adjust margin-left */
+  margin-right: 2px; /* Adjust margin-right */
+  width: auto; /* Turn off fixed width */
+}
+
+.dark .rbc-event {
+  border-radius: 4px; /* Rounded corners */
+  padding: 4px; /* Smaller padding */
+  font-size: 0.75rem; /* Decrease font size */
+  margin-left: 2px; /* Adjust margin-left */
+  margin-right: 2px; /* Adjust margin-right */
+  width: auto; /* Turn off fixed width */
+}

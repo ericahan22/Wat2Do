@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,8 +7,10 @@ import { Calendar, Clock, MapPin, ExternalLink, Bookmark } from 'lucide-react'
 import { useEvents } from '@/hooks'
 import { useSearchParam } from '@/hooks/useSearchParam'
 import { useCategoryParam } from '@/hooks/useCategoryParam'
+import EventsCalendar from '@/components/EventsCalendar'
 
 function EventsPage() {
+  const [view, setView] = useState<'grid' | 'calendar'>('grid') // to toggle views
   const {
     allEvents,
     filteredEvents,
@@ -71,6 +73,14 @@ function EventsPage() {
               ))}
             </SelectContent>
           </Select>
+
+          {/* button to toggle between views */}
+          <Button
+            variant="outline"
+            onClick={() => setView(view === 'grid' ? 'calendar' : 'grid')}
+          >
+            {view === 'grid' ? 'Switch to Calendar View' : 'Switch to Grid View'}
+          </Button>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -84,67 +94,71 @@ function EventsPage() {
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 sm:gap-6">
-        {filteredEvents.map((event) => (
-          <Card 
-            key={event.id} 
-            className="hover:shadow-lg h-full overflow-hidden bg-white"
-          >
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">{event.name}</CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">@{event.club_handle}</p>
-              {event.categories && event.categories.length > 0 && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Bookmark className="h-4 w-4 flex-shrink-0" />
-                  <span className="line-clamp-1">{event.categories.join(', ')}</span>
-                </div>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-3 flex flex-col h-full">
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{event.date}</span>
-              </div>
-              
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <Clock className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">
-                  {event.start_time} - {event.end_time}
-                </span>
-              </div>
-              
-              {event.location && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                  <span className="line-clamp-1">{event.location}</span>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex space-x-3 pt-2 w-full mt-auto">
-                {event.url ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 w-full"
-                    onMouseDown={() => window.open(event.url, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open Event
-                  </Button>
-                ) : (
-                  <div className="text-center py-2 w-full">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">No event link available</p>
+      {view === 'grid' ? (
+        <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 sm:gap-6">
+          {filteredEvents.map((event) => (
+            <Card 
+              key={event.id} 
+              className="hover:shadow-lg h-full overflow-hidden bg-white"
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">{event.name}</CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400">@{event.club_handle}</p>
+                {event.categories && event.categories.length > 0 && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Bookmark className="h-4 w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{event.categories.join(', ')}</span>
                   </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardHeader>
+              <CardContent className="space-y-3 flex flex-col h-full">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Calendar className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{event.date}</span>
+                </div>
+                
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <Clock className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">
+                    {event.start_time} - {event.end_time}
+                  </span>
+                </div>
+                
+                {event.location && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{event.location}</span>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-2 w-full mt-auto">
+                  {event.url ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 w-full"
+                      onMouseDown={() => window.open(event.url, '_blank')}
+                    >
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open Event
+                    </Button>
+                  ) : (
+                    <div className="text-center py-2 w-full">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">No event link available</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <EventsCalendar events={filteredEvents.map(event => ({ ...event, id: String(event.id) }))} />
+      )}
 
       {/* Loading indicator for next page */}
-      {hasNextPage && (
+      {view === 'grid' && hasNextPage && (
         <div ref={infiniteScrollRef} className="flex items-center justify-center py-8">
           {isFetchingNextPage ? (
             <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
