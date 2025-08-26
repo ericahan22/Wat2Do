@@ -78,6 +78,7 @@ function EventsPage() {
           <div
             onClick={() => setView(view === 'grid' ? 'calendar' : 'grid')}
             className='cursor-pointer flex items-center justify-center w-10 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700'
+            title={view === 'grid' ? 'Switch to Calendar View' : 'Switch to Grid View'}
           >
             {view === 'grid' ? (
               <Calendar className='h-5 w-5 text-gray-800 dark:text-gray-200' />
