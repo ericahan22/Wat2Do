@@ -191,8 +191,8 @@
 }
 
 /* Bold text for .rbc-button-link only on the current date */
-.rbc-date-cell.rbc-now.rbc-current .rbc-button-link {
-  font-weight: bold; /* Make the text bold */
+.rbc-date-cell.rbc-now .rbc-button-link {
+  font-weight: bold !important; /* Make the text bold */
 }
 
 /* Event boxes */
