@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Calendar, LayoutGrid, Clock, MapPin, ExternalLink, Bookmark, LayoutGridIcon } from 'lucide-react'
+import { Calendar, LayoutGrid, Clock, MapPin, ExternalLink, Bookmark } from 'lucide-react'
 import { useEvents } from '@/hooks'
 import { useSearchParam } from '@/hooks/useSearchParam'
 import { useCategoryParam } from '@/hooks/useCategoryParam'
@@ -77,7 +77,7 @@ function EventsPage() {
           {/* button to toggle between views */}
           <div
             onClick={() => setView(view === 'grid' ? 'calendar' : 'grid')}
-            className='cursor-pointer flex items-center justify-center w-10 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700'
+            className='cursor-pointer flex items-center justify-center w-9 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700'
             title={view === 'grid' ? 'Switch to Calendar View' : 'Switch to Grid View'}
           >
             {view === 'grid' ? (
