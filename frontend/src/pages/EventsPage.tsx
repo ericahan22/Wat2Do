@@ -187,7 +187,7 @@ function EventsPage() {
       )}
       
       {/* End of results message */}
-      {!hasNextPage && allEvents.length > 0 && (
+      {view === 'grid' && !hasNextPage && allEvents.length > 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500 dark:text-gray-400">You've reached the end of the list</p>
         </div>
