@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Calendar, dateFnsLocalizer, NavigateAction, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -84,6 +84,8 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
     const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
     const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
 
+    const calendarContainerRef = useRef<HTMLDivElement>(null);
+
     const calendarEvents = events.map((event) => ({
         ...event,
         title: event.name,
@@ -102,7 +104,8 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
         e.stopPropagation();
 
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const container = document.querySelector('.events-calendar-container') as HTMLElement;
+        const container = calendarContainerRef.current;
+        if (!container) return;
         const containerRect = container.getBoundingClientRect();
 
         const popupWidth = 320;
@@ -139,7 +142,11 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
     };
 
     return (
-        <div className='events-calendar-container relative' onClick={handleOutsideClick}>
+        <div
+            ref={calendarContainerRef}
+            className='events-calendar-container relative'
+            onMouseDown={handleOutsideClick}
+        >
             <Calendar
                 localizer={localizer}
                 events={calendarEvents}
