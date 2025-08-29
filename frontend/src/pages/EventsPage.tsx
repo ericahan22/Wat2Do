@@ -97,7 +97,7 @@ function EventsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : `${totalQueryCount || 0} of ${totalCount || 0} events results`}
+            {isLoading ? "Loading..." : `Showing ${totalQueryCount || 0} of ${totalCount || 0} events`}
           </p>
         </div>
       </div>
