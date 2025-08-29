@@ -74,16 +74,27 @@ function EventsPage() {
           </Select>
 
           {/* button to toggle between views */}
-          <div
-            onClick={() => setView(view === 'grid' ? 'calendar' : 'grid')}
-            className='cursor-pointer flex items-center justify-center w-9 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700'
-            title={view === 'grid' ? 'Switch to Calendar View' : 'Switch to Grid View'}
-          >
-            {view === 'grid' ? (
-              <Calendar className='h-5 w-5 text-gray-800 dark:text-gray-200' />
-            ) : (
+          <div className='flex space-x-0 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden'>
+            <div
+              onClick={() => setView('grid')}
+              className={`flex items-center justify-center w-9 h-9 border-r border-gray-300 dark:border-gray-600
+                ${view === 'grid' ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}
+                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
+              title='Grid View'
+              aria-label='Grid View'
+            >
               <LayoutGrid className='h-5 w-5 text-gray-800 dark:text-gray-200' />
-            )}
+            </div>
+            <div
+              onClick={() => setView('calendar')}
+              className={`flex items-center justify-center w-9 h-9
+                ${view === 'calendar' ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}
+                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
+              title='Calendar View'
+              aria-label='Calendar View'
+            >
+              <Calendar className='h-5 w-5 text-gray-800 dark:text-gray-200' />
+            </div>
           </div>
         </div>
 
