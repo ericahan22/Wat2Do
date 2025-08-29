@@ -16,6 +16,7 @@ interface ClubsResponse {
   clubs: Club[];
   count: number;
   total_count: number;
+  total_query_count: number;
   has_more: boolean;
   next_offset: number | null;
   current_offset: number;
@@ -27,9 +28,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 const fetchClubs = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: string[] }): Promise<ClubsResponse> => {
   const searchTerm = queryKey[1] || ""; // Get search term from queryKey
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
+  const categoryFilter = queryKey[2] || "all";
+  const categoryParam = categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : "";
 
   const response = await fetch(
-    `${API_BASE_URL}/clubs/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/clubs/?limit=50&offset=${pageParam}${searchParam}${categoryParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch clubs");
@@ -52,7 +55,7 @@ export function useClubs() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["clubs", searchTerm],  
+    queryKey: ["clubs", searchTerm, categoryFilter],  
     queryFn: fetchClubs,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
@@ -61,22 +64,9 @@ export function useClubs() {
   });
 
   // Flatten all pages into a single array of clubs
-  const allClubs = useMemo(() => {
+  const parsedClubs = useMemo(() => {
     return data?.pages.flatMap((page) => page.clubs) || [];
   }, [data]);
-
-  const filteredClubs = useMemo(() => {
-    // Since search is now handled server-side, we only need to filter by category
-    return allClubs.filter((club: Club) => {
-      const matchesCategory =
-        categoryFilter === "all" ||
-        club.categories.some((category) =>
-          category.toLowerCase().includes(categoryFilter.toLowerCase())
-        );
-
-      return matchesCategory;
-    });
-  }, [allClubs, categoryFilter]);
 
   const uniqueCategories = useMemo(() => {
     return [
@@ -109,8 +99,7 @@ export function useClubs() {
   }, [inView, hasNextPage, isFetchingNextPage, isLoadingMore, fetchNextPage]);
 
   return {
-    allClubs,
-    filteredClubs,
+    data: parsedClubs,
     uniqueCategories,    
     isLoading,
     error,
@@ -118,5 +107,6 @@ export function useClubs() {
     isFetchingNextPage,
     infiniteScrollRef: ref,
     totalCount: data?.pages[0]?.total_count,
+    totalQueryCount: data?.pages[0]?.total_query_count,
   };
 }

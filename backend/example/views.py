@@ -45,20 +45,26 @@ def get_events(request):
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
         
-        # Build queryset with search filter
-        queryset = Events.objects.all()
+        # Build base queryset
+        base_queryset = Events.objects.all()
+        
+        # TOTAL COUNT: Get count of ALL items in database (no filters)
+        total_count = base_queryset.count()
+        
+        # Apply filters to create filtered queryset
+        filtered_queryset = base_queryset
         if search_term:
-            queryset = queryset.filter(name__icontains=search_term)
+            filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
         
-        # Get total count of filtered results (this is the SQL count query)
-        filtered_total_count = queryset.count()
+        # QUERY COUNT: Get total count of items matching the filters (no pagination)
+        total_query_count = filtered_queryset.count()
         
-        # Get paginated events
-        events = queryset[offset:offset + limit]
+        # SEPARATE DATA QUERY: Get paginated events from the filtered queryset
+        paginated_events = filtered_queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
         events_data = []
-        for event in events:
+        for event in paginated_events:
             events_data.append({
                 'id': event.id,
                 'club_handle': event.club_handle,
@@ -71,12 +77,13 @@ def get_events(request):
             })
         
         # Check if there are more events to load
-        has_more = offset + limit < filtered_total_count
+        has_more = offset + limit < total_query_count
         next_offset = offset + limit if has_more else None
         
         return Response({
-            "count": len(events_data),
-            "total_count": filtered_total_count,  # This is the SQL count of filtered results
+            "count": len(events_data),  # Number of events in this page response
+            "total_count": total_count,  # Total count of ALL events in database
+            "total_query_count": total_query_count,  # Total count of events matching filters
             "events": events_data,
             "has_more": has_more,
             "next_offset": next_offset,
@@ -95,24 +102,33 @@ def get_clubs(request):
         limit = int(request.GET.get('limit', 20))  # Default 20 clubs per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
+        category_filter = request.GET.get('category', '').strip()  # Get category filter
         
         # Limit the maximum number of clubs per request
         limit = min(limit, 100)  # Max 100 clubs per request
         
-        # Build queryset with search filter
-        queryset = Clubs.objects.all()
+        # Build base queryset
+        base_queryset = Clubs.objects.all()
+        
+        # TOTAL COUNT: Get count of ALL items in database (no filters)
+        total_count = base_queryset.count()
+        
+        # Apply filters to create filtered queryset
+        filtered_queryset = base_queryset
         if search_term:
-            queryset = queryset.filter(club_name__icontains=search_term)
+            filtered_queryset = filtered_queryset.filter(club_name__icontains=search_term)
+        if category_filter and category_filter.lower() != 'all':
+            filtered_queryset = filtered_queryset.filter(categories__icontains=category_filter)
         
-        # Get total count of filtered results
-        filtered_total_count = queryset.count()
+        # QUERY COUNT: Get total count of items matching the filters (no pagination)
+        total_query_count = filtered_queryset.count()
         
-        # Get paginated clubs
-        clubs = queryset[offset:offset + limit]
+        # SEPARATE DATA QUERY: Get paginated clubs from the filtered queryset
+        paginated_clubs = filtered_queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
         clubs_data = []
-        for club in clubs:
+        for club in paginated_clubs:
             clubs_data.append({
                 'id': club.id,
                 'club_name': club.club_name,
@@ -123,12 +139,13 @@ def get_clubs(request):
             })
         
         # Check if there are more clubs to load
-        has_more = offset + limit < filtered_total_count
+        has_more = offset + limit < total_query_count
         next_offset = offset + limit if has_more else None
         
         return Response({
-            "count": len(clubs_data),
-            "total_count": filtered_total_count,  # Now returns filtered count
+            "count": len(clubs_data),  # Number of clubs in this page response
+            "total_count": total_count,  # Total count of ALL clubs in database
+            "total_query_count": total_query_count,  # Total count of clubs matching filters
             "clubs": clubs_data,
             "has_more": has_more,
             "next_offset": next_offset,
