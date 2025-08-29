@@ -50,8 +50,8 @@ def get_events(request):
         if search_term:
             queryset = queryset.filter(name__icontains=search_term)
         
-        # Get total count (after search filter)
-        total_count = queryset.count()
+        # Get total count of filtered results (this is the SQL count query)
+        filtered_total_count = queryset.count()
         
         # Get paginated events
         events = queryset[offset:offset + limit]
@@ -71,12 +71,12 @@ def get_events(request):
             })
         
         # Check if there are more events to load
-        has_more = offset + limit < total_count
+        has_more = offset + limit < filtered_total_count
         next_offset = offset + limit if has_more else None
         
         return Response({
             "count": len(events_data),
-            "total_count": total_count,
+            "total_count": filtered_total_count,  # This is the SQL count of filtered results
             "events": events_data,
             "has_more": has_more,
             "next_offset": next_offset,
@@ -104,8 +104,8 @@ def get_clubs(request):
         if search_term:
             queryset = queryset.filter(club_name__icontains=search_term)
         
-        # Get total count (after search filter)
-        total_count = queryset.count()
+        # Get total count of filtered results
+        filtered_total_count = queryset.count()
         
         # Get paginated clubs
         clubs = queryset[offset:offset + limit]
@@ -123,12 +123,12 @@ def get_clubs(request):
             })
         
         # Check if there are more clubs to load
-        has_more = offset + limit < total_count
+        has_more = offset + limit < filtered_total_count
         next_offset = offset + limit if has_more else None
         
         return Response({
             "count": len(clubs_data),
-            "total_count": total_count,
+            "total_count": filtered_total_count,  # Now returns filtered count
             "clubs": clubs_data,
             "has_more": has_more,
             "next_offset": next_offset,

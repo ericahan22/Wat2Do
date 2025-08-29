@@ -83,9 +83,19 @@ export function useEvents() {
 
   const uniqueCategories = useMemo(() => {
     return [
-      ...new Set(allEvents.flatMap((event: Event) => event.categories || [])),
-    ].sort();
-  }, [allEvents]);
+      'Academic',
+      'Business and Entrepreneurial',
+      'Charitable, Community Service & International Development',
+      'Creative Arts, Dance and Music',
+      'Cultural',
+      'Environmental and Sustainability',
+      'Games, Recreational and Social',
+      'Health Promotion',
+      'Media, Publications and Web Development',
+      'Political and Social Awareness',
+      'Religious and Spiritual'
+    ];
+  }, []);
 
   const { ref, inView } = useInView({
     threshold: 0,

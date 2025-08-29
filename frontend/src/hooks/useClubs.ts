@@ -80,9 +80,19 @@ export function useClubs() {
 
   const uniqueCategories = useMemo(() => {
     return [
-      ...new Set(allClubs.flatMap((club: Club) => club.categories || [])),
-    ].sort();
-  }, [allClubs]);
+      'Academic',
+      'Business and Entrepreneurial',
+      'Charitable, Community Service & International Development',
+      'Creative Arts, Dance and Music',
+      'Cultural',
+      'Environmental and Sustainability',
+      'Games, Recreational and Social',
+      'Health Promotion',
+      'Media, Publications and Web Development',
+      'Political and Social Awareness',
+      'Religious and Spiritual'
+    ];
+  }, []);
 
   const { ref, inView } = useInView({
     threshold: 0,

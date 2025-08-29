@@ -1,17 +1,17 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
-import { useRef, useEffect, memo, useState } from 'react'
+import { useRef, useEffect, memo, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 interface SearchInputProps {
-  onSearch: (value: string) => void
   placeholder?: string
   className?: string
 }
 
-const SearchInput = memo(({ onSearch, placeholder = "Search...", className = "flex-1" }: SearchInputProps) => {
+const SearchInput = memo(({   placeholder = "Search...", className = "flex-1" }: SearchInputProps) => {
+  const [, setSearchParams] = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null)
-  const [localSearchTerm, setLocalSearchTerm] = useState("")
 
   // Auto-focus on search input when component mounts
   useEffect(() => {
@@ -20,24 +20,27 @@ const SearchInput = memo(({ onSearch, placeholder = "Search...", className = "fl
     }
   }, [])
 
-  const handleSearch = () => {
-    onSearch(localSearchTerm)
-  }
+  const handleSearch = useCallback(() => {
+    setSearchParams({ search: inputRef.current?.value || "" })
+  }, [setSearchParams])
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch()
     }
-  }
+  }, [handleSearch])
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchParams({ search: e.target.value })
+  }, [])
 
   return (
     <div className={`relative ${className} border border-gray-300 dark:border-gray-700 rounded-md`}>
       <Input
         ref={inputRef}
         placeholder={placeholder}
-        value={localSearchTerm}
-        onChange={(e) => setLocalSearchTerm(e.target.value)}
-        onKeyPress={handleKeyPress}
+        // onChange={handleInputChange}
+        onKeyDown={handleKeyPress}
         className="pr-12 shadow-none border-none"
       />
       <Button 
