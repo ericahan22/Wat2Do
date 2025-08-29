@@ -77,7 +77,7 @@ function EventsPage() {
           <div className='flex space-x-0 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden'>
             <div
               onClick={() => setView('grid')}
-              className={`flex items-center justify-center w-9 h-9 border-r border-gray-300 dark:border-gray-600
+              className={`flex items-center justify-center w-9 h-full border-r border-gray-300 dark:border-gray-600
                 ${view === 'grid' ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}
                 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
               title='Grid View'
@@ -87,7 +87,7 @@ function EventsPage() {
             </div>
             <div
               onClick={() => setView('calendar')}
-              className={`flex items-center justify-center w-9 h-9
+              className={`flex items-center justify-center w-9 h-full
                 ${view === 'calendar' ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}
                 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
               title='Calendar View'
