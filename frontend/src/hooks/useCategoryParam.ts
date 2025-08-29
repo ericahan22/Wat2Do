@@ -10,9 +10,11 @@ export const useCategoryParam = () => {
   const handleCategoryParamChange = useCallback(
     (value: string) => {
       setCategoryParam(value);
-      const nextParams = new URLSearchParams(categoryParams);
-      nextParams.set("category", value);
-      setCategoryParams(nextParams);
+      setCategoryParams((prev) => {
+        const nextParams = new URLSearchParams(prev);
+        nextParams.set("category", value);
+        return nextParams;
+      });
     },
     [setCategoryParam]
   );

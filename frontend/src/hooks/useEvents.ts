@@ -19,6 +19,7 @@ interface EventsResponse {
   events: Event[];
   count: number;
   total_count: number;
+  total_query_count: number;
   has_more: boolean;
   next_offset: number | null;
   current_offset: number;
@@ -30,9 +31,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 const fetchEvents = async ({ pageParam = 0, queryKey }: { pageParam?: number; queryKey: string[] }): Promise<EventsResponse> => {
   const searchTerm = queryKey[1] || ""; // Get search term from queryKey
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
+  const categoryFilter = queryKey[2] || "all";
+  const categoryParam = categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : "";
 
   const response = await fetch(
-    `${API_BASE_URL}/events/?limit=50&offset=${pageParam}${searchParam}`
+    `${API_BASE_URL}/events/?limit=50&offset=${pageParam}${searchParam}${categoryParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
@@ -55,31 +58,13 @@ export function useEvents() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["events", searchTerm],  
+    queryKey: ["events", searchTerm, categoryFilter],  
     queryFn: fetchEvents,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
     initialPageParam: 0,
     refetchOnWindowFocus: false,
   });
-
-  // Flatten all pages into a single array of events
-  const allEvents = useMemo(() => {
-    return data?.pages.flatMap((page) => page.events) || [];
-  }, [data]);
-
-  const filteredEvents = useMemo(() => {
-    // Since search is now handled server-side, we only need to filter by category
-    return allEvents.filter((event: Event) => {
-      const matchesCategory =
-        categoryFilter === "all" ||
-        (event.categories && event.categories.some((category) =>
-          category.toLowerCase().includes(categoryFilter.toLowerCase())
-        ));
-
-      return matchesCategory;
-    });
-  }, [allEvents, categoryFilter]);
 
   const uniqueCategories = useMemo(() => {
     return [
@@ -111,9 +96,14 @@ export function useEvents() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, isLoadingMore, fetchNextPage]);
 
+  // Parse events from all pages
+  const parsedEvents = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap(page => page.events || []);
+  }, [data]);
+
   return {
-    allEvents,
-    filteredEvents,
+    data: parsedEvents,
     uniqueCategories,    
     isLoading,
     error,
@@ -121,5 +111,6 @@ export function useEvents() {
     isFetchingNextPage,
     infiniteScrollRef: ref,
     totalCount: data?.pages[0]?.total_count,
+    totalQueryCount: data?.pages[0]?.total_query_count,
   };
 }
