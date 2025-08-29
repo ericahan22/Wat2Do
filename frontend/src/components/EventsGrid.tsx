@@ -11,7 +11,7 @@ interface EventsGridProps {
   isFetchingNextPage: boolean
   infiniteScrollRef: (node?: Element | null) => void
   formatDate: (dateString: string) => string
-  formatTime: (timeString: string) => string
+  formatTime: (startTime: string, endTime?: string) => string
 }
 
 const EventsGrid = memo(({
@@ -20,6 +20,8 @@ const EventsGrid = memo(({
   hasNextPage,
   isFetchingNextPage,
   infiniteScrollRef,
+  formatDate,
+  formatTime,
 }: EventsGridProps) => {
   const LoadingIndicator = () => (
     <div ref={infiniteScrollRef} className="flex items-center justify-center py-8">
@@ -71,13 +73,13 @@ const EventsGrid = memo(({
             <CardContent className="space-y-3 flex flex-col h-full">
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{event.date}</span>
+                <span className="truncate">{formatDate(event.date)}</span>
               </div>
               
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <Clock className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">
-                  {event.start_time} - {event.end_time}
+                  {formatTime(event.start_time, event.end_time)}
                 </span>
               </div>
               

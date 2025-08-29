@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import "../styles/calendar.css";
+import { formatTimeRange } from "@/lib/dateUtils";
 
 const locales = {
   "en-US": enUS,
@@ -54,7 +55,7 @@ const CustomToolbar: React.FC<{
     <div className="relative mb-4">
       {/* Today button */}
       <button
-        onClick={() => onNavigate("TODAY")}
+        onMouseDown={() => onNavigate("TODAY")}
         className="absolute left-0 top-1/2 -translate-y-1/2 rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
         aria-label="Today"
       >
@@ -64,7 +65,7 @@ const CustomToolbar: React.FC<{
       <div className="flex items-center justify-center gap-4">
         {/* Back button < */}
         <button
-          onClick={() => onNavigate("PREV")}
+          onMouseDown={() => onNavigate("PREV")}
           className="text-gray-800 dark:text-gray-200"
           aria-label="Previous Month"
           style={{ padding: "4px 8px" }}
@@ -84,7 +85,7 @@ const CustomToolbar: React.FC<{
 
         {/* Next button > */}
         <button
-          onClick={() => onNavigate("NEXT")}
+          onMouseDown={() => onNavigate("NEXT")}
           className="text-gray-800 dark:text-gray-200"
           aria-label="Next Month"
           style={{ padding: "4px 8px" }}
@@ -194,11 +195,11 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             top: popupPosition.y,
             left: popupPosition.x,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
-            onClick={closePopup}
+            onMouseDown={closePopup}
             className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
           >
             ✕
@@ -218,7 +219,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
             <Clock className="h-4 w-4 flex-shrink-0" />
             <span>
-              {selectedEvent.start_time} - {selectedEvent.end_time}
+              {formatTimeRange(selectedEvent.start_time, selectedEvent.end_time)}
             </span>
           </div>
           {selectedEvent.location && (
