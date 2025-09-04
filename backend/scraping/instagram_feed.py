@@ -123,9 +123,9 @@ def process_instagram_posts(max_posts=10):
 
 def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
     # Check if an event already exists in db and insert it if not
-    event_name = event_data.get("name").lower()
+    event_name = event_data.get("name").title()
     event_date = event_data.get("date")
-    event_location = event_data.get("location").lower()
+    event_location = event_data.get("location").title()
     conn = None
     try:
         conn = psycopg2.connect(os.getenv("SUPABASE_DB_URL"))
@@ -137,8 +137,8 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
         cur.execute(query, (event_date,))
         existing_events = cur.fetchall()
         for existing_name, existing_location in existing_events:
-            existing_name = existing_name.lower()
-            existing_location = existing_location.lower()
+            existing_name = existing_name.title()
+            existing_location = existing_location.title()
             
             # Check similarity
             name_sim = fuzz.ratio(event_name, existing_name)
