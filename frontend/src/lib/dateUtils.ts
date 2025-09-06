@@ -2,17 +2,18 @@
  * Utility functions for formatting dates and times
  */
 
+
+import { toZonedTime, format } from "date-fns-tz";
+
+
 /**
  * Format a date string to a prettier format (e.g., "August 10, 2025")
  */
 export const formatPrettyDate = (dateString: string): string => {
   try {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    const tz = "America/New_York";
+    const date = toZonedTime(dateString, tz);
+    return format(date, "MMMM d, yyyy");
   } catch (error) {
     return dateString // Return original string if parsing fails
   }

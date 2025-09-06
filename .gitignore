@@ -9,3 +9,5 @@ backend/scraping/*.csv
 backend/scraping/test*.py
 
 *.log
+
+node_modules/
