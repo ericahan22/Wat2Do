@@ -47,8 +47,8 @@ export const formatPrettyTime = (timeString: string): string => {
 /**
  * Format a time range (e.g., "3pm - 8pm")
  */
-export const formatTimeRange = (startTime: string, endTime: string): string => {
+export const formatTimeRange = (startTime: string, endTime: string | null): string => {
   const start = formatPrettyTime(startTime)
-  const end = formatPrettyTime(endTime)
-  return `${start} - ${end}`
+  const end = endTime ? formatPrettyTime(endTime) : null
+  return end ? `${start} - ${end}` : start
 }

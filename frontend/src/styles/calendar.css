@@ -213,3 +213,52 @@
   margin-right: 2px; /* Adjust margin-right */
   width: auto; /* Turn off fixed width */
 }
+
+/* Light mode: Default styles for .rbc-show-more */
+.rbc-show-more {
+  background: none; /* No background */
+  color: inherit; /* Inherit text color */
+  cursor: pointer;
+}
+
+/* Dark mode: Ensure .rbc-show-more matches light mode */
+.dark .rbc-show-more {
+  background: none; /* Remove background in dark mode */
+  color: inherit; /* Inherit text color */
+  cursor: pointer;
+}
+
+/* Time view container */
+.dark .rbc-time-view {
+  border: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Time header content (left border) */
+.dark .rbc-time-header-content {
+  border-left: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Time content (top border) */
+.dark .rbc-time-content {
+  border-top: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Events container (left border) */
+.dark .rbc-events-container {
+  border-left: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Time slot (top border) */
+.dark .rbc-time-slot {
+  border-top: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Time slot group (bottom border) */
+.dark .rbc-timeslot-group {
+  border-bottom: 1px solid #4a5568; /* Grey border for dark mode */
+}
+
+/* Time header (right border) */
+.dark .rbc-time-header {
+  border-right: 1px solid #4a5568; /* Grey border for dark mode */
+}

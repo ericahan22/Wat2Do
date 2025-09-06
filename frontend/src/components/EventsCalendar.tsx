@@ -4,6 +4,7 @@ import {
   dateFnsLocalizer,
   NavigateAction,
   View,
+  ToolbarProps
 } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -47,22 +48,27 @@ interface EventsCalendarProps {
 }
 
 // Custom toolbar for < and > month buttons
-const CustomToolbar: React.FC<{
-  label: string;
-  onNavigate: (action: "PREV" | "NEXT" | "TODAY") => void;
-}> = ({ label, onNavigate }) => {
+const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
+  label,
+  onNavigate,
+  onView,
+  view,
+}) => {
+  const centerWidth = view === "week" ? 350 : 260;
+
   return (
-    <div className="relative mb-4">
+    <div className="relative mb-4 flex items-center justify-between">
       {/* Today button */}
       <button
         onMouseDown={() => onNavigate("TODAY")}
-        className="absolute left-0 top-1/2 -translate-y-1/2 rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+        className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
         aria-label="Today"
       >
         Today
       </button>
 
-      <div className="flex items-center justify-center gap-4">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-between"
+           style={{ width: centerWidth }}>
         {/* Back button < */}
         <button
           onMouseDown={() => onNavigate("PREV")}
@@ -74,14 +80,9 @@ const CustomToolbar: React.FC<{
         </button>
 
         {/* Month Year title */}
-        <div
-          className="flex items-center justify-center"
-          style={{ width: "140px" }}
-        >
-          <h2 className="text-lg whitespace-nowrap font-bold text-gray-900 dark:text-white">
-            {label}
-          </h2>
-        </div>
+        <h2 className="text-lg whitespace-nowrap font-bold text-gray-900 dark:text-white">
+          {label}
+        </h2>
 
         {/* Next button > */}
         <button
@@ -93,12 +94,35 @@ const CustomToolbar: React.FC<{
           <ChevronRight className="h-6 w-6" />
         </button>
       </div>
+      
+      {/* View buttons (Month/Week/Day) */}
+      <div className="flex items-center gap-2">
+        <button
+          onMouseDown={() => onView("month")}
+          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
+          Month
+        </button>
+        <button
+          onMouseDown={() => onView("week")}
+          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
+          Week
+        </button>
+        <button
+          onMouseDown={() => onView("day")}
+          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+        >
+          Day
+        </button>
+      </div>
     </div>
   );
 };
 
 const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState<View>("month");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [popupPosition, setPopupPosition] = useState<{
     x: number;
@@ -107,12 +131,18 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
   const calendarContainerRef = useRef<HTMLDivElement>(null);
 
-  const calendarEvents = events.map((event) => ({
-    ...event,
-    title: event.name,
-    start: new Date(`${event.date}T${event.start_time}`),
-    end: new Date(`${event.date}T${event.end_time}`),
-  }));
+  const calendarEvents = events.map((event) => {
+    const start = new Date(`${event.date}T${event.start_time}`);
+    const end = event.end_time
+      ? new Date(`${event.date}T${event.end_time}`)
+      : new Date(start.getTime() + 60 * 60 * 1000); // Default end time = 1 hour after start
+    return {
+      ...event,
+      title: event.name,
+      start,
+      end,
+    };
+  });
 
   const handleNavigate = (
     newDate: Date,
@@ -179,6 +209,8 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
         endAccessor="end"
         date={currentDate}
         onNavigate={handleNavigate}
+        onView={(view) => setCurrentView(view)}
+        view={currentView}
         selectable={false}
         onSelectSlot={() => {}}
         onSelectEvent={handleSelectEvent}
@@ -219,7 +251,9 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
             <Clock className="h-4 w-4 flex-shrink-0" />
             <span>
-              {formatTimeRange(selectedEvent.start_time, selectedEvent.end_time)}
+              {selectedEvent.end_time
+                ? formatTimeRange(selectedEvent.start_time, selectedEvent.end_time)
+                : formatTimeRange(selectedEvent.start_time, null)}
             </span>
           </div>
           {selectedEvent.location && (
