@@ -42,7 +42,7 @@ const EventsGrid = memo(
                 {event.categories && event.categories.length > 0 && (
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                     <Bookmark className="h-4 w-4 flex-shrink-0" />
-                    <span className="line-clamp-1">
+                    <span className="line-clamp-1" title={event.categories.join(" | ")}>
                       {event.categories.join(" | ")}
                     </span>
                   </div>
@@ -68,7 +68,7 @@ const EventsGrid = memo(
                 {event.location && (
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                     <MapPin className="h-4 w-4 flex-shrink-0" />
-                    <span className="line-clamp-1">{event.location}</span>
+                    <span className="line-clamp-1" title={event.location}>{event.location}</span>
                   </div>
                 )}
 

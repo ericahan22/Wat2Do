@@ -34,7 +34,7 @@ const ClubsGrid = memo(
                 {club.categories && club.categories.length > 0 && (
                   <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                     <Bookmark className="h-4 w-4 flex-shrink-0" />
-                    <span className="line-clamp-1">
+                    <span className="line-clamp-1" title={club.categories.join(" | ")}>
                       {club.categories.join(" | ")}
                     </span>
                   </div>
