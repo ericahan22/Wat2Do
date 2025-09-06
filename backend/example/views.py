@@ -46,7 +46,7 @@ def get_events(request):
         limit = min(limit, 100)  # Max 100 events per request
         
         # Build base queryset
-        base_queryset = Events.objects.all()
+        base_queryset = Events.objects.all().order_by('date', 'start_time')
         
         # TOTAL COUNT: Get count of ALL items in database (no filters)
         total_count = base_queryset.count()

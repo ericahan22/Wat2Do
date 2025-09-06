@@ -133,7 +133,8 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
         
         # Check duplicates
         logger.debug(f"Checking for duplicates: {event_data}")
-        query = "SELECT name, location FROM events WHERE date = %s"
+        query = "SELECT name, location FROM events WHERE date = %s " \
+                "ORDER BY start_time ASC"
         cur.execute(query, (event_date,))
         existing_events = cur.fetchall()
         for existing_name, existing_location in existing_events:
