@@ -5,5 +5,7 @@
 __pycache__/
 
 *.csv
+backend/scraping/*.csv
+backend/scraping/test*.py
 
 *.log
