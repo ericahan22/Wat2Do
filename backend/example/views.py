@@ -45,7 +45,7 @@ def get_events(request):
         search_term = request.GET.get('search', '').strip()  # Get search term
         
         # Get date filtering parameter - by default hide past events
-        include_past = request.GET.get('include_past', 'false') in ('true')
+        include_past = request.GET.get('include_past', 'false') == 'true'
         
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
@@ -61,14 +61,13 @@ def get_events(request):
         
         # Apply date filtering by default (hide past events)
         if not include_past:
-            # Include events from today onwards (where today is determined in UTC)
-            # The requirement mentions "today at 5am utc" as reference, but for simplicity
-            # we'll use today in UTC timezone as the cutoff
+            # Include events from today at 5 AM UTC onwards
+            # The requirement specifies "today at 5am utc" as reference point
             now_utc = datetime.now(timezone.utc)
-            cutoff_date = now_utc.date()
+            cutoff_datetime = datetime.combine(now_utc.date(), datetime.min.time()).replace(tzinfo=timezone.utc) + timedelta(hours=5)
             
-            # Include events from today onwards
-            filtered_queryset = filtered_queryset.filter(date__gte=cutoff_date)
+            # Include events from the cutoff date onwards
+            filtered_queryset = filtered_queryset.filter(date__gte=cutoff_datetime.date())
         
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
