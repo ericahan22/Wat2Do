@@ -58,8 +58,11 @@ def get_events(request):
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
         if category_filter and category_filter.lower() != 'all':
+            matching_club_handles = Clubs.objects.filter(
+                categories__icontains=category_filter
+            ).values_list('ig', flat=True)
             filtered_queryset = filtered_queryset.filter(
-                club_handle__in=Clubs.objects.filter(categories__icontains=category_filter).values_list('ig', flat=True)
+                club_handle__in=matching_club_handles
             )
         
         # QUERY COUNT: Get total count of items matching the filters (no pagination)
@@ -70,12 +73,15 @@ def get_events(request):
         
         # Convert to list of dictionaries
         events_data = []
+        club_handles = set(event.club_handle for event in paginated_events if event.club_handle)
+        clubs_queries = Clubs.objects.filter(ig__in=club_handles)
+        clubs_lookup = {club.ig: club for club in clubs_queries}
         for event in paginated_events:
             event_category = None
             event_club_type = None
             if event.club_handle:
                 # Find event's matching club in database
-                matching_club = Clubs.objects.filter(ig=event.club_handle).first()
+                matching_club = clubs_lookup.get(event.club_handle)
                 if matching_club:
                     event_category = matching_club.categories
                     event_club_type = matching_club.club_type
