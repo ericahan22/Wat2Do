@@ -48,12 +48,14 @@ const ClubsGrid = memo(
                       variant="outline"
                       size="sm"
                       className="flex-1 w-full"
-                      onMouseDown={() =>
-                        window.open(
-                          `https://clubs.wusa.ca/clubs/${club.club_page}`,
-                          "_blank"
-                        )
-                      }
+                      onMouseDown={() => {
+                        // if club_page integer, append clubs.wusa.ca
+                        const isInteger = /^\d+$/.test(club.club_page);
+                        const url = isInteger
+                          ? `https://clubs.wusa.ca/clubs/${club.club_page}`
+                          : club.club_page;
+                        window.open(url, "_blank");
+                      }}
                     >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Website
