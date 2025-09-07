@@ -17,8 +17,8 @@ def home(request):
         {
             "message": "Instagram Event Scraper API",
             "endpoints": {
-                "GET /api/events/": "Get events from database (hides past events by default)",
-                "GET /api/events/?include_past=true": "Get all events including past ones",
+                "GET /api/events/?view=grid": "Get events in grid view",
+                "GET /api/events/?view=calendar": "Get events in calendar view",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
             },
