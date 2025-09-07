@@ -10,6 +10,7 @@ from rest_framework import status
 from .models import Clubs, Events
 from django.core.serializers import serialize
 import json
+from datetime import datetime, timezone, timedelta
 
 
 @api_view(["GET"])
@@ -19,7 +20,8 @@ def home(request):
         {
             "message": "Instagram Event Scraper API",
             "endpoints": {
-                "GET /api/events/": "Get all events from database",
+                "GET /api/events/": "Get events from database (hides past events by default)",
+                "GET /api/events/?include_past=true": "Get all events including past ones",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
             },
@@ -42,6 +44,9 @@ def get_events(request):
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
         
+        # Get date filtering parameter - by default hide past events
+        include_past = request.GET.get('include_past', 'false').lower() in ('true', '1', 'yes')
+        
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
         
@@ -53,6 +58,18 @@ def get_events(request):
         
         # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
+        
+        # Apply date filtering by default (hide past events)
+        if not include_past:
+            # Include events from today onwards (where today is determined in UTC)
+            # The requirement mentions "today at 5am utc" as reference, but for simplicity
+            # we'll use today in UTC timezone as the cutoff
+            now_utc = datetime.now(timezone.utc)
+            cutoff_date = now_utc.date()
+            
+            # Include events from today onwards
+            filtered_queryset = filtered_queryset.filter(date__gte=cutoff_date)
+        
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
         
