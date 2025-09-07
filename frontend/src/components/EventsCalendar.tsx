@@ -148,13 +148,13 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
   // Custom styles for events based on club_type
   const eventPropGetter = (event: typeof calendarEvents[number]) => {
-    let backgroundColor = "#3a7bd5 ";
+    let backgroundColor = "#3a7bd5";
     if (event.club_type === "WUSA") {
-      backgroundColor = "#4b9b6a ";
+      backgroundColor = "#4b9b6a";
     } else if (event.club_type === "Athletics") {
-      backgroundColor = "#d9924a ";
+      backgroundColor = "#d9924a";
     } else if (event.club_type === "Student Society") {
-      backgroundColor = "#d16c6c ";
+      backgroundColor = "#d16c6c";
     }
     return {
       style: {
