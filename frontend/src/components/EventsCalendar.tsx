@@ -41,6 +41,7 @@ interface Event {
   location: string;
   club_handle: string;
   url?: string;
+  club_type?: "WUSA" | "Athletics" | "Student Society" | null;
 }
 
 interface EventsCalendarProps {
@@ -144,6 +145,26 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
       end,
     };
   });
+
+  // Custom styles for events based on club_type
+  const eventPropGetter = (event: typeof calendarEvents[number]) => {
+    let backgroundColor = "#3a7bd5 ";
+    if (event.club_type === "WUSA") {
+      backgroundColor = "#4b9b6a ";
+    } else if (event.club_type === "Athletics") {
+      backgroundColor = "#d9924a ";
+    } else if (event.club_type === "Student Society") {
+      backgroundColor = "#d16c6c ";
+    }
+    return {
+      style: {
+        backgroundColor,
+        borderRadius: "6px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        border: "1px solid rgba(0, 0, 0, 0.15)",
+      },
+    };
+  };
 
   const handleNavigate = (
     newDate: Date,
@@ -258,6 +279,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
         components={{
           toolbar: CustomToolbar,
         }}
+        eventPropGetter={eventPropGetter}
       />
 
       {/* Event details popup */}

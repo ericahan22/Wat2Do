@@ -72,11 +72,13 @@ def get_events(request):
         events_data = []
         for event in paginated_events:
             event_category = None
+            event_club_type = None
             if event.club_handle:
                 # Find event's matching club in database
                 matching_club = Clubs.objects.filter(ig=event.club_handle).first()
                 if matching_club:
                     event_category = matching_club.categories
+                    event_club_type = matching_club.club_type
                     
             events_data.append({
                 'id': event.id,
@@ -88,6 +90,7 @@ def get_events(request):
                 'end_time': event.end_time.isoformat() if event.end_time else None,
                 'location': event.location,
                 'category': event_category,
+                'club_type': event_club_type,
             })
         
         # Check if there are more events to load

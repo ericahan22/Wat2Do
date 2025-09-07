@@ -69,6 +69,7 @@ export function useEvents() {
   const uniqueCategories = useMemo(() => {
     return [
       'Academic',
+      'Athletics',
       'Business and Entrepreneurial',
       'Charitable, Community Service & International Development',
       'Creative Arts, Dance and Music',
