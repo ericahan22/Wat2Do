@@ -45,7 +45,7 @@ def get_events(request):
         search_term = request.GET.get('search', '').strip()  # Get search term
         
         # Get date filtering parameter - by default hide past events
-        include_past = request.GET.get('include_past', 'false').lower() in ('true', '1', 'yes')
+        include_past = request.GET.get('include_past', 'false') in ('true')
         
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
