@@ -35,12 +35,14 @@ def health(request):
 
 @api_view(["GET"])
 def get_events(request):
-    """Get events from database with pagination and search support"""
+    """Get events from database with pagination and search support
+       Event categories are based on club categories"""
     try:
         # Get pagination parameters
         limit = int(request.GET.get('limit', 20))  # Default 20 events per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
+        category_filter = request.GET.get('category', '').strip()
         
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
@@ -55,6 +57,10 @@ def get_events(request):
         filtered_queryset = base_queryset
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
+        if category_filter and category_filter.lower() != 'all':
+            filtered_queryset = filtered_queryset.filter(
+                club_handle__in=Clubs.objects.filter(categories__icontains=category_filter).values_list('ig', flat=True)
+            )
         
         # QUERY COUNT: Get total count of items matching the filters (no pagination)
         total_query_count = filtered_queryset.count()
@@ -65,6 +71,13 @@ def get_events(request):
         # Convert to list of dictionaries
         events_data = []
         for event in paginated_events:
+            event_category = None
+            if event.club_handle:
+                # Find event's matching club in database
+                matching_club = Clubs.objects.filter(ig=event.club_handle).first()
+                if matching_club:
+                    event_category = matching_club.categories
+                    
             events_data.append({
                 'id': event.id,
                 'club_handle': event.club_handle,
@@ -74,6 +87,7 @@ def get_events(request):
                 'start_time': event.start_time.isoformat() if event.start_time else None,
                 'end_time': event.end_time.isoformat() if event.end_time else None,
                 'location': event.location,
+                'category': event_category,
             })
         
         # Check if there are more events to load
