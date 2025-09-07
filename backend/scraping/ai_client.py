@@ -4,6 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import logging
 import traceback
+from datetime import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -19,8 +20,15 @@ def parse_caption_for_event(caption_text):
     Returns a consistent JSON format with all required fields.
     """
     
+    # Get current date and day of week for context
+    now = datetime.now()
+    current_date = now.strftime("%Y-%m-%d")
+    current_day_of_week = now.strftime("%A")
+    
     prompt = f"""
     Analyze the following Instagram caption and extract event information if it's an event post.
+    
+    Current context: Today is {current_day_of_week}, {current_date}
     
     Caption: {caption_text}
     
@@ -36,6 +44,8 @@ def parse_caption_for_event(caption_text):
     Guidelines:
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
+    - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
+    - For weekly events, calculate the next occurrence based on the current date and day of week
     - If information is not available, use empty string ""
     - Be consistent with the exact field names
     - Return ONLY the JSON object, no additional text
