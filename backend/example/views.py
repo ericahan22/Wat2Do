@@ -10,6 +10,7 @@ from rest_framework import status
 from .models import Clubs, Events
 from django.core.serializers import serialize
 import json
+from django.db.models import Subquery, OuterRef
 
 
 @api_view(["GET"])
@@ -64,6 +65,15 @@ def get_events(request):
             filtered_queryset = filtered_queryset.filter(
                 club_handle__in=matching_club_handles
             )
+            
+        filtered_queryset = filtered_queryset.annotate(
+            club_categories=Subquery(
+                Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
+            ),
+            club_type=Subquery(
+                Clubs.objects.filter(ig=OuterRef('club_handle')).values('club_type')[:1]
+            )
+        )
         
         # QUERY COUNT: Get total count of items matching the filters (no pagination)
         total_query_count = filtered_queryset.count()
@@ -73,19 +83,7 @@ def get_events(request):
         
         # Convert to list of dictionaries
         events_data = []
-        club_handles = set(event.club_handle for event in paginated_events if event.club_handle)
-        clubs_queries = Clubs.objects.filter(ig__in=club_handles)
-        clubs_lookup = {club.ig: club for club in clubs_queries}
         for event in paginated_events:
-            event_category = None
-            event_club_type = None
-            if event.club_handle:
-                # Find event's matching club in database
-                matching_club = clubs_lookup.get(event.club_handle)
-                if matching_club:
-                    event_category = matching_club.categories
-                    event_club_type = matching_club.club_type
-                    
             events_data.append({
                 'id': event.id,
                 'club_handle': event.club_handle,
@@ -95,8 +93,8 @@ def get_events(request):
                 'start_time': event.start_time.isoformat() if event.start_time else None,
                 'end_time': event.end_time.isoformat() if event.end_time else None,
                 'location': event.location,
-                'category': event_category,
-                'club_type': event_club_type,
+                'category': event.club_categories,
+                'club_type': event.club_type,
             })
         
         # Check if there are more events to load
