@@ -2,15 +2,12 @@
 Views for the app.
 """
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Clubs, Events
-from django.core.serializers import serialize
-import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+from pytz import timezone
 
 
 @api_view(["GET"])
@@ -43,9 +40,7 @@ def get_events(request):
         limit = int(request.GET.get('limit', 20))  # Default 20 events per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
-        
-        # Get date filtering parameter - by default hide past events
-        include_past = request.GET.get('include_past', 'false') == 'true'
+        view = request.GET.get('view', 'grid')
         
         # Limit the maximum number of events per request
         limit = min(limit, 100)  # Max 100 events per request
@@ -59,15 +54,12 @@ def get_events(request):
         # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
         
-        # Apply date filtering by default (hide past events)
-        if not include_past:
-            # Include events from today at 5 AM UTC onwards
-            # The requirement specifies "today at 5am utc" as reference point
-            now_utc = datetime.now(timezone.utc)
-            cutoff_datetime = datetime.combine(now_utc.date(), datetime.min.time()).replace(tzinfo=timezone.utc) + timedelta(hours=5)
-            
-            # Include events from the cutoff date onwards
-            filtered_queryset = filtered_queryset.filter(date__gte=cutoff_datetime.date())
+        # Hide past events in grid view only
+        if view == 'grid':
+            # Include events from today onwards (interpret as EST)
+            est = timezone('America/New_York')
+            today = datetime.now(est).date()
+            filtered_queryset = filtered_queryset.filter(date__gte=today)
         
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)

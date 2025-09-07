@@ -33,9 +33,10 @@ const fetchEvents = async ({ pageParam = 0, queryKey }: { pageParam?: number; qu
   const searchParam = searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : "";
   const categoryFilter = queryKey[2] || "all";
   const categoryParam = categoryFilter ? `&category=${encodeURIComponent(categoryFilter)}` : "";
+  const view = queryKey[3] || 'grid';
 
   const response = await fetch(
-    `${API_BASE_URL}/events/?limit=50&offset=${pageParam}${searchParam}${categoryParam}`
+    `${API_BASE_URL}/events/?limit=50&offset=${pageParam}${searchParam}${categoryParam}&view=${view}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
@@ -44,7 +45,7 @@ const fetchEvents = async ({ pageParam = 0, queryKey }: { pageParam?: number; qu
   return data;
 };
 
-export function useEvents() {
+export function useEvents(view: 'grid' | 'calendar') {
   const [searchParams] = useSearchParams();
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const searchTerm = searchParams.get("search") || "";
@@ -58,7 +59,7 @@ export function useEvents() {
     isLoading,
     error,
   } = useInfiniteQuery({
-    queryKey: ["events", searchTerm, categoryFilter],  
+    queryKey: ["events", searchTerm, categoryFilter, view],  
     queryFn: fetchEvents,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.next_offset : undefined,
