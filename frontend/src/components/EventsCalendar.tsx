@@ -48,6 +48,7 @@ interface EventsCalendarProps {
 }
 
 // Custom toolbar for < and > month buttons
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
   label,
   onNavigate,
@@ -165,19 +166,59 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
     const popupWidth = 320;
     const popupHeight = 200;
-    let x = rect.left - containerRect.left + rect.width + 10;
-    let y = rect.top - containerRect.top;
+    
+    // Calculate all possible positions relative to event
+    const positions = {
+      right: { x: rect.right + 10, y: rect.top },
+      left: { x: rect.left - popupWidth - 10, y: rect.top },
+      bottom: { x: rect.left, y: rect.bottom + 10 },
+      top: { x: rect.left, y: rect.top - popupHeight - 10 }
+    };
 
-    // Handle overflow
-    if (x + popupWidth > containerRect.width) {
-      x = rect.left - containerRect.left - popupWidth - 10;
+    // Score each position based on how well it fits
+    let bestPosition = null;
+    let bestScore = -1;
+
+    for (const [name, pos] of Object.entries(positions)) {
+      let score = 0;
+
+      // Check if popup fits in viewport
+      if (pos.x >= 0 && pos.x + popupWidth <= window.innerWidth) score += 10;
+      if (pos.y >= 0 && pos.y + popupHeight <= window.innerHeight) score += 10;
+
+      // Check if popup fits in container
+      const containerX = pos.x - containerRect.left;
+      const containerY = pos.y - containerRect.top;
+      if (containerX >= 0 && containerX + popupWidth <= containerRect.width) score += 5;
+      if (containerY >= 0 && containerY + popupHeight <= containerRect.height) score += 5;
+
+      // Prefer right and bottom positions for better UX
+      if (name === 'right') score += 2;
+      if (name === 'bottom') score += 1;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestPosition = pos;
+      }
     }
-    if (y + popupHeight > containerRect.height) {
-      y = containerRect.height - popupHeight - 10;
+
+    // Convert to container-relative coordinates or fallback to center
+    let finalPosition;
+    if (bestPosition && bestScore > 0) {
+      finalPosition = {
+        x: bestPosition.x - containerRect.left,
+        y: bestPosition.y - containerRect.top
+      };
+    } else {
+      // Fallback to center if no good position found
+      finalPosition = {
+        x: Math.max(0, (containerRect.width - popupWidth) / 2),
+        y: Math.max(0, (containerRect.height - popupHeight) / 2)
+      };
     }
 
     setSelectedEvent(event);
-    setPopupPosition({ x, y });
+    setPopupPosition(finalPosition);
   };
 
   const closePopup = () => {
