@@ -40,13 +40,10 @@ def get_events(request):
        Event categories are based on club categories"""
     try:
         # Get pagination parameters
-        limit = int(request.GET.get('limit', 20))  # Default 20 events per page
+        limit = min(int(request.GET.get('limit', 20)), 100)  # Default 20, max 100 events per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
         category_filter = request.GET.get('category', '').strip()
-        
-        # Limit the maximum number of events per request
-        limit = min(limit, 100)  # Max 100 events per request
         
         # Build base queryset
         base_queryset = Events.objects.all().order_by('date', 'start_time')
@@ -59,11 +56,10 @@ def get_events(request):
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
         if category_filter and category_filter.lower() != 'all':
-            matching_club_handles = Clubs.objects.filter(
-                categories__icontains=category_filter
-            ).values_list('ig', flat=True)
             filtered_queryset = filtered_queryset.filter(
-                club_handle__in=matching_club_handles
+                club_handle__in=Clubs.objects.filter(
+                    categories__icontains=category_filter
+                ).values('ig')
             )
             
         filtered_queryset = filtered_queryset.annotate(
@@ -82,9 +78,8 @@ def get_events(request):
         paginated_events = filtered_queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
-        events_data = []
-        for event in paginated_events:
-            events_data.append({
+        events_data = [
+            {
                 'id': event.id,
                 'club_handle': event.club_handle,
                 'url': event.url,
@@ -95,11 +90,12 @@ def get_events(request):
                 'location': event.location,
                 'category': event.club_categories,
                 'club_type': event.club_type,
-            })
+            }
+            for event in paginated_events
+        ]
         
         # Check if there are more events to load
         has_more = offset + limit < total_query_count
-        next_offset = offset + limit if has_more else None
         
         return Response({
             "count": len(events_data),  # Number of events in this page response
@@ -107,7 +103,7 @@ def get_events(request):
             "total_query_count": total_query_count,  # Total count of events matching filters
             "events": events_data,
             "has_more": has_more,
-            "next_offset": next_offset,
+            "next_offset": offset + limit if has_more else None,
             "current_offset": offset,
             "limit": limit
         })
@@ -120,13 +116,10 @@ def get_clubs(request):
     """Get clubs from database with pagination and search support"""
     try:
         # Get pagination parameters
-        limit = int(request.GET.get('limit', 20))  # Default 20 clubs per page
+        limit = min(int(request.GET.get('limit', 20)), 100)  # Default 20, max 100 clubs per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
         category_filter = request.GET.get('category', '').strip()  # Get category filter
-        
-        # Limit the maximum number of clubs per request
-        limit = min(limit, 100)  # Max 100 clubs per request
         
         # Build base queryset
         base_queryset = Clubs.objects.all()
@@ -148,20 +141,20 @@ def get_clubs(request):
         paginated_clubs = filtered_queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
-        clubs_data = []
-        for club in paginated_clubs:
-            clubs_data.append({
+        clubs_data = [
+            {
                 'id': club.id,
                 'club_name': club.club_name,
                 'categories': club.categories,
                 'club_page': club.club_page,
                 'ig': club.ig,
                 'discord': club.discord,
-            })
+            }
+            for club in paginated_clubs
+        ]
         
         # Check if there are more clubs to load
         has_more = offset + limit < total_query_count
-        next_offset = offset + limit if has_more else None
         
         return Response({
             "count": len(clubs_data),  # Number of clubs in this page response
@@ -169,7 +162,7 @@ def get_clubs(request):
             "total_query_count": total_query_count,  # Total count of clubs matching filters
             "clubs": clubs_data,
             "has_more": has_more,
-            "next_offset": next_offset,
+            "next_offset": offset + limit if has_more else None,
             "current_offset": offset,
             "limit": limit
         })
