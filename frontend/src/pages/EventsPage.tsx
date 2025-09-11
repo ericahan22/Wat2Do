@@ -27,7 +27,7 @@ function EventsPage() {
     infiniteScrollRef,
     totalCount,
     totalQueryCount,
-  } = useEvents();
+  } = useEvents(view);
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
 

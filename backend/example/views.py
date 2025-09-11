@@ -2,15 +2,15 @@
 Views for the app.
 """
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Clubs, Events
+from .models import Clubs, Events 
 from django.core.serializers import serialize
 import json
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef 
+from datetime import datetime
+from pytz import timezone 
 
 
 @api_view(["GET"])
@@ -20,7 +20,8 @@ def home(request):
         {
             "message": "Instagram Event Scraper API",
             "endpoints": {
-                "GET /api/events/": "Get all events from database",
+                "GET /api/events/?view=grid": "Get events in grid view",
+                "GET /api/events/?view=calendar": "Get events in calendar view",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
             },
@@ -42,8 +43,11 @@ def get_events(request):
         # Get pagination parameters
         limit = min(int(request.GET.get('limit', 20)), 100)  # Default 20, max 100 events per page
         offset = int(request.GET.get('offset', 0))  # Default offset 0
-        search_term = request.GET.get('search', '').strip()  # Get search term
-        category_filter = request.GET.get('category', '').strip()
+        search_term = request.GET.get('search', '').strip()  # Get search term 
+        category_filter = request.GET.get('category', '').strip() 
+        view = request.GET.get('view', 'grid')
+        
+        # Limit the maximum number of events per request 
         
         # Build base queryset
         base_queryset = Events.objects.all().order_by('date', 'start_time')
@@ -53,6 +57,14 @@ def get_events(request):
         
         # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
+        
+        # Hide past events in grid view only
+        if view == 'grid':
+            # Include events from today onwards (interpret as EST)
+            est = timezone('America/New_York')
+            today = datetime.now(est).date()
+            filtered_queryset = filtered_queryset.filter(date__gte=today)
+        
         if search_term:
             filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
         if category_filter and category_filter.lower() != 'all':
