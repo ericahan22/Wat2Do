@@ -91,6 +91,7 @@ class S3ImageUploader:
                     
                 filename = f"events/{uuid.uuid4()}.{file_ext}"
             
+            print(f"Uploading image to S3: {filename}")
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
                 Key=filename,
@@ -99,7 +100,8 @@ class S3ImageUploader:
                 CacheControl='max-age=31536000',
                 ACL='public-read'  # Make the object publicly accessible
             )
-            
+            print(f"Image uploaded to S3: {filename}")
+
             # Generate permanent public URL instead of presigned URL
             public_url = f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{filename}"
             logger.info(f"Successfully uploaded image: {filename}")

@@ -194,6 +194,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                 raw_image_url = get_post_image_url(post)
                 if raw_image_url:
                     image_url = s3_uploader.upload_image(raw_image_url)
+                    print(f"Uploaded image to S3: {image_url}")
                 else:
                     logger.warning(f"No image URL found for post {post.shortcode}, skipping image upload")
                     image_url = None
