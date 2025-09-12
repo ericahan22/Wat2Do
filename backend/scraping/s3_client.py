@@ -7,6 +7,9 @@ import requests
 from io import BytesIO
 from PIL import Image
 import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
