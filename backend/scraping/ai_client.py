@@ -41,8 +41,6 @@ def parse_caption_for_event(caption_text):
         "location": string,  // location of the event
         "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
         "food": string,  // food information if mentioned, empty string if not
-        "drinks": string,  // drinks information if mentioned, empty string if not
-        "snacks": string,  // snacks information if mentioned, empty string if not
         "registration": boolean  // true if registration is required/mentioned, false otherwise
     }}
     
@@ -52,8 +50,8 @@ def parse_caption_for_event(caption_text):
     - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
-    - For food/drinks/snacks: extract any mentions of refreshments, meals, beverages, snacks, catering, etc.
-    - For registration: look for terms like "register", "RSVP", "sign up", "registration required", "link in bio", etc.
+    - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks")
+    - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON object, no additional text
@@ -84,7 +82,7 @@ def parse_caption_for_event(caption_text):
             
             # Ensure all required fields are present
             required_fields = ["name", "date", "start_time", "end_time", "location", 
-                             "price", "food", "drinks", "snacks", "registration"]
+                             "price", "food", "registration"]
             for field in required_fields:
                 if field not in event_data:
                     if field == "price":
@@ -108,8 +106,6 @@ def parse_caption_for_event(caption_text):
                 "location": "",
                 "price": None,
                 "food": "",
-                "drinks": "",
-                "snacks": "",
                 "registration": False
             }
             
@@ -126,7 +122,5 @@ def parse_caption_for_event(caption_text):
             "location": "",
             "price": None,
             "food": "",
-            "drinks": "",
-            "snacks": "",
             "registration": False
         } 

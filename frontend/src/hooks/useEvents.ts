@@ -14,8 +14,6 @@ export interface Event {
   categories?: string[];
   price?: number | null;
   food?: string | null;
-  drinks?: string | null;
-  snacks?: string | null;
   registration?: boolean;
 }
 

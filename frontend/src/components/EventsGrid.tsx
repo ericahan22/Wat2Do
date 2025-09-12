@@ -66,37 +66,6 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 </div>
               )}
 
-              {/* New event details */}
-              {event.price !== undefined && event.price !== null && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span>Price: ${event.price}</span>
-                </div>
-              )}
-
-              {event.food && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span>Food: {event.food}</span>
-                </div>
-              )}
-
-              {event.drinks && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span>Drinks: {event.drinks}</span>
-                </div>
-              )}
-
-              {event.snacks && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span>Snacks: {event.snacks}</span>
-                </div>
-              )}
-
-              {event.registration && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span>Registration: Required</span>
-                </div>
-              )}
-
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">
                 {event.url ? (

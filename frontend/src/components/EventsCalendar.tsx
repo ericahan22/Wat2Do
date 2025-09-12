@@ -16,6 +16,8 @@ import {
   Clock,
   MapPin,
   ExternalLink,
+  Utensils,
+  DollarSign,
 } from "lucide-react";
 import "../styles/calendar.css";
 import { formatTimeRange } from "@/lib/dateUtils";
@@ -44,8 +46,6 @@ interface Event {
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
   price?: number | null;
   food?: string | null;
-  drinks?: string | null;
-  snacks?: string | null;
   registration?: boolean;
 }
 
@@ -333,34 +333,27 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             </div>
           )}
 
-          {/* New event details */}
-          {selectedEvent.price !== undefined && selectedEvent.price !== null && (
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>Price: ${selectedEvent.price}</span>
+          {selectedEvent.price && (
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <DollarSign className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {selectedEvent.price}
+              </span>
             </div>
           )}
 
           {selectedEvent.food && (
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>Food: {selectedEvent.food}</span>
-            </div>
-          )}
-
-          {selectedEvent.drinks && (
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>Drinks: {selectedEvent.drinks}</span>
-            </div>
-          )}
-
-          {selectedEvent.snacks && (
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>Snacks: {selectedEvent.snacks}</span>
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <Utensils className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate" title={selectedEvent.food}>
+                {selectedEvent.food}
+              </span>
             </div>
           )}
 
           {selectedEvent.registration && (
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span>Registration: Required</span>
+              <span className="italic">Registration required</span>
             </div>
           )}
 

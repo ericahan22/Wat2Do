@@ -33,8 +33,6 @@ class Events(models.Model):
     location = models.CharField(max_length=255)
     price = models.FloatField(blank=True, null=True)
     food = models.CharField(max_length=255, blank=True, null=True)
-    drinks = models.CharField(max_length=255, blank=True, null=True)
-    snacks = models.CharField(max_length=255, blank=True, null=True)
     registration = models.BooleanField(default=False)
 
     class Meta:

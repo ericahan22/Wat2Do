@@ -92,7 +92,7 @@ function EventsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : view === "grid" ? `Showing ${data.length} upcoming events` : `Showing ${data.length} total events`}
+            {isLoading ? "Loading..." : view === "grid" ? `Showing ${data.length} upcoming events` : `Showing ${data.length} events`}
           </p>
         </div>
       </div>
