@@ -22,11 +22,6 @@ function EventsPage() {
     uniqueCategories,
     isLoading,
     error,
-    hasNextPage,
-    isFetchingNextPage,
-    infiniteScrollRef,
-    totalCount,
-    totalQueryCount,
   } = useEvents(view);
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
@@ -97,7 +92,7 @@ function EventsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : `Showing ${totalQueryCount || 0} of ${totalCount || 0} events`}
+            {isLoading ? "Loading..." : `Showing ${data.length} events`}
           </p>
         </div>
       </div>
@@ -125,12 +120,7 @@ function EventsPage() {
       {!isLoading && !error && (
         <>
           {view === "grid" ? (
-            <EventsGrid
-              data={data} 
-              hasNextPage={hasNextPage}
-              isFetchingNextPage={isFetchingNextPage}
-              infiniteScrollRef={infiniteScrollRef}
-            />
+            <EventsGrid data={data} />
           ) : (
             <EventsCalendar
               events={data.map((event) => ({
