@@ -12,7 +12,7 @@ from datetime import datetime
 import sys
 from fuzzywuzzy import fuzz
 import time
-
+import json
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -23,6 +23,32 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+def get_post_image_url(post):
+    """
+    Safely extract image URL from Instagram post with fallback options.
+    
+    Args:
+        post: Instagram post object from instaloader
+        
+    Returns:
+        str or None: Image URL if found, None otherwise
+    """
+    try:
+        # Try different methods to get image URL
+        if hasattr(post, 'url'):
+            return post.url
+        elif hasattr(post, '_node') and 'display_url' in post._node:
+            return post._node['display_url']
+        elif hasattr(post, '_node') and 'display_src' in post._node:
+            return post._node['display_src']
+        else:
+            logger.warning(f"No image URL found for post {getattr(post, 'shortcode', 'unknown')}")
+            return None
+    except (KeyError, AttributeError) as e:
+        logger.error(f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {str(e)}")
+        return None
+
 
 def handle_instagram_errors(func):
     # Handle common Instagram errors?
@@ -89,33 +115,6 @@ def update_event_csv(event_data, club_name, url):
         print(f"Added event: {event_data.get('name')}")
         return True
 
-
-def process_instagram_posts(max_posts=10):
-    """
-    Process Instagram posts and extract event information.
-    """
-    club_name = "uw.wealthmanagement"
-
-    profile = Profile.from_username(L.context, club_name)
-    events_added = 0
-
-    for i, post in enumerate(profile.get_posts()):
-        print(f"Post: {post.post}")
-        if i >= max_posts:
-            break
-
-        print(f"\n--- Processing post {i+1} ---")
-
-        event_data = parse_caption_for_event(post.caption, post.url)
-
-        if update_event_csv(event_data, club_name, post.url):
-            events_added += 1
-
-    print(f"\n--- Summary ---")
-    print(f"Processed {max_posts} posts")
-    print(f"Added {events_added} events to CSV")
-
-
 def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
     # Check if an event already exists in db and insert it if not
     event_name = event_data.get("name") #.title()
@@ -177,9 +176,22 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
         posts_processed = 0
         consec_old_posts = 0
         s3_uploader = S3ImageUploader()  # Initialize S3 uploader
+
         
         for post in L.get_feed_posts():
-            print(post._node.keys())
+            for k in post._node.keys():
+                print(k)
+            if "image_versions2" in post._node:
+                print(json.dumps(post._node["image_versions2"], indent=2))
+
+            if "carousel_media" in post._node:
+                for i, media in enumerate(post._node["carousel_media"]):
+                    print(f"carousel item {i}:")
+                    print(json.dumps(media["image_versions2"], indent=2))
+
+            if "display_url" in post._node:
+                print(json.dumps(post._node["display_url"], indent=2))
+
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
@@ -198,7 +210,13 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                     logger.info(f"Reached max post limit of {max_posts}, stopping.")
                     break
 
-                image_url = s3_uploader.upload_image(post.url)
+                # Safely get image URL and upload to S3
+                raw_image_url = get_post_image_url(post)
+                if raw_image_url:
+                    image_url = s3_uploader.upload_image(raw_image_url)
+                else:
+                    logger.warning(f"No image URL found for post {post.shortcode}, skipping image upload")
+                    image_url = None
                 
                 event_data = parse_caption_for_event(post.caption, image_url)
                 
@@ -252,6 +270,5 @@ def session():
 
 
 if __name__ == "__main__":
-    # process_instagram_posts(max_posts=10)
     L = session()
     process_recent_feed()
