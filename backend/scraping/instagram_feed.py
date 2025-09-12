@@ -28,11 +28,11 @@ def get_post_image_url(post):
     try:
         if "image_versions2" in post._node and post._node["image_versions2"]:
             print(json.dumps(post._node["image_versions2"], indent=2))
-            return post._node["image_versions2"][0]["url"]
+            return post._node["image_versions2"]["candidates"][0]["url"]
 
         if "carousel_media" in post._node and post._node["carousel_media"]:
             print(json.dumps(post._node["carousel_media"], indent=2))
-            return post._node["carousel_media"][0]["image_versions2"][0]["url"]
+            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0]["url"]
 
         if "display_url" in post._node and post._node["display_url"]:
             print(json.dumps(post._node["display_url"], indent=2))
