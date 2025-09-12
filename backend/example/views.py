@@ -87,6 +87,9 @@ def get_events(request):
                 'location': event.location,
                 'category': event.club_categories,
                 'club_type': event.club_type,
+                'price': event.price,
+                'food': event.food,
+                'registration': event.registration,
             }
             for event in filtered_queryset
         ]
