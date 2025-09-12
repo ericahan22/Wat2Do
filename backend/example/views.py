@@ -65,14 +65,19 @@ def get_events(request):
                 ).values('ig')
             )
             
-        filtered_queryset = filtered_queryset.annotate(
-            club_categories=Subquery(
-                Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
-            ),
-            club_type=Subquery(
-                Clubs.objects.filter(ig=OuterRef('club_handle')).values('club_type')[:1]
-            )
-        )
+        # Only add club annotations if we have clubs
+        try:
+            # Test if we can access the clubs table first
+            clubs_exist = Clubs.objects.exists()
+            if clubs_exist:
+                filtered_queryset = filtered_queryset.annotate(
+                    club_categories=Subquery(
+                        Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
+                    )
+                )
+        except Exception:
+            # If there's any issue with clubs table, skip annotations
+            pass
         
         # Convert to list of dictionaries (no pagination)
         events_data = [
@@ -90,6 +95,7 @@ def get_events(request):
                 'price': event.price,
                 'food': event.food,
                 'registration': event.registration,
+                'image_url': event.image_url,
             }
             for event in filtered_queryset
         ]
@@ -127,6 +133,7 @@ def get_clubs(request):
                 'club_page': club.club_page,
                 'ig': club.ig,
                 'discord': club.discord,
+                'club_type': club.club_type,
             }
             for club in filtered_queryset
         ]
