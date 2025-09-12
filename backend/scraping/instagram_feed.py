@@ -179,7 +179,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
         s3_uploader = S3ImageUploader()  # Initialize S3 uploader
         
         for post in L.get_feed_posts():
-            print(f"Post: {post}")
+            print(post._node.keys())
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
