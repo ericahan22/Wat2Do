@@ -42,6 +42,11 @@ interface Event {
   club_handle: string;
   url?: string;
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
+  price?: number | null;
+  food?: string | null;
+  drinks?: string | null;
+  snacks?: string | null;
+  registration?: boolean;
 }
 
 interface EventsCalendarProps {
@@ -327,6 +332,38 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
               </span>
             </div>
           )}
+
+          {/* New event details */}
+          {selectedEvent.price !== undefined && selectedEvent.price !== null && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span>Price: ${selectedEvent.price}</span>
+            </div>
+          )}
+
+          {selectedEvent.food && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span>Food: {selectedEvent.food}</span>
+            </div>
+          )}
+
+          {selectedEvent.drinks && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span>Drinks: {selectedEvent.drinks}</span>
+            </div>
+          )}
+
+          {selectedEvent.snacks && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span>Snacks: {selectedEvent.snacks}</span>
+            </div>
+          )}
+
+          {selectedEvent.registration && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span>Registration: Required</span>
+            </div>
+          )}
+
           {selectedEvent.url && (
             <a
               href={selectedEvent.url}

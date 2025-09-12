@@ -12,6 +12,11 @@ export interface Event {
   end_time: string;
   location: string;
   categories?: string[];
+  price?: number | null;
+  food?: string | null;
+  drinks?: string | null;
+  snacks?: string | null;
+  registration?: boolean;
 }
 
 interface EventsResponse {
