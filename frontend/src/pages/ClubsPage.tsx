@@ -17,11 +17,6 @@ function ClubsPage() {
     uniqueCategories,
     isLoading,
     error,
-    hasNextPage,
-    isFetchingNextPage,
-    infiniteScrollRef,
-    totalCount,
-    totalQueryCount,
   } = useClubs();
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
@@ -60,7 +55,7 @@ function ClubsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : `Showing ${totalQueryCount || 0} of ${totalCount || 0} clubs`}
+            {isLoading ? "Loading..." : `Showing ${data.length} clubs`}
           </p>
         </div>
       </div>
@@ -85,14 +80,7 @@ function ClubsPage() {
       )}
 
       {/* Clubs Grid */}
-      {!isLoading && !error && (
-        <ClubsGrid
-          data={data}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          infiniteScrollRef={infiniteScrollRef}
-        />
-      )}
+      {!isLoading && !error && <ClubsGrid data={data} />}
     </div>
   );
 }

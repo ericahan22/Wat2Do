@@ -11,17 +11,17 @@ This is a full-stack web application consisting of a Django REST API backend and
   - Backend setup:
     ```bash
     cd backend
-    pip install -r requirements.txt  # Takes ~22 seconds. NEVER CANCEL.
+    pip install -r requirements.txt   
     export USE_SQLITE=1
-    python manage.py migrate        # Takes <1 second
-    python manage.py runserver 8000 # Starts immediately
+    python manage.py migrate    
+    python manage.py runserver 8000  
     ```
   - Frontend setup:
     ```bash
     cd frontend
-    npm install                     # Takes ~12 seconds. NEVER CANCEL.
-    npm run build                   # Takes ~9 seconds. NEVER CANCEL. Set timeout to 30+ seconds.
-    npm run dev                     # Starts immediately on port 5173
+    npm install                
+    npm run build                 
+    npm run dev                   
     ```
 
 ### Development Database Configuration
