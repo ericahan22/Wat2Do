@@ -25,26 +25,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def get_post_image_url(post):
-    """
-    Safely extract image URL from Instagram post with fallback options.
-    
-    Args:
-        post: Instagram post object from instaloader
-        
-    Returns:
-        str or None: Image URL if found, None otherwise
-    """
     try:
-        # Try different methods to get image URL
-        if hasattr(post, 'url'):
-            return post.url
-        elif hasattr(post, '_node') and 'display_url' in post._node:
-            return post._node['display_url']
-        elif hasattr(post, '_node') and 'display_src' in post._node:
-            return post._node['display_src']
-        else:
-            logger.warning(f"No image URL found for post {getattr(post, 'shortcode', 'unknown')}")
-            return None
+        if "image_versions2" in post._node and post._node["image_versions2"]:
+            return post._node["image_versions2"][0]["url"]
+
+        if "carousel_media" in post._node and post._node["carousel_media"]:
+            return post._node["carousel_media"][0]["image_versions2"][0]["url"]
+
+        if "display_url" in post._node and post._node["display_url"]:
+            return post._node["display_url"]
+        return None
     except (KeyError, AttributeError) as e:
         logger.error(f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {str(e)}")
         return None
@@ -179,19 +169,6 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
 
         
         for post in L.get_feed_posts():
-            for k in post._node.keys():
-                print(k)
-            if "image_versions2" in post._node:
-                print(json.dumps(post._node["image_versions2"], indent=2))
-
-            if "carousel_media" in post._node:
-                for i, media in enumerate(post._node["carousel_media"]):
-                    print(f"carousel item {i}:")
-                    print(json.dumps(media["image_versions2"], indent=2))
-
-            if "display_url" in post._node:
-                print(json.dumps(post._node["display_url"], indent=2))
-
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
