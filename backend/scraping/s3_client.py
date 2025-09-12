@@ -14,8 +14,8 @@ class S3ImageUploader:
     def __init__(self):
         self.s3_client = None
         self.bucket_name = os.getenv('AWS_S3_BUCKET_NAME')
-        self.region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
-        
+        self.region = os.getenv('AWS_DEFAULT_REGION', 'us-east-2')
+        print(f"S3 client initialized with bucket name: {self.bucket_name} and region: {self.region}")
         try:
             self.s3_client = boto3.client(
                 's3',
