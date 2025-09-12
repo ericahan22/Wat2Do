@@ -100,22 +100,16 @@ def process_instagram_posts(max_posts=10):
     events_added = 0
 
     for i, post in enumerate(profile.get_posts()):
+        print(f"Post: {post.post}")
         if i >= max_posts:
             break
 
         print(f"\n--- Processing post {i+1} ---")
 
-        if post.caption:
-            print(f"Caption: {post.caption[:100]}...")
+        event_data = parse_caption_for_event(post.caption, post.url)
 
-            # Parse caption using AI client
-            event_data = parse_caption_for_event(post.caption)
-
-            # Update CSV if it's an event
-            if update_event_csv(event_data, club_name, post.url):
-                events_added += 1
-        else:
-            print("No caption found, skipping...")
+        if update_event_csv(event_data, club_name, post.url):
+            events_added += 1
 
     print(f"\n--- Summary ---")
     print(f"Processed {max_posts} posts")
@@ -185,6 +179,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
         s3_uploader = S3ImageUploader()  # Initialize S3 uploader
         
         for post in L.get_feed_posts():
+            print(f"Post: {post}")
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
@@ -198,41 +193,27 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                         break
                     continue # to next post
                 consec_old_posts = 0
+
                 if posts_processed >= max_posts:
                     logger.info(f"Reached max post limit of {max_posts}, stopping.")
                     break
 
-                if post.caption:
-                    # Process image first
-                    image_url = None
-                    try:
-                        # Get the image URL from the post
-                        if hasattr(post, 'url') and post.url:
-                            logger.debug(f"Attempting to upload image from post: {post.url}")
-                            image_url = s3_uploader.upload_image(post.url)
-                            if image_url:
-                                logger.info(f"Successfully uploaded image for post {post.shortcode}")
-                            else:
-                                logger.warning(f"Failed to upload image for post {post.shortcode}")
-                    except Exception as img_error:
-                        logger.warning(f"Image processing failed for post {post.shortcode}: {img_error}")
-                    
-                    # Parse caption with optional image
-                    event_data = parse_caption_for_event(post.caption, image_url)
-                    if event_data is None:
-                        logger.warning(f"AI client returned None for post {post.shortcode}")
-                        continue
-                    post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                    if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
-                        if insert_event_to_db(event_data, post.owner_username, post_url):
-                            events_added += 1
-                            logger.info(f"Successfully added event from {post.owner_username}")
-                    else:
-                        missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
-                        logger.warning(f"Missing required fields: {missing_fields}, skipping event")
+                image_url = s3_uploader.upload_image(post.url)
+                
+                event_data = parse_caption_for_event(post.caption, image_url)
+                
+                if event_data is None:
+                    logger.warning(f"AI client returned None for post {post.shortcode}")
+                    continue
+                
+                post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
+                    if insert_event_to_db(event_data, post.owner_username, post_url):
+                        events_added += 1
+                        logger.info(f"Successfully added event from {post.owner_username}")
                 else:
-                    logger.debug(f"No caption for post {post.shortcode}, skipping...")
-                    print("No caption found, skipping...")
+                    missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
+                    logger.warning(f"Missing required fields: {missing_fields}, skipping event")
                 time.sleep(5)
             except Exception as e:
                 logger.error(f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}")

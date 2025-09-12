@@ -20,7 +20,7 @@ def parse_caption_for_event(caption_text, image_url=None):
     Returns a consistent JSON format with all required fields.
     
     Args:
-        caption_text (str): Instagram caption text
+        caption_text (str or None): Instagram caption text (can be None)
         image_url (str, optional): URL to image for enhanced analysis
     """
     
