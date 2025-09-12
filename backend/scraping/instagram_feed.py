@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import csv
 from ai_client import parse_caption_for_event
+from s3_client import S3ImageUploader
 from datetime import datetime, timedelta, timezone
 import psycopg2
 import logging
@@ -146,8 +147,8 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
                 return False
             
         insert_query = """
-        INSERT INTO events (club_handle, url, name, date, start_time, end_time, location)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO events (club_handle, url, name, date, start_time, end_time, location, image_url)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT DO NOTHING;
         """
         cur.execute(insert_query, (
@@ -158,6 +159,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_data["start_time"],
             event_data["end_time"] or None,
             event_location,
+            event_data.get("image_url"),
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
@@ -180,6 +182,8 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
         events_added = 0
         posts_processed = 0
         consec_old_posts = 0
+        s3_uploader = S3ImageUploader()  # Initialize S3 uploader
+        
         for post in L.get_feed_posts():
             try:
                 posts_processed += 1
@@ -199,7 +203,22 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                     break
 
                 if post.caption:
-                    event_data = parse_caption_for_event(post.caption)
+                    # Process image first
+                    image_url = None
+                    try:
+                        # Get the image URL from the post
+                        if hasattr(post, 'url') and post.url:
+                            logger.debug(f"Attempting to upload image from post: {post.url}")
+                            image_url = s3_uploader.upload_image(post.url)
+                            if image_url:
+                                logger.info(f"Successfully uploaded image for post {post.shortcode}")
+                            else:
+                                logger.warning(f"Failed to upload image for post {post.shortcode}")
+                    except Exception as img_error:
+                        logger.warning(f"Image processing failed for post {post.shortcode}: {img_error}")
+                    
+                    # Parse caption with optional image
+                    event_data = parse_caption_for_event(post.caption, image_url)
                     if event_data is None:
                         logger.warning(f"AI client returned None for post {post.shortcode}")
                         continue

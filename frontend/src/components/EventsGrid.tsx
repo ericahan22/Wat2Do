@@ -24,6 +24,20 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
             className="hover:shadow-lg h-full overflow-hidden bg-white"
           >
             <CardHeader className="pb-3">
+              {/* Event Image */}
+              {event.image_url && (
+                <div className="mb-3 -mx-6 -mt-6">
+                  <img
+                    src={event.image_url}
+                    alt={event.name}
+                    className="w-full h-40 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
               <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {event.name}
               </CardTitle>

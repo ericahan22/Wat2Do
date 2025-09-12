@@ -20,5 +20,9 @@ openai
 fuzzywuzzy
 python-Levenshtein
 
+# AWS S3 for image storage
+boto3==1.34.0
+Pillow>=10.0.0
+
 # Development and deployment
 gunicorn==21.2.0 

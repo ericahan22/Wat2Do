@@ -14,10 +14,14 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def parse_caption_for_event(caption_text):
+def parse_caption_for_event(caption_text, image_url=None):
     """
     Parse an Instagram caption to extract event information.
     Returns a consistent JSON format with all required fields.
+    
+    Args:
+        caption_text (str): Instagram caption text
+        image_url (str, optional): URL to image for enhanced analysis
     """
     
     # Get current date and day of week for context
@@ -38,10 +42,11 @@ def parse_caption_for_event(caption_text):
         "date": string,  // date in YYYY-MM-DD format if found, empty string if not
         "start_time": string,  // start time in HH:MM format if found, empty string if not
         "end_time": string,  // end time in HH:MM format if found, empty string if not
-        "location": string,  // location of the event
+        "location": string,,  // location of the event
         "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
         "food": string,  // food information if mentioned, empty string if not
         "registration": boolean  // true if registration is required/mentioned, false otherwise
+        "image_url": string  // URL of the event image if provided, empty string if not
     }}
     
     Guidelines:
@@ -55,20 +60,47 @@ def parse_caption_for_event(caption_text):
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON object, no additional text
+    {f"- An image is provided at: {image_url}. Use visual cues from the image to enhance event extraction." if image_url else ""}
     """
     
     try:
         logger.debug(f"Parsing caption of length: {len(caption_text)}")
         logger.debug(f"Caption preview: {caption_text[:100]}...")
-        response = client.responses.create(
-            model="gpt-4o-mini",
-            instructions="You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
-            input=prompt,
-            temperature=0.1
+        
+        # Prepare messages for the API call
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested."
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt}
+                ]
+            }
+        ]
+        
+        # Add image to the message if provided
+        if image_url:
+            logger.debug(f"Including image analysis from: {image_url}")
+            messages[1]["content"].append({
+                "type": "image_url",
+                "image_url": {"url": image_url}
+            })
+            model = "gpt-4o-mini"  # Use vision-capable model
+        else:
+            model = "gpt-4o-mini"
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=0.1,
+            max_tokens=500
         )
         
         # Extract the JSON response
-        response_text = response.output_text.strip()
+        response_text = response.choices[0].message.content.strip()
         
         # Try to parse the JSON response
         try:
@@ -82,7 +114,7 @@ def parse_caption_for_event(caption_text):
             
             # Ensure all required fields are present
             required_fields = ["name", "date", "start_time", "end_time", "location", 
-                             "price", "food", "registration"]
+                             "price", "food", "registration", "image_url"]
             for field in required_fields:
                 if field not in event_data:
                     if field == "price":
@@ -91,6 +123,10 @@ def parse_caption_for_event(caption_text):
                         event_data[field] = False
                     else:
                         event_data[field] = ""
+            
+            # Set image_url if provided
+            if image_url and not event_data.get("image_url"):
+                event_data["image_url"] = image_url
             
             return event_data
             
@@ -106,7 +142,8 @@ def parse_caption_for_event(caption_text):
                 "location": "",
                 "price": None,
                 "food": "",
-                "registration": False
+                "registration": False,
+                "image_url": image_url if image_url else ""
             }
             
     except Exception as e:
@@ -122,5 +159,6 @@ def parse_caption_for_event(caption_text):
             "location": "",
             "price": None,
             "food": "",
-            "registration": False
+            "registration": False,
+            "image_url": image_url if image_url else ""
         } 
