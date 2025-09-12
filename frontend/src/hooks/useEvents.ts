@@ -12,6 +12,9 @@ export interface Event {
   end_time: string;
   location: string;
   categories?: string[];
+  price?: number | null;
+  food?: string | null;
+  registration?: boolean;
 }
 
 interface EventsResponse {

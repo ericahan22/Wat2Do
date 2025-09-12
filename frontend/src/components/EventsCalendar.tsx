@@ -16,6 +16,8 @@ import {
   Clock,
   MapPin,
   ExternalLink,
+  Utensils,
+  DollarSign,
 } from "lucide-react";
 import "../styles/calendar.css";
 import { formatTimeRange } from "@/lib/dateUtils";
@@ -42,6 +44,9 @@ interface Event {
   club_handle: string;
   url?: string;
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
+  price?: number | null;
+  food?: string | null;
+  registration?: boolean;
 }
 
 interface EventsCalendarProps {
@@ -327,6 +332,31 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
               </span>
             </div>
           )}
+
+          {selectedEvent.price && (
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <DollarSign className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {selectedEvent.price}
+              </span>
+            </div>
+          )}
+
+          {selectedEvent.food && (
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <Utensils className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate" title={selectedEvent.food}>
+                {selectedEvent.food}
+              </span>
+            </div>
+          )}
+
+          {selectedEvent.registration && (
+            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+              <span className="italic">Registration required</span>
+            </div>
+          )}
+
           {selectedEvent.url && (
             <a
               href={selectedEvent.url}

@@ -7,7 +7,10 @@ __pycache__/
 *.csv
 backend/scraping/*.csv
 backend/scraping/test*.py
+backend/testing
 
 *.log
 
 node_modules/
+
+.vscode

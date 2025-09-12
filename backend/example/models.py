@@ -31,6 +31,9 @@ class Events(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     location = models.CharField(max_length=255)
+    price = models.FloatField(blank=True, null=True)
+    food = models.CharField(max_length=255, blank=True, null=True)
+    registration = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'events'  # Remove api_ prefix
