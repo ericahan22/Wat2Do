@@ -50,6 +50,7 @@ def parse_caption_for_event(caption_text, image_url=None):
     }}
     
     Guidelines:
+    - PRIORITIZE CAPTION TEXT: Always extract information from the caption text first and use it as the primary source of truth
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
     - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
@@ -60,7 +61,7 @@ def parse_caption_for_event(caption_text, image_url=None):
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON object, no additional text
-    {f"- An image is provided at: {image_url}. Use visual cues from the image to enhance event extraction." if image_url else ""}
+    {f"- An image is provided at: {image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if image_url else ""}
     """
     
     try:
