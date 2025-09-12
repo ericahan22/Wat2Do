@@ -37,23 +37,14 @@ def health(request):
 
 @api_view(["GET"])
 def get_events(request):
-    """Get events from database with pagination and search support
-       Event categories are based on club categories"""
+    """Get all events from database (no pagination). Event categories are based on club categories"""
     try:
-        # Get pagination parameters
-        limit = min(int(request.GET.get('limit', 20)), 100)  # Default 20, max 100 events per page
-        offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term 
         category_filter = request.GET.get('category', '').strip() 
         view = request.GET.get('view', 'grid')
         
-        # Limit the maximum number of events per request 
-        
         # Build base queryset
         base_queryset = Events.objects.all().order_by('date', 'start_time')
-        
-        # TOTAL COUNT: Get count of ALL items in database (no filters)
-        total_count = base_queryset.count()
         
         # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
@@ -83,13 +74,7 @@ def get_events(request):
             )
         )
         
-        # QUERY COUNT: Get total count of items matching the filters (no pagination)
-        total_query_count = filtered_queryset.count()
-        
-        # SEPARATE DATA QUERY: Get paginated events from the filtered queryset
-        paginated_events = filtered_queryset[offset:offset + limit]
-        
-        # Convert to list of dictionaries
+        # Convert to list of dictionaries (no pagination)
         events_data = [
             {
                 'id': event.id,
@@ -103,21 +88,11 @@ def get_events(request):
                 'category': event.club_categories,
                 'club_type': event.club_type,
             }
-            for event in paginated_events
+            for event in filtered_queryset
         ]
         
-        # Check if there are more events to load
-        has_more = offset + limit < total_query_count
-        
         return Response({
-            "count": len(events_data),  # Number of events in this page response
-            "total_count": total_count,  # Total count of ALL events in database
-            "total_query_count": total_query_count,  # Total count of events matching filters
             "events": events_data,
-            "has_more": has_more,
-            "next_offset": offset + limit if has_more else None,
-            "current_offset": offset,
-            "limit": limit
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -125,19 +100,13 @@ def get_events(request):
 
 @api_view(["GET"])
 def get_clubs(request):
-    """Get clubs from database with pagination and search support"""
+    """Get all clubs from database (no pagination)"""
     try:
-        # Get pagination parameters
-        limit = min(int(request.GET.get('limit', 20)), 100)  # Default 20, max 100 clubs per page
-        offset = int(request.GET.get('offset', 0))  # Default offset 0
         search_term = request.GET.get('search', '').strip()  # Get search term
         category_filter = request.GET.get('category', '').strip()  # Get category filter
         
         # Build base queryset
         base_queryset = Clubs.objects.all()
-        
-        # TOTAL COUNT: Get count of ALL items in database (no filters)
-        total_count = base_queryset.count()
         
         # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
@@ -145,12 +114,6 @@ def get_clubs(request):
             filtered_queryset = filtered_queryset.filter(club_name__icontains=search_term)
         if category_filter and category_filter.lower() != 'all':
             filtered_queryset = filtered_queryset.filter(categories__icontains=category_filter)
-        
-        # QUERY COUNT: Get total count of items matching the filters (no pagination)
-        total_query_count = filtered_queryset.count()
-        
-        # SEPARATE DATA QUERY: Get paginated clubs from the filtered queryset
-        paginated_clubs = filtered_queryset[offset:offset + limit]
         
         # Convert to list of dictionaries
         clubs_data = [
@@ -162,21 +125,11 @@ def get_clubs(request):
                 'ig': club.ig,
                 'discord': club.discord,
             }
-            for club in paginated_clubs
+            for club in filtered_queryset
         ]
         
-        # Check if there are more clubs to load
-        has_more = offset + limit < total_query_count
-        
         return Response({
-            "count": len(clubs_data),  # Number of clubs in this page response
-            "total_count": total_count,  # Total count of ALL clubs in database
-            "total_query_count": total_query_count,  # Total count of clubs matching filters
-            "clubs": clubs_data,
-            "has_more": has_more,
-            "next_offset": offset + limit if has_more else None,
-            "current_offset": offset,
-            "limit": limit
+            "clubs": clubs_data
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
