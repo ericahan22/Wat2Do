@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, ExternalLink, Bookmark } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Bookmark, DollarSign } from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
 import {
@@ -79,6 +79,13 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                   </span>
                 </div>
               )}
+
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <DollarSign className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">
+                  {event.price === null || event.price === 0 ? "Free" : `${event.price}`}
+                </span>
+              </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">

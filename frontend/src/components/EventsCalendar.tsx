@@ -349,14 +349,12 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             </div>
           )}
 
-          {selectedEvent.price && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <DollarSign className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">
-                {selectedEvent.price}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <DollarSign className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">
+              {selectedEvent.price === null || selectedEvent.price === 0 ? "Free" : `${selectedEvent.price}`}
+            </span>
+          </div>
 
           {selectedEvent.food && (
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">

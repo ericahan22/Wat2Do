@@ -65,19 +65,14 @@ def get_events(request):
                 ).values('ig')
             )
             
-        # Only add club annotations if we have clubs
-        try:
-            # Test if we can access the clubs table first
-            clubs_exist = Clubs.objects.exists()
-            if clubs_exist:
-                filtered_queryset = filtered_queryset.annotate(
-                    club_categories=Subquery(
-                        Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
-                    )
-                )
-        except Exception:
-            # If there's any issue with clubs table, skip annotations
-            pass
+        filtered_queryset = filtered_queryset.annotate(
+            club_categories=Subquery(
+                Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
+            ),
+            club_type=Subquery(
+                Clubs.objects.filter(ig=OuterRef('club_handle')).values('club_type')[:1]
+            )
+        )
         
         # Convert to list of dictionaries (no pagination)
         events_data = [
@@ -101,7 +96,7 @@ def get_events(request):
         ]
         
         return Response({
-            "events": events_data,
+            "events": events_data,      
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
