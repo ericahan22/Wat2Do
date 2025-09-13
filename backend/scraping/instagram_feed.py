@@ -133,8 +133,10 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
                 return False
             
         insert_query = """
-        INSERT INTO events (club_handle, url, name, date, start_time, end_time, location, image_url)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO events (
+            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT DO NOTHING;
         """
         cur.execute(insert_query, (
@@ -146,6 +148,9 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_data["end_time"] or None,
             event_location,
             event_data.get("image_url"),
+            event_data.get("price", None),
+            event_data.get("food", ""),
+            bool(event_data.get("registration", False)),
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
