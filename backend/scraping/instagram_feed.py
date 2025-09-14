@@ -162,7 +162,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             conn.close()
 
 
-def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), max_posts=3, max_consec_old_posts=3):
+def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), max_posts=100, max_consec_old_posts=3):
     # Process Instagram feed posts and extract event info. Stops
     #   scraping once posts become older than cutoff.
     try:
@@ -179,11 +179,6 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                 logger.info("\n" + "-" * 50)
                 logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
                 
-                # Display post data as formatted JSON
-                import json
-                post_data = dict(post._node.items())
-                logger.info("Post data JSON:")
-                logger.info(json.dumps(post_data, indent=2, default=str))
                 post_time = post.date_utc.replace(tzinfo=timezone.utc)
                 if post_time < cutoff:
                     consec_old_posts += 1
@@ -217,7 +212,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                 if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
                     if insert_event_to_db(event_data, post.owner_username, post_url):
                         events_added += 1
-                #         logger.info(f"Successfully added event from {post.owner_username}")
+                        logger.info(f"Successfully added event from {post.owner_username}")
                 else:
                     missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
                     logger.warning(f"Missing required fields: {missing_fields}, skipping event")
