@@ -24,6 +24,12 @@ This is a full-stack web application consisting of a Django REST API backend and
     npm run dev                   
     ```
 
+   - Testing the ai_client with mock caption and mock image url:
+   ```bash
+   cd backend
+   python test_ai_client.py
+   ```
+
 ### Development Database Configuration
 - **CRITICAL**: Always set `export USE_SQLITE=1` before running Django commands for local development
 - Without this environment variable, Django will try to connect to PostgreSQL and fail
