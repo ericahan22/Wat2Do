@@ -165,7 +165,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             conn.close()
 
 
-def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), max_posts=100, max_consec_old_posts=3):
+def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), max_posts=3, max_consec_old_posts=3):
     # Process Instagram feed posts and extract event info. Stops
     #   scraping once posts become older than cutoff.
     try:
@@ -180,6 +180,8 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
+                for key,value in post._node.items():
+                    logger.info(f"{key}: {value}")
                 logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
                 post_time = post.date_utc.replace(tzinfo=timezone.utc)
                 if post_time < cutoff:
@@ -204,21 +206,21 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                     logger.warning(f"No image URL found for post {post.shortcode}, skipping image upload")
                     image_url = None
                 
-                event_data = parse_caption_for_event(post.caption, image_url)
+                # event_data = parse_caption_for_event(post.caption, image_url)
                 
-                if event_data is None:
-                    logger.warning(f"AI client returned None for post {post.shortcode}")
-                    continue
+                # if event_data is None:
+                #     logger.warning(f"AI client returned None for post {post.shortcode}")
+                #     continue
                 
                 post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
-                    if insert_event_to_db(event_data, post.owner_username, post_url):
-                        events_added += 1
-                        logger.info(f"Successfully added event from {post.owner_username}")
-                else:
-                    missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
-                    logger.warning(f"Missing required fields: {missing_fields}, skipping event")
-                time.sleep(5)
+                # if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
+                #     if insert_event_to_db(event_data, post.owner_username, post_url):
+                #         events_added += 1
+                # #         logger.info(f"Successfully added event from {post.owner_username}")
+                # else:
+                #     missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
+                #     logger.warning(f"Missing required fields: {missing_fields}, skipping event")
+                # time.sleep(5)
             except Exception as e:
                 logger.error(f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}")
                 logger.error(f"Traceback: {traceback.format_exc()}")
