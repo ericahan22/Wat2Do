@@ -11,6 +11,7 @@ export interface Event {
   start_time: string;
   end_time: string;
   location: string;
+  image_url?: string | null;
   categories?: string[];
   price?: number | null;
   food?: string | null;

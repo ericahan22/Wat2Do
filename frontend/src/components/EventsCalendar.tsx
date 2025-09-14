@@ -43,6 +43,7 @@ interface Event {
   location: string;
   club_handle: string;
   url?: string;
+  image_url?: string | null;
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
   price?: number | null;
   food?: string | null;
@@ -305,6 +306,21 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             ✕
           </button>
 
+          {/* Event Image */}
+          {selectedEvent.image_url && (
+            <div className="mb-3 -mx-4 -mt-4">
+              <img 
+                src={selectedEvent.image_url} 
+                alt={selectedEvent.name}
+                className="w-full h-40 object-cover rounded-t-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 pr-8">
             {selectedEvent.name}
           </h2>
@@ -333,14 +349,12 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             </div>
           )}
 
-          {selectedEvent.price && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <DollarSign className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">
-                {selectedEvent.price}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <DollarSign className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">
+              {selectedEvent.price === null || selectedEvent.price === 0 ? "Free" : `${selectedEvent.price}`}
+            </span>
+          </div>
 
           {selectedEvent.food && (
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">

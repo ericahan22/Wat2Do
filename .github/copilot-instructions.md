@@ -11,8 +11,8 @@ This is a full-stack web application consisting of a Django REST API backend and
   - Backend setup:
     ```bash
     cd backend
+    source .venv/bin/activate
     pip install -r requirements.txt   
-    export USE_SQLITE=1
     python manage.py migrate    
     python manage.py runserver 8000  
     ```

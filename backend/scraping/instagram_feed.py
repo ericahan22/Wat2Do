@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 import csv
 from ai_client import parse_caption_for_event
+from s3_client import S3ImageUploader
 from datetime import datetime, timedelta, timezone
 import psycopg2
 import logging
@@ -11,7 +12,7 @@ from datetime import datetime
 import sys
 from fuzzywuzzy import fuzz
 import time
-
+import json
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -22,6 +23,25 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+def get_post_image_url(post):
+    try:
+        if "image_versions2" in post._node and post._node["image_versions2"]:
+            print(json.dumps(post._node["image_versions2"], indent=2))
+            return post._node["image_versions2"]["candidates"][0]["url"]
+
+        if "carousel_media" in post._node and post._node["carousel_media"]:
+            print(json.dumps(post._node["carousel_media"], indent=2))
+            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0]["url"]
+
+        if "display_url" in post._node and post._node["display_url"]:
+            print(json.dumps(post._node["display_url"], indent=2))
+            return post._node["display_url"]
+        return None
+    except (KeyError, AttributeError) as e:
+        logger.error(f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {str(e)}")
+        return None
+
 
 def handle_instagram_errors(func):
     # Handle common Instagram errors?
@@ -88,39 +108,6 @@ def update_event_csv(event_data, club_name, url):
         print(f"Added event: {event_data.get('name')}")
         return True
 
-
-def process_instagram_posts(max_posts=10):
-    """
-    Process Instagram posts and extract event information.
-    """
-    club_name = "uw.wealthmanagement"
-
-    profile = Profile.from_username(L.context, club_name)
-    events_added = 0
-
-    for i, post in enumerate(profile.get_posts()):
-        if i >= max_posts:
-            break
-
-        print(f"\n--- Processing post {i+1} ---")
-
-        if post.caption:
-            print(f"Caption: {post.caption[:100]}...")
-
-            # Parse caption using AI client
-            event_data = parse_caption_for_event(post.caption)
-
-            # Update CSV if it's an event
-            if update_event_csv(event_data, club_name, post.url):
-                events_added += 1
-        else:
-            print("No caption found, skipping...")
-
-    print(f"\n--- Summary ---")
-    print(f"Processed {max_posts} posts")
-    print(f"Added {events_added} events to CSV")
-
-
 def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
     # Check if an event already exists in db and insert it if not
     event_name = event_data.get("name") #.title()
@@ -147,9 +134,9 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             
         insert_query = """
         INSERT INTO events (
-            club_handle, url, name, date, start_time, end_time, location, price, food, registration
+            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT DO NOTHING;
         """
         cur.execute(insert_query, (
@@ -160,6 +147,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_data["start_time"],
             event_data["end_time"] or None,
             event_location,
+            event_data.get("image_url"),
             event_data.get("price", None),
             event_data.get("food", ""),
             bool(event_data.get("registration", False)),
@@ -185,6 +173,9 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
         events_added = 0
         posts_processed = 0
         consec_old_posts = 0
+        s3_uploader = S3ImageUploader()  # Initialize S3 uploader
+
+        
         for post in L.get_feed_posts():
             try:
                 posts_processed += 1
@@ -199,26 +190,34 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                         break
                     continue # to next post
                 consec_old_posts = 0
+
                 if posts_processed >= max_posts:
                     logger.info(f"Reached max post limit of {max_posts}, stopping.")
                     break
 
-                if post.caption:
-                    event_data = parse_caption_for_event(post.caption)
-                    if event_data is None:
-                        logger.warning(f"AI client returned None for post {post.shortcode}")
-                        continue
-                    post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                    if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
-                        if insert_event_to_db(event_data, post.owner_username, post_url):
-                            events_added += 1
-                            logger.info(f"Successfully added event from {post.owner_username}")
-                    else:
-                        missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
-                        logger.warning(f"Missing required fields: {missing_fields}, skipping event")
+                # Safely get image URL and upload to S3
+                raw_image_url = get_post_image_url(post)
+                if raw_image_url:
+                    image_url = s3_uploader.upload_image(raw_image_url)
+                    print(f"Uploaded image to S3: {image_url}")
                 else:
-                    logger.debug(f"No caption for post {post.shortcode}, skipping...")
-                    print("No caption found, skipping...")
+                    logger.warning(f"No image URL found for post {post.shortcode}, skipping image upload")
+                    image_url = None
+                
+                event_data = parse_caption_for_event(post.caption, image_url)
+                
+                if event_data is None:
+                    logger.warning(f"AI client returned None for post {post.shortcode}")
+                    continue
+                
+                post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                if event_data.get("name") and event_data.get("date") and event_data.get("location") and event_data.get("start_time"):
+                    if insert_event_to_db(event_data, post.owner_username, post_url):
+                        events_added += 1
+                        logger.info(f"Successfully added event from {post.owner_username}")
+                else:
+                    missing_fields = [key for key in ['name', 'date', 'location', 'start_time'] if not event_data.get(key)]
+                    logger.warning(f"Missing required fields: {missing_fields}, skipping event")
                 time.sleep(5)
             except Exception as e:
                 logger.error(f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}")
@@ -257,6 +256,5 @@ def session():
 
 
 if __name__ == "__main__":
-    # process_instagram_posts(max_posts=10)
     L = session()
     process_recent_feed()

@@ -90,12 +90,13 @@ def get_events(request):
                 'price': event.price,
                 'food': event.food,
                 'registration': event.registration,
+                'image_url': event.image_url,
             }
             for event in filtered_queryset
         ]
         
         return Response({
-            "events": events_data,
+            "events": events_data,      
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -127,6 +128,7 @@ def get_clubs(request):
                 'club_page': club.club_page,
                 'ig': club.ig,
                 'discord': club.discord,
+                'club_type': club.club_type,
             }
             for club in filtered_queryset
         ]

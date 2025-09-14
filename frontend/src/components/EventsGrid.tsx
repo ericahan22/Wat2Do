@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, ExternalLink, Bookmark } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Bookmark, DollarSign } from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
 import {
@@ -24,6 +24,20 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
             className="hover:shadow-lg h-full overflow-hidden bg-white"
           >
             <CardHeader className="pb-3">
+              {/* Event Image */}
+              {event.image_url && (
+                <div className="mb-3 -mx-6 -mt-6">
+                  <img
+                    src={event.image_url}
+                    alt={event.name}
+                    className="w-full h-40 object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
               <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {event.name}
               </CardTitle>
@@ -65,6 +79,13 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                   </span>
                 </div>
               )}
+
+              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <DollarSign className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">
+                  {event.price === null || event.price === 0 ? "Free" : `${event.price}`}
+                </span>
+              </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">

@@ -6,9 +6,13 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
+*.egg-info/
+dist/
+build/
 
 # Django
 *.log
@@ -39,5 +43,21 @@ Thumbs.db
 Dockerfile
 docker-compose.yml
 
-# Wheels directory (will be installed during build)
-<!-- wheels/ -->
+# Development and testing
+*.pytest_cache/
+.coverage
+.tox/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Large binary dependencies (will be installed during build)
+# wheels/ - Comment out to include during build
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# macOS
+*.DS_Store

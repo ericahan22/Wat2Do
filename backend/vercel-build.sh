@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies with size optimization
+pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
+
+# Clean up pip cache to reduce size
+pip cache purge || true
 
 # Collect static files (even though we're not serving UI, Django needs this)
 python manage.py collectstatic --noinput

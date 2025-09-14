@@ -34,6 +34,7 @@ class Events(models.Model):
     price = models.FloatField(blank=True, null=True)
     food = models.CharField(max_length=255, blank=True, null=True)
     registration = models.BooleanField(default=False)
+    image_url = models.URLField(blank=True, null=True)
 
     class Meta:
         db_table = 'events'  # Remove api_ prefix
