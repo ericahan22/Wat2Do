@@ -27,15 +27,12 @@ logger = logging.getLogger(__name__)
 def get_post_image_url(post):
     try:
         if "image_versions2" in post._node and post._node["image_versions2"]:
-            print(json.dumps(post._node["image_versions2"], indent=2))
             return post._node["image_versions2"]["candidates"][0]["url"]
 
         if "carousel_media" in post._node and post._node["carousel_media"]:
-            print(json.dumps(post._node["carousel_media"], indent=2))
             return post._node["carousel_media"][0]["image_versions2"]["candidates"][0]["url"]
 
         if "display_url" in post._node and post._node["display_url"]:
-            print(json.dumps(post._node["display_url"], indent=2))
             return post._node["display_url"]
         return None
     except (KeyError, AttributeError) as e:
@@ -181,6 +178,7 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
                 logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
+                
                 post_time = post.date_utc.replace(tzinfo=timezone.utc)
                 if post_time < cutoff:
                     consec_old_posts += 1
