@@ -180,9 +180,13 @@ def process_recent_feed(cutoff=datetime.now(timezone.utc) - timedelta(days=2), m
             try:
                 posts_processed += 1
                 logger.info("\n" + "-" * 50)
-                for key,value in post._node.items():
-                    logger.info(f"{key}: {value}")
                 logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
+                
+                # Display post data as formatted JSON
+                import json
+                post_data = dict(post._node.items())
+                logger.info("Post data JSON:")
+                logger.info(json.dumps(post_data, indent=2, default=str))
                 post_time = post.date_utc.replace(tzinfo=timezone.utc)
                 if post_time < cutoff:
                     consec_old_posts += 1
