@@ -146,7 +146,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_location,
             event_data.get("image_url"),
             event_data.get("price", None),
-            event_data.get("food", ""),
+            event_data.get("food") or "",
             bool(event_data.get("registration", False)),
         ))
         conn.commit()
