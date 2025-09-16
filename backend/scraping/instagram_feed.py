@@ -70,40 +70,31 @@ MID = os.getenv("MID")
 IG_DID = os.getenv("IG_DID")
 
 
-def update_event_csv(event_data, club_name, url):
-    """
-    Update the event_info.csv file with new event data. 
-    """
-    csv_file = "event_info.csv" 
-
-    required_fields = ["name", "date", "start_time", "location"]
-
-    for field in required_fields:
-        if not event_data.get(field, "").strip():
-            print(f"Event missing required field: {field}, skipping...")
-            return False
-
-    event_data["club_name"] = club_name
-    event_data["url"] = url
-    # Append the event data
+def append_event_to_csv(event_data, club_ig, post_url):
+    csv_file = "events_scraped.csv"
+    file_exists = os.path.isfile(csv_file)
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
-            "club_name",
-            "url",
-            "name",
-            "date",
-            "start_time",
-            "end_time",
-            "location",
+            "club_handle", "url", "name", "date", "start_time", "end_time",
+            "location", "price", "food", "registration", "image_url"
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow({
+            "club_handle": club_ig,
+            "url": post_url,
+            "name": event_data.get("name", ""),
+            "date": event_data.get("date", ""),
+            "start_time": event_data.get("start_time", ""),
+            "end_time": event_data.get("end_time", ""),
+            "location": event_data.get("location", ""),
+            "price": event_data.get("price", ""),
+            "food": event_data.get("food", ""),
+            "registration": event_data.get("registration", False),
+            "image_url": event_data.get("image_url", ""),
+        })
 
-        # Write the event data
-        event_row = {k: v for k, v in event_data.items()}
-        writer.writerow(event_row)
-
-        print(f"Added event: {event_data.get('name')}")
-        return True
 
 def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
     # Check if an event already exists in db and insert it if not
@@ -151,6 +142,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
+        append_event_to_csv(event_data, club_ig, post_url)
         return True
     except Exception as e:
         logger.error(f"Database error: {str(e)}")
