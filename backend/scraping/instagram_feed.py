@@ -12,7 +12,6 @@ from datetime import datetime
 import sys
 from fuzzywuzzy import fuzz
 import time
-import json
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -71,7 +70,7 @@ IG_DID = os.getenv("IG_DID")
 
 
 def append_event_to_csv(event_data, club_ig, post_url):
-    csv_file = "events_scraped.csv"
+    csv_file = "backend/scraping/events_scraped.csv"
     file_exists = os.path.isfile(csv_file)
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
