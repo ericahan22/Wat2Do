@@ -69,13 +69,13 @@ MID = os.getenv("MID")
 IG_DID = os.getenv("IG_DID")
 
 
-def append_event_to_csv(event_data, club_ig, post_url):
+def append_event_to_csv(event_data, club_ig, post_url, status="success"):
     csv_file = "backend/scraping/events_scraped.csv"
     file_exists = os.path.isfile(csv_file)
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
             "club_handle", "url", "name", "date", "start_time", "end_time",
-            "location", "price", "food", "registration", "image_url"
+            "location", "price", "food", "registration", "image_url", "status"
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if not file_exists:
@@ -92,6 +92,7 @@ def append_event_to_csv(event_data, club_ig, post_url):
             "food": event_data.get("food", ""),
             "registration": event_data.get("registration", False),
             "image_url": event_data.get("image_url", ""),
+            "status": status,
         })
 
 
@@ -134,19 +135,20 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_data["start_time"],
             event_data["end_time"] or None,
             event_location,
-            event_data.get("image_url"),
             event_data.get("price", None),
             event_data.get("food") or "",
             bool(event_data.get("registration", False)),
+            event_data.get("image_url"),
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
-        append_event_to_csv(event_data, club_ig, post_url)
+        append_event_to_csv(event_data, club_ig, post_url, status="success")
         return True
     except Exception as e:
         logger.error(f"Database error: {str(e)}")
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
+        append_event_to_csv(event_data, club_ig, post_url, status="failed")
         return False
     finally:
         if conn:
