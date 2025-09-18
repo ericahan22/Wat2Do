@@ -20,7 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import "../styles/calendar.css";
-import { formatTimeRange } from "@/lib/dateUtils";
+import { formatPrettyDate, formatTimeRange } from "@/lib/dateUtils";
 
 const locales = {
   "en-US": enUS,
@@ -330,7 +330,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
             <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-            <span>{format(new Date(selectedEvent.date), "MMMM dd, yyyy")}</span>
+            <span>{formatPrettyDate(selectedEvent.date)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
             <Clock className="h-4 w-4 flex-shrink-0" />
