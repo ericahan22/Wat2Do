@@ -71,6 +71,7 @@ IG_DID = os.getenv("IG_DID")
 
 def append_event_to_csv(event_data, club_ig, post_url, status="success"):
     csv_file = "backend/scraping/events_scraped.csv"
+    os.makedirs(os.path.dirname(csv_file), exist_ok=True)
     file_exists = os.path.isfile(csv_file)
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
@@ -142,13 +143,26 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
-        append_event_to_csv(event_data, club_ig, post_url, status="success")
+        
+        try:
+            append_event_to_csv(event_data, club_ig, post_url, status="success")
+        except Exception as csv_err:
+            logger.error(f"Database insert succeeded, but failed to append to CSV: {csv_err}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return False
+        
         return True
     except Exception as e:
         logger.error(f"Database error: {str(e)}")
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
-        append_event_to_csv(event_data, club_ig, post_url, status="failed")
+        
+        try:
+            append_event_to_csv(event_data, club_ig, post_url, status="failed")
+        except Exception as csv_err:
+            logger.error(f"Database insert failed, and failed to append to CSV: {csv_err}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            
         return False
     finally:
         if conn:
