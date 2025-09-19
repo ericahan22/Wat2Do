@@ -2,7 +2,7 @@ name: Scrape Instagram and Store Events
 
 on:
   schedule:
-    - cron: '0 7 * * *'   # Once per day at 07:00 UTC
+    - cron: '0 12 * * *'  # Once per day at 12:00 UTC (7:00am EST)
   workflow_dispatch:      # Optional manual trigger
 
 jobs:
