@@ -62,9 +62,16 @@ my_project/
 
 ## Setup Instructions
 
+### Frontend (React)
+```bash
+cd frontend
+npm run dev
+```
+
 ### Backend (Django)
 ```bash
 cd backend
+source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
@@ -94,4 +101,15 @@ docker run -p 8000:8000 instagram-scraper-api
 - CSV files are now located in `/backend/scripts/`
 - API endpoints are prefixed with `/api/`
 - CORS is enabled for frontend integration
-- Database is SQLite (can be changed to PostgreSQL for production) 
+- Database is SQLite (can be changed to PostgreSQL for production)
+
+## API Commands
+
+| Goal/Description | cURL Command |
+|------------------|--------------|
+| Get API info | `curl http://localhost:8000/api/` |
+| Health check | `curl http://localhost:8000/api/health/` |
+| Get all events | `curl http://localhost:8000/api/events/` |
+| Get all clubs | `curl http://localhost:8000/api/clubs/` |
+| Create mock event | `curl -X POST http://localhost:8000/api/mock-event/ -H "Content-Type: application/json" -d '{"name": "Test Event", "location": "Test Location", "food": "Pizza"}'` |
+| Find similar events | `curl "http://localhost:8000/api/test-similarity/?text=Your%20Search%20Text"` | 

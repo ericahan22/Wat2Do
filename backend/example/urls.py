@@ -10,4 +10,8 @@ urlpatterns = [
     path("health/", views.health, name="health"),
     path("events/", views.get_events, name="events"),
     path("clubs/", views.get_clubs, name="clubs"),
+
+    # test endpoints
+    path("mock-event/", views.create_mock_event, name="create_mock_event"),
+    path("test-similarity/", views.test_similarity, name="test_similarity"),
 ]

@@ -34,7 +34,7 @@ function EventsPage() {
           Events
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Discover and explore upcoming events
+          Discover and explore upcoming events. Updates everyday at 7am EST.
         </p>
       </div>
 

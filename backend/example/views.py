@@ -9,8 +9,10 @@ from .models import Clubs, Events
 from django.core.serializers import serialize
 import json
 from django.db.models import Subquery, OuterRef 
-from datetime import datetime
-from pytz import timezone 
+from datetime import datetime, date, time
+from pytz import timezone
+from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events
+from django.db import connection 
 
 
 @api_view(["GET"])
@@ -18,12 +20,14 @@ def home(request):
     """Home endpoint with basic info"""
     return Response(
         {
-            "message": "Instagram Event Scraper API",
+            "message": "Instagram Event Scraper API with Vector Similarity",
             "endpoints": {
                 "GET /api/events/?view=grid": "Get events in grid view",
                 "GET /api/events/?view=calendar": "Get events in calendar view",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
+                "POST /api/mock-event/": "Create a mock event with vector embedding",
+                "GET /api/test-similarity/?text=search_text": "Test vector similarity search",
             },
         }
     )
@@ -138,3 +142,100 @@ def get_clubs(request):
         })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+def create_mock_event(request):
+    """Create a mock event with vector embedding for testing"""
+    try:
+        # Get event data from request or use defaults
+        event_data = {
+            'name': request.data.get('name', 'Test Event'),
+            'location': request.data.get('location', 'Test Location'),
+            'food': request.data.get('food', 'Pizza and drinks'),
+            'club_handle': request.data.get('club_handle', 'test_club'),
+        }
+        
+        # Check if this would be a duplicate
+        embedding = generate_event_embedding(event_data)
+        similar_events = find_similar_events(embedding)
+        
+        if similar_events:
+            return Response({
+                "message": "Duplicate event detected! A similar event already exists.",
+                "event_data": event_data,
+                "similar_event": similar_events[0]
+            }, status=status.HTTP_409_CONFLICT)
+        
+        # Create the event using raw SQL to handle the vector column
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO events (
+                    club_handle, url, name, date, start_time, end_time, 
+                    location, price, food, registration, image_url, embedding
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector)
+                RETURNING id
+            """, [
+                event_data['club_handle'],
+                request.data.get('url', 'https://example.com'),
+                event_data['name'],
+                request.data.get('date', date.today()),
+                request.data.get('start_time', time(18, 0)),  # 6 PM
+                request.data.get('end_time', time(20, 0)),   # 8 PM
+                event_data['location'],
+                request.data.get('price', 10.0),
+                event_data['food'],
+                request.data.get('registration', False),
+                request.data.get('image_url', 'https://example.com/image.jpg'),
+                embedding,
+            ])
+            
+            event_id = cursor.fetchone()[0]
+        
+        return Response({
+            "message": "Mock event created successfully!",
+            "event_id": event_id,
+            "event_data": event_data,
+            "embedding_generated": True
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response({
+            "error": f"Failed to create mock event: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+def test_similarity(request):
+    """Test vector similarity search"""
+    try:
+        search_text = request.GET.get('text', 'Test Event at Test Location')
+        
+        # Generate embedding for search text
+        search_embedding = generate_event_embedding({
+            'name': search_text,
+            'location': 'Test Location',
+            'food': '',
+            'club_handle': 'test_club'
+        })
+
+        similar_events = find_similar_events(search_embedding)
+        
+        results = []
+        for event in similar_events:
+            results.append({
+                'id': event['id'],
+                'name': event['name'],
+                'location': event['location'],
+                'similarity': float(event['similarity'])
+            })
+        
+        return Response({
+            "search_text": search_text,
+            "similar_events": results
+        })
+        
+    except Exception as e:
+        return Response({
+            "error": f"Failed to test similarity: {str(e)}"
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
