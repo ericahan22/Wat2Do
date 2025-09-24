@@ -11,7 +11,7 @@ import json
 from django.db.models import Subquery, OuterRef 
 from datetime import datetime, date, time
 from pytz import timezone
-from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events
+from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events, get_embedding
 from django.db import connection 
 
 
@@ -61,7 +61,16 @@ def get_events(request):
             filtered_queryset = filtered_queryset.filter(date__gte=today)
         
         if search_term:
-            filtered_queryset = filtered_queryset.filter(name__icontains=search_term)
+            search_embedding = get_embedding(search_term)
+            similar_events = find_similar_events(
+                embedding=search_embedding, 
+                threshold=0.25
+            )
+            if similar_events:
+                similar_event_ids = [event['id'] for event in similar_events]
+                filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
+            else:
+                filtered_queryset = filtered_queryset.none()
         if category_filter and category_filter.lower() != 'all':
             filtered_queryset = filtered_queryset.filter(
                 club_handle__in=Clubs.objects.filter(
@@ -158,7 +167,7 @@ def create_mock_event(request):
         
         # Check if this would be a duplicate
         embedding = generate_event_embedding(event_data)
-        similar_events = find_similar_events(embedding)
+        similar_events = find_similar_events(embedding, limit=1)
         
         if similar_events:
             return Response({
@@ -210,25 +219,27 @@ def test_similarity(request):
     """Test vector similarity search"""
     try:
         search_text = request.GET.get('text', 'Test Event at Test Location')
-        
         # Generate embedding for search text
-        search_embedding = generate_event_embedding({
-            'name': search_text,
-            'location': 'Test Location',
-            'food': '',
-            'club_handle': 'test_club'
-        })
+        search_embedding = generate_event_embedding(search_text)
 
-        similar_events = find_similar_events(search_embedding)
+        similar_events = find_similar_events(search_embedding, threshold=0.38)
         
         results = []
-        for event in similar_events:
-            results.append({
-                'id': event['id'],
-                'name': event['name'],
-                'location': event['location'],
-                'similarity': float(event['similarity'])
-            })
+        if similar_events:
+            # Get the actual event details
+            event_ids = [event['id'] for event in similar_events]
+            events = Events.objects.filter(id__in=event_ids)
+            # Create a mapping for quick lookup
+            events_dict = {event.id: event for event in events}
+            
+            for similar_event in similar_events:
+                event = events_dict.get(similar_event['id'])
+                if event:
+                    results.append({
+                        'id': event.id,
+                        'name': event.name,
+                        'similarity': similar_event['similarity']
+                    })
         
         return Response({
             "search_text": search_text,
