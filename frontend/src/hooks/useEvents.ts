@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { staticEventsData } from "@/data/staticEvents";
 
 export interface Event {
-  id: number;
+  id: string;
   club_handle: string;
   url: string;
   name: string;
@@ -16,6 +17,7 @@ export interface Event {
   price: number | null;
   food: string | null;
   registration: boolean;
+  club_type?: "WUSA" | "Athletics" | "Student Society" | null;
 }
 
 interface EventsResponse {
@@ -55,10 +57,13 @@ export function useEvents(view: "grid" | "calendar") {
   const searchTerm = searchParams.get("search") || "";
   const categoryFilter = searchParams.get("category") || "all";
 
+  const hasActiveFilters = searchTerm !== "" || categoryFilter !== "all";
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["events", searchTerm, categoryFilter, view],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
+    enabled: hasActiveFilters,
   });
 
   const uniqueCategories = useMemo(() => {
@@ -78,10 +83,13 @@ export function useEvents(view: "grid" | "calendar") {
     ];
   }, []);
 
+  // Use static data when no filters, API data when filters are active
+  const events = hasActiveFilters ? data?.events || [] : staticEventsData;
+
   return {
-    data: data?.events || [],
+    data: events,
     uniqueCategories,
-    isLoading,
-    error,
+    isLoading: hasActiveFilters ? isLoading : false,
+    error: hasActiveFilters ? error : null,
   };
 }

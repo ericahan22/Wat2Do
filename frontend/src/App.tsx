@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import { useTheme } from './hooks/useTheme'
+import { useTheme } from '@/hooks/useTheme'
 import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import EventsPage from './pages/EventsPage'
-import ClubsPage from './pages/ClubsPage'
+import EventsPage from '@/pages/EventsPage'
+import ClubsPage from '@/pages/ClubsPage'
 
 function Navigation() {
   const location = useLocation()

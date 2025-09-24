@@ -14,7 +14,7 @@ export const formatPrettyDate = (dateString: string): string => {
     const tz = "America/New_York";
     const date = toZonedTime(dateString, tz);
     return format(date, "MMMM d, yyyy");
-  } catch (error) {
+  } catch {
     return dateString // Return original string if parsing fails
   }
 }
@@ -39,7 +39,7 @@ export const formatPrettyTime = (timeString: string): string => {
       minute: date.getMinutes() === 0 ? undefined : '2-digit',
       hour12: true
     }).toLowerCase()
-  } catch (error) {
+  } catch {
     return timeString // Return original string if parsing fails
   }
 }

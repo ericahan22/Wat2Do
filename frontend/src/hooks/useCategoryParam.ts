@@ -16,7 +16,7 @@ export const useCategoryParam = () => {
         return nextParams;
       });
     },
-    [setCategoryParam]
+    [setCategoryParam, setCategoryParams]
   );
 
   return { categoryParam, setCategoryParam: handleCategoryParamChange };

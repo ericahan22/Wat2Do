@@ -4,7 +4,7 @@ import {
   dateFnsLocalizer,
   NavigateAction,
   View,
-  ToolbarProps
+  ToolbarProps,
 } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -21,6 +21,10 @@ import {
 } from "lucide-react";
 import "../styles/calendar.css";
 import { formatPrettyDate, formatTimeRange } from "@/lib/dateUtils";
+import { getClubTypeColor } from "@/lib/clubTypeColors";
+import { Event } from "@/hooks";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IconButton } from "@/components/ui/icon-button";
 
 const locales = {
   "en-US": enUS,
@@ -34,25 +38,30 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-interface Event {
-  id: string;
-  name: string;
-  date: string;
-  start_time: string;
-  end_time: string;
-  location: string;
-  club_handle: string;
-  url?: string;
-  image_url?: string | null;
-  club_type?: "WUSA" | "Athletics" | "Student Society" | null;
-  price?: number | null;
-  food?: string | null;
-  registration?: boolean;
-}
+// Function to abbreviate month names in the label
+const abbreviateLabel = (label: string): string => {
+  const monthAbbreviations: Record<string, string> = {
+    'January': 'Jan',
+    'February': 'Feb',
+    'March': 'Mar',
+    'April': 'Apr',
+    'May': 'May',
+    'June': 'Jun',
+    'July': 'Jul',
+    'August': 'Aug',
+    'September': 'Sep',
+    'October': 'Oct',
+    'November': 'Nov',
+    'December': 'Dec'
+  };
 
-interface EventsCalendarProps {
-  events: Event[];
-}
+  let abbreviatedLabel = label;
+  Object.entries(monthAbbreviations).forEach(([full, abbrev]) => {
+    abbreviatedLabel = abbreviatedLabel.replace(full, abbrev);
+  });
+  
+  return abbreviatedLabel;
+};
 
 // Custom toolbar for < and > month buttons
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,73 +71,46 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
   onView,
   view,
 }) => {
-  const centerWidth = view === "week" ? 350 : 260;
+  const centerWidth = view === "month" ? 200 : 260;
 
   return (
-    <div className="relative mb-4 flex items-center justify-between">
-      {/* Today button */}
-      <button
-        onMouseDown={() => onNavigate("TODAY")}
-        className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-        aria-label="Today"
-      >
-        Today
-      </button>
-
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-between"
-           style={{ width: centerWidth }}>
+    <div className="relative mb-4 flex items-center justify-between gap-12">
+      <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4">
         {/* Back button < */}
-        <button
+        <IconButton
           onMouseDown={() => onNavigate("PREV")}
-          className="text-gray-800 dark:text-gray-200"
+          icon={ChevronLeft}
           aria-label="Previous Month"
-          style={{ padding: "4px 8px" }}
-        >
-          <ChevronLeft className="h-6 w-6" />
-        </button>
+        />
 
         {/* Month Year title */}
         <h2 className="text-lg whitespace-nowrap font-bold text-gray-900 dark:text-white">
-          {label}
+          {abbreviateLabel(label)}
         </h2>
 
         {/* Next button > */}
-        <button
+        <IconButton
           onMouseDown={() => onNavigate("NEXT")}
-          className="text-gray-800 dark:text-gray-200"
+          icon={ChevronRight}
           aria-label="Next Month"
-          style={{ padding: "4px 8px" }}
-        >
-          <ChevronRight className="h-6 w-6" />
-        </button>
+        />
       </div>
-      
-      {/* View buttons (Month/Week/Day) */}
-      <div className="flex items-center gap-2">
-        <button
-          onMouseDown={() => onView("month")}
-          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-        >
-          Month
-        </button>
-        <button
-          onMouseDown={() => onView("week")}
-          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-        >
-          Week
-        </button>
-        <button
-          onMouseDown={() => onView("day")}
-          className="rbc-btn px-4 py-1 text-sm font-medium text-gray-800 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-        >
-          Day
-        </button>
+
+      {/* View tabs (Month/Week/Day) - positioned to the right */}
+      <div className="ml-auto">
+        <Tabs value={view} onValueChange={(value) => onView(value as View)}>
+          <TabsList>
+            <TabsTrigger value="month">Month</TabsTrigger>
+            <TabsTrigger value="week">Week</TabsTrigger>
+            <TabsTrigger value="day">Day</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
     </div>
   );
 };
 
-const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
+const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<View>("month");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -154,14 +136,7 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
   // Custom styles for events based on club_type
   const eventPropGetter = (event: typeof calendarEvents[number]) => {
-    let backgroundColor = "#3a7bd5";
-    if (event.club_type === "WUSA") {
-      backgroundColor = "#4b9b6a";
-    } else if (event.club_type === "Athletics") {
-      backgroundColor = "#d9924a";
-    } else if (event.club_type === "Student Society") {
-      backgroundColor = "#d16c6c";
-    }
+    const backgroundColor = getClubTypeColor(event.club_type);
     return {
       style: {
         backgroundColor,
@@ -193,13 +168,13 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
 
     const popupWidth = 320;
     const popupHeight = 200;
-    
+
     // Calculate all possible positions relative to event
     const positions = {
       right: { x: rect.right + 10, y: rect.top },
       left: { x: rect.left - popupWidth - 10, y: rect.top },
       bottom: { x: rect.left, y: rect.bottom + 10 },
-      top: { x: rect.left, y: rect.top - popupHeight - 10 }
+      top: { x: rect.left, y: rect.top - popupHeight - 10 },
     };
 
     // Score each position based on how well it fits
@@ -216,12 +191,14 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
       // Check if popup fits in container
       const containerX = pos.x - containerRect.left;
       const containerY = pos.y - containerRect.top;
-      if (containerX >= 0 && containerX + popupWidth <= containerRect.width) score += 5;
-      if (containerY >= 0 && containerY + popupHeight <= containerRect.height) score += 5;
+      if (containerX >= 0 && containerX + popupWidth <= containerRect.width)
+        score += 5;
+      if (containerY >= 0 && containerY + popupHeight <= containerRect.height)
+        score += 5;
 
       // Prefer right and bottom positions for better UX
-      if (name === 'right') score += 2;
-      if (name === 'bottom') score += 1;
+      if (name === "right") score += 2;
+      if (name === "bottom") score += 1;
 
       if (score > bestScore) {
         bestScore = score;
@@ -234,13 +211,13 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
     if (bestPosition && bestScore > 0) {
       finalPosition = {
         x: bestPosition.x - containerRect.left,
-        y: bestPosition.y - containerRect.top
+        y: bestPosition.y - containerRect.top,
       };
     } else {
       // Fallback to center if no good position found
       finalPosition = {
         x: Math.max(0, (containerRect.width - popupWidth) / 2),
-        y: Math.max(0, (containerRect.height - popupHeight) / 2)
+        y: Math.max(0, (containerRect.height - popupHeight) / 2),
       };
     }
 
@@ -309,13 +286,13 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
           {/* Event Image */}
           {selectedEvent.image_url && (
             <div className="mb-3 -mx-4 -mt-4">
-              <img 
-                src={selectedEvent.image_url} 
+              <img
+                src={selectedEvent.image_url}
                 alt={selectedEvent.name}
                 className="w-full h-40 object-cover rounded-t-lg"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
+                  target.style.display = "none";
                 }}
               />
             </div>
@@ -336,7 +313,10 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
             <Clock className="h-4 w-4 flex-shrink-0" />
             <span>
               {selectedEvent.end_time
-                ? formatTimeRange(selectedEvent.start_time, selectedEvent.end_time)
+                ? formatTimeRange(
+                    selectedEvent.start_time,
+                    selectedEvent.end_time
+                  )
                 : formatTimeRange(selectedEvent.start_time, null)}
             </span>
           </div>
@@ -352,7 +332,9 @@ const EventsCalendar: React.FC<EventsCalendarProps> = ({ events }) => {
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
             <DollarSign className="h-4 w-4 flex-shrink-0" />
             <span className="truncate">
-              {selectedEvent.price === null || selectedEvent.price === 0 ? "Free" : `${selectedEvent.price}`}
+              {selectedEvent.price === null || selectedEvent.price === 0
+                ? "Free"
+                : `${selectedEvent.price}`}
             </span>
           </div>
 

@@ -11,6 +11,7 @@ import { useEvents } from "@/hooks";
 import { useCategoryParam } from "@/hooks/useCategoryParam";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
+import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
 
 
@@ -34,7 +35,7 @@ function EventsPage() {
           Events
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Discover and explore upcoming events. Updates everyday at 7am EST.
+          Discover and explore upcoming events. Updates daily at 7am EST.
         </p>
       </div>
 
@@ -122,12 +123,12 @@ function EventsPage() {
           {view === "grid" ? (
             <EventsGrid data={data} />
           ) : (
-            <EventsCalendar
-              events={data.map((event) => ({
-                ...event,
-                id: String(event.id),
-              }))}
-            />
+            <>
+              <EventsCalendar
+                events={data}
+              />
+              <EventLegend />
+            </>
           )}
         </>
       )}
