@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import {
   Calendar,
   dateFnsLocalizer,
-  NavigateAction,
   View,
   ToolbarProps,
 } from "react-big-calendar";
@@ -41,27 +40,126 @@ const localizer = dateFnsLocalizer({
 // Function to abbreviate month names in the label
 const abbreviateLabel = (label: string): string => {
   const monthAbbreviations: Record<string, string> = {
-    'January': 'Jan',
-    'February': 'Feb',
-    'March': 'Mar',
-    'April': 'Apr',
-    'May': 'May',
-    'June': 'Jun',
-    'July': 'Jul',
-    'August': 'Aug',
-    'September': 'Sep',
-    'October': 'Oct',
-    'November': 'Nov',
-    'December': 'Dec'
+    January: "Jan",
+    February: "Feb",
+    March: "Mar",
+    April: "Apr",
+    May: "May",
+    June: "Jun",
+    July: "Jul",
+    August: "Aug",
+    September: "Sep",
+    October: "Oct",
+    November: "Nov",
+    December: "Dec",
   };
 
   let abbreviatedLabel = label;
   Object.entries(monthAbbreviations).forEach(([full, abbrev]) => {
     abbreviatedLabel = abbreviatedLabel.replace(full, abbrev);
   });
-  
+
   return abbreviatedLabel;
 };
+
+// Event popup component
+const EventPopup: React.FC<{
+  event: Event & { start: Date; end: Date; title: string };
+  onClose: () => void;
+  style: React.CSSProperties;
+}> = ({ event, onClose, style }) => (
+  <div
+    className="event-popup absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-80 z-50 border border-gray-200 dark:border-gray-700"
+    style={style}
+    onClick={(e) => e.stopPropagation()}
+  >
+    <button
+      onClick={onClose}
+      className="absolute top-2 right-2 text-gray-800 dark:text-gray-300 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
+    >
+      ✕
+    </button>
+
+    {event.image_url && (
+      <div className="mb-3 -mx-4 -mt-4">
+        <img
+          src={event.image_url}
+          alt={event.name}
+          className="w-full h-40 object-cover rounded-t-lg"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = "none";
+          }}
+        />
+      </div>
+    )}
+
+    <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 pr-8">
+      {event.name}
+    </h2>
+    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+      @{event.club_handle}
+    </p>
+
+    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex items-center gap-2">
+        <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+        <span>{formatPrettyDate(event.date)}</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <Clock className="h-4 w-4 flex-shrink-0" />
+        <span>
+          {event.end_time
+            ? formatTimeRange(event.start_time, event.end_time)
+            : formatTimeRange(event.start_time, null)}
+        </span>
+      </div>
+      
+      {event.location && (
+        <div className="flex items-center gap-2">
+          <MapPin className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate" title={event.location}>
+            {event.location}
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <DollarSign className="h-4 w-4 flex-shrink-0" />
+        <span>
+          {event.price === null || event.price === 0 ? "Free" : `$${event.price}`}
+        </span>
+      </div>
+
+      {event.food && (
+        <div className="flex items-center gap-2">
+          <Utensils className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate" title={event.food}>
+            {event.food}
+          </span>
+        </div>
+      )}
+
+      {event.registration && (
+        <div className="italic">Registration required</div>
+      )}
+
+      {event.url && (
+        <a
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-blue-500 hover:underline"
+          title={event.url}
+        >
+          <ExternalLink className="h-4 w-4 flex-shrink-0" />
+          Event Link
+        </a>
+      )}
+    </div>
+  </div>
+);
 
 // Custom toolbar for < and > month buttons
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,10 +169,9 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
   onView,
   view,
 }) => {
-
   return (
-    <div className="relative mb-4 flex items-center justify-between gap-12">
-      <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+    <div className="relative mb-4 flex items-center justify-end gap-12">
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center ">
         {/* Back button < */}
         <IconButton
           onMouseDown={() => onNavigate("PREV")}
@@ -95,30 +192,24 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
         />
       </div>
 
-      {/* View tabs (Month/Week/Day) - positioned to the right */}
-      <div className="ml-auto">
-        <Tabs value={view} onValueChange={(value) => onView(value as View)}>
-          <TabsList>
-            <TabsTrigger value="month">Month</TabsTrigger>
-            <TabsTrigger value="week">Week</TabsTrigger>
-            <TabsTrigger value="day">Day</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      {/* View tabs (Month/Week/Day) */}
+      <Tabs value={view} onValueChange={(value) => onView(value as View)}>
+        <TabsList>
+          <TabsTrigger value="month">Month</TabsTrigger>
+          <TabsTrigger value="week">Week</TabsTrigger>
+          <TabsTrigger value="day">Day</TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   );
 };
 
 const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<View>("month");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [popupPosition, setPopupPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-
-  const calendarContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedEvent, setSelectedEvent] = useState<(Event & { start: Date; end: Date; title: string }) | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
 
   const calendarEvents = events.map((event) => {
     const start = new Date(`${event.date}T${event.start_time}`);
@@ -136,22 +227,28 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   // Custom styles for events based on club_type
   const eventPropGetter = (event: typeof calendarEvents[number]) => {
     const backgroundColor = getClubTypeColor(event.club_type);
-    return {
-      style: {
-        backgroundColor,
-        borderRadius: "6px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        border: "1px solid rgba(0, 0, 0, 0.15)",
-      },
+    const baseStyle = {
+      backgroundColor,
+      borderRadius: "6px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      border: "1px solid rgba(0, 0, 0, 0.15)",
     };
-  };
 
-  const handleNavigate = (
-    newDate: Date,
-    _view: View,
-    _action: NavigateAction
-  ) => {
-    setCurrentDate(newDate);
+    // Cap event width in day view to prevent them from taking up too much horizontal space
+    if (currentView === "day") {
+      return {
+        style: {
+          ...baseStyle,
+          width: "25%",
+          maxWidth: "200px",
+          minWidth: "80px",
+        },
+      };
+    }
+
+    return {
+      style: baseStyle,
+    };
   };
 
   const handleSelectEvent = (
@@ -229,22 +326,15 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
     setPopupPosition(null);
   };
 
-  const handleOutsideClick = (e: React.MouseEvent) => {
-    const popup = document.querySelector(".event-popup") as HTMLElement;
-    const target = e.target as HTMLElement;
-
-    if ((popup && popup.contains(target)) || target.closest(".rbc-event")) {
-      return;
-    }
-    setSelectedEvent(null);
-    setPopupPosition(null);
+  const handleNavigate = (newDate: Date) => {
+    setCurrentDate(newDate);
   };
 
   return (
-    <div
+    <div 
+      className="events-calendar-container relative" 
+      onClick={closePopup}
       ref={calendarContainerRef}
-      className="events-calendar-container relative"
-      onMouseDown={handleOutsideClick}
     >
       <Calendar
         localizer={localizer}
@@ -253,118 +343,22 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
         endAccessor="end"
         date={currentDate}
         onNavigate={handleNavigate}
-        onView={(view) => setCurrentView(view)}
+        onView={setCurrentView}
         view={currentView}
-        selectable={false}
-        onSelectSlot={() => {}}
         onSelectEvent={handleSelectEvent}
-        components={{
-          toolbar: CustomToolbar,
-        }}
+        components={{ toolbar: CustomToolbar }}
         eventPropGetter={eventPropGetter}
       />
 
-      {/* Event details popup */}
       {selectedEvent && popupPosition && (
-        <div
-          className="event-popup absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-80 z-50"
+        <EventPopup
+          event={selectedEvent}
+          onClose={closePopup}
           style={{
             top: popupPosition.y,
             left: popupPosition.x,
           }}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          {/* Close button */}
-          <button
-            onMouseDown={closePopup}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
-          >
-            ✕
-          </button>
-
-          {/* Event Image */}
-          {selectedEvent.image_url && (
-            <div className="mb-3 -mx-4 -mt-4">
-              <img
-                src={selectedEvent.image_url}
-                alt={selectedEvent.name}
-                className="w-full h-40 object-cover rounded-t-lg"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                }}
-              />
-            </div>
-          )}
-
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 pr-8">
-            {selectedEvent.name}
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            @{selectedEvent.club_handle}
-          </p>
-
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-            <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-            <span>{formatPrettyDate(selectedEvent.date)}</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-            <Clock className="h-4 w-4 flex-shrink-0" />
-            <span>
-              {selectedEvent.end_time
-                ? formatTimeRange(
-                    selectedEvent.start_time,
-                    selectedEvent.end_time
-                  )
-                : formatTimeRange(selectedEvent.start_time, null)}
-            </span>
-          </div>
-          {selectedEvent.location && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <MapPin className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate" title={selectedEvent.location}>
-                {selectedEvent.location}
-              </span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-            <DollarSign className="h-4 w-4 flex-shrink-0" />
-            <span className="truncate">
-              {selectedEvent.price === null || selectedEvent.price === 0
-                ? "Free"
-                : `${selectedEvent.price}`}
-            </span>
-          </div>
-
-          {selectedEvent.food && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <Utensils className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate" title={selectedEvent.food}>
-                {selectedEvent.food}
-              </span>
-            </div>
-          )}
-
-          {selectedEvent.registration && (
-            <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              <span className="italic">Registration required</span>
-            </div>
-          )}
-
-          {selectedEvent.url && (
-            <a
-              href={selectedEvent.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-blue-500 hover:underline text-sm"
-              title={selectedEvent.url}
-            >
-              <ExternalLink className="h-4 w-4 flex-shrink-0" />
-              Event Link
-            </a>
-          )}
-        </div>
+        />
       )}
     </div>
   );

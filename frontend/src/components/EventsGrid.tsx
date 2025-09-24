@@ -1,6 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, ExternalLink, Bookmark, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ExternalLink,
+  Bookmark,
+  DollarSign,
+} from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
 import {
@@ -13,31 +21,93 @@ interface EventsGridProps {
   data: Event[];
 }
 
+const getEventStatus = (event: Event): "live" | "soon" | "none" => {
+  const now = new Date();
+  const startDateTime = new Date(`${event.date}T${event.start_time}`);
+  const endDateTime = new Date(`${event.date}T${event.end_time}`);
+
+  const nowTime = now.getTime();
+  const startTime = startDateTime.getTime();
+  const endTime = endDateTime.getTime();
+  const oneHourInMs = 60 * 60 * 1000;
+
+  if (nowTime >= startTime && nowTime <= endTime) return "live";
+
+  if (startTime > nowTime && startTime - nowTime <= oneHourInMs) return "soon";
+
+  return "none";
+};
+
+const isEventNew = (event: Event): boolean => {
+  if (!event.added_at) return false;
+  
+  const now = new Date();
+  const addedAt = new Date(event.added_at);
+  const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+  
+  return (now.getTime() - addedAt.getTime()) <= twentyFourHoursInMs;
+};
+
+const EventStatusBadge = ({ event }: { event: Event }) => {
+  const status = getEventStatus(event);
+
+  if (status === "live") {
+    return (
+      <Badge variant="live" className="absolute top-2 right-2 z-10">
+        LIVE
+      </Badge>
+    );
+  }
+
+  if (status === "soon") {
+    return (
+      <Badge variant="soon" className="absolute top-2 right-2 z-10">
+        Starts in 1 hr
+      </Badge>
+    );
+  }
+
+  return null;
+};
+
+const NewEventBadge = ({ event }: { event: Event }) => {
+  if (!isEventNew(event)) return null;
+
+  return (
+    <Badge variant="new" className="absolute top-2 left-2 z-10">
+      NEW
+    </Badge>
+  );
+};
+
 const EventsGrid = memo(({ data }: EventsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Events Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 sm:gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-4 sm:gap-6">
         {data.map((event) => (
           <Card
             key={event.id}
-            className="hover:shadow-lg h-full overflow-hidden bg-white"
+            className="relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
           >
-            <CardHeader className="pb-3">
-              {/* Event Image */}
-              {event.image_url && (
-                <div className="mb-3 -mx-6 -mt-6">
-                  <img
-                    src={event.image_url}
-                    alt={event.name}
-                    className="w-full h-40 object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                    }}
-                  />
-                </div>
-              )}
+            <EventStatusBadge event={event} />
+            <NewEventBadge event={event} />
+
+            {/* Event Image */}
+            {event.image_url && (
+              <div className=" ">
+                <img
+                  src={event.image_url}
+                  alt={event.name}
+                  className="w-full h-40 object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+            <CardHeader className="p-4 pb-0">
               <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {event.name}
               </CardTitle>
@@ -56,7 +126,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 </div>
               )}
             </CardHeader>
-            <CardContent className="space-y-3 flex flex-col h-full">
+            <CardContent className="flex flex-col gap-1 h-full p-4">
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <Calendar className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">{formatPrettyDate(event.date)}</span>
@@ -83,7 +153,9 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <DollarSign className="h-4 w-4 flex-shrink-0" />
                 <span className="truncate">
-                  {event.price === null || event.price === 0 ? "Free" : `${event.price}`}
+                  {event.price === null || event.price === 0
+                    ? "Free"
+                    : `${event.price}`}
                 </span>
               </div>
 

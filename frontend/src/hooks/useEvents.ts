@@ -18,6 +18,7 @@ export interface Event {
   food: string | null;
   registration: boolean;
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
+  added_at: string; 
 }
 
 interface EventsResponse {
@@ -84,7 +85,56 @@ export function useEvents(view: "grid" | "calendar") {
   }, []);
 
   // Use static data when no filters, API data when filters are active
-  const events = hasActiveFilters ? data?.events || [] : staticEventsData;
+  const rawEvents = hasActiveFilters ? data?.events || [] : staticEventsData;
+
+  // Filter out past events and sort by date for grid view
+  const events = useMemo(() => {
+    if (view === "grid") {
+      const now = new Date();
+      
+      return rawEvents
+        .filter(event => {
+          const eventDateStr = event.date; // e.g., "2025-09-24"
+          const todayStr = now.toISOString().split('T')[0]; // e.g., "2025-09-24"
+          
+          // If event is on a future date, include it
+          if (eventDateStr > todayStr) {
+            return true;
+          }
+          
+          // If event is today, check if it hasn't finished yet
+          if (eventDateStr === todayStr) {
+            const [hours, minutes] = event.end_time.split(':').map(Number);
+            const eventEndDateTime = new Date();
+            eventEndDateTime.setHours(hours, minutes, 0, 0);
+            
+            // Include if event hasn't finished yet (current time < event end time)
+            return now < eventEndDateTime;
+          }
+          
+          return false;
+        })
+        .sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          
+          // First sort by date
+          const dateDiff = dateA.getTime() - dateB.getTime();
+          if (dateDiff !== 0) {
+            return dateDiff;
+          }
+          
+          // If same date, sort by start time
+          const [hoursA, minutesA] = a.start_time.split(':').map(Number);
+          const [hoursB, minutesB] = b.start_time.split(':').map(Number);
+          const timeA = hoursA * 60 + minutesA; // Convert to minutes for easy comparison
+          const timeB = hoursB * 60 + minutesB;
+          
+          return timeA - timeB;
+        });
+    }
+    return rawEvents;
+  }, [rawEvents, view]);
 
   return {
     data: events,

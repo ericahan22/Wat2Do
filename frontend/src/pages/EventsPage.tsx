@@ -6,6 +6,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Calendar, LayoutGrid } from "lucide-react";
 import { useEvents } from "@/hooks";
 import { useCategoryParam } from "@/hooks/useCategoryParam";
@@ -30,7 +35,7 @@ function EventsPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="text-center sm:text-left">
+      <div className="sm:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Events
         </h1>
@@ -58,37 +63,19 @@ function EventsPage() {
             </SelectContent>
           </Select>
 
-          {/* button to toggle between views */}
-          <div className="flex space-x-0 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
-              <div
-                onMouseDown={() => setView("calendar")}
-                className={`flex items-center justify-center w-9 h-full
-                  ${
-                    view === "calendar"
-                      ? "bg-gray-200 dark:bg-gray-700"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }
-                  focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
-                title="Calendar View"
-                aria-label="Calendar View"
-              >
-                <Calendar className="h-5 w-5 text-gray-800 dark:text-gray-200" />
-              </div>
-            <div
-              onMouseDown={() => setView("grid")}
-              className={`flex items-center justify-center w-9 h-full border-r border-gray-300 dark:border-gray-600
-                ${
-                  view === "grid"
-                    ? "bg-gray-200 dark:bg-gray-700"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                }
-                focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500`}
-              title="Grid View"
-              aria-label="Grid View"
-            >
-              <LayoutGrid className="h-5 w-5 text-gray-800 dark:text-gray-200" />
-            </div>
-          </div>
+          {/* View toggle tabs */}
+          <Tabs value={view} onValueChange={(value) => setView(value as "grid" | "calendar")}>
+            <TabsList>
+              <TabsTrigger value="calendar" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Calendar
+              </TabsTrigger>
+              <TabsTrigger value="grid" className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Grid
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

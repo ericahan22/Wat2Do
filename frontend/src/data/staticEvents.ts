@@ -15,6 +15,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "273",
@@ -31,6 +32,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/08976337-4edb-4d13-b947-439a4f54b812.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "316",
@@ -47,6 +49,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/463acfb5-9218-42f3-bc5d-c1144f5233e5.jpg",
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "278",
@@ -63,6 +66,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/370907b7-ae59-4d64-8453-29a659538ab4.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "2",
@@ -78,6 +82,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "231",
@@ -94,6 +99,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9ada6d63-7d57-49b6-b617-c8e57938b511.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "304",
@@ -110,6 +116,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b2c071a2-a508-4db8-af69-7a28509cb7df.jpg",
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "246",
@@ -125,6 +132,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "252",
@@ -140,6 +148,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "258",
@@ -155,6 +164,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "283",
@@ -171,6 +181,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2c92e8bb-a177-4e9a-ab8f-a7bb97b0e2d5.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "43",
@@ -186,6 +197,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "309",
@@ -202,6 +214,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/80169fa8-9a62-4078-86f0-b22babac582e.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "300",
@@ -218,6 +231,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d141f7b6-e032-40bb-a6f2-e18bd40f0503.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "68",
@@ -233,6 +247,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "288",
@@ -249,6 +264,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4fc0f532-3a8b-4424-aeea-beeab4b62a54.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "37",
@@ -264,6 +280,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "80",
@@ -279,6 +296,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "41",
@@ -294,6 +312,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "42",
@@ -309,6 +328,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "32",
@@ -324,6 +344,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "70",
@@ -339,6 +360,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "57",
@@ -354,6 +376,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "67",
@@ -369,6 +392,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "45",
@@ -384,6 +408,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "49",
@@ -399,6 +424,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "324",
@@ -415,6 +441,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e7a5c554-ff1d-4df3-8ee2-9a0431055cd6.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "321",
@@ -431,6 +458,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bfd2f7bf-d330-43ed-9c1e-2e3b07be9afc.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "299",
@@ -447,6 +475,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b19fb4e7-c12c-4551-9d84-c451d3546f7b.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "58",
@@ -462,6 +491,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "65",
@@ -477,6 +507,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "33",
@@ -492,6 +523,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "1",
@@ -507,6 +539,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "242",
@@ -522,6 +555,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "253",
@@ -537,6 +571,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "259",
@@ -552,6 +587,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "264",
@@ -567,6 +603,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "269",
@@ -583,6 +620,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b24b8967-aa1b-48ea-acf3-1c0e82163032.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "222",
@@ -599,6 +637,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0b009dbb-2eca-4151-8dda-a4bc0b7b4e2d.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "247",
@@ -614,6 +653,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "274",
@@ -630,6 +670,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4dbe3530-033e-4c0e-b584-5f50f9ebdf5a.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "279",
@@ -646,6 +687,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/575c7509-61a5-4f01-9812-3eaa076179d5.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "289",
@@ -662,6 +704,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/455eff65-b2e9-4076-8279-e88edc779d4b.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "164",
@@ -678,6 +721,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1f60c933-306d-4350-aad4-e8931eac65e6.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "169",
@@ -694,6 +738,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/969ec663-946d-410e-8ff1-b7e6c280f25e.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "284",
@@ -710,6 +755,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7d617538-fd70-4065-9c6f-6584e1914925.jpg",
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "301",
@@ -726,6 +772,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/47d89055-1baf-4824-81ed-80b180617936.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "315",
@@ -742,6 +789,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6b5fb970-a2b9-4bf7-95af-81b3c986eb42.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "313",
@@ -758,6 +806,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4e840cfd-bd50-4fe6-9f80-1b7697208037.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "317",
@@ -774,6 +823,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4ad20cf8-6135-48d7-b75e-847cca2b8baa.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "318",
@@ -790,6 +840,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/42e46134-83d6-4fd1-ba0b-5f63cccd4d7f.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "325",
@@ -806,6 +857,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6431cee0-70a3-476a-9131-de76381d4fd8.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "331",
@@ -822,6 +874,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1571b244-862f-454e-83ac-11676c77f8b5.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "336",
@@ -838,6 +891,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/56c5cc7a-9535-43ef-b89f-f4b564f68f4b.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "337",
@@ -854,6 +908,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/23b1e498-9ce8-4897-8679-d7a2c9c356cf.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "46",
@@ -869,6 +924,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "48",
@@ -884,6 +940,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "13",
@@ -899,6 +956,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "151",
@@ -914,6 +972,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "34",
@@ -929,6 +988,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "14",
@@ -944,6 +1004,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "5",
@@ -959,6 +1020,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "62",
@@ -974,6 +1036,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "183",
@@ -990,6 +1053,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/32826e32-7a03-419e-b283-ad845f3cfa07.jpg",
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "180",
@@ -1006,6 +1070,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/30fd1ac0-c7ac-418c-bd91-ced8088a6378.webp",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "181",
@@ -1022,6 +1087,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/34033e79-6c28-4256-9f06-e36aabeab25e.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "191",
@@ -1038,6 +1104,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bdd6bb86-4426-4e3a-9b0d-1df4442da5c9.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "192",
@@ -1054,6 +1121,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/797776b2-9a6f-40dd-9e1a-ddb71fe02f07.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "197",
@@ -1070,6 +1138,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f6efa8c6-e392-4735-b5cb-f109177a95d2.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "208",
@@ -1086,6 +1155,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e91f1128-99fc-49f0-be94-da9a7f205e37.webp",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "200",
@@ -1102,6 +1172,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/db357817-568c-43a7-bfac-0e722ac44042.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "36",
@@ -1117,6 +1188,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "260",
@@ -1132,6 +1204,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "223",
@@ -1148,6 +1221,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1a2a6132-8940-4e1c-af15-2193f034ef4f.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "177",
@@ -1164,6 +1238,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/11a1d80e-f7bb-4ae4-868a-5234c12676dd.jpg",
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "228",
@@ -1180,6 +1255,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b2926e29-8556-473d-8b4a-4a95df6e0b3d.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "243",
@@ -1195,6 +1271,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "254",
@@ -1210,6 +1287,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "53",
@@ -1225,6 +1303,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: null,
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "265",
@@ -1241,6 +1320,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/94a119d1-f0c3-43b7-a65d-cd1710eafc66.webp",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "270",
@@ -1257,6 +1337,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/202b6381-9158-4619-a818-ee359a3ce444.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "275",
@@ -1273,6 +1354,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/86aa9936-0bd8-411e-896f-9c2f3c1c6d35.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "280",
@@ -1289,6 +1371,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0a6009c-18e0-4fb2-ab03-79cf470b9964.webp",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "239",
@@ -1304,6 +1387,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "285",
@@ -1320,6 +1404,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be103ec5-82cb-4092-ba36-b2438b3b060c.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "84",
@@ -1335,6 +1420,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "88",
@@ -1350,6 +1436,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "95",
@@ -1365,6 +1452,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "81",
@@ -1380,6 +1468,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "129",
@@ -1396,6 +1485,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ff45779a-1d67-4651-8e91-4a3f5916ec81.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "166",
@@ -1412,6 +1502,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6741f153-0db2-4f54-b00e-2c6a4e5cc2e2.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "168",
@@ -1428,6 +1519,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e76b4397-56f0-4b74-9794-e1d8a7b2b87d.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "174",
@@ -1444,6 +1536,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d151c727-23ee-466a-b362-ad41741bd051.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "234",
@@ -1460,6 +1553,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/650147f0-d32b-4547-b5a2-76daf0caf2f4.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "249",
@@ -1475,6 +1569,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "261",
@@ -1490,6 +1585,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "266",
@@ -1506,6 +1602,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39448e1a-47b6-4b63-8484-4c935e65e850.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "276",
@@ -1522,6 +1619,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c5090c14-64dd-497f-b972-69a69f8a7a7f.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "199",
@@ -1538,6 +1636,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d5af707e-fd4c-4881-bc16-95d59dc9829b.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "286",
@@ -1554,6 +1653,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0985858d-244f-48f8-9a5d-ca36fa8b1f3a.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "271",
@@ -1570,6 +1670,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e7949bb2-5f7f-499d-bef2-3ab91c4db901.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "281",
@@ -1586,6 +1687,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2afc9c7e-c282-45e7-95d1-71d92ebc130a.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "255",
@@ -1601,6 +1703,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "206",
@@ -1617,6 +1720,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3aa09df9-1cc7-4151-ba95-a2b6e53658b3.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "262",
@@ -1633,6 +1737,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "267",
@@ -1649,6 +1754,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d360ff69-a995-45e1-ad4f-2dbe6ba5e15c.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "282",
@@ -1665,6 +1771,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c35f6744-9402-49a6-a3dd-c024fef2fdc3.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "287",
@@ -1681,6 +1788,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2386bf71-fc86-447d-84aa-ae9fcad0956f.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "59",
@@ -1696,6 +1804,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "17",
@@ -1712,6 +1821,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "40",
@@ -1727,6 +1837,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "55",
@@ -1742,6 +1853,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "38",
@@ -1758,6 +1870,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "47",
@@ -1773,6 +1886,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "44",
@@ -1788,6 +1902,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "141",
@@ -1803,6 +1918,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "140",
@@ -1818,6 +1934,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "60",
@@ -1833,6 +1950,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "142",
@@ -1848,6 +1966,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "144",
@@ -1863,6 +1982,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "152",
@@ -1878,6 +1998,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "64",
@@ -1893,6 +2014,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "159",
@@ -1909,6 +2031,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/62b0eaea-724a-4674-93fb-2199e2ea46d0.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "160",
@@ -1924,6 +2047,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "147",
@@ -1939,6 +2063,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "148",
@@ -1954,6 +2079,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "158",
@@ -1970,6 +2096,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/839a794a-e27e-4eeb-aa9a-acce68b0cf52.webp",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "176",
@@ -1986,6 +2113,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cc1fb28d-6c63-462d-ba76-90dbd86e693c.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "179",
@@ -2002,6 +2130,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e0f35338-6751-432d-8690-8b4e7bd13cac.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "178",
@@ -2018,6 +2147,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dbeb7740-bf81-498e-97d4-ca1d4931e7b3.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "71",
@@ -2033,6 +2163,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "112",
@@ -2048,6 +2179,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "66",
@@ -2063,6 +2195,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "111",
@@ -2078,6 +2211,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "121",
@@ -2093,6 +2227,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "119",
@@ -2108,6 +2243,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "115",
@@ -2123,6 +2259,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "51",
@@ -2138,6 +2275,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "96",
@@ -2153,6 +2291,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "93",
@@ -2168,6 +2307,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "90",
@@ -2183,6 +2323,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "82",
@@ -2198,6 +2339,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "74",
@@ -2213,6 +2355,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "4",
@@ -2228,6 +2371,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "25",
@@ -2243,6 +2387,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "77",
@@ -2258,6 +2403,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "78",
@@ -2273,6 +2419,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "52",
@@ -2289,6 +2436,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "76",
@@ -2304,6 +2452,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "86",
@@ -2319,6 +2468,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "99",
@@ -2334,6 +2484,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "102",
@@ -2349,6 +2500,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "106",
@@ -2364,6 +2516,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "105",
@@ -2379,6 +2532,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "101",
@@ -2394,6 +2548,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "107",
@@ -2409,6 +2564,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "109",
@@ -2424,6 +2580,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "116",
@@ -2439,6 +2596,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "117",
@@ -2454,6 +2612,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "114",
@@ -2469,6 +2628,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "120",
@@ -2484,6 +2644,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "97",
@@ -2499,6 +2660,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "83",
@@ -2514,6 +2676,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "153",
@@ -2529,6 +2692,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "161",
@@ -2545,6 +2709,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/41f64182-2e9b-4151-94fe-568a4bcf24a4.webp",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "165",
@@ -2562,6 +2727,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c921aa46-fb74-4349-9b3f-530b37d175d0.webp",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "172",
@@ -2578,6 +2744,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6ce37e21-f2fd-492b-b44a-b492e72a5f6d.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "170",
@@ -2594,6 +2761,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7c27d8b4-3114-45b8-9f8d-e0974cfbc2b9.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "173",
@@ -2610,6 +2778,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/41ec3726-f1e5-496b-ad27-3345ef841775.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "150",
@@ -2625,6 +2794,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "162",
@@ -2641,6 +2811,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/615746ac-5882-4b7e-b2f3-9331ee786602.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "163",
@@ -2657,6 +2828,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0a5ee855-854f-42f3-b665-75dd94ecc513.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "175",
@@ -2673,6 +2845,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8b5fcd06-9d7a-490e-a1e6-2a5405b57d39.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "184",
@@ -2689,6 +2862,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4a276ccc-80bc-449b-a56f-12900ac9f47b.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "185",
@@ -2705,6 +2879,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a082b196-4a97-4429-955d-0457383e13e7.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "186",
@@ -2721,6 +2896,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/72f953c4-ff5b-43be-ad56-60a1dd73382a.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "190",
@@ -2737,6 +2913,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f5ca2f07-5a2d-4532-b989-c731c777b0b8.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "211",
@@ -2753,6 +2930,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0ef8a344-9cad-47cb-b424-ddf505152b2d.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "213",
@@ -2769,6 +2947,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b84ec909-ff2b-4a83-87b5-a13d4a445ca9.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "272",
@@ -2785,6 +2964,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e2d3629a-3bad-41aa-bab5-0a21f96ac474.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "214",
@@ -2801,6 +2981,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4e3d83de-9ad8-4161-ac62-89daaa6735eb.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "230",
@@ -2817,6 +2998,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfa7657c-f2f9-4080-b4b9-a3ff95a78b86.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "171",
@@ -2833,6 +3015,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/24011285-d620-41e8-9165-9ec109bf898c.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "196",
@@ -2848,6 +3031,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "61",
@@ -2863,6 +3047,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "251",
@@ -2878,6 +3063,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "257",
@@ -2893,6 +3079,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "73",
@@ -2908,6 +3095,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "18",
@@ -2923,6 +3111,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "189",
@@ -2939,6 +3128,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0b1fef4d-d839-4b8c-b33a-bda503f7b1aa.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "202",
@@ -2955,6 +3145,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/22312bb1-f966-4181-a327-6d1c713082e0.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "203",
@@ -2971,6 +3162,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/926d6b03-09e6-4c45-9c43-ddc6572fef7a.jpg",
     club_type: "Athletics",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "205",
@@ -2987,6 +3179,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ad7146ba-705a-4f5b-861d-f3c322475b22.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "209",
@@ -3003,6 +3196,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/15c00a0f-c54f-483d-b32a-2e68afe11964.jpg",
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "250",
@@ -3018,6 +3212,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     image_url: null,
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "256",
@@ -3033,6 +3228,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     image_url: null,
     club_type: "Student Society",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "292",
@@ -3049,6 +3245,7 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/098ba6e5-d9b4-4f80-bbf3-a2c905d1320f.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
   {
     id: "297",
@@ -3065,5 +3262,6 @@ export const staticEventsData: Event[] = [
     image_url:
       "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2815409c-0e5b-4208-9222-21283bd18ccc.jpg",
     club_type: "WUSA",
+    added_at: "2025-09-20 00:00:00",
   },
 ];

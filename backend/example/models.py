@@ -37,6 +37,8 @@ class Events(models.Model):
     registration = models.BooleanField(default=False)
     image_url = models.URLField(blank=True, null=True)
     embedding = VectorField(dimensions=1536, blank=True, null=True)
+    added_at = models.DateTimeField(auto_now_add=True, null=True)
+    club_type = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         db_table = 'events'  
