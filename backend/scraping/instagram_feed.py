@@ -176,7 +176,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             conn.close()
 
 
-def process_recent_feed(loader, cutoff=datetime.now(timezone.utc) - timedelta(days=3), max_posts=100, max_consec_old_posts=15):
+def process_recent_feed(loader, cutoff=datetime.now(timezone.utc) - timedelta(days=2), max_posts=100, max_consec_old_posts=10):
     # Process Instagram feed posts and extract event info. Stops
     #   scraping once posts become older than cutoff.
     events_added = 0
