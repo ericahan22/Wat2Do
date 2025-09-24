@@ -65,6 +65,7 @@ my_project/
 ### Frontend (React)
 ```bash
 cd frontend
+npm i
 npm run dev
 ```
 

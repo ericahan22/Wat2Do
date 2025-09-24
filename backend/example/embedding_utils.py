@@ -21,7 +21,7 @@ def generate_event_embedding(event_data: dict) -> List[float]:
     return get_embedding(repr(event_data))
 
 
-def find_similar_events(embedding: List[float], threshold: float = 0.95) -> List[dict]:
+def find_similar_events(embedding: List[float], threshold: float = 0.985) -> List[dict]:
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT id, name, location, date, start_time, end_time, 

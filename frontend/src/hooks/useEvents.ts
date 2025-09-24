@@ -11,11 +11,11 @@ export interface Event {
   start_time: string;
   end_time: string;
   location: string;
-  image_url?: string | null;
+  image_url: string | null;
   categories?: string[];
-  price?: number | null;
-  food?: string | null;
-  registration?: boolean;
+  price: number | null;
+  food: string | null;
+  registration: boolean;
 }
 
 interface EventsResponse {
@@ -41,7 +41,7 @@ const fetchEvents = async ({
   const view = queryKey[3] || "grid";
 
   const response = await fetch(
-    `${API_BASE_URL}/events/?view=${view}${searchParam}${categoryParam}`
+    `${API_BASE_URL}/api/events/?view=${view}${searchParam}${categoryParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");

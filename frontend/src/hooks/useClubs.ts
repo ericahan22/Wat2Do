@@ -33,7 +33,7 @@ const fetchClubs = async ({
     : "";
 
   const response = await fetch(
-    `${API_BASE_URL}/clubs/?${searchParam}${categoryParam}`
+    `${API_BASE_URL}/api/clubs/?${searchParam}${categoryParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch clubs");
