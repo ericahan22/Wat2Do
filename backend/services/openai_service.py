@@ -1,3 +1,12 @@
+"""
+OpenAI service for AI-powered text analysis and embeddings.
+
+This module provides methods for interacting with OpenAI's API, including:
+- Text embeddings generation
+- Event information extraction from social media captions
+- Image analysis for event data
+"""
+
 import os
 import json
 from openai import OpenAI
@@ -5,17 +14,29 @@ from dotenv import load_dotenv
 import logging
 import traceback
 from datetime import datetime
-from typing import List
+from typing import List, Dict, Optional, Union
 
 
 logger = logging.getLogger(__name__)
 
-
+# Load environment variables
 load_dotenv()
 
+# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def get_embedding(text: str, model: str = "text-embedding-3-small") -> List[float]:
+
+def generate_embedding(text: str, model: str = "text-embedding-3-small") -> List[float]:
+    """
+    Generate an embedding vector for the given text.
+    
+    Args:
+        text: Text to generate embedding for
+        model: OpenAI embedding model to use
+        
+    Returns:
+        List of floats representing the embedding vector
+    """
     text = text.replace("\n", " ").strip()
     
     response = client.embeddings.create(
@@ -25,14 +46,17 @@ def get_embedding(text: str, model: str = "text-embedding-3-small") -> List[floa
     
     return response.data[0].embedding
 
-def parse_caption_for_event(caption_text, image_url=None):
+
+def extract_event_from_caption(caption_text: str, image_url: Optional[str] = None) -> Dict[str, Union[str, bool, float, None]]:
     """
     Parse an Instagram caption to extract event information.
-    Returns a consistent JSON format with all required fields.
     
     Args:
-        caption_text (str or None): Instagram caption text (can be None)
-        image_url (str, optional): URL to image for enhanced analysis
+        caption_text: Instagram caption text (can be None)
+        image_url: Optional URL to image for enhanced analysis
+        
+    Returns:
+        Dictionary with event information in consistent format
     """
     
     # Get current date and day of week for context
@@ -76,8 +100,9 @@ def parse_caption_for_event(caption_text, image_url=None):
     """
     
     try:
-        logger.debug(f"Parsing caption of length: {len(caption_text)}")
-        logger.debug(f"Caption preview: {caption_text[:100]}...")
+        logger.debug(f"Parsing caption of length: {len(caption_text) if caption_text else 0}")
+        if caption_text:
+            logger.debug(f"Caption preview: {caption_text[:100]}...")
         
         # Prepare messages for the API call
         messages = [
@@ -143,34 +168,31 @@ def parse_caption_for_event(caption_text, image_url=None):
             return event_data
             
         except json.JSONDecodeError as e:
-            print(f"Error parsing JSON response: {e}")
-            print(f"Response text: {response_text}")
+            logger.error(f"Error parsing JSON response: {e}")
+            logger.error(f"Response text: {response_text}")
             # Return default structure if JSON parsing fails
-            return {
-                "name": "",
-                "date": "",
-                "start_time": "",
-                "end_time": "",
-                "location": "",
-                "price": None,
-                "food": "",
-                "registration": False,
-                "image_url": image_url if image_url else ""
-            }
+            return _get_default_event_structure(image_url)
             
     except Exception as e:
         logger.error(f"Error parsing caption: {str(e)}")
         logger.error(f"Caption text: {caption_text}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         # Return default structure if API call fails
-        return {
-            "name": "",
-            "date": "",
-            "start_time": "",
-            "end_time": "",
-            "location": "",
-            "price": None,
-            "food": "",
-            "registration": False,
-            "image_url": image_url if image_url else ""
-        } 
+        return _get_default_event_structure(image_url)
+
+
+def _get_default_event_structure(image_url: Optional[str] = None) -> Dict[str, Union[str, bool, float, None]]:
+    """Return the default event structure with empty/null values."""
+    return {
+        "name": "",
+        "date": "",
+        "start_time": "",
+        "end_time": "",
+        "location": "",
+        "price": None,
+        "food": "",
+        "registration": False,
+        "image_url": image_url if image_url else ""
+    }
+
+

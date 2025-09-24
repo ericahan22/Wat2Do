@@ -6,12 +6,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Clubs, Events 
-from django.core.serializers import serialize
 import json
 from django.db.models import Subquery, OuterRef 
 from datetime import datetime, date, time
 from pytz import timezone
-from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events, get_embedding
+from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events
+from services.openai_service import generate_embedding
 from django.db import connection 
 
 
@@ -61,7 +61,7 @@ def get_events(request):
             filtered_queryset = filtered_queryset.filter(date__gte=today)
         
         if search_term:
-            search_embedding = get_embedding(search_term)
+            search_embedding = generate_embedding(search_term)
             similar_events = find_similar_events(
                 embedding=search_embedding, 
                 threshold=0.25

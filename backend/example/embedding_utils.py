@@ -1,12 +1,12 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scraping.ai_client import get_embedding
+from services.openai_service import generate_embedding
 from django.db import connection
 from typing import List
 
 def generate_event_embedding(event_data: dict) -> List[float]:
-    return get_embedding(repr(event_data))
+    return generate_embedding(repr(event_data))
 
 def find_similar_events(embedding: List[float], threshold: float = 0.985, limit: int = None) -> List[dict]:
     with connection.cursor() as cursor:

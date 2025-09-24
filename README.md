@@ -35,7 +35,7 @@ my_project/
 │       ├── __init__.py
 │       ├── ai_client.py
 │       ├── instagram_feed.py
-│       ├── scrape.py
+│       ├── wusa_club_directory_scraper.py
 │       ├── club_info.csv
 │       └── event_info.csv
 │

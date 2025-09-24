@@ -1,5 +1,5 @@
 import json
-from scraping.ai_client import parse_caption_for_event
+from services.openai_service import extract_event_from_caption
 
 # Test data
 post = {
@@ -195,5 +195,5 @@ post = {
 image_url = "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a0e6f8eb-a8bf-4463-96a7-a4d388755d9e.jpg"
 
 # Test AI client
-result = parse_caption_for_event(post['caption'], image_url)
+result = extract_event_from_caption(post['caption'], image_url)
 print(json.dumps(result, indent=2))
