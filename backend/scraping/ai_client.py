@@ -5,14 +5,25 @@ from dotenv import load_dotenv
 import logging
 import traceback
 from datetime import datetime
+from typing import List
 
 
 logger = logging.getLogger(__name__)
 
 
-# Load API key from .env file
 load_dotenv()
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def get_embedding(text: str, model: str = "text-embedding-3-small") -> List[float]:
+    text = text.replace("\n", " ").strip()
+    
+    response = client.embeddings.create(
+        input=[text],
+        model=model
+    )
+    
+    return response.data[0].embedding
 
 def parse_caption_for_event(caption_text, image_url=None):
     """

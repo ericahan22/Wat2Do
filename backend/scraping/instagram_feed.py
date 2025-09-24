@@ -2,7 +2,7 @@ from instaloader import Instaloader
 from dotenv import load_dotenv
 import os
 import csv
-from ai_client import parse_caption_for_event
+from .ai_client import parse_caption_for_event
 from s3_client import S3ImageUploader
 from datetime import datetime, timedelta, timezone
 import psycopg2
