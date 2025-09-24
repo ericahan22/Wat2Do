@@ -71,7 +71,6 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
   onView,
   view,
 }) => {
-  const centerWidth = view === "month" ? 200 : 260;
 
   return (
     <div className="relative mb-4 flex items-center justify-between gap-12">
