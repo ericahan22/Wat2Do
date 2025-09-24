@@ -1,11 +1,12 @@
 from django.db import models
+from pgvector.django import VectorField
 
 class Clubs(models.Model):
     club_name = models.CharField(max_length=100, unique=True)
     categories = models.CharField(max_length=255)
     club_page = models.URLField(blank=True, null=True)
-    ig = models.URLField(blank=True, null=True)  # Changed from insta_url to ig
-    discord = models.URLField(blank=True, null=True)  # Added discord field
+    ig = models.URLField(blank=True, null=True)  
+    discord = models.URLField(blank=True, null=True)  
     club_type = models.CharField(
         max_length=50,
         null=True,
@@ -18,13 +19,13 @@ class Clubs(models.Model):
     )
 
     class Meta:
-        db_table = 'clubs'  # Remove api_ prefix
+        db_table = 'clubs' 
 
     def __str__(self):
         return self.club_name
 
 class Events(models.Model):
-    club_handle = models.CharField(max_length=100, blank=True, null=True)  # Made nullable
+    club_handle = models.CharField(max_length=100, blank=True, null=True)  
     url = models.URLField(blank=True, null=True)
     name = models.CharField(max_length=100)
     date = models.DateField()
@@ -35,9 +36,10 @@ class Events(models.Model):
     food = models.CharField(max_length=255, blank=True, null=True)
     registration = models.BooleanField(default=False)
     image_url = models.URLField(blank=True, null=True)
+    embedding = VectorField(dimensions=1536, blank=True, null=True)
 
     class Meta:
-        db_table = 'events'  # Remove api_ prefix
+        db_table = 'events'  
 
     def __str__(self):
         return self.name

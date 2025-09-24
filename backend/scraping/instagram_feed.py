@@ -12,6 +12,9 @@ import sys
 from fuzzywuzzy import fuzz
 import time
 from pathlib import Path
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from example.embedding_utils import generate_event_embedding, is_duplicate_event
 
 
 logging.basicConfig(
@@ -101,7 +104,7 @@ def append_event_to_csv(event_data, club_ig, post_url, status="success"):
         })
 
 
-def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
+def insert_event_to_db(event_data, club_ig, post_url):
     # Check if an event already exists in db and insert it if not
     event_name = event_data.get("name") #.title()
     event_date = event_data.get("date")
@@ -111,25 +114,22 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
         conn = psycopg2.connect(SUPABASE_DB_URL)
         cur = conn.cursor()
         
-        # Check duplicates
-        logger.debug(f"Checking for duplicates: {event_data}")
-        query = "SELECT name, location FROM events WHERE date = %s " \
-                "ORDER BY start_time ASC"
-        cur.execute(query, (event_date,))
-        existing_events = cur.fetchall()
-        for existing_name, existing_location in existing_events:
-            # Check similarity
-            name_sim = fuzz.ratio(event_name, existing_name)
-            location_sim = fuzz.ratio(event_location, existing_location)
-            if name_sim >= sim_threshold and location_sim >= sim_threshold:
-                logger.debug(f"Duplicate event found: {existing_name} at {existing_location}")
-                return False
+        # Check duplicates using vector similarity
+        logger.debug(f"Checking for duplicates using vector similarity: {event_data}")
+        
+        # Check if this event is a duplicate using vector similarity
+        if is_duplicate_event(event_data):
+            logger.debug(f"Duplicate event found using vector similarity: {event_name} at {event_location}")
+            return False
             
+        # Generate embedding for the event
+        embedding = generate_event_embedding(event_data)
+        
         insert_query = """
         INSERT INTO events (
-            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url
+            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector)
         ON CONFLICT DO NOTHING;
         """
         cur.execute(insert_query, (
@@ -144,6 +144,7 @@ def insert_event_to_db(event_data, club_ig, post_url, sim_threshold=80):
             event_data.get("food") or "",
             bool(event_data.get("registration", False)),
             event_data.get("image_url"),
+            embedding,
         ))
         conn.commit()
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
