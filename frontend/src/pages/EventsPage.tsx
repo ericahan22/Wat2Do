@@ -59,13 +59,13 @@ function EventsPage() {
             onValueChange={(value) => setView(value as "grid" | "calendar")}
           >
             <TabsList>
-              <TabsTrigger value="calendar" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Calendar
-              </TabsTrigger>
               <TabsTrigger value="grid" className="flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4" />
                 Grid
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Calendar
               </TabsTrigger>
             </TabsList>
           </Tabs>

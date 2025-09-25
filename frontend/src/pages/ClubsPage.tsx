@@ -24,7 +24,7 @@ function ClubsPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="text-center sm:text-left">
+      <div className="sm:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Clubs
         </h1>

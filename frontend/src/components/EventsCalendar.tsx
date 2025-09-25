@@ -171,7 +171,7 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
 }) => {
   return (
     <div className="relative mb-4 flex items-center justify-end gap-12">
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center ">
+      <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 flex items-center ">
         {/* Back button < */}
         <IconButton
           onMouseDown={() => onNavigate("PREV")}
