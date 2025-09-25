@@ -11,7 +11,7 @@ def format_value(value):
     if isinstance(value, (date, time, datetime)):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
-        return f'"{value.replace("\\", "\\\\").replace("\"", "\\\"")}"'
+        return f'"{value.replace("\\", "\\\\").replace('"', '\\"')}"'
     if isinstance(value, bool):
         return str(value).lower()
     return value
