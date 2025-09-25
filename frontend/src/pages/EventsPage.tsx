@@ -16,14 +16,14 @@ import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
 
 function EventsPage() {
-  const [view, setView] = useState<"grid" | "calendar">("grid"); 
+  const [view, setView] = useState<"grid" | "calendar">("grid");
 
   const { data, uniqueCategories, isLoading, error } = useEvents(view);
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="sm:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -35,7 +35,7 @@ function EventsPage() {
       </div>
 
       {/* Filters */}
-      <div className="space-y-6">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchInput placeholder="Search events..." className="flex-1" />
 

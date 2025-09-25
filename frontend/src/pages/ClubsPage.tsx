@@ -22,7 +22,7 @@ function ClubsPage() {
   const { categoryParam, setCategoryParam } = useCategoryParam();
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="text-center sm:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -34,7 +34,7 @@ function ClubsPage() {
       </div>
 
       {/* Filters */}
-      <div className="space-y-6">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchInput placeholder="Search clubs..." className="flex-1" />
 

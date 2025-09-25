@@ -34,13 +34,11 @@ function GitHubLink() {
       href={`https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+      className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 transition-colors"
       title="View on GitHub"
     >
       <Button>
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-          <Github className="h-4 w-4 text-gray-700 dark:text-gray-300" />
-        </div>
+        <Github className="h-4 w-4 text-gray-700 dark:text-gray-300" />
         {!isLoading && starCount !== null && (
           <span className="text-sm font-medium">{starCount}</span>
         )}
