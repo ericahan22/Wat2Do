@@ -219,7 +219,7 @@ def test_similarity(request):
         # Generate embedding for search text
         search_embedding = generate_event_embedding(search_text)
 
-        similar_events = find_similar_events(search_embedding, threshold=0.38)
+        similar_events = find_similar_events(search_embedding, threshold=0.4)
         
         results = []
         if similar_events:
