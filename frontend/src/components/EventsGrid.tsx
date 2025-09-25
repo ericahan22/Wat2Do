@@ -83,7 +83,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Events Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-3.5">
         {data.map((event) => (
           <Card
             key={event.id}
@@ -106,22 +106,22 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 />
               </div>
             )}
-            <CardHeader className="p-4 pb-0">
-              <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">
+            <CardHeader className="p-3.5 pb-0">
+              <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {event.name}
               </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 @{event.club_handle}
               </p>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1 h-full p-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="h-4 w-4 flex-shrink-0" />
+            <CardContent className="flex flex-col gap-1 h-full p-3.5 pt-2.5">
+              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">{formatPrettyDate(event.date)}</span>
               </div>
 
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <Clock className="h-4 w-4 flex-shrink-0" />
+              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
                   {event.end_time
                     ? formatTimeRange(event.start_time, event.end_time)
@@ -130,16 +130,16 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
               </div>
 
               {event.location && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="line-clamp-1" title={event.location}>
                     {event.location}
                   </span>
                 </div>
               )}
 
-              <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <DollarSign className="h-4 w-4 flex-shrink-0" />
+              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
                   {event.price === null || event.price === 0
                     ? "Free"
@@ -156,12 +156,12 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                     className="flex-1 w-full"
                     onMouseDown={() => window.open(event.url, "_blank")}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
                     Open Event
                   </Button>
                 ) : (
                   <div className="text-center py-2 w-full">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       No event link available
                     </p>
                   </div>
@@ -179,7 +179,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
               No events found
             </p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm">
+            <p className="text-gray-400 dark:text-gray-500 text-xs">
               Try adjusting your search or filters
             </p>
           </div>

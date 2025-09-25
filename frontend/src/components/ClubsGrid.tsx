@@ -12,13 +12,13 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Clubs Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-3.5">
         {data.map((club) => (
           <Card
             key={club.id}
             className="relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
           >
-            <CardHeader className="p-4 pb-0 gap-2">
+            <CardHeader className="p-3.5 pb-0 gap-2">
               <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {club.club_name}
               </CardTitle>
@@ -34,7 +34,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
                 </div>
               )}
             </CardHeader>
-            <CardContent className="p-4 pt-0 space-y-3 flex flex-col h-full">
+            <CardContent className="p-3.5 pt-2.5 space-y-3 flex flex-col h-full">
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">
                 {club.club_page ? (
