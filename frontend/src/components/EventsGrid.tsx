@@ -52,7 +52,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 
   if (status === "live") {
     return (
-      <Badge variant="live" className="absolute top-2 right-2 z-10">
+      <Badge variant="live" className="absolute top-1 right-1 z-10">
         LIVE
       </Badge>
     );
@@ -60,7 +60,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 
   if (status === "soon") {
     return (
-      <Badge variant="soon" className="absolute top-2 right-2 z-10">
+      <Badge variant="soon" className="absolute top-1 right-1 z-10">
         Starts in 1 hr
       </Badge>
     );
@@ -73,7 +73,7 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   if (!isEventNew(event)) return null;
 
   return (
-    <Badge variant="new" className="absolute top-2 left-2 z-10">
+    <Badge variant="new" className="absolute top-1 left-1 z-10">
       NEW
     </Badge>
   );
