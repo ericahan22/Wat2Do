@@ -44,7 +44,7 @@ def main():
                     e.registration,
                     e.image_url,
                     e.club_type,
-                    NOW() AT TIME ZONE 'UTC' as added_at
+                    e.added_at
                 FROM
                     events e
                 ORDER BY e.date DESC, e.start_time DESC;
