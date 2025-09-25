@@ -55,11 +55,11 @@ jobs:
         working-directory: backend/scraping
         run: mkdir -p logs
 
-      # - name: Run scraper
-      #   working-directory: backend/scraping
-      #   run: |
-      #     python -u instagram_feed.py 2>&1 | tee logs/scraping.log
-      #   continue-on-error: false
+      - name: Run scraper
+        working-directory: backend/scraping
+        run: |
+          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
+        continue-on-error: false
       
       - name: Generate static events file
         id: generate_static
