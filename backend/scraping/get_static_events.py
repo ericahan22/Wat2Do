@@ -11,7 +11,7 @@ def format_value(value):
     if isinstance(value, (date, time, datetime)):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
-        escaped_value = value.replace("\\", "\\\\").replace('"', '\\"')
+        escaped_value = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r")
         return f'"{escaped_value}"'
     if isinstance(value, bool):
         return str(value).lower()
@@ -28,6 +28,7 @@ def main():
                 logging.info("Executing query...")
                 query = """
                 SELECT
+                    e.id,
                     e.club_handle,
                     e.url,
                     e.name,
@@ -59,6 +60,7 @@ def main():
             f.write("export const staticEventsData: Event[] = [\n")
             for i, event in enumerate(events):
                 f.write("  {\n")
+                f.write(f'    id: {format_value(str(event["id"]))},\n')
                 f.write(f'    club_handle: {format_value(event["club_handle"])},\n')
                 f.write(f'    url: {format_value(event["url"])},\n')
                 f.write(f'    name: {format_value(event["name"])},\n')
