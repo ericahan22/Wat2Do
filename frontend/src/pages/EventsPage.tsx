@@ -6,11 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutGrid } from "lucide-react";
 import { useEvents } from "@/hooks";
 import { useCategoryParam } from "@/hooks/useCategoryParam";
@@ -19,16 +15,10 @@ import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
 
-
 function EventsPage() {
-  const [view, setView] = useState<"grid" | "calendar">("calendar"); // to toggle views
+  const [view, setView] = useState<"grid" | "calendar">("grid"); 
 
-  const {
-    data,
-    uniqueCategories,
-    isLoading,
-    error,
-  } = useEvents(view);
+  const { data, uniqueCategories, isLoading, error } = useEvents(view);
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
 
@@ -64,7 +54,10 @@ function EventsPage() {
           </Select>
 
           {/* View toggle tabs */}
-          <Tabs value={view} onValueChange={(value) => setView(value as "grid" | "calendar")}>
+          <Tabs
+            value={view}
+            onValueChange={(value) => setView(value as "grid" | "calendar")}
+          >
             <TabsList>
               <TabsTrigger value="calendar" className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
@@ -80,7 +73,11 @@ function EventsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : view === "grid" ? `Showing ${data.length} upcoming events` : `Showing ${data.length} events`}
+            {isLoading
+              ? "Loading..."
+              : view === "grid"
+              ? `Showing ${data.length} upcoming events`
+              : `Showing ${data.length} events`}
           </p>
         </div>
       </div>
@@ -111,9 +108,7 @@ function EventsPage() {
             <EventsGrid data={data} />
           ) : (
             <>
-              <EventsCalendar
-                events={data}
-              />
+              <EventsCalendar events={data} />
               <EventLegend />
             </>
           )}

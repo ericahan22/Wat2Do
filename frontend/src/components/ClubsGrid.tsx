@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ExternalLink, Instagram, MessageCircle } from "lucide-react";
+import { Tag, ExternalLink, Instagram, MessageCircle } from "lucide-react";
 import { Club } from "@/hooks";
 import { memo } from "react";
 
@@ -12,21 +12,21 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Clubs Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(300px,_1fr))] gap-4 sm:gap-6">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-4 sm:gap-4">
         {data.map((club) => (
           <Card
             key={club.id}
-            className="hover:shadow-lg h-full overflow-hidden bg-white"
+            className="relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
           >
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg line-clamp-2 leading-tight text-gray-900 dark:text-white">
+            <CardHeader className="p-4 pb-0 gap-2">
+              <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {club.club_name}
               </CardTitle>
               {club.categories && club.categories.length > 0 && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Bookmark className="h-4 w-4 flex-shrink-0" />
+                <div className="flex gap-1 text-sm text-gray-600 dark:text-gray-400">
+                  <Tag className="h-4 w-4 flex-shrink-0" />
                   <span
-                    className="line-clamp-1"
+                    className="line-clamp-2 text-xs"
                     title={club.categories.join(" | ")}
                   >
                     {club.categories.join(" | ")}
@@ -34,7 +34,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
                 </div>
               )}
             </CardHeader>
-            <CardContent className="space-y-3 flex flex-col h-full">
+            <CardContent className="p-4 pt-0 space-y-3 flex flex-col h-full">
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">
                 {club.club_page ? (

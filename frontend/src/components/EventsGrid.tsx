@@ -6,7 +6,6 @@ import {
   Clock,
   MapPin,
   ExternalLink,
-  Bookmark,
   DollarSign,
 } from "lucide-react";
 import { Event } from "@/hooks";
@@ -114,17 +113,6 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 @{event.club_handle}
               </p>
-              {event.categories && event.categories.length > 0 && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Bookmark className="h-4 w-4 flex-shrink-0" />
-                  <span
-                    className="line-clamp-1"
-                    title={event.categories.join(" | ")}
-                  >
-                    {event.categories.join(" | ")}
-                  </span>
-                </div>
-              )}
             </CardHeader>
             <CardContent className="flex flex-col gap-1 h-full p-4">
               <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">

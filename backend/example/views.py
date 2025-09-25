@@ -64,7 +64,7 @@ def get_events(request):
             search_embedding = generate_embedding(search_term)
             similar_events = find_similar_events(
                 embedding=search_embedding, 
-                threshold=0.25
+                threshold=0.275
             )
             if similar_events:
                 similar_event_ids = [event['id'] for event in similar_events]
@@ -219,7 +219,7 @@ def test_similarity(request):
         # Generate embedding for search text
         search_embedding = generate_event_embedding(search_text)
 
-        similar_events = find_similar_events(search_embedding, threshold=0.4)
+        similar_events = find_similar_events(search_embedding, threshold=0.38)
         
         results = []
         if similar_events:

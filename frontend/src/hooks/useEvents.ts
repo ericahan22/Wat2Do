@@ -84,11 +84,10 @@ export function useEvents(view: "grid" | "calendar") {
     ];
   }, []);
 
-  // Use static data when no filters, API data when filters are active
-  const rawEvents = hasActiveFilters ? data?.events || [] : staticEventsData;
-
   // Filter out past events and sort by date for grid view
   const events = useMemo(() => {
+    const rawEvents = hasActiveFilters ? data?.events || [] : staticEventsData;
+    
     if (view === "grid") {
       const now = new Date();
       
@@ -134,7 +133,7 @@ export function useEvents(view: "grid" | "calendar") {
         });
     }
     return rawEvents;
-  }, [rawEvents, view]);
+  }, [hasActiveFilters, data?.events, view]);
 
   return {
     data: events,

@@ -4,6 +4,7 @@ import { Moon, Sun } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import EventsPage from '@/pages/EventsPage'
 import ClubsPage from '@/pages/ClubsPage'
+import Footer from '@/components/Footer'
 
 function Navigation() {
   const location = useLocation()
@@ -90,16 +91,17 @@ function Navigation() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
         <Navigation />
-        
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Routes>
             <Route path="/" element={<EventsPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/clubs" element={<ClubsPage />} />
           </Routes>
         </main>
+
+        <Footer />
       </div>
     </Router>
   )
