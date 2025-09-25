@@ -8,9 +8,6 @@ on:
 jobs:
   instagram_feed:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       USERNAME: ${{ secrets.USERNAME }}
@@ -49,6 +46,7 @@ jobs:
         run: pip install --upgrade pip setuptools wheel
 
       - name: Install dependencies
+        working-directory: backend
         run: pip install -r requirements.txt
 
       - name: Create logs directory
