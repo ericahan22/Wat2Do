@@ -1,6 +1,9 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from instaloader import Instaloader
 from dotenv import load_dotenv
-import os
 import csv
 from services.openai_service import extract_event_from_caption
 from services.storage_service import upload_image_from_url
@@ -8,11 +11,9 @@ from datetime import datetime, timedelta, timezone
 import psycopg2
 import logging
 import traceback
-import sys
 import time
 from pathlib import Path
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 
 
