@@ -55,11 +55,25 @@ jobs:
         working-directory: backend/scraping
         run: mkdir -p logs
 
-      - name: Run scraper
+      # - name: Run scraper
+      #   working-directory: backend/scraping
+      #   run: |
+      #     python -u instagram_feed.py 2>&1 | tee logs/scraping.log
+      #   continue-on-error: false
+      
+      - name: Generate static events file
+        id: generate_static
         working-directory: backend/scraping
+        run: python get_static_events.py
+      
+      - name: Commit and push changes
+        if: steps.generate_static.outcome == 'success'
         run: |
-          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
-        continue-on-error: false
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add frontend/src/data/staticEvents.ts
+          git commit -m "chore: update static events from DB" || echo "No changes to commit"
+          git push
 
       - name: Upload logs as artifacts
         uses: actions/upload-artifact@v4

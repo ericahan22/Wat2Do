@@ -2,6 +2,10 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
+django.setup()
+
 from instaloader import Instaloader
 from dotenv import load_dotenv
 import csv
@@ -17,8 +21,10 @@ from pathlib import Path
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 
 
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
@@ -136,6 +142,13 @@ def insert_event_to_db(event_data, club_ig, post_url):
         conn = psycopg2.connect(SUPABASE_DB_URL)
         cur = conn.cursor()
 
+        # Get club_type from club handle
+        cur.execute("SELECT club_type FROM clubs WHERE ig = %s", (club_ig,))
+        club_row = cur.fetchone()
+        club_type = club_row[0] if club_row else None
+        if not club_type:
+            logger.warning(f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type.")
+
         # Check duplicates using vector similarity
         logger.debug(f"Checking for duplicates using vector similarity: {event_data}")
 
@@ -151,9 +164,9 @@ def insert_event_to_db(event_data, club_ig, post_url):
 
         insert_query = """
         INSERT INTO events (
-            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding
+            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding, club_type
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector, %s)
         ON CONFLICT DO NOTHING;
         """
         cur.execute(
@@ -171,6 +184,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 bool(event_data.get("registration", False)),
                 event_data.get("image_url"),
                 embedding,
+                club_type,
             ),
         )
         conn.commit()
@@ -276,6 +290,9 @@ def process_recent_feed(
                 ]
                 logger.warning(
                     f"Missing required fields: {missing_fields}, skipping event"
+                )
+                append_event_to_csv(
+                    event_data, post.owner_username, post_url, status="missing_fields"
                 )
             time.sleep(5)
         except Exception as e:
