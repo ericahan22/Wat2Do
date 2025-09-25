@@ -8,6 +8,8 @@ on:
 jobs:
   instagram_feed:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       USERNAME: ${{ secrets.USERNAME }}
