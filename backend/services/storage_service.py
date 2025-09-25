@@ -96,7 +96,8 @@ def upload_image_from_url(image_url: str, filename: Optional[str] = None) -> Opt
             Body=image_data,
             ContentType=f'image/{filename.split(".")[-1]}',
             CacheControl='max-age=31536000',
-            ACL='public-read'  
+            ACL='public-read'
+        )
         
         public_url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{filename}"
         logger.info(f"Successfully uploaded image: {filename}")
