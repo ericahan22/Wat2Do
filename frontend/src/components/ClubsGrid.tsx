@@ -12,7 +12,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Clubs Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-4 sm:gap-4">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-4">
         {data.map((club) => (
           <Card
             key={club.id}
