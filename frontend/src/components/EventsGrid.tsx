@@ -99,7 +99,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 <img
                   src={event.image_url}
                   alt={event.name}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-40 object-cover brightness-75"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = "none";

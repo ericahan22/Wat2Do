@@ -81,9 +81,6 @@ def get_events(request):
         filtered_queryset = filtered_queryset.annotate(
             club_categories=Subquery(
                 Clubs.objects.filter(ig=OuterRef('club_handle')).values('categories')[:1]
-            ),
-            club_type=Subquery(
-                Clubs.objects.filter(ig=OuterRef('club_handle')).values('club_type')[:1]
             )
         )
         

@@ -6,7 +6,7 @@ export interface ClubTypeColor {
 export const clubTypeColors: Record<string, ClubTypeColor> = {
   "WUSA": {
     backgroundColor: "#4b9b6a",
-    name: "WUSA Events"
+    name: "WUSA Club Events"
   },
   "Athletics": {
     backgroundColor: "#d9924a", 
