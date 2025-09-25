@@ -83,7 +83,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Events Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-3.5">
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-3">
         {data.map((event) => (
           <Card
             key={event.id}
