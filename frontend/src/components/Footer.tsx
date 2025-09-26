@@ -11,24 +11,7 @@ function Footer() {
               © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights
               reserved.
             </p>
-            <p>
-              Feedback or issues? Email us at{" "}
-              <a
-                href="mailto:e22han@uwaterloo.ca"
-                className="text-blue-500 hover:text-blue-600"
-              >
-                e22han@uwaterloo.ca
-              </a>{" "}
-              or{" "}
-              <a
-                href="mailto:tqiu@uwaterloo.ca"
-                className="text-blue-500 hover:text-blue-600"
-              >
-                tqiu@uwaterloo.ca
-              </a>
-            </p>
           </div>
-
           <div className="flex items-center gap-4">
             <a
               href="https://wat2do.instatus.com/"
