@@ -177,7 +177,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
         <div className="text-center py-12">
           <div className="max-w-md mx-auto">
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
-              No events found
+              No upcoming events found
             </p>
             <p className="text-gray-400 dark:text-gray-500 text-xs">
               Try adjusting your search or filters
