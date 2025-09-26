@@ -2,9 +2,10 @@
 Views for the app.
 """
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.throttling import AnonRateThrottle
 from .models import Clubs, Events 
 import json
 from django.db.models import Subquery, OuterRef 
@@ -40,6 +41,7 @@ def health(request):
 
 
 @api_view(["GET"])
+@throttle_classes([AnonRateThrottle])
 def get_events(request):
     """Get all events from database (no pagination). Event categories are based on club categories"""
     try:
@@ -113,6 +115,7 @@ def get_events(request):
 
 
 @api_view(["GET"])
+@throttle_classes([AnonRateThrottle])
 def get_clubs(request):
     """Get all clubs from database (no pagination)"""
     try:
@@ -151,6 +154,7 @@ def get_clubs(request):
 
 
 @api_view(["POST"])
+@throttle_classes([AnonRateThrottle])
 def create_mock_event(request):
     """Create a mock event with vector embedding for testing"""
     try:
@@ -212,6 +216,7 @@ def create_mock_event(request):
 
 
 @api_view(["GET"])
+@throttle_classes([AnonRateThrottle])
 def test_similarity(request):
     """Test vector similarity search"""
     try:
