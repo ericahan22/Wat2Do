@@ -12,11 +12,11 @@ import csv
 from services.openai_service import extract_event_from_caption
 from services.storage_service import upload_image_from_url
 from datetime import datetime, timedelta, timezone
-import psycopg2
 import logging
 import traceback
 import time
 from pathlib import Path
+from django.db import connection
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 
@@ -24,7 +24,7 @@ from example.embedding_utils import generate_event_embedding, is_duplicate_event
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
@@ -137,58 +137,54 @@ def insert_event_to_db(event_data, club_ig, post_url):
     event_name = event_data.get("name")  # .title()
     event_date = event_data.get("date")
     event_location = event_data.get("location")  # .title()
-    conn = None
     try:
-        conn = psycopg2.connect(SUPABASE_DB_URL)
-        cur = conn.cursor()
+        with connection.cursor() as cur:
+            # Get club_type from club handle
+            cur.execute("SELECT club_type FROM clubs WHERE ig = %s", (club_ig,))
+            club_row = cur.fetchone()
+            club_type = club_row[0] if club_row else None
+            if not club_type:
+                logger.warning(f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type.")
 
-        # Get club_type from club handle
-        cur.execute("SELECT club_type FROM clubs WHERE ig = %s", (club_ig,))
-        club_row = cur.fetchone()
-        club_type = club_row[0] if club_row else None
-        if not club_type:
-            logger.warning(f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type.")
+            # Check duplicates using vector similarity
+            logger.debug(f"Checking for duplicates using vector similarity: {event_data}")
 
-        # Check duplicates using vector similarity
-        logger.debug(f"Checking for duplicates using vector similarity: {event_data}")
+            # Check if this event is a duplicate using vector similarity
+            if is_duplicate_event(event_data):
+                logger.debug(
+                    f"Duplicate event found using vector similarity: {event_name} at {event_location}"
+                )
+                return False
 
-        # Check if this event is a duplicate using vector similarity
-        if is_duplicate_event(event_data):
-            logger.debug(
-                f"Duplicate event found using vector similarity: {event_name} at {event_location}"
+            # Generate embedding for the event
+            embedding = generate_event_embedding(event_data)
+
+            insert_query = """
+            INSERT INTO events (
+                club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding, club_type
             )
-            return False
-
-        # Generate embedding for the event
-        embedding = generate_event_embedding(event_data)
-
-        insert_query = """
-        INSERT INTO events (
-            club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding, club_type
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector, %s)
-        ON CONFLICT DO NOTHING;
-        """
-        cur.execute(
-            insert_query,
-            (
-                club_ig,
-                post_url,
-                event_name,
-                event_date,
-                event_data["start_time"],
-                event_data["end_time"] or None,
-                event_location,
-                event_data.get("price", None),
-                event_data.get("food") or "",
-                bool(event_data.get("registration", False)),
-                event_data.get("image_url"),
-                embedding,
-                club_type,
-            ),
-        )
-        conn.commit()
-        logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector, %s)
+            ON CONFLICT DO NOTHING;
+            """
+            cur.execute(
+                insert_query,
+                (
+                    club_ig,
+                    post_url,
+                    event_name,
+                    event_date,
+                    event_data["start_time"],
+                    event_data["end_time"] or None,
+                    event_location,
+                    event_data.get("price", None),
+                    event_data.get("food") or "",
+                    bool(event_data.get("registration", False)),
+                    event_data.get("image_url"),
+                    embedding,
+                    club_type,
+                ),
+            )
+            logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
 
         try:
             append_event_to_csv(event_data, club_ig, post_url, status="success")
@@ -216,9 +212,6 @@ def insert_event_to_db(event_data, club_ig, post_url):
             logger.error(f"Traceback: {traceback.format_exc()}")
 
         return False
-    finally:
-        if conn:
-            conn.close()
 
 
 def process_recent_feed(
