@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "./ui/button";
 
 function Footer() {
   return (
@@ -7,21 +8,42 @@ function Footer() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="space-y-1">
             <p>
-              © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights reserved.
+              © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights
+              reserved.
             </p>
             <p>
-              Feedback or issues? Email us at {" "}
-              <a href="mailto:e22han@uwaterloo.ca" className="text-blue-500 hover:text-blue-600">
+              Feedback or issues? Email us at{" "}
+              <a
+                href="mailto:e22han@uwaterloo.ca"
+                className="text-blue-500 hover:text-blue-600"
+              >
                 e22han@uwaterloo.ca
               </a>{" "}
-              and {" "}
-              <a href="mailto:tqiu@uwaterloo.ca" className="text-blue-500 hover:text-blue-600">
+              or{" "}
+              <a
+                href="mailto:tqiu@uwaterloo.ca"
+                className="text-blue-500 hover:text-blue-600"
+              >
                 tqiu@uwaterloo.ca
               </a>
             </p>
           </div>
 
           <div className="flex items-center gap-4">
+            <a
+              href="https://wat2do.instatus.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            >
+              <Button>
+                <div className="relative">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="absolute inset-0 w-2 h-2 bg-green-500 rounded-full animate-ping opacity-75"></div>
+                </div>
+                <span>All systems operational</span>
+              </Button>
+            </a>
             <a
               href="/events"
               className="hover:text-gray-900 dark:hover:text-gray-200"
@@ -42,5 +64,3 @@ function Footer() {
 }
 
 export default React.memo(Footer);
-
-
