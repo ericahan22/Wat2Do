@@ -49,7 +49,7 @@ function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-2">
             <GitHubLink />
             <Button
               variant="ghost"
