@@ -21,9 +21,13 @@ else
     exit 1
 fi
 
-# Test backend linting and formatting with Ruff
+# Auto-fix and test backend linting and formatting with Ruff
 echo "📝 Testing backend linting and formatting..."
 cd ../backend
+
+ruff check --fix .
+ruff format .
+
 if ruff check . && ruff format --check .; then
     echo "✅ Backend linting and formatting passed"
 else
