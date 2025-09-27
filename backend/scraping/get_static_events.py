@@ -1,7 +1,8 @@
-import os
-import psycopg2
 import logging
-from datetime import date, time, datetime
+import os
+from datetime import date, datetime, time
+
+import psycopg2
 
 
 def format_value(value):
@@ -11,7 +12,12 @@ def format_value(value):
     if isinstance(value, (date, time, datetime)):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
-        escaped_value = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r")
+        escaped_value = (
+            value.replace("\\", "\\\\")
+            .replace('"', '\\"')
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+        )
         return f'"{escaped_value}"'
     if isinstance(value, bool):
         return str(value).lower()
@@ -20,7 +26,9 @@ def format_value(value):
 
 def main():
     """Connects to Supabase DB, fetches all events, writes to TS file"""
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
     try:
         conn_string = os.environ.get("SUPABASE_DB_URL")
         logging.info("Connecting to the database...")
@@ -54,7 +62,9 @@ def main():
                 columns = [desc[0] for desc in cur.description]
                 events = [dict(zip(columns, row)) for row in cur.fetchall()]
                 logging.info(f"Fetched {len(events)} events.")
-        output_path = os.path.join("..", "..", "frontend", "src", "data", "staticEvents.ts")
+        output_path = os.path.join(
+            "..", "..", "frontend", "src", "data", "staticEvents.ts"
+        )
         logging.info(f"Writing to {output_path}...")
         with open(output_path, "w", encoding="utf-8") as f:
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
@@ -84,7 +94,7 @@ def main():
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         exit(1)
-        
-        
+
+
 if __name__ == "__main__":
     main()

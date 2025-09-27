@@ -16,35 +16,39 @@ def regenerate_embeddings_simple(apps, schema_editor):
             FROM events 
         """)
         events = cursor.fetchall()
-        
+
         total_events = len(events)
-        print(f"Regenerating embeddings for {total_events} events using name, location, food only...")
-        
+        print(
+            f"Regenerating embeddings for {total_events} events using name, location, food only..."
+        )
+
         for i, (event_id, name, location, food) in enumerate(events, 1):
             try:
                 # Generate embedding for the event using only core fields
                 event_data = {
-                    'name': name or '',
-                    'location': location or '',
-                    'food': food or '',
+                    "name": name or "",
+                    "location": location or "",
+                    "food": food or "",
                 }
-                
+
                 embedding = generate_event_embedding(event_data)
-                
+
                 # Update the event with the embedding
                 cursor.execute(
                     "UPDATE events SET embedding = %s::vector WHERE id = %s",
-                    [embedding, event_id]
+                    [embedding, event_id],
                 )
-                
+
                 if i % 10 == 0:  # Progress indicator
                     print(f"Processed {i}/{total_events} events...")
-                
+
             except Exception as e:
                 print(f"Error generating embedding for event {event_id} ({name}): {e}")
                 continue
-        
-        print(f"Completed regenerating embeddings for {total_events} events using simplified data.")
+
+        print(
+            f"Completed regenerating embeddings for {total_events} events using simplified data."
+        )
 
 
 def reverse_regenerate_embeddings_simple(apps, schema_editor):
@@ -57,7 +61,6 @@ def reverse_regenerate_embeddings_simple(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0010_repopulate_embeddings"),
     ]

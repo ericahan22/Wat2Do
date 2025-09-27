@@ -1,4 +1,5 @@
 from django.db import models
+
 from pgvector.django import VectorField
 
 
@@ -6,8 +7,8 @@ class Clubs(models.Model):
     club_name = models.CharField(max_length=100, unique=True)
     categories = models.CharField(max_length=255)
     club_page = models.URLField(blank=True, null=True)
-    ig = models.URLField(blank=True, null=True)  
-    discord = models.URLField(blank=True, null=True)  
+    ig = models.URLField(blank=True, null=True)
+    discord = models.URLField(blank=True, null=True)
     club_type = models.CharField(
         max_length=50,
         null=True,
@@ -20,14 +21,14 @@ class Clubs(models.Model):
     )
 
     class Meta:
-        db_table = 'clubs' 
+        db_table = "clubs"
 
     def __str__(self):
         return self.club_name
 
 
 class Events(models.Model):
-    club_handle = models.CharField(max_length=100, blank=True, null=True)  
+    club_handle = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     name = models.CharField(max_length=100)
     date = models.DateField()
@@ -43,7 +44,7 @@ class Events(models.Model):
     club_type = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
-        db_table = 'events'  
+        db_table = "events"
 
     def __str__(self):
         return self.name

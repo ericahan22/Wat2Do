@@ -16,37 +16,45 @@ def repopulate_embeddings(apps, schema_editor):
             FROM events 
         """)
         events = cursor.fetchall()
-        
+
         total_events = len(events)
         print(f"Regenerating embeddings for {total_events} events...")
-        
-        for i, (event_id, name, location, food, club_handle, price, registration) in enumerate(events, 1):
+
+        for i, (
+            event_id,
+            name,
+            location,
+            food,
+            club_handle,
+            price,
+            registration,
+        ) in enumerate(events, 1):
             try:
                 # Generate embedding for the event using the same format as scraper
                 event_data = {
-                    'name': name or '',
-                    'location': location or '',
-                    'food': food or '',
-                    'club_handle': club_handle or '',
-                    'price': price,
-                    'registration': registration or False,
+                    "name": name or "",
+                    "location": location or "",
+                    "food": food or "",
+                    "club_handle": club_handle or "",
+                    "price": price,
+                    "registration": registration or False,
                 }
-                
+
                 embedding = generate_event_embedding(event_data)
-                
+
                 # Update the event with the embedding
                 cursor.execute(
                     "UPDATE events SET embedding = %s::vector WHERE id = %s",
-                    [embedding, event_id]
+                    [embedding, event_id],
                 )
-                
+
                 if i % 10 == 0:  # Progress indicator
                     print(f"Processed {i}/{total_events} events...")
-                
+
             except Exception as e:
                 print(f"Error generating embedding for event {event_id} ({name}): {e}")
                 continue
-        
+
         print(f"Completed regenerating embeddings for {total_events} events.")
 
 
@@ -60,7 +68,6 @@ def reverse_repopulate_embeddings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0009_populate_embeddings"),
     ]

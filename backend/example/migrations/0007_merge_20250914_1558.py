@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0005_events_image_url"),
         ("example", "0006_remove_events_drinks_remove_events_snacks"),

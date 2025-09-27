@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0001_squashed_0004_alter_clubs_club_type"),
     ]

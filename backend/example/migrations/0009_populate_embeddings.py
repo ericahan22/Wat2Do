@@ -10,27 +10,29 @@ def populate_embeddings(apps, schema_editor):
     """
     with schema_editor.connection.cursor() as cursor:
         # Get all events that don't have embeddings
-        cursor.execute("SELECT id, name, location, food, club_handle FROM events WHERE embedding IS NULL")
+        cursor.execute(
+            "SELECT id, name, location, food, club_handle FROM events WHERE embedding IS NULL"
+        )
         events = cursor.fetchall()
-        
+
         for event_id, name, location, food, club_handle in events:
             try:
                 # Generate embedding for the event
                 event_data = {
-                    'name': name or '',
-                    'location': location or '',
-                    'food': food or '',
-                    'club_handle': club_handle or '',
+                    "name": name or "",
+                    "location": location or "",
+                    "food": food or "",
+                    "club_handle": club_handle or "",
                 }
-                
+
                 embedding = generate_event_embedding(event_data)
-                
+
                 # Update the event with the embedding
                 cursor.execute(
                     "UPDATE events SET embedding = %s::vector WHERE id = %s",
-                    [embedding, event_id]
+                    [embedding, event_id],
                 )
-                
+
             except Exception as e:
                 print(f"Error generating embedding for event {event_id}: {e}")
                 continue
@@ -45,7 +47,6 @@ def reverse_populate_embeddings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0008_add_embedding_vector"),
     ]

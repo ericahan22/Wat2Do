@@ -3,8 +3,11 @@
 echo "🧪 Testing Workflow Components..."
 
 # Test frontend linting
-echo "📝 Testing frontend linting..."
+echo "📝 Auto-fixing and testing frontend linting..."
 cd frontend
+
+npm run lint:fix
+
 if npm run lint; then
     echo "✅ Frontend linting passed"
 else

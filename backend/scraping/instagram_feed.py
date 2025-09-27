@@ -1,25 +1,28 @@
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 django.setup()
 
-from instaloader import Instaloader
-from dotenv import load_dotenv
 import csv
-from services.openai_service import extract_event_from_caption
-from services.storage_service import upload_image_from_url
-from datetime import datetime, timedelta, timezone
 import logging
-import traceback
 import time
+import traceback
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
 from django.db import connection
 
-from example.embedding_utils import generate_event_embedding, is_duplicate_event
+from dotenv import load_dotenv
+from instaloader import Instaloader
 
+from example.embedding_utils import generate_event_embedding, is_duplicate_event
+from services.openai_service import extract_event_from_caption
+from services.storage_service import upload_image_from_url
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -144,10 +147,14 @@ def insert_event_to_db(event_data, club_ig, post_url):
             club_row = cur.fetchone()
             club_type = club_row[0] if club_row else None
             if not club_type:
-                logger.warning(f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type.")
+                logger.warning(
+                    f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type."
+                )
 
             # Check duplicates using vector similarity
-            logger.debug(f"Checking for duplicates using vector similarity: {event_data}")
+            logger.debug(
+                f"Checking for duplicates using vector similarity: {event_data}"
+            )
 
             # Check if this event is a duplicate using vector similarity
             if is_duplicate_event(event_data):
@@ -297,7 +304,7 @@ def process_recent_feed(
     logger.info(
         f"Feed processing completed. Processed {posts_processed} posts, added {events_added} events"
     )
-    logger.info(f"\n--- Summary ---")
+    logger.info("\n--- Summary ---")
     logger.info(f"Added {events_added} event(s) to Supabase")
 
 
