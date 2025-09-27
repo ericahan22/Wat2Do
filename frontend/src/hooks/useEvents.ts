@@ -99,7 +99,6 @@ export function useEvents(view: "grid" | "calendar") {
         
       return rawEvents
         .filter((event) => {
-          console.log(event);
           const eventDateStr = event.date; // e.g., "2025-09-24"
 
           // If event is on a future date, include it
