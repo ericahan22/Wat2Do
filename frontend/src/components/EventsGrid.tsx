@@ -42,9 +42,9 @@ const isEventNew = (event: Event): boolean => {
   
   const now = new Date();
   const addedAt = new Date(event.added_at);
-  const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
+  const seventeenHoursInMs = 17 * 60 * 60 * 1000;
   
-  return (now.getTime() - addedAt.getTime()) <= twentyFourHoursInMs;
+  return (now.getTime() - addedAt.getTime()) <= seventeenHoursInMs;
 };
 
 const EventStatusBadge = ({ event }: { event: Event }) => {
