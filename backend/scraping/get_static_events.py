@@ -4,8 +4,9 @@ from datetime import date, datetime, time
 
 import psycopg2
 from dotenv import load_dotenv
- 
+
 load_dotenv()
+
 
 def format_value(value):
     """Format values for TypeScript file"""
@@ -65,7 +66,13 @@ def main():
                 events = [dict(zip(columns, row)) for row in cur.fetchall()]
                 logging.info(f"Fetched {len(events)} events.")
         output_path = os.path.join(
-            os.path.dirname(__file__), "..", "..", "frontend", "src", "data", "staticEvents.ts"
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "frontend",
+            "src",
+            "data",
+            "staticEvents.ts",
         )
         logging.info(f"Writing to {output_path}...")
         with open(output_path, "w", encoding="utf-8") as f:
@@ -73,8 +80,8 @@ def main():
             f.write("export const staticEventsData: Record<string, Event> = {\n")
             for i, event in enumerate(events):
                 event_id = str(event["id"])
-                f.write(f'  {format_value(event_id)}: {{\n')
-                f.write(f'    id: {format_value(event_id)},\n')
+                f.write(f"  {format_value(event_id)}: {{\n")
+                f.write(f"    id: {format_value(event_id)},\n")
                 f.write(f'    club_handle: {format_value(event["club_handle"])},\n')
                 f.write(f'    url: {format_value(event["url"])},\n')
                 f.write(f'    name: {format_value(event["name"])},\n')
