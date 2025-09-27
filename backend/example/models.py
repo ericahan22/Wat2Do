@@ -1,6 +1,7 @@
 from django.db import models
 from pgvector.django import VectorField
 
+
 class Clubs(models.Model):
     club_name = models.CharField(max_length=100, unique=True)
     categories = models.CharField(max_length=255)
@@ -23,6 +24,7 @@ class Clubs(models.Model):
 
     def __str__(self):
         return self.club_name
+
 
 class Events(models.Model):
     club_handle = models.CharField(max_length=100, blank=True, null=True)  

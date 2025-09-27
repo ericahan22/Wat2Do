@@ -150,8 +150,8 @@ def extract_event_from_caption(caption_text: str, image_url: Optional[str] = Non
             event_data = json.loads(response_text.strip())
             
             # Ensure all required fields are present
-            required_fields = ["name", "date", "start_time", "end_time", "location", 
-                             "price", "food", "registration", "image_url"]
+            required_fields = ["name", "date", "start_time", "end_time", "location",
+                               "price", "food", "registration", "image_url"]
             for field in required_fields:
                 if field not in event_data:
                     if field == "price":

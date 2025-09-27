@@ -7,6 +7,7 @@ import time
 URL = 'https://clubs.wusa.ca/club_listings'
 REQUEST_DELAY = 1
 
+
 def get_soup(url):
     try:
         res = requests.get(url, timeout=10)

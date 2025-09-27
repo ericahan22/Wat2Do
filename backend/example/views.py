@@ -6,16 +6,15 @@ from rest_framework.decorators import api_view, throttle_classes, permission_cla
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from .models import Clubs, Events 
-import json
 from django.db.models import Subquery, OuterRef 
 from datetime import datetime, date, time
 from pytz import timezone
-from .embedding_utils import generate_event_embedding, is_duplicate_event, find_similar_events
+from .embedding_utils import generate_event_embedding, find_similar_events
 from services.openai_service import generate_embedding
 from django.db import connection 
 

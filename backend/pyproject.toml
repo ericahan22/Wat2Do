@@ -1,0 +1,43 @@
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+# Enable the same rules as your previous flake8 setup
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings  
+    "F",  # Pyflakes
+    "I",  # isort
+]
+
+# Ignore rules (Ruff uses different codes than flake8)
+ignore = [
+    "E203",  # whitespace before ':' (conflicts with formatter)
+    "E501",  # line too long (handled by formatter)
+    "W291",  # trailing whitespace
+    "W292",  # no newline at end of file
+    "W293",  # blank line contains whitespace
+]
+
+# Per-file ignores (same as your .flake8 setup)
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"*/migrations/*" = ["E", "W", "F", "I"]  # Ignore all rules in migrations
+"*/embedding_utils.py" = ["E402"]  # Allow imports not at top (Django setup)
+"*/instagram_feed.py" = ["E402"]   # Allow imports not at top (Django setup)
+
+[tool.ruff.lint.isort]
+# Configure import sorting (same as your previous isort setup)
+known-first-party = ["api", "example", "services", "scraping"]
+known-third-party = ["django"]
+section-order = ["future", "standard-library", "django", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+django = ["django"]
+
+[tool.ruff.format]
+# Use Black-compatible formatting
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

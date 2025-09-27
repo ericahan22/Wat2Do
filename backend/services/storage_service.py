@@ -8,7 +8,7 @@ specifically AWS S3. It handles image validation, optimization, and upload.
 import os
 import boto3
 import logging
-from botocore.exceptions import ClientError, NoCredentialsError
+from botocore.exceptions import ClientError
 import requests
 from io import BytesIO
 from PIL import Image

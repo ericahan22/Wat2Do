@@ -17,6 +17,7 @@ def format_value(value):
         return str(value).lower()
     return value
 
+
 def main():
     """Connects to Supabase DB, fetches all events, writes to TS file"""
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
