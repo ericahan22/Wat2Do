@@ -1,7 +1,7 @@
 import { Event } from "@/hooks/useEvents";
 
-export const staticEventsData: Event[] = [
-  {
+export const staticEventsData: Record<string, Event> = {
+  "297": {
     id: "297",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DO6SKyNDnI9/",
@@ -17,7 +17,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "255": {
     id: "255",
     club_handle: "ascenduw",
     url: "https://www.instagram.com/p/DOgUojiAMJO/",
@@ -33,7 +33,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "372": {
     id: "372",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPAo06LjSvV/",
@@ -49,23 +49,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "412": {
     id: "412",
-    club_handle: "taqwacon",
+    club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPF0UZuDdyw/",
     name: "Taqwa Con Escape Room",
     date: "2025-10-11",
     start_time: "12:00:00",
     end_time: "20:30:00",
-    location: "LH 3101 & 3098",
+    location: "LH 3101 & 3098 (WLU)",
     price: null,
     food: "",
     registration: true,
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/eb76fdd9-588e-4e44-83ad-2bfa1cd6fa418.jpg",
-    club_type: null,
+    club_type: "WUSA",
     added_at: "2025-09-27T12:45:10.236068",
   },
-  {
+  "184": {
     id: "184",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOtU_gEjdfY/",
@@ -81,7 +81,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "367": {
     id: "367",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DPADOcADWKI/",
@@ -97,7 +97,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "304": {
     id: "304",
     club_handle: "fass.theatre.company",
     url: "https://www.instagram.com/p/DO9OHmcjzcJ/",
@@ -113,7 +113,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "313": {
     id: "313",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DO9XVOQE2ST/",
@@ -129,7 +129,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "405": {
     id: "405",
     club_handle: "uw.bmlt",
     url: "https://www.instagram.com/p/DO_TQyuEYIT/",
@@ -145,7 +145,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-26T14:59:17.055733",
   },
-  {
+  "264": {
     id: "264",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOYgs9lEyok/",
@@ -161,7 +161,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "415": {
     id: "415",
     club_handle: "kwcommunists",
     url: "https://www.instagram.com/p/DPCkVJ1ibss/",
@@ -169,7 +169,7 @@ export const staticEventsData: Event[] = [
     date: "2025-10-06",
     start_time: "18:00:00",
     end_time: "20:00:00",
-    location: "Black and Gold Room, UWATERLOO",
+    location: "Black and Gold Room",
     price: null,
     food: "",
     registration: false,
@@ -177,7 +177,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-27T12:45:52.187264",
   },
-  {
+  "358": {
     id: "358",
     club_handle: "uwmun",
     url: "https://www.instagram.com/p/DPAor1jDSqd/",
@@ -193,7 +193,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "284": {
     id: "284",
     club_handle: "spaceapps.kw",
     url: "https://www.instagram.com/p/DO6snOIDzJK/",
@@ -209,7 +209,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "375": {
     id: "375",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO_5s7UAY7s/",
@@ -225,7 +225,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "347": {
     id: "347",
     club_handle: "uw_jsa",
     url: "https://www.instagram.com/p/DPAEyY8Ds4D/",
@@ -241,7 +241,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "285": {
     id: "285",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DO6xLImjk2o/",
@@ -257,7 +257,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "272": {
     id: "272",
     club_handle: "uwscisoc",
     url: "https://www.instagram.com/p/DO8cluhjUeY/",
@@ -273,7 +273,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "404": {
     id: "404",
     club_handle: "uw_base",
     url: "https://www.instagram.com/p/DO_vg_8j36e/",
@@ -289,7 +289,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-26T14:55:42.505592",
   },
-  {
+  "263": {
     id: "263",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DOsASg6DVhF/",
@@ -305,7 +305,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "341": {
     id: "341",
     club_handle: "uwerssa",
     url: "https://www.instagram.com/p/DPARtk9jODp/",
@@ -321,7 +321,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "373": {
     id: "373",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DPBpKS0ET14/",
@@ -337,39 +337,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
-    id: "398",
-    club_handle: "jamnetwork_uw",
-    url: "https://www.instagram.com/p/DPDVr54DDXc/",
-    name: "Vocal Victories",
-    date: "2025-10-02",
-    start_time: "18:00:00",
-    end_time: "19:30:00",
-    location: "AL 124",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a58e921e-4c8d-4577-acd4-c539a7d6d853.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-26T14:43:25.625363",
-  },
-  {
-    id: "419",
-    club_handle: "uwaterloowics",
-    url: "https://www.instagram.com/p/DPCxzBxDbTV/",
-    name: "Navigating Co-op",
-    date: "2025-10-02",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "MC Comfy",
-    price: null,
-    food: "pizza",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dae6e1d4-fc16-4b5a-84d4-848fd6167a4f.jpg",
-    club_type: "Student Society",
-    added_at: "2025-09-27T12:48:23.797986",
-  },
-  {
+  "301": {
     id: "301",
     club_handle: "uw.psa",
     url: "https://www.instagram.com/p/DO9S00KDrCL/",
@@ -385,7 +353,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "398": {
+    id: "398",
+    club_handle: "jamnetwork_uw",
+    url: "https://www.instagram.com/p/DPDVr54DDXc/",
+    name: "Vocal Victories",
+    date: "2025-10-02",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "STC 0050",
+    price: 2.5,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfe8c228-82a3-49ed-b903-2dbef2cb34a9.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-26T14:43:25.625363",
+  },
+  "406": {
     id: "406",
     club_handle: "uw.crafts4charity",
     url: "https://www.instagram.com/p/DPErhoKDmxr/",
@@ -401,7 +385,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-26T20:35:48.685713",
   },
-  {
+  "389": {
     id: "389",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DPCxzBxDbTV/",
@@ -417,7 +401,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-26T14:43:25.625363",
   },
-  {
+  "419": {
+    id: "419",
+    club_handle: "uwaterloowics",
+    url: "https://www.instagram.com/p/DPCxzBxDbTV/",
+    name: "Navigating Co-op",
+    date: "2025-10-02",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "MC Comfy",
+    price: null,
+    food: "pizza",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dae6e1d4-fc16-4b5a-84d4-848fd6167a4f.jpg",
+    club_type: "Student Society",
+    added_at: "2025-09-27T12:48:23.797986",
+  },
+  "425": {
     id: "425",
     club_handle: "mns.soc",
     url: "https://www.instagram.com/p/DPEdgLPAI_2/",
@@ -433,7 +433,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-27T12:52:11.732054",
   },
-  {
+  "261": {
     id: "261",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOtIGtPkyEW/",
@@ -449,7 +449,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "423": {
     id: "423",
     club_handle: "uwenglishsociety",
     url: "https://www.instagram.com/p/DPEWQLzDVnp/",
@@ -465,7 +465,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-27T12:50:08.539418",
   },
-  {
+  "416": {
     id: "416",
     club_handle: "uw.mehfil",
     url: "https://www.instagram.com/p/DPFN4D4kpRC/",
@@ -481,7 +481,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-27T12:46:33.843680",
   },
-  {
+  "273": {
     id: "273",
     club_handle: "uwenglishsociety",
     url: "https://www.instagram.com/p/DO61gXckbke/",
@@ -497,7 +497,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "417": {
     id: "417",
     club_handle: "wreaclub",
     url: "https://www.instagram.com/p/DPFRk6wj8DM/",
@@ -513,7 +513,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-27T12:47:18.807320",
   },
-  {
+  "411": {
     id: "411",
     club_handle: "uwsoccerwpclub",
     url: "https://www.instagram.com/p/DPF_a8HgJQP/",
@@ -523,29 +523,13 @@ export const staticEventsData: Event[] = [
     end_time: "18:00:00",
     location: "MC 4058",
     price: 5.0,
-    food: "pizza, pop",
+    food: "Pizza, pop",
     registration: false,
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b19f685c-be95-4898-bda4-5501327e501a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:44:59.427612",
   },
-  {
-    id: "266",
-    club_handle: "ahsum.waterloo",
-    url: "https://www.instagram.com/p/DO6G4G0gFrG/",
-    name: "BeaverTail Food Truck",
-    date: "2025-10-01",
-    start_time: "12:30:00",
-    end_time: "14:30:00",
-    location: "BMH Services Parking Lot",
-    price: 7.0,
-    food: "BeaverTails",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39448e1a-47b6-4b63-8484-4c935e65e850.jpg",
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "421": {
     id: "421",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DPB9V32DYqV/",
@@ -561,7 +545,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-27T12:49:47.017055",
   },
-  {
+  "266": {
+    id: "266",
+    club_handle: "ahsum.waterloo",
+    url: "https://www.instagram.com/p/DO6G4G0gFrG/",
+    name: "BeaverTail Food Truck",
+    date: "2025-10-01",
+    start_time: "12:30:00",
+    end_time: "14:30:00",
+    location: "BMH Services Parking Lot",
+    price: 7.0,
+    food: "BeaverTails",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39448e1a-47b6-4b63-8484-4c935e65e850.jpg",
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "350": {
     id: "350",
     club_handle: "tma.waterloo",
     url: "https://www.instagram.com/p/DO_n13VkdKn/",
@@ -577,7 +577,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "253": {
     id: "253",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DOWbwKbkZ64/",
@@ -593,7 +593,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "413": {
+    id: "413",
+    club_handle: "uw.fsa",
+    url: "https://www.instagram.com/p/DPEjtl7EZPZ/",
+    name: "Baon Fire",
+    date: "2025-09-30",
+    start_time: "18:00:00",
+    end_time: "22:00:00",
+    location: "Columbia Firepit 2",
+    price: null,
+    food: "Hot dogs, s'mores, drinks",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d4e9648-2319-40ba-8bfa-775308c0acf7.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-27T12:45:20.887933",
+  },
+  "259": {
     id: "259",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOenL-qjg1q/",
@@ -609,23 +625,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "413",
-    club_handle: "uw.fsa",
-    url: "https://www.instagram.com/p/DPEjtl7EZPZ/",
-    name: "Baon Fire 4",
-    date: "2025-09-30",
-    start_time: "18:00:00",
-    end_time: "22:00:00",
-    location: "Columbia Firepit 2",
-    price: null,
-    food: "free food and drinks",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d4e9648-2319-40ba-8bfa-775308c0acf7.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-27T12:45:20.887933",
-  },
-  {
+  "344": {
     id: "344",
     club_handle: "uwbuilders",
     url: "https://www.instagram.com/p/DPAg63UjOxU/",
@@ -641,23 +641,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
-    id: "414",
-    club_handle: "uwbuilders",
-    url: "https://www.instagram.com/p/DPFruJRgGjX/",
-    name: "First Fall Term Club Meetup",
-    date: "2025-09-30",
-    start_time: "16:00:00",
-    end_time: "17:00:00",
-    location: "SLC 3223",
-    price: null,
-    food: "",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/527f4ffd-2d8c-4696-a062-816d60af86d7.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-27T12:45:41.208115",
-  },
-  {
+  "348": {
     id: "348",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DO_8joCAe_2/",
@@ -673,7 +657,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "420": {
     id: "420",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPGtqZSDl4N/",
@@ -689,7 +673,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-27T12:48:45.777261",
   },
-  {
+  "317": {
     id: "317",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DO7prtYDbYj/",
@@ -705,7 +689,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "399": {
     id: "399",
     club_handle: "uwpokerclub",
     url: "https://www.instagram.com/p/DPCzbsRCauW/",
@@ -721,7 +705,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-26T14:43:25.625363",
   },
-  {
+  "321": {
     id: "321",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DO945j6jfHt/",
@@ -737,7 +721,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "343": {
     id: "343",
     club_handle: "medlife_uwaterloo",
     url: "https://www.instagram.com/p/DPAd6P3jqVl/",
@@ -753,7 +737,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "360": {
     id: "360",
     club_handle: "uwaterloopsa",
     url: "https://www.instagram.com/p/DPAjJSZjUn0/",
@@ -769,7 +753,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "274": {
     id: "274",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DO7MFTyjVaa/",
@@ -785,7 +769,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "418": {
     id: "418",
     club_handle: "wloowrestling",
     url: "https://www.instagram.com/p/DPEk1WMitsY/",
@@ -801,7 +785,23 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-27T12:47:41.840746",
   },
-  {
+  "325": {
+    id: "325",
+    club_handle: "wloo.outersclub",
+    url: "https://www.instagram.com/p/DO9DjFBkSYh/",
+    name: "Birdwatching Social",
+    date: "2025-09-28",
+    start_time: "12:00:00",
+    end_time: "14:30:00",
+    location: "CIF",
+    price: null,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9d52ba9b-c031-43d9-b1d4-9ba4f20f578b.jpg",
+    club_type: "Athletics",
+    added_at: "2025-09-27T12:47:41.840746",
+  },
+  "76": {
     id: "76",
     club_handle: "uw.tsu",
     url: "https://www.instagram.com/p/DORelsNkp0K/",
@@ -817,23 +817,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "325",
-    club_handle: "wloo.outersclub",
-    url: "https://www.instagram.com/p/DO9DjFBkSYh/",
-    name: "Birdwatching Social",
-    date: "2025-09-28",
-    start_time: "09:00:00",
-    end_time: "10:00:00",
-    location: "Huron Natural Area",
-    price: null,
-    food: "Birdseed",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6431cee0-70a3-476a-9131-de76381d4fd8.jpg",
-    club_type: "Athletics",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "243": {
     id: "243",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOWM9WQjle-/",
@@ -849,39 +833,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "409",
-    club_handle: "test_club",
-    url: "https://example.com",
-    name: "Authenticated Test Event",
-    date: "2025-09-27",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "Test Location",
-    price: 10.0,
-    food: "Pizza and drinks",
-    registration: false,
-    image_url: "https://example.com/image.jpg",
-    club_type: null,
-    added_at: "2025-09-27T11:53:04.049169",
-  },
-  {
-    id: "410",
-    club_handle: "test_club",
-    url: "https://example.com",
-    name: "Admin Only Test Event",
-    date: "2025-09-27",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "Admin Location",
-    price: 10.0,
-    food: "Pizza and drinks",
-    registration: false,
-    image_url: "https://example.com/image.jpg",
-    club_type: null,
-    added_at: "2025-09-27T11:55:04.988148",
-  },
-  {
+  "424": {
     id: "424",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPFvhP8Ebb0/",
@@ -897,7 +849,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-27T12:51:36.713020",
   },
-  {
+  "422": {
     id: "422",
     club_handle: "wlooringette",
     url: "https://www.instagram.com/p/DPEVLHTjesU/",
@@ -913,7 +865,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-27T12:49:57.226044",
   },
-  {
+  "262": {
     id: "262",
     club_handle: "uw.tsu",
     url: "https://www.instagram.com/p/DOZU_0REva5/",
@@ -929,7 +881,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "287": {
     id: "287",
     club_handle: "uwkpopclub",
     url: "https://www.instagram.com/p/DO7JZqIDVqZ/",
@@ -945,7 +897,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "342": {
     id: "342",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DO_u5t1kVCn/",
@@ -961,23 +913,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
-    id: "368",
-    club_handle: "wloorunning",
-    url: "https://www.instagram.com/p/DO_6cqckedF/",
-    name: "Bonfire Night",
-    date: "2025-09-26",
-    start_time: "19:00:00",
-    end_time: "21:00:00",
-    location: "CL1 Firepit",
-    price: null,
-    food: "S'mores",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3efcc7d4-9792-4726-a914-3004af8916d5.jpg",
-    club_type: "Athletics",
-    added_at: "2025-09-25T15:35:01.613015",
-  },
-  {
+  "365": {
     id: "365",
     club_handle: "uwccf",
     url: "https://www.instagram.com/p/DO_d9_LjR67/",
@@ -993,7 +929,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "368": {
+    id: "368",
+    club_handle: "wloorunning",
+    url: "https://www.instagram.com/p/DO_6cqckedF/",
+    name: "Bonfire Night",
+    date: "2025-09-26",
+    start_time: "19:00:00",
+    end_time: "21:00:00",
+    location: "CL1 Firepit",
+    price: null,
+    food: "S'mores",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3efcc7d4-9792-4726-a914-3004af8916d5.jpg",
+    club_type: "Athletics",
+    added_at: "2025-09-25T15:35:01.613015",
+  },
+  "206": {
     id: "206",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOynYcZDghl/",
@@ -1009,23 +961,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "371",
-    club_handle: "jamnetwork_uw",
-    url: "https://www.instagram.com/p/DPAfIXejA3p/",
-    name: "Beginning of Term Open Mic",
-    date: "2025-09-26",
-    start_time: "18:00:00",
-    end_time: "19:00:00",
-    location: "Arts Quad",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ec51c52d-5e57-42af-a4c0-b5706ce582f2.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-25T15:35:01.613015",
-  },
-  {
+  "337": {
     id: "337",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DO8rJJ_AC4F/",
@@ -1041,7 +977,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "371": {
+    id: "371",
+    club_handle: "jamnetwork_uw",
+    url: "https://www.instagram.com/p/DPAfIXejA3p/",
+    name: "Beginning of Term Open Mic",
+    date: "2025-09-26",
+    start_time: "18:00:00",
+    end_time: "19:00:00",
+    location: "Arts Quad",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ec51c52d-5e57-42af-a4c0-b5706ce582f2.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-25T15:35:01.613015",
+  },
+  "383": {
     id: "383",
     club_handle: "uwboardgames",
     url: "https://www.instagram.com/p/DPDeQCgDVeg/",
@@ -1057,7 +1009,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-26T14:43:25.625363",
   },
-  {
+  "250": {
     id: "250",
     club_handle: "uwindianca",
     url: "https://www.instagram.com/p/DOyi1lQEXog/",
@@ -1073,7 +1025,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "331": {
     id: "331",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO9hbkpDjxJ/",
@@ -1089,23 +1041,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "283",
-    club_handle: "uw_psychsoc",
-    url: "https://www.instagram.com/p/DO7Ji0_kWrt/",
-    name: "Grad School Info Session",
-    date: "2025-09-26",
-    start_time: "16:30:00",
-    end_time: "19:00:00",
-    location: "PAS 2083",
-    price: null,
-    food: "Pizza, drinks",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2c92e8bb-a177-4e9a-ab8f-a7bb97b0e2d5.jpg",
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "275": {
     id: "275",
     club_handle: "uw_phys_club",
     url: "https://www.instagram.com/p/DO7AT7JkTm4/",
@@ -1121,7 +1057,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "283": {
+    id: "283",
+    club_handle: "uw_psychsoc",
+    url: "https://www.instagram.com/p/DO7Ji0_kWrt/",
+    name: "Grad School Info Session",
+    date: "2025-09-26",
+    start_time: "16:30:00",
+    end_time: "19:00:00",
+    location: "PAS 2083",
+    price: null,
+    food: "Pizza, drinks",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2c92e8bb-a177-4e9a-ab8f-a7bb97b0e2d5.jpg",
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "370": {
     id: "370",
     club_handle: "uwvelocity",
     url: "https://www.instagram.com/p/DPB1zohjorB/",
@@ -1137,7 +1089,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "260": {
     id: "260",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOqf5IyE4m2/",
@@ -1153,7 +1105,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "299": {
     id: "299",
     club_handle: "wlooartisticswimming",
     url: "https://www.instagram.com/p/DO-IyDlDV9k/",
@@ -1169,7 +1121,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "374": {
     id: "374",
     club_handle: "uw.movie.watchers.club",
     url: "https://www.instagram.com/p/DPBnvA_keg4/",
@@ -1185,39 +1137,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
-    id: "366",
-    club_handle: "uwhiphop",
-    url: "https://www.instagram.com/p/DPAQ7ZkjMxA/",
-    name: "BOT Session",
-    date: "2025-09-25",
-    start_time: "19:00:00",
-    end_time: "22:00:00",
-    location: "SLC Lower Atrium",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2f9b3f48-c54f-4a85-bdfd-4578514004e5.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-25T15:35:01.613015",
-  },
-  {
-    id: "353",
-    club_handle: "uwcccf",
-    url: "https://www.instagram.com/p/DO_lgsqjrAy/",
-    name: "Bible Study",
-    date: "2025-09-25",
-    start_time: "19:00:00",
-    end_time: "20:00:00",
-    location: "DWE 3518",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/643cfb93-8b82-4d9d-a20b-2053f1800126.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-25T15:35:01.613015",
-  },
-  {
+  "351": {
     id: "351",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DPB1Amsjht3/",
@@ -1233,7 +1153,39 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "353": {
+    id: "353",
+    club_handle: "uwcccf",
+    url: "https://www.instagram.com/p/DO_lgsqjrAy/",
+    name: "Bible Study",
+    date: "2025-09-25",
+    start_time: "19:00:00",
+    end_time: "20:00:00",
+    location: "QNC 2502",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c3846ae5-5a36-48a2-982c-dcf97f0d2f8e.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-25T15:35:01.613015",
+  },
+  "366": {
+    id: "366",
+    club_handle: "uwhiphop",
+    url: "https://www.instagram.com/p/DPAQ7ZkjMxA/",
+    name: "BOT Session",
+    date: "2025-09-25",
+    start_time: "19:00:00",
+    end_time: "22:00:00",
+    location: "SLC Lower Atrium",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2f9b3f48-c54f-4a85-bdfd-4578514004e5.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-25T15:35:01.613015",
+  },
+  "309": {
     id: "309",
     club_handle: "uw_yaf",
     url: "https://www.instagram.com/p/DO-H6dBjvCK/",
@@ -1249,7 +1201,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "300": {
     id: "300",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO-Ab4Qjn_L/",
@@ -1265,7 +1217,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "324": {
     id: "324",
     club_handle: "_uwasa",
     url: "https://www.instagram.com/p/DO9VbUPEf5A/",
@@ -1281,7 +1233,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "349": {
     id: "349",
     club_handle: "uw_sofa",
     url: "https://www.instagram.com/p/DPAHdTVDdQ4/",
@@ -1297,7 +1249,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "279": {
     id: "279",
     club_handle: "uwteaclub",
     url: "https://www.instagram.com/p/DO7G0ohDSm0/",
@@ -1313,23 +1265,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "318",
-    club_handle: "eesa_uw",
-    url: "https://www.instagram.com/p/DO9rhrxkaCO/",
-    name: "Diaspora Link-up",
-    date: "2025-09-25",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "STC 0050",
-    price: null,
-    food: "Yes!",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/42e46134-83d6-4fd1-ba0b-5f63cccd4d7f.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "271": {
     id: "271",
     club_handle: "uwaterloondp",
     url: "https://www.instagram.com/p/DO8fq0ZkWjK/",
@@ -1345,7 +1281,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "318": {
+    id: "318",
+    club_handle: "eesa_uw",
+    url: "https://www.instagram.com/p/DO9rhrxkaCO/",
+    name: "Diaspora Link-up",
+    date: "2025-09-25",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "STC 0050",
+    price: null,
+    food: "Yes!",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/42e46134-83d6-4fd1-ba0b-5f63cccd4d7f.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "357": {
     id: "357",
     club_handle: "uwskate",
     url: "https://www.instagram.com/p/DPAfmFskUfL/",
@@ -1361,7 +1313,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "369": {
     id: "369",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO_4LFnAUok/",
@@ -1377,7 +1329,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "270": {
     id: "270",
     club_handle: "uwvisualartsclub",
     url: "https://www.instagram.com/p/DO7cr86DT18/",
@@ -1393,23 +1345,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "267",
-    club_handle: "uwaterloopremed",
-    url: "https://www.instagram.com/p/DO5-nZ6kcT_/",
-    name: "Pre-Med 101",
-    date: "2025-09-25",
-    start_time: "17:30:00",
-    end_time: "20:00:00",
-    location: "STC 0010",
-    price: null,
-    food: "Pizza",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d360ff69-a995-45e1-ad4f-2dbe6ba5e15c.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "199": {
     id: "199",
     club_handle: "uwbiochem",
     url: "https://www.instagram.com/p/DOylBhlDiE9/",
@@ -1425,7 +1361,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "267": {
+    id: "267",
+    club_handle: "uwaterloopremed",
+    url: "https://www.instagram.com/p/DO5-nZ6kcT_/",
+    name: "Pre-Med 101",
+    date: "2025-09-25",
+    start_time: "17:30:00",
+    end_time: "20:00:00",
+    location: "STC 0010",
+    price: null,
+    food: "Pizza",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d360ff69-a995-45e1-ad4f-2dbe6ba5e15c.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "142": {
     id: "142",
     club_handle: "uw_psychsoc",
     url: "https://www.instagram.com/p/DOhUUaJkeoj/",
@@ -1441,7 +1393,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "286": {
     id: "286",
     club_handle: "uwsbsa",
     url: "https://www.instagram.com/p/DO64LJBAcRr/",
@@ -1457,7 +1409,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "211": {
     id: "211",
     club_handle: "mns.soc",
     url: "https://www.instagram.com/p/DOyaL9QgEAc/",
@@ -1473,7 +1425,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "278": {
     id: "278",
     club_handle: "uwcsclub",
     url: "https://www.instagram.com/p/DO6XKC6jU7L/",
@@ -1489,7 +1441,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "363": {
     id: "363",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DPARe_BD6zb/",
@@ -1505,11 +1457,11 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
-    id: "289",
-    club_handle: "uwimprovisation",
-    url: "https://www.instagram.com/p/DO6zp1pkfKB/",
-    name: "Improv Club Weekly Meeting",
+  "246": {
+    id: "246",
+    club_handle: "uwactsciclub",
+    url: "https://www.instagram.com/p/DOwtFMHjYct/",
+    name: "Beginning of Term Social",
     date: "2025-09-24",
     start_time: "18:00:00",
     end_time: "20:00:00",
@@ -1521,7 +1473,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "281": {
     id: "281",
     club_handle: "uwaterloobhangra",
     url: "https://www.instagram.com/p/DO6uMFbj39J/",
@@ -1537,7 +1489,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "289": {
+    id: "289",
+    club_handle: "uwimprovisation",
+    url: "https://www.instagram.com/p/DO6zp1pkfKB/",
+    name: "Improv Club Weekly Meeting",
+    date: "2025-09-24",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "KST Dance Studio",
+    price: null,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2afc9c7e-c282-45e7-95d1-71d92ebc130a.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "336": {
     id: "336",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO9W3NEAR6c/",
@@ -1553,23 +1521,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "246",
-    club_handle: "uwactsciclub",
-    url: "https://www.instagram.com/p/DOwtFMHjYct/",
-    name: "Beginning of Term Social",
-    date: "2025-09-24",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "MC Comfy",
-    price: null,
-    food: "Yes",
-    registration: false,
-    image_url: null,
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "153": {
     id: "153",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOiqm0Ok6xE/",
@@ -1585,7 +1537,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "242": {
     id: "242",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOWisrHkzMv/",
@@ -1601,7 +1553,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "316": {
     id: "316",
     club_handle: "femphys",
     url: "https://www.instagram.com/p/DO8i7OgDRdK/",
@@ -1617,7 +1569,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "378": {
     id: "378",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DO_d8nzjedQ/",
@@ -1633,7 +1585,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
   },
-  {
+  "280": {
     id: "280",
     club_handle: "uwmusoc",
     url: "https://www.instagram.com/p/DO6aUFRDj0E/",
@@ -1649,7 +1601,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "205": {
     id: "205",
     club_handle: "envwags",
     url: "https://www.instagram.com/p/DOyHXMnjT5Q/",
@@ -1665,7 +1617,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "276": {
     id: "276",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DO6n5Btkojw/",
@@ -1681,23 +1633,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "254",
-    club_handle: "uwaterloodsc",
-    url: "https://www.instagram.com/p/DOrOLTDj3nR/",
-    name: "Point72 x DSC Panel",
-    date: "2025-09-23",
-    start_time: "18:30:00",
-    end_time: "19:30:00",
-    location: "STC 0020",
-    price: null,
-    food: "Chung Chun, pop",
-    registration: true,
-    image_url: null,
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "190": {
     id: "190",
     club_handle: "uw.mehfil",
     url: "https://www.instagram.com/p/DOtxH0AEi2d/",
@@ -1713,7 +1649,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "254": {
+    id: "254",
+    club_handle: "uwaterloodsc",
+    url: "https://www.instagram.com/p/DOrOLTDj3nR/",
+    name: "Point72 x DSC Panel",
+    date: "2025-09-23",
+    start_time: "18:30:00",
+    end_time: "19:30:00",
+    location: "STC 0020",
+    price: null,
+    food: "Chung Chun, pop",
+    registration: true,
+    image_url: null,
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "315": {
     id: "315",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DO9VkngjwN5/",
@@ -1729,7 +1681,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "185": {
     id: "185",
     club_handle: "tma.waterloo",
     url: "https://www.instagram.com/p/DOtopKwDR65/",
@@ -1745,7 +1697,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "252": {
     id: "252",
     club_handle: "uwcsclub",
     url: "https://www.instagram.com/p/DOtm3sijhAz/",
@@ -1761,7 +1713,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "247": {
     id: "247",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOyjpGwjip3/",
@@ -1777,7 +1729,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "282": {
     id: "282",
     club_handle: "uwfilmclub_",
     url: "https://www.instagram.com/p/DO6sVKhgTVu/",
@@ -1793,7 +1745,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "172": {
     id: "172",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DOonDzLjtXT",
@@ -1809,7 +1761,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "288": {
     id: "288",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO6PbNIjgkc/",
@@ -1825,7 +1777,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "239": {
     id: "239",
     club_handle: "uw_aises",
     url: "https://www.instagram.com/p/DOdzMZgESPe/",
@@ -1841,7 +1793,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "192": {
     id: "192",
     club_handle: "uwneuro",
     url: "https://www.instagram.com/p/DOuFLKzgIYQ/",
@@ -1857,7 +1809,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "164": {
     id: "164",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DOpNjgMDUL_",
@@ -1873,7 +1825,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "265": {
     id: "265",
     club_handle: "knituw",
     url: "https://www.instagram.com/p/DO55VQujTJ8/",
@@ -1889,7 +1841,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "258": {
     id: "258",
     club_handle: "arbussociety",
     url: "https://www.instagram.com/p/DOtfK8-DrM9/",
@@ -1905,55 +1857,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "115",
-    club_handle: "uwmathnews",
-    url: "https://www.instagram.com/p/DOflnPujTK5/",
-    name: "Prod Night",
-    date: "2025-09-22",
-    start_time: "18:30:00",
-    end_time: "19:30:00",
-    location: "QNC 1502",
-    price: null,
-    food: "Pizza",
-    registration: false,
-    image_url: null,
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "292",
-    club_handle: "uwdeception",
-    url: "https://www.instagram.com/p/DO6r9TbknUB/",
-    name: "Clocktower",
-    date: "2025-09-22",
-    start_time: "18:30:00",
-    end_time: "19:30:00",
-    location: "EV3 3408 & 3412",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/098ba6e5-d9b4-4f80-bbf3-a2c905d1320f.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "256",
-    club_handle: "uwlegalstudiessociety",
-    url: "https://www.instagram.com/p/DO30O7hkehM/",
-    name: "Welcome Event",
-    date: "2025-09-22",
-    start_time: "18:30:00",
-    end_time: "20:30:00",
-    location: "AL 208",
-    price: null,
-    food: "Snacks, drinks",
-    registration: true,
-    image_url: null,
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "257": {
     id: "257",
     club_handle: "uwcampuscompost",
     url: "https://www.instagram.com/p/DOrLMMfE01L/",
@@ -1969,23 +1873,55 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "186",
-    club_handle: "uw.fsa",
-    url: "https://www.instagram.com/p/DOuMdVPAdpM/",
-    name: "Bilis Barkada Speed Friending",
+  "256": {
+    id: "256",
+    club_handle: "uwlegalstudiessociety",
+    url: "https://www.instagram.com/p/DO30O7hkehM/",
+    name: "Welcome Event",
     date: "2025-09-22",
-    start_time: "18:00:00",
-    end_time: "21:00:00",
-    location: "SLC Black and Gold Room",
+    start_time: "18:30:00",
+    end_time: "19:30:00",
+    location: "QNC 1502",
     price: null,
-    food: "Yes",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/72f953c4-ff5b-43be-ad56-60a1dd73382a.jpg",
+    food: "Pizza",
+    registration: false,
+    image_url: null,
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "115": {
+    id: "115",
+    club_handle: "uwmathnews",
+    url: "https://www.instagram.com/p/DOflnPujTK5/",
+    name: "Prod Night",
+    date: "2025-09-22",
+    start_time: "18:30:00",
+    end_time: "19:30:00",
+    location: "QNC 1502",
+    price: null,
+    food: "Pizza",
+    registration: false,
+    image_url: null,
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "292": {
+    id: "292",
+    club_handle: "uwdeception",
+    url: "https://www.instagram.com/p/DO6r9TbknUB/",
+    name: "Clocktower",
+    date: "2025-09-22",
+    start_time: "18:30:00",
+    end_time: "19:30:00",
+    location: "EV3 3408 & 3412",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/098ba6e5-d9b4-4f80-bbf3-a2c905d1320f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "93": {
     id: "93",
     club_handle: "uw.pssa",
     url: "https://www.instagram.com/p/DOXY5voDYE6/",
@@ -2001,7 +1937,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "174": {
+    id: "174",
+    club_handle: "uwactsciclub",
+    url: "https://www.instagram.com/p/DOosl8UgQHI",
+    name: "RBC Networking Event",
+    date: "2025-09-22",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "MC 5501",
+    price: null,
+    food: "Pizza, drinks",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d151c727-23ee-466a-b362-ad41741bd051.jpg",
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "222": {
     id: "222",
     club_handle: "uwdebate",
     url: "https://www.instagram.com/p/DO3pr61jTTd/",
@@ -2017,23 +1969,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "174",
-    club_handle: "uwactsciclub",
-    url: "https://www.instagram.com/p/DOosl8UgQHI",
-    name: "RBC Networking Event",
-    date: "2025-09-22",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "MC 5501",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d151c727-23ee-466a-b362-ad41741bd051.jpg",
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "249": {
     id: "249",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOyxx-cALMT/",
@@ -2049,7 +1985,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "186": {
+    id: "186",
+    club_handle: "uw.fsa",
+    url: "https://www.instagram.com/p/DOuMdVPAdpM/",
+    name: "Bilis Barkada Speed Friending",
+    date: "2025-09-22",
+    start_time: "18:00:00",
+    end_time: "21:00:00",
+    location: "SLC Black and Gold Room",
+    price: null,
+    food: "Yes",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/72f953c4-ff5b-43be-ad56-60a1dd73382a.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "163": {
     id: "163",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOphsnnDRfc",
@@ -2065,7 +2017,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "234": {
     id: "234",
     club_handle: "uwtetris",
     url: "https://www.instagram.com/p/DOrGgLZgYkx/",
@@ -2081,7 +2033,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "223": {
     id: "223",
     club_handle: "wloofencing",
     url: "https://www.instagram.com/p/DO3mfE8juX1/",
@@ -2097,7 +2049,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "213": {
     id: "213",
     club_handle: "uwaterlooacs",
     url: "https://www.instagram.com/p/DO1NHy3kayg/",
@@ -2113,7 +2065,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "251": {
     id: "251",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOxGHSdjGSD/",
@@ -2129,7 +2081,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "151": {
     id: "151",
     club_handle: "susawaterloo",
     url: "https://www.instagram.com/p/DOj4TJDAH9y/",
@@ -2145,7 +2097,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "152": {
     id: "152",
     club_handle: "wlooclimbingclub",
     url: "https://www.instagram.com/p/DOjOr5_Ef49/",
@@ -2161,7 +2113,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "202": {
     id: "202",
     club_handle: "uwtrgbookclub",
     url: "https://www.instagram.com/p/DOyq7j6juI_/",
@@ -2177,7 +2129,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "208": {
     id: "208",
     club_handle: "uw.psa",
     url: "https://www.instagram.com/p/DO1X-0FDubu/",
@@ -2193,7 +2145,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "209": {
     id: "209",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOynuEPDvyE/",
@@ -2209,7 +2161,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "117": {
     id: "117",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOe4n0QDZiI/",
@@ -2225,7 +2177,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "181": {
     id: "181",
     club_handle: "uwriichi_mahjong",
     url: "https://www.instagram.com/p/DOugA6Ekfl4/",
@@ -2241,7 +2193,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "214": {
     id: "214",
     club_handle: "wlooringette",
     url: "https://www.instagram.com/p/DO1fgKOEWnW/",
@@ -2257,7 +2209,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "203": {
     id: "203",
     club_handle: "wloocricket",
     url: "https://www.instagram.com/p/DOzDXVkEVwg/",
@@ -2273,7 +2225,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "120": {
     id: "120",
     club_handle: "uwaterloohksa",
     url: "https://www.instagram.com/p/DOfTkC5jMwF/",
@@ -2289,7 +2241,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "197": {
     id: "197",
     club_handle: "uwyugioh",
     url: "https://www.instagram.com/p/DOzFtRUEr5d/",
@@ -2305,7 +2257,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "171": {
     id: "171",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOpGWpWjDSR",
@@ -2321,7 +2273,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "140": {
     id: "140",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DOgaFl5DeUw/",
@@ -2337,7 +2289,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "150": {
     id: "150",
     club_handle: "uwaterloodj",
     url: "https://www.instagram.com/p/DOZup2SkVHb/",
@@ -2353,7 +2305,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "189": {
     id: "189",
     club_handle: "uw_breakers",
     url: "https://www.instagram.com/p/DOtjgvxgJvy/",
@@ -2369,7 +2321,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "107": {
     id: "107",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DOaHtQ_DCg5/",
@@ -2385,23 +2337,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "144",
-    club_handle: "uwaterloowics",
-    url: "https://www.instagram.com/p/DOglm0ZDpNJ/",
-    name: "BOT Karaoke Night",
-    date: "2025-09-19",
-    start_time: "19:00:00",
-    end_time: "21:00:00",
-    location: "STC 0020",
-    price: null,
-    food: "Chungchuns, drinks",
-    registration: true,
-    image_url: null,
-    club_type: "Student Society",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "141": {
     id: "141",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DOhD7VAkhVb/",
@@ -2417,7 +2353,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "144": {
+    id: "144",
+    club_handle: "uwaterloowics",
+    url: "https://www.instagram.com/p/DOglm0ZDpNJ/",
+    name: "BOT Karaoke Night",
+    date: "2025-09-19",
+    start_time: "19:00:00",
+    end_time: "21:00:00",
+    location: "STC 0020",
+    price: null,
+    food: "Chungchuns, drinks",
+    registration: true,
+    image_url: null,
+    club_type: "Student Society",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "231": {
     id: "231",
     club_handle: "uw.unaccompaniedminors",
     url: "https://www.instagram.com/p/DOy2kPiESW6/",
@@ -2433,7 +2385,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "177": {
     id: "177",
     club_handle: "uw.mwa",
     url: "https://www.instagram.com/p/DOrLyjFAbrv",
@@ -2449,23 +2401,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "269",
-    club_handle: "uwaterlooacs",
-    url: "https://www.instagram.com/p/DOwjcRmEVyD/",
-    name: "Mix & Mingle",
-    date: "2025-09-19",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "STC 0040",
-    price: null,
-    food: "Jamaican patties",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b24b8967-aa1b-48ea-acf3-1c0e82163032.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "179": {
     id: "179",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DOqxN80Dv7e",
@@ -2481,23 +2417,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "200",
-    club_handle: "uwboardgames",
-    url: "https://www.instagram.com/p/DOy1korjmV7/",
-    name: "Board Game Night",
-    date: "2025-09-19",
-    start_time: "18:00:00",
-    end_time: "19:00:00",
-    location: "MC 4040",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/db357817-568c-43a7-bfac-0e722ac44042.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "228": {
     id: "228",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOvyH9Kjaa-/",
@@ -2513,7 +2433,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "200": {
+    id: "200",
+    club_handle: "uwboardgames",
+    url: "https://www.instagram.com/p/DOy1korjmV7/",
+    name: "Board Game Night",
+    date: "2025-09-19",
+    start_time: "18:00:00",
+    end_time: "19:00:00",
+    location: "MC 4040",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/db357817-568c-43a7-bfac-0e722ac44042.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "37": {
     id: "37",
     club_handle: "uw.gsa",
     url: "https://www.instagram.com/p/DNZTcw_NGM1/",
@@ -2529,7 +2465,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "269": {
+    id: "269",
+    club_handle: "uwaterlooacs",
+    url: "https://www.instagram.com/p/DOwjcRmEVyD/",
+    name: "Mix & Mingle",
+    date: "2025-09-19",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "STC 0040",
+    price: null,
+    food: "Jamaican patties",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b24b8967-aa1b-48ea-acf3-1c0e82163032.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "161": {
     id: "161",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DOpmwGWAHWN",
@@ -2545,7 +2497,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "168": {
     id: "168",
     club_handle: "uwanthsoc",
     url: "https://www.instagram.com/p/DOoUy45gKF2",
@@ -2561,7 +2513,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "170": {
     id: "170",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOo4PjyAWrT",
@@ -2577,23 +2529,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "230",
-    club_handle: "kc_waterloo",
-    url: "https://www.instagram.com/p/DOrTDHkkdIY/",
-    name: "True Repentance",
-    date: "2025-09-18",
-    start_time: "19:00:00",
-    end_time: "21:00:00",
-    location: "QNC 1507",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfa7657c-f2f9-4080-b4b9-a3ff95a78b86.jpg",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "191": {
     id: "191",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DOq6B5tEeFS/",
@@ -2609,7 +2545,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "121": {
     id: "121",
     club_handle: "uwcsa",
     url: "https://www.instagram.com/p/DOenmr2DkDB/",
@@ -2625,7 +2561,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "230": {
+    id: "230",
+    club_handle: "kc_waterloo",
+    url: "https://www.instagram.com/p/DOrTDHkkdIY/",
+    name: "True Repentance",
+    date: "2025-09-18",
+    start_time: "19:00:00",
+    end_time: "21:00:00",
+    location: "QNC 1507",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfa7657c-f2f9-4080-b4b9-a3ff95a78b86.jpg",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "112": {
     id: "112",
     club_handle: "uwyoungliberals",
     url: "https://www.instagram.com/p/DOcmJWqDF-k/",
@@ -2641,39 +2593,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "59",
-    club_handle: "esawaterloo",
-    url: "https://www.instagram.com/p/DONF2MCDtAy/",
-    name: "Fall 2025 Bonfire Meet & Greet",
-    date: "2025-09-18",
-    start_time: "18:00:00",
-    end_time: "22:00:00",
-    location: "Laurel Creek Firepit",
-    price: null,
-    food: "S'mores, snacks",
-    registration: false,
-    image_url: null,
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "176",
-    club_handle: "wlooquadball",
-    url: "https://www.instagram.com/p/DOr8QUYjPQj",
-    name: "Try-it Session",
-    date: "2025-09-18",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "V1 Green",
-    price: null,
-    food: "",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cc1fb28d-6c63-462d-ba76-90dbd86e693c.jpg",
-    club_type: "Athletics",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "178": {
     id: "178",
     club_handle: "uwvisualartsclub",
     url: "https://www.instagram.com/p/DOsEsfeDVV4",
@@ -2689,7 +2609,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "59": {
+    id: "59",
+    club_handle: "esawaterloo",
+    url: "https://www.instagram.com/p/DONF2MCDtAy/",
+    name: "Fall 2025 Bonfire Meet & Greet",
+    date: "2025-09-18",
+    start_time: "18:00:00",
+    end_time: "22:00:00",
+    location: "Laurel Creek Firepit",
+    price: null,
+    food: "S'mores, snacks",
+    registration: false,
+    image_url: null,
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "183": {
     id: "183",
     club_handle: "uwrepairclub",
     url: "https://www.instagram.com/p/DOuairtkWZx/",
@@ -2705,7 +2641,23 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "176": {
+    id: "176",
+    club_handle: "wlooquadball",
+    url: "https://www.instagram.com/p/DOr8QUYjPQj",
+    name: "Try-it Session",
+    date: "2025-09-18",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "V1 Green",
+    price: null,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cc1fb28d-6c63-462d-ba76-90dbd86e693c.jpg",
+    club_type: "Athletics",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "180": {
     id: "180",
     club_handle: "uwmusoc",
     url: "https://www.instagram.com/p/DOuNgi9D7-A/",
@@ -2721,7 +2673,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "196": {
     id: "196",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN52w2GERJF/",
@@ -2737,7 +2689,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "175": {
     id: "175",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOr--9ZjL_O",
@@ -2753,7 +2705,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "173": {
     id: "173",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DOoti3cj4d4",
@@ -2769,7 +2721,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "162": {
     id: "162",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DOpDxV_DoXp",
@@ -2785,7 +2737,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "129": {
     id: "129",
     club_handle: "uw.mariokart",
     url: "https://www.instagram.com/p/DOgyqvrCR_d/",
@@ -2801,7 +2753,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "51": {
     id: "51",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DOCK1AZiUJ4/",
@@ -2817,7 +2769,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "169": {
     id: "169",
     club_handle: "uwaterloobhangra",
     url: "https://www.instagram.com/p/DOovKgMD2bo",
@@ -2833,7 +2785,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "166": {
     id: "166",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOpixFPgBWq",
@@ -2849,7 +2801,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "111": {
     id: "111",
     club_handle: "gbdasoc",
     url: "https://www.instagram.com/p/DOcPAsoDCaY/",
@@ -2865,23 +2817,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "165",
-    club_handle: "uwcheeseclub",
-    url: "https://www.instagram.com/p/DOoqRthDeSq",
-    name: "Cheese Club Meeting",
-    date: "2025-09-16",
-    start_time: "18:00:00",
-    end_time: "19:00:00",
-    location: "RCH 105",
-    price: 5.0,
-    food: "Vacherousse, Traditional Danish Blue, Old White Cheddar, Triple Cream Brie, Caramelized Onion Cheddar",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c921aa46-fb74-4349-9b3f-530b37d175d0.webp",
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "160": {
     id: "160",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DOZJhhiAQ_D/",
@@ -2897,7 +2833,23 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "165": {
+    id: "165",
+    club_handle: "uwcheeseclub",
+    url: "https://www.instagram.com/p/DOoqRthDeSq",
+    name: "Cheese Club Meeting",
+    date: "2025-09-16",
+    start_time: "18:00:00",
+    end_time: "19:00:00",
+    location: "RCH 105",
+    price: 5.0,
+    food: "Vacherousse, Traditional Danish Blue, Old White Cheddar, Triple Cream Brie, Caramelized Onion Cheddar",
+    registration: false,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c921aa46-fb74-4349-9b3f-530b37d175d0.webp",
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "158": {
     id: "158",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DOmzQAJDNeE",
@@ -2913,7 +2865,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "83": {
     id: "83",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOPNgwPgbWQ/",
@@ -2929,7 +2881,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "74": {
     id: "74",
     club_handle: "arbussociety",
     url: "https://www.instagram.com/p/DOUQyteDs66/",
@@ -2945,7 +2897,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "147": {
     id: "147",
     club_handle: "wloolacrosse",
     url: "https://www.instagram.com/p/DOgrvfMiSfU/",
@@ -2961,7 +2913,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "148": {
     id: "148",
     club_handle: "wloorunning",
     url: "https://www.instagram.com/p/DOhOdB4kZzM/",
@@ -2977,7 +2929,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "159": {
     id: "159",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOmxy-HjEW0",
@@ -2993,7 +2945,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "116": {
     id: "116",
     club_handle: "uwindianca",
     url: "https://www.instagram.com/p/DOevpG9AftQ/",
@@ -3009,7 +2961,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "102": {
     id: "102",
     club_handle: "uwstrengthclub",
     url: "https://www.instagram.com/p/DOY-UT7ibv7/",
@@ -3025,7 +2977,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "105": {
     id: "105",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOZLrcgkbq3/",
@@ -3041,7 +2993,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "97": {
     id: "97",
     club_handle: "_uwasa",
     url: "https://www.instagram.com/p/DOXR68ZkSbY/",
@@ -3057,7 +3009,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "119": {
     id: "119",
     club_handle: "uwmccf",
     url: "https://www.instagram.com/p/DObRgQBkXIi/",
@@ -3073,7 +3025,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "66": {
     id: "66",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DOOV_u-gJ07/",
@@ -3089,7 +3041,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "78": {
     id: "78",
     club_handle: "uw_aviation",
     url: "https://www.instagram.com/p/DOWTQq8EXiX/",
@@ -3105,7 +3057,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "106": {
     id: "106",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOYjHxSjeRw/",
@@ -3121,7 +3073,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "34": {
     id: "34",
     club_handle: "waterlootechweek",
     url: "https://www.instagram.com/p/DNZC2rNyiot/",
@@ -3137,23 +3089,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "65",
-    club_handle: "wasawaterloo",
-    url: "https://www.instagram.com/p/DOOm07EkYDc/",
-    name: "Meet & Greet",
-    date: "2025-09-11",
-    start_time: "19:00:00",
-    end_time: "22:00:00",
-    location: "SLC Student Lounge",
-    price: null,
-    food: "Tea, snacks",
-    registration: false,
-    image_url: null,
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "14": {
     id: "14",
     club_handle: "waterlootechweek",
     url: "https://www.instagram.com/p/DNByOM6TFKX/",
@@ -3169,7 +3105,23 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "65": {
+    id: "65",
+    club_handle: "wasawaterloo",
+    url: "https://www.instagram.com/p/DOOm07EkYDc/",
+    name: "Meet & Greet",
+    date: "2025-09-11",
+    start_time: "19:00:00",
+    end_time: "22:00:00",
+    location: "SLC Student Lounge",
+    price: null,
+    food: "Tea, snacks",
+    registration: false,
+    image_url: null,
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "47": {
     id: "47",
     club_handle: "uwcarivybz",
     url: "https://www.instagram.com/p/DOLmUPkDcVL/",
@@ -3185,71 +3137,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "44",
-    club_handle: "yourwusa",
-    url: "https://www.instagram.com/p/DN_YmQpiS3F/",
-    name: "Retro Rollers",
-    date: "2025-09-11",
-    start_time: "18:00:00",
-    end_time: "22:00:00",
-    location: "REV-Court",
-    price: null,
-    food: "",
-    registration: true,
-    image_url: null,
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "68",
-    club_handle: "uwrepairclub",
-    url: "https://www.instagram.com/p/DOL_PncEX3C/",
-    name: "Repair Club First Meeting",
-    date: "2025-09-11",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "E7-1401",
-    price: null,
-    food: "Snacks",
-    registration: false,
-    image_url: null,
-    club_type: null,
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "109",
-    club_handle: "uwvisualartsclub",
-    url: "https://www.instagram.com/p/DObX2LIDZFh/",
-    name: "Chill Drawing Session",
-    date: "2025-09-11",
-    start_time: "18:00:00",
-    end_time: "20:00:00",
-    location: "EV3 3408",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: null,
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
-    id: "90",
-    club_handle: "wloo.outersclub",
-    url: "https://www.instagram.com/p/DOMgVyVkdsA/",
-    name: "Beginning-of-Term Potluck & Raffle",
-    date: "2025-09-11",
-    start_time: "18:00:00",
-    end_time: "19:00:00",
-    location: "Laurel Creek Fire Pit",
-    price: null,
-    food: "Yes",
-    registration: false,
-    image_url: null,
-    club_type: "Athletics",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "70": {
     id: "70",
     club_handle: "uwvsa",
     url: "https://www.instagram.com/p/DOPAFI8CTIq/",
@@ -3265,23 +3153,87 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "68": {
+    id: "68",
+    club_handle: "uwrepairclub",
+    url: "https://www.instagram.com/p/DOL_PncEX3C/",
+    name: "Repair Club First Meeting",
+    date: "2025-09-11",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "E7-1401",
+    price: null,
+    food: "Snacks",
+    registration: false,
+    image_url: null,
+    club_type: null,
+    added_at: "2025-09-20T00:00:00",
+  },
+  "109": {
+    id: "109",
+    club_handle: "uwvisualartsclub",
+    url: "https://www.instagram.com/p/DObX2LIDZFh/",
+    name: "Chill Drawing Session",
+    date: "2025-09-11",
+    start_time: "18:00:00",
+    end_time: "20:00:00",
+    location: "EV3 3408",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: null,
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "58": {
     id: "58",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DOMsL3NjaIu/",
     name: "Mix & Mingle",
     date: "2025-09-11",
     start_time: "18:00:00",
-    end_time: "22:00:00",
-    location: "Columbia Lake Firepit",
+    end_time: "19:00:00",
+    location: "Laurel Creek Fire Pit",
     price: null,
-    food: "S'mores",
+    food: "Yes",
+    registration: false,
+    image_url: null,
+    club_type: "Athletics",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "44": {
+    id: "44",
+    club_handle: "yourwusa",
+    url: "https://www.instagram.com/p/DN_YmQpiS3F/",
+    name: "Retro Rollers",
+    date: "2025-09-11",
+    start_time: "18:00:00",
+    end_time: "22:00:00",
+    location: "REV-Court",
+    price: null,
+    food: "",
     registration: true,
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "90": {
+    id: "90",
+    club_handle: "wloo.outersclub",
+    url: "https://www.instagram.com/p/DOMgVyVkdsA/",
+    name: "Beginning-of-Term Potluck & Raffle",
+    date: "2025-09-11",
+    start_time: "18:00:00",
+    end_time: "19:00:00",
+    location: "Laurel Creek Fire Pit",
+    price: null,
+    food: "Yes",
+    registration: false,
+    image_url: null,
+    club_type: "Athletics",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "62": {
     id: "62",
     club_handle: "seruwaterloo",
     url: "https://www.instagram.com/p/DOMiVwDEckT/",
@@ -3297,7 +3249,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "82": {
     id: "82",
     club_handle: "uw_sofa",
     url: "https://www.instagram.com/p/DOJzLdQgRV_/",
@@ -3313,7 +3265,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "114": {
     id: "114",
     club_handle: "uw.chess.club",
     url: "https://www.instagram.com/p/DObTrEjDvyd/",
@@ -3329,23 +3281,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "99",
-    club_handle: "uwdebate",
-    url: "https://www.instagram.com/p/DOWBnR4jVJV/",
-    name: "Beginning of Term Meeting",
-    date: "2025-09-10",
-    start_time: "18:30:00",
-    end_time: "19:30:00",
-    location: "RCH 309",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: null,
-    club_type: "WUSA",
-    added_at: "2025-09-20T00:00:00",
-  },
-  {
+  "71": {
     id: "71",
     club_handle: "nasawaterloo",
     url: "https://www.instagram.com/p/DOPMc4tgXZK/",
@@ -3361,7 +3297,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "80": {
     id: "80",
     club_handle: "uwaterloogg",
     url: "https://www.instagram.com/p/DOPLDDskn0J/",
@@ -3377,11 +3313,11 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
-    id: "101",
-    club_handle: "uw_ace",
-    url: "https://www.instagram.com/p/DOZ6XlXDMn9/",
-    name: "ACE Mini-Rehearsal",
+  "99": {
+    id: "99",
+    club_handle: "uwdebate",
+    url: "https://www.instagram.com/p/DOWBnR4jVJV/",
+    name: "Beginning of Term Meeting",
     date: "2025-09-10",
     start_time: "18:00:00",
     end_time: "19:00:00",
@@ -3393,7 +3329,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "81": {
     id: "81",
     club_handle: "uwaterloodj",
     url: "https://www.instagram.com/p/DOWgwuVEVmM/\r\n",
@@ -3409,7 +3345,23 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "101": {
+    id: "101",
+    club_handle: "uw_ace",
+    url: "https://www.instagram.com/p/DOZ6XlXDMn9/",
+    name: "ACE Mini-Rehearsal",
+    date: "2025-09-10",
+    start_time: "18:00:00",
+    end_time: "19:00:00",
+    location: "Arts Quad",
+    price: null,
+    food: "",
+    registration: false,
+    image_url: null,
+    club_type: "WUSA",
+    added_at: "2025-09-20T00:00:00",
+  },
+  "96": {
     id: "96",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOW5iZNgC-q/",
@@ -3425,7 +3377,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "88": {
     id: "88",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DOLpCTfDfhC/",
@@ -3441,7 +3393,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "49": {
     id: "49",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DOJXRrAkR9j/",
@@ -3457,7 +3409,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "86": {
     id: "86",
     club_handle: "wlooartisticswimming",
     url: "https://www.instagram.com/p/DOPCEwdDy2K/",
@@ -3473,7 +3425,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "57": {
     id: "57",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DOMbvWogUCj/",
@@ -3489,7 +3441,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "95": {
     id: "95",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOXg4F_AO2G/",
@@ -3505,7 +3457,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "84": {
     id: "84",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOUP6VngZBG/",
@@ -3521,7 +3473,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "42": {
     id: "42",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN-6bDqjj2Y/",
@@ -3537,7 +3489,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "53": {
     id: "53",
     club_handle: "uwvelocity",
     url: "https://www.instagram.com/p/DOG1aqAjrEG/",
@@ -3553,7 +3505,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "77": {
     id: "77",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOUjhWZDGKn/",
@@ -3569,7 +3521,7 @@ export const staticEventsData: Event[] = [
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "40": {
     id: "40",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN8dBt1jwQI/",
@@ -3585,7 +3537,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "48": {
     id: "48",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DOJzAbij9jN/",
@@ -3601,7 +3553,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "60": {
     id: "60",
     club_handle: "_afroxdance_",
     url: "https://www.instagram.com/p/DOOoNAPgFBK/",
@@ -3617,7 +3569,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "52": {
     id: "52",
     club_handle: "uw_ux",
     url: "https://www.instagram.com/p/DOCLwzKj4SZ/",
@@ -3633,7 +3585,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "67": {
     id: "67",
     club_handle: "techplusuw",
     url: "https://www.instagram.com/p/DOO2hl2kvef/",
@@ -3649,7 +3601,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "41": {
     id: "41",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN81pn_iS1a/",
@@ -3665,7 +3617,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "55": {
     id: "55",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOICu9ZDP14/",
@@ -3681,7 +3633,7 @@ export const staticEventsData: Event[] = [
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "46": {
     id: "46",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOKo3sNjHFs/",
@@ -3697,7 +3649,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "38": {
     id: "38",
     club_handle: "uwaterloo_ksa",
     url: "https://www.instagram.com/p/DNf9D1dvgKG/",
@@ -3713,7 +3665,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "32": {
     id: "32",
     club_handle: "uwaterloo_ksa",
     url: "https://www.instagram.com/p/DNWYrYYzKR0/",
@@ -3729,7 +3681,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "36": {
     id: "36",
     club_handle: "akcse_uw",
     url: "https://www.instagram.com/p/DNZAplpPEAp/",
@@ -3745,7 +3697,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "73": {
     id: "73",
     club_handle: "uwccf",
     url: "https://www.instagram.com/p/DOO-tQvEuQx/",
@@ -3761,7 +3713,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "64": {
     id: "64",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOONcmKgEM0/",
@@ -3777,7 +3729,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "61": {
     id: "61",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOMi-Ztj6Au/",
@@ -3793,7 +3745,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "43": {
     id: "43",
     club_handle: "kc_waterloo",
     url: "https://www.instagram.com/p/DN_gg1vEXyL/",
@@ -3809,7 +3761,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "45": {
     id: "45",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOHG0muD8_r/",
@@ -3825,7 +3777,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "33": {
     id: "33",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DNZFuQ4gyWL/",
@@ -3841,7 +3793,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "17": {
     id: "17",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DNA42WOsD03/",
@@ -3857,7 +3809,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "18": {
     id: "18",
     club_handle: "uwcsa",
     url: "https://www.instagram.com/p/DNE7UZcM5OR/",
@@ -3873,7 +3825,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "25": {
     id: "25",
     club_handle: "waterboo_uw",
     url: "https://www.instagram.com/p/DNMVwt3ga2G/",
@@ -3889,7 +3841,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "1": {
     id: "1",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DM3l978RmM5/",
@@ -3905,7 +3857,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "2": {
     id: "2",
     club_handle: "hillelwaterloolaurier",
     url: "https://www.instagram.com/p/DM8JBcHMooG/",
@@ -3921,7 +3873,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "5": {
     id: "5",
     club_handle: "seruwaterloo",
     url: "https://www.instagram.com/p/DM9Bgw3tsKP/",
@@ -3937,7 +3889,7 @@ export const staticEventsData: Event[] = [
     club_type: null,
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "13": {
     id: "13",
     club_handle: "uwmoot",
     url: "https://www.instagram.com/p/DNBFLu1Mlmo/",
@@ -3953,7 +3905,7 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   },
-  {
+  "4": {
     id: "4",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DM8TDLRR6PD/",
@@ -3969,4 +3921,4 @@ export const staticEventsData: Event[] = [
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
   }
-];
+};

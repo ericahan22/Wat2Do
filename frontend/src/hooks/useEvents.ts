@@ -22,7 +22,7 @@ export interface Event {
 }
 
 interface EventsResponse {
-  events: Event[];
+  event_ids: string[];
 }
 
 const API_BASE_URL =
@@ -84,9 +84,17 @@ export function useEvents(view: "grid" | "calendar") {
     ];
   }, []);
 
-  // Filter out past events and sort by date for grid view
+  // Get events from static data using IDs from search results
   const events = useMemo(() => {
-    const rawEvents = hasActiveFilters ? data?.events || [] : staticEventsData;
+    let rawEvents: Event[];
+    
+    if (hasActiveFilters && data?.event_ids) {
+      // Get events from static data using the returned IDs
+      rawEvents = data.event_ids
+        .map(id => staticEventsData[id]) 
+    } else { 
+      rawEvents = Object.values(staticEventsData);
+    }
 
     if (view === "grid") {
       const now = new Date();
@@ -138,7 +146,7 @@ export function useEvents(view: "grid" | "calendar") {
         });
     }
     return rawEvents;
-  }, [hasActiveFilters, data?.events, view]);
+  }, [hasActiveFilters, data?.event_ids, view]);
 
   return {
     data: events,

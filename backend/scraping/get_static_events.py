@@ -3,7 +3,9 @@ import os
 from datetime import date, datetime, time
 
 import psycopg2
-
+from dotenv import load_dotenv
+ 
+load_dotenv()
 
 def format_value(value):
     """Format values for TypeScript file"""
@@ -63,15 +65,16 @@ def main():
                 events = [dict(zip(columns, row)) for row in cur.fetchall()]
                 logging.info(f"Fetched {len(events)} events.")
         output_path = os.path.join(
-            "..", "..", "frontend", "src", "data", "staticEvents.ts"
+            os.path.dirname(__file__), "..", "..", "frontend", "src", "data", "staticEvents.ts"
         )
         logging.info(f"Writing to {output_path}...")
         with open(output_path, "w", encoding="utf-8") as f:
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
-            f.write("export const staticEventsData: Event[] = [\n")
+            f.write("export const staticEventsData: Record<string, Event> = {\n")
             for i, event in enumerate(events):
-                f.write("  {\n")
-                f.write(f'    id: {format_value(str(event["id"]))},\n')
+                event_id = str(event["id"])
+                f.write(f'  {format_value(event_id)}: {{\n')
+                f.write(f'    id: {format_value(event_id)},\n')
                 f.write(f'    club_handle: {format_value(event["club_handle"])},\n')
                 f.write(f'    url: {format_value(event["url"])},\n')
                 f.write(f'    name: {format_value(event["name"])},\n')
@@ -89,7 +92,7 @@ def main():
                 if i < len(events) - 1:
                     f.write(",")
                 f.write("\n")
-            f.write("];\n")
+            f.write("};\n")
         logging.info("Successfully updated staticEvents.ts")
     except Exception as e:
         logging.error(f"An error occurred: {e}")

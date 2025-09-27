@@ -114,32 +114,12 @@ def get_events(request):
             )
         )
 
-        # Convert to list of dictionaries (no pagination)
-        events_data = [
-            {
-                "id": event.id,
-                "club_handle": event.club_handle,
-                "url": event.url,
-                "name": event.name,
-                "date": event.date.isoformat() if event.date else None,
-                "start_time": event.start_time.isoformat()
-                if event.start_time
-                else None,
-                "end_time": event.end_time.isoformat() if event.end_time else None,
-                "location": event.location,
-                "category": event.club_categories,
-                "club_type": event.club_type,
-                "price": event.price,
-                "food": event.food,
-                "registration": event.registration,
-                "image_url": event.image_url,
-            }
-            for event in filtered_queryset
-        ]
+        # Return only event IDs for search results
+        event_ids = [str(event.id) for event in filtered_queryset]
 
         return Response(
             {
-                "events": events_data,
+                "event_ids": event_ids,
             }
         )
     except Exception as e:
