@@ -254,15 +254,8 @@ def process_recent_feed(
 
     for post in loader.get_feed_posts():
         try:
-            if post.shortcode in seen_shortcodes:
-                logger.debug(f"Skipping post {post.shortcode}, already in database")
-                continue
-            posts_processed += 1
-            logger.info("\n" + "-" * 50)
-            logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
-
             post_time = post.date_utc.replace(tzinfo=timezone.utc)
-            if post_time < cutoff:
+            if post.shortcode in seen_shortcodes or post_time < cutoff:
                 consec_old_posts += 1
                 if consec_old_posts >= max_consec_old_posts:
                     logger.info(
@@ -270,11 +263,11 @@ def process_recent_feed(
                     )
                     break
                 continue  # to next post
+            
             consec_old_posts = 0
-
-            if posts_processed >= max_posts:
-                logger.info(f"Reached max post limit of {max_posts}, stopping.")
-                break
+            posts_processed += 1
+            logger.info("\n" + "-" * 50)
+            logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
 
             # Safely get image URL and upload to S3
             raw_image_url = get_post_image_url(post)
@@ -288,7 +281,6 @@ def process_recent_feed(
                 image_url = None
 
             event_data = extract_event_from_caption(post.caption, image_url)
-
             if event_data is None:
                 logger.warning(f"AI client returned None for post {post.shortcode}")
                 continue
@@ -315,12 +307,18 @@ def process_recent_feed(
                 append_event_to_csv(
                     event_data, post.owner_username, post_url, status="missing_fields"
                 )
+                
             time.sleep(random.uniform(8, 20))
+            
+            if posts_processed >= max_posts:
+                logger.info(f"Reached max post limit of {max_posts}, stopping")
+                break
         except Exception as e:
             logger.error(
                 f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}"
             )
             logger.error(f"Traceback: {traceback.format_exc()}")
+            time.sleep(random.uniform(3, 8))
             continue  # with next post
     logger.info(
         f"Feed processing completed. Processed {posts_processed} posts, added {events_added} events"
@@ -332,26 +330,32 @@ def process_recent_feed(
 @handle_instagram_errors
 def session():
     L = Instaloader()
-    logger.info("Attemping to load Instagram session...")
+    session_file = Path("session-" + USERNAME)
     try:
-        L.load_session(
-            USERNAME,
-            {
-                "csrftoken": CSRFTOKEN,
-                "sessionid": SESSIONID,
-                "ds_user_id": DS_USER_ID,
-                "mid": MID,
-                "ig_did": IG_DID,
-            },
-        )
-        logger.info("Session created successfully")
+        if session_file.exists():
+            L.load_session_from_file(USERNAME, filename=session_file)
+            logger.info("Loaded session from file")
+        else:
+            L.context.log("No session file found, falling back to env")
+            L.load_session(
+                USERNAME,
+                {
+                    "csrftoken": CSRFTOKEN,
+                    "sessionid": SESSIONID,
+                    "ds_user_id": DS_USER_ID,
+                    "mid": MID,
+                    "ig_did": IG_DID,
+                },
+            )
+        L.save_session_to_file(filename=session_file)
         return L
     except Exception as e:
         logger.error(f"Failed to load session: {e}")
-        logger.error(f"Traceback: {traceback.format_exc()}")
         raise
 
 
 if __name__ == "__main__":
+    logger.info("Attemping to load Instagram session...")
     L = session()
+    logger.info("Session created successfully!")
     process_recent_feed(L)
