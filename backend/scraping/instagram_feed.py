@@ -10,14 +10,13 @@ django.setup()
 
 import csv
 import logging
+import random
 import time
 import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from django.db import connection
-import random
-
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
