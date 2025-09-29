@@ -18,49 +18,62 @@ def update_null_embeddings(apps, schema_editor):
             WHERE embedding IS NULL
         """)
         events = cursor.fetchall()
-        
+
         total_events = len(events)
         if total_events == 0:
             print("No events with null embeddings found.")
             return
-            
+
         print(f"Updating embeddings for {total_events} events with null embeddings...")
-        
-        for i, (event_id, club_handle, url, name, date, start_time, end_time, 
-                location, price, food, registration, image_url, club_type) in enumerate(events, 1):
+
+        for i, (
+            event_id,
+            club_handle,
+            url,
+            name,
+            date,
+            start_time,
+            end_time,
+            location,
+            price,
+            food,
+            registration,
+            image_url,
+            club_type,
+        ) in enumerate(events, 1):
             try:
                 # Create event data dictionary for embedding generation
                 event_data = {
-                    'club_handle': club_handle or '',
-                    'url': url or '',
-                    'name': name or '',
-                    'date': str(date) if date else '',
-                    'start_time': str(start_time) if start_time else '',
-                    'end_time': str(end_time) if end_time else '',
-                    'location': location or '',
-                    'price': price or 0,
-                    'food': food or '',
-                    'registration': registration,
-                    'image_url': image_url or '',
-                    'club_type': club_type or '',
+                    "club_handle": club_handle or "",
+                    "url": url or "",
+                    "name": name or "",
+                    "date": str(date) if date else "",
+                    "start_time": str(start_time) if start_time else "",
+                    "end_time": str(end_time) if end_time else "",
+                    "location": location or "",
+                    "price": price or 0,
+                    "food": food or "",
+                    "registration": registration,
+                    "image_url": image_url or "",
+                    "club_type": club_type or "",
                 }
-                
+
                 # Generate embedding for the event
                 embedding = generate_event_embedding(event_data)
-                
+
                 # Update the event with the embedding
                 cursor.execute(
                     "UPDATE events SET embedding = %s::vector WHERE id = %s",
-                    [embedding, event_id]
+                    [embedding, event_id],
                 )
-                
+
                 if i % 10 == 0:  # Progress indicator
                     print(f"Processed {i}/{total_events} events...")
-                
+
             except Exception as e:
                 print(f"Error generating embedding for event {event_id} ({name}): {e}")
                 continue
-        
+
         print(f"Completed updating embeddings for {total_events} events.")
 
 
@@ -74,7 +87,6 @@ def reverse_update_null_embeddings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0013_events_club_type"),
     ]

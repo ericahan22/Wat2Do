@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,7 +21,10 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Credentials
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-key-for-local-development-only-please-change-in-production")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-dev-key-for-local-development-only-please-change-in-production",
+)
 DEBUG = os.getenv("PRODUCTION") != "1"  # Fixed the DEBUG logic
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".vercel.app"]
@@ -34,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party apps
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     "pgvector",
     # Our apps
@@ -131,12 +136,17 @@ USE_TZ = True
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle'
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '50/hour'      # 100 requests per hour for all users
-    }
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "50/hour"  # 100 requests per hour for all users
+    },
 }
 
 

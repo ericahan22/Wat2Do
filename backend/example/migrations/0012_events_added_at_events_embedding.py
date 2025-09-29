@@ -5,7 +5,6 @@ import pgvector.django.vector
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("example", "0011_regenerate_embeddings_simple"),
     ]
