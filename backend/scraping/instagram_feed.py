@@ -240,7 +240,7 @@ def get_seen_shortcodes():
 def process_recent_feed(
     loader,
     cutoff=datetime.now(timezone.utc) - timedelta(days=2),
-    max_posts=30,
+    max_posts=80,
     max_consec_old_posts=10,
 ):
     # Process Instagram feed posts and extract event info. Stops
