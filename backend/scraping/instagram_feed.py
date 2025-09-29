@@ -17,9 +17,12 @@ import traceback
 import time
 from pathlib import Path
 from django.db import connection
+import random
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 
+
+Path("logs").mkdir(exist_ok=True)
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -214,10 +217,24 @@ def insert_event_to_db(event_data, club_ig, post_url):
         return False
 
 
+def get_seen_shortcodes():
+    """Fetches all post shortcodes from events table in DB"""
+    logger.info("Fetching seen shortcodes from the database...")
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT url FROM events WHERE url IS NOT NULL")
+            urls = cur.fetchall()
+            shortcodes = {url[0].split('/')[-2] for url in urls if url[0]}
+            return shortcodes
+    except Exception as e:
+        logger.error(f"Could not fetch shortcodes from database: {e}")
+        return set()
+    
+
 def process_recent_feed(
     loader,
     cutoff=datetime.now(timezone.utc) - timedelta(days=2),
-    max_posts=100,
+    max_posts=30,
     max_consec_old_posts=10,
 ):
     # Process Instagram feed posts and extract event info. Stops
@@ -226,9 +243,14 @@ def process_recent_feed(
     posts_processed = 0
     consec_old_posts = 0
     logger.info(f"Starting feed processing with cutoff: {cutoff}")
+    
+    seen_shortcodes = get_seen_shortcodes()
 
     for post in loader.get_feed_posts():
         try:
+            if post.shortcode in seen_shortcodes:
+                logger.debug(f"Skipping post {post.shortcode}, already in database")
+                continue
             posts_processed += 1
             logger.info("\n" + "-" * 50)
             logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
@@ -287,7 +309,7 @@ def process_recent_feed(
                 append_event_to_csv(
                     event_data, post.owner_username, post_url, status="missing_fields"
                 )
-            time.sleep(5)
+            time.sleep(random.uniform(8, 20))
         except Exception as e:
             logger.error(
                 f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}"
