@@ -8,7 +8,7 @@ import {
   ExternalLink,
   DollarSign,
 } from "lucide-react";
-import { Event } from "@/hooks";
+import { Event, API_BASE_URL } from "@/hooks/useEvents";
 import { memo } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
@@ -93,7 +93,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
       eventId: string;
       reaction: string;
     }) => {
-      const response = await fetch(`api/events/${eventId}/react/`, {
+      const response = await fetch(`${API_BASE_URL}/api/events/${eventId}/react/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
     onMutate: async (newReaction: { eventId: string; reaction: string }) => {
       const queryKey = ["reactions"];
       await queryClient.cancelQueries({ queryKey });  // don't overwrite optimistic update
-      const previousEvents = queryClient.getQueryData(queryKey);
+      const previousReactions = queryClient.getQueryData(queryKey);
       // Optimistic update:
       queryClient.setQueryData(queryKey, (oldData: any) => {
         if (!oldData) return {};

@@ -387,6 +387,7 @@ def create_user(request):
 
 @api_view(["POST"])
 @throttle_classes([AnonRateThrottle])
+@permission_classes([AllowAny])
 def add_reaction(request, event_id):
     """
     Add an emoji reaction to an event

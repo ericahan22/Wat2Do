@@ -29,7 +29,7 @@ interface EventsResponse {
 
 type ReactionsResponse = Record<string, Record<string, number>>;
 
-const API_BASE_URL =
+export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 const fetchEvents = async ({
@@ -87,7 +87,7 @@ export function useEvents(view: "grid" | "calendar") {
   const { data: reactionsData, isLoading: isLoadingReactions } = useQuery({
     queryKey: ["reactions"],
     queryFn: fetchReactions,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     staleTime: 60 * 1000,
   });
 
