@@ -11,7 +11,6 @@ import {
 import { Event, API_BASE_URL } from "@/hooks/useEvents";
 import { memo } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
 import {
   formatPrettyDate,
   formatTimeRange,
@@ -83,7 +82,6 @@ const NewEventBadge = ({ event }: { event: Event }) => {
 
 const EventsGrid = memo(({ data }: EventsGridProps) => {
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
   
   const addReactionMutation = useMutation({
     mutationFn: async ({
@@ -126,13 +124,13 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
       });
       return { previousReactions, queryKey };
     },
-    onError: (err, newReaction, context) => {
+    onError: (err, _variables, context) => {
       if (context?.previousReactions) {
         queryClient.setQueryData(context.queryKey, context.previousReactions);
       }
       console.error("Reaction failed:", err);
     },
-    onSettled: (data, error, variables, context) => {
+    onSettled: (_data, _error, _variables, context) => {
       if (context?.queryKey) {
         queryClient.invalidateQueries({ queryKey: context.queryKey });
       }
