@@ -107,34 +107,28 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
       return response.json();
     },
     onMutate: async (newReaction: { eventId: string; reaction: string }) => {
-      const searchTerm = searchParams.get("search") || "";
-      const categoryFilter = searchParams.get("category") || "all";
-      const queryKey = ["events", searchTerm, categoryFilter, "grid"];
-
+      const queryKey = ["reactions"];
       await queryClient.cancelQueries({ queryKey });  // don't overwrite optimistic update
       const previousEvents = queryClient.getQueryData(queryKey);
       // Optimistic update:
       queryClient.setQueryData(queryKey, (oldData: any) => {
-        if (!oldData) return oldData;
-        const updatedEvents = oldData.data.map((event: Event) =>
-          event.id === newReaction.eventId ? {
-            ...event,
-            reactions: {
-              ...event.reactions,
-              [newReaction.reaction]:
-                (event.reactions?.[newReaction.reaction] || 0) + 1,
-            },
-            user_reaction: newReaction.reaction,
-          }
-        : event
-      );
-      return { ...oldData, data: updatedEvents };
-    });
-    return { previousEvents, queryKey };
+        if (!oldData) return {};
+        const { eventId, reaction } = newReaction;
+        const currentReactions = oldData[eventId] || {};
+        const newCount = (currentReactions[reaction] || 0) + 1;
+        return { 
+          ...oldData, 
+          [eventId]: {
+            ...currentReactions,
+            [reaction]: newCount,
+          },
+        };
+      });
+      return { previousReactions, queryKey };
     },
     onError: (err, newReaction, context) => {
-      if (context?.previousEvents) {
-        queryClient.setQueryData(context.queryKey, context.previousEvents);
+      if (context?.previousReactions) {
+        queryClient.setQueryData(context.queryKey, context.previousReactions);
       }
       console.error("Reaction failed:", err);
     },
