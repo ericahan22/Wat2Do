@@ -19,11 +19,15 @@ export interface Event {
   registration: boolean;
   club_type?: "WUSA" | "Athletics" | "Student Society" | null;
   added_at: string;
+  reactions?: Record<string, number>;
+  user_reaction?: string;
 }
 
 interface EventsResponse {
   event_ids: string[];
 }
+
+type ReactionsResponse = Record<string, Record<string, number>>;
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
@@ -53,6 +57,15 @@ const fetchEvents = async ({
   return data;
 };
 
+const fetchReactions = async (): Promise<ReactionsResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/reactions/`);
+  if (!response.ok) {
+    console.error("Failed to fetch (live) reactions");
+    return {};
+  }
+  return response.json();
+};
+
 export function useEvents(view: "grid" | "calendar") {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
@@ -60,11 +73,22 @@ export function useEvents(view: "grid" | "calendar") {
 
   const hasActiveFilters = searchTerm !== "" || categoryFilter !== "all";
 
-  const { data, isLoading, error } = useQuery({
+  const { 
+    data: eventsData, 
+    isLoading: isLoadingEvents,
+    error: eventsError
+   } = useQuery({
     queryKey: ["events", searchTerm, categoryFilter, view],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
+  });
+
+  const { data: reactionsData, isLoading: isLoadingReactions } = useQuery({
+    queryKey: ["reactions"],
+    queryFn: fetchReactions,
+    refetchOnWindowFocus: true,
+    staleTime: 60 * 1000,
   });
 
   const uniqueCategories = useMemo(() => {
@@ -88,13 +112,18 @@ export function useEvents(view: "grid" | "calendar") {
   const events = useMemo(() => {
     let rawEvents: Event[];
     
-    if (hasActiveFilters && data?.event_ids) {
+    if (hasActiveFilters && eventsData?.event_ids) {
       // Get events from static data using the returned IDs
-      rawEvents = data.event_ids
+      rawEvents = eventsData.event_ids
         .map(id => staticEventsData[id]) 
     } else { 
       rawEvents = Object.values(staticEventsData);
     }
+
+    const eventsWithLiveReactions = rawEvents.map((event) => ({
+      ...event,
+      reactions: reactionsData?.[event.id] || event.reactions || {},
+    }));
 
     if (view === "grid") {
       const now = new Date();
@@ -105,7 +134,7 @@ export function useEvents(view: "grid" | "calendar") {
         "-" +
         String(now.getDate()).padStart(2, "0");
         
-      return rawEvents
+      return eventsWithLiveReactions
         .filter((event) => {
           const eventDateStr = event.date; // e.g., "2025-09-24"
 
@@ -145,13 +174,13 @@ export function useEvents(view: "grid" | "calendar") {
           return timeA - timeB;
         });
     }
-    return rawEvents;
-  }, [hasActiveFilters, data?.event_ids, view]);
+    return eventsWithLiveReactions;
+  }, [hasActiveFilters, eventsData?.event_ids, view, reactionsData]);
 
   return {
     data: events,
     uniqueCategories,
-    isLoading: hasActiveFilters ? isLoading : false,
-    error: hasActiveFilters ? error : null,
+    isLoading: hasActiveFilters ? isLoadingEvents : isLoadingReactions,
+    error: hasActiveFilters ? eventsError : null,
   };
 }

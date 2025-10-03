@@ -8,6 +8,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import connection
 from django.db.models import OuterRef, Subquery
+from django.shortcuts import get_object_or_404
 
 from pytz import timezone
 from rest_framework import status
@@ -279,6 +280,23 @@ def test_similarity(request):
             {"error": f"Failed to test similarity: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+        
+        
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@throttle_classes([AnonRateThrottle])
+def get_all_reactions(request):
+    """Get all emoji reactions for all events"""
+    try:
+        events_with_reactions = Events.objects.exclude(reactions__isnull=True).only(
+            "id", "reactions"
+        )
+        reactions_data = {
+            str(event.id): event.reactions for event in events_with_reactions
+        }
+        return Response(reactions_data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["POST"])
@@ -365,3 +383,23 @@ def create_user(request):
             {"error": f"Failed to create user: {str(e)}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+@api_view(["POST"])
+@throttle_classes([AnonRateThrottle])
+def add_reaction(request, event_id):
+    """
+    Add an emoji reaction to an event
+    POST request, e.g. {"reaction": "🔥"}
+    """
+    event = get_object_or_404(Events, id=event_id)
+    reaction = request.data.get("reaction")
+    if not reaction:
+        return Response(
+            {"error": "No reaction provided"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    if event.reactions is None:
+        event.reactions = {}
+    event.reactions[reaction] = event.reactions.get(reaction, 0) + 1
+    event.save(update_fields=["reactions"])
+    return Response(event.reactions, status=status.HTTP_200_OK)

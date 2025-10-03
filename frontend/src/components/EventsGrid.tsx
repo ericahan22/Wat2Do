@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import {
   formatPrettyDate,
   formatTimeRange,
@@ -80,6 +82,69 @@ const NewEventBadge = ({ event }: { event: Event }) => {
 };
 
 const EventsGrid = memo(({ data }: EventsGridProps) => {
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  
+  const addReactionMutation = useMutation({
+    mutationFn: async ({
+      eventId,
+      reaction,
+    }: {
+      eventId: string;
+      reaction: string;
+    }) => {
+      const response = await fetch(`api/events/${eventId}/react/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reaction }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add reaction :(");
+      }
+      return response.json();
+    },
+    onMutate: async (newReaction: { eventId: string; reaction: string }) => {
+      const searchTerm = searchParams.get("search") || "";
+      const categoryFilter = searchParams.get("category") || "all";
+      const queryKey = ["events", searchTerm, categoryFilter, "grid"];
+
+      await queryClient.cancelQueries({ queryKey });  // don't overwrite optimistic update
+      const previousEvents = queryClient.getQueryData(queryKey);
+      // Optimistic update:
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        if (!oldData) return oldData;
+        const updatedEvents = oldData.data.map((event: Event) =>
+          event.id === newReaction.eventId ? {
+            ...event,
+            reactions: {
+              ...event.reactions,
+              [newReaction.reaction]:
+                (event.reactions?.[newReaction.reaction] || 0) + 1,
+            },
+            user_reaction: newReaction.reaction,
+          }
+        : event
+      );
+      return { ...oldData, data: updatedEvents };
+    });
+    return { previousEvents, queryKey };
+    },
+    onError: (err, newReaction, context) => {
+      if (context?.previousEvents) {
+        queryClient.setQueryData(context.queryKey, context.previousEvents);
+      }
+      console.error("Reaction failed:", err);
+    },
+    onSettled: (data, error, variables, context) => {
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
+    },
+  });
+
   return (
     <div className="space-y-8">
       {/* Events Grid */}
@@ -94,7 +159,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
 
             {/* Event Image */}
             {event.image_url && (
-              <div className=" ">
+              <div className="relative">
                 <img
                   src={event.image_url}
                   alt={event.name}
@@ -104,6 +169,24 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                     target.style.display = "none";
                   }}
                 />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute bottom-0 left-0 z-10 flex h-auto items-center gap-1 rounded-none rounded-tr-lg bg-black/20 px-2 py-1 text-white backdrop-blur-sm hover:bg-black/30 dark:hover:bg-black/30"
+                  onClick={() =>
+                    addReactionMutation.mutate({
+                      eventId: event.id,
+                      reaction: "🔥",
+                    })
+                  }
+                >
+                  🔥
+                  {(event.reactions?.["🔥"] ?? 0) > 0 && (
+                    <span className="text-xs font-medium">
+                      {event.reactions?.["🔥"]}
+                    </span>
+                  )}
+                </Button>
               </div>
             )}
             <CardHeader className="p-3.5 pb-0">
