@@ -24,7 +24,18 @@ from example.embedding_utils import generate_event_embedding, is_duplicate_event
 from services.openai_service import extract_event_from_caption
 from services.storage_service import upload_image_from_url
 
-Path("logs").mkdir(exist_ok=True)
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+]
+
+LOG_DIR = Path("logs")
+LOG_DIR.mkdir(exist_ok=True)
+LOG_FILE = LOG_DIR / "scraping.log"
 
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -33,11 +44,14 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("logs/scraping.log", encoding="utf-8"),
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
     ],
 )
 logger = logging.getLogger(__name__)
 
+MAX_POSTS = 50
+MAX_CONSEC_OLD_POSTS = 10
+CUTOFF_DAYS = 2
 
 # Load environment variables from .env file
 load_dotenv()
@@ -96,7 +110,7 @@ def handle_instagram_errors(func):
     return wrapper
 
 
-def append_event_to_csv(event_data, club_ig, post_url, status="success"):
+def append_event_to_csv(event_data, club_ig, post_url, status="success", embedding=None):
     csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
@@ -115,6 +129,7 @@ def append_event_to_csv(event_data, club_ig, post_url, status="success"):
             "registration",
             "image_url",
             "status",
+            "embedding"
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if not file_exists:
@@ -133,6 +148,7 @@ def append_event_to_csv(event_data, club_ig, post_url, status="success"):
                 "registration": event_data.get("registration", False),
                 "image_url": event_data.get("image_url", ""),
                 "status": status,
+                "embedding": embedding or ""
             }
         )
 
@@ -196,7 +212,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
 
         try:
-            append_event_to_csv(event_data, club_ig, post_url, status="success")
+            append_event_to_csv(event_data, club_ig, post_url, status="success", embedding=embedding)
             logger.info(f"Appended event to CSV: {event_data.get('name')}")
         except Exception as csv_err:
             logger.error(
@@ -212,7 +228,8 @@ def insert_event_to_db(event_data, club_ig, post_url):
         logger.error(f"Traceback: {traceback.format_exc()}")
 
         try:
-            append_event_to_csv(event_data, club_ig, post_url, status="failed")
+            embedding = generate_event_embedding(event_data)
+            append_event_to_csv(event_data, club_ig, post_url, status="failed", embedding=embedding)
             logger.info(f"Appended event to CSV: {event_data.get('name')}")
         except Exception as csv_err:
             logger.error(
@@ -239,9 +256,9 @@ def get_seen_shortcodes():
 
 def process_recent_feed(
     loader,
-    cutoff=datetime.now(timezone.utc) - timedelta(days=2),
-    max_posts=80,
-    max_consec_old_posts=10,
+    cutoff=datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS),
+    max_posts=MAX_POSTS,
+    max_consec_old_posts=MAX_CONSEC_OLD_POSTS,
 ):
     # Process Instagram feed posts and extract event info. Stops
     #   scraping once posts become older than cutoff.
@@ -272,6 +289,7 @@ def process_recent_feed(
             # Safely get image URL and upload to S3
             raw_image_url = get_post_image_url(post)
             if raw_image_url:
+                time.sleep(random.uniform(1, 3))
                 image_url = upload_image_from_url(raw_image_url)
                 logger.info(f"Uploaded image to S3: {image_url}")
             else:
@@ -304,11 +322,12 @@ def process_recent_feed(
                 logger.warning(
                     f"Missing required fields: {missing_fields}, skipping event"
                 )
+                embedding = generate_event_embedding(event_data)
                 append_event_to_csv(
-                    event_data, post.owner_username, post_url, status="missing_fields"
+                    event_data, post.owner_username, post_url, status="missing_fields", embedding=embedding
                 )
                 
-            time.sleep(random.uniform(8, 20))
+            time.sleep(random.uniform(15, 45))
             
             if posts_processed >= max_posts:
                 logger.info(f"Reached max post limit of {max_posts}, stopping")
@@ -329,14 +348,14 @@ def process_recent_feed(
 
 @handle_instagram_errors
 def session():
-    L = Instaloader()
-    session_file = Path("session-" + USERNAME)
+    L = Instaloader(user_agent=random.choice(USER_AGENTS))
+    session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
     try:
         if session_file.exists():
-            L.load_session_from_file(USERNAME, filename=session_file)
-            logger.info("Loaded session from file")
+            L.load_session_from_file(USERNAME, filename=str(session_file))
+            logger.info(f"Loaded session from file: {str(session_file)}")
         else:
-            L.context.log("No session file found, falling back to env")
+            logger.info("No session file found, falling back to env")
             L.load_session(
                 USERNAME,
                 {
@@ -347,7 +366,7 @@ def session():
                     "ig_did": IG_DID,
                 },
             )
-        L.save_session_to_file(filename=session_file)
+        L.save_session_to_file(filename=str(session_file))
         return L
     except Exception as e:
         logger.error(f"Failed to load session: {e}")
@@ -357,5 +376,8 @@ def session():
 if __name__ == "__main__":
     logger.info("Attemping to load Instagram session...")
     L = session()
-    logger.info("Session created successfully!")
-    process_recent_feed(L)
+    if L:
+        logger.info("Session created successfully!")
+        process_recent_feed(L)
+    else:
+        logger.critical("Failed to initialize Instagram session, stopping...")

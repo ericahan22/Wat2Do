@@ -45,6 +45,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      
+      - name: Cache session file
+        uses: actions/cache@v4
+        with:
+          path: backend/session-${{ secrets.USERNAME }}
+          key: ${{ runner.os }}-instaloader-session-${{ secrets.USERNAME }}
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -54,12 +60,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install build tools
-        run: pip install --upgrade pip setuptools wheel
-
       - name: Install dependencies
         working-directory: backend
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
 
       - name: Create logs directory
         working-directory: backend/scraping
@@ -71,7 +76,18 @@ jobs:
         run: |
           python -u instagram_feed.py 2>&1 | tee logs/scraping.log
         continue-on-error: false
-      
+
+      - name: Upload logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraping-logs-${{ github.run_number }}
+          path: |
+            backend/scraping/logs/
+            backend/scraping/*.log
+            backend/scraping/*.csv
+          retention-days: 30
+
       - name: Generate static events file
         id: generate_static
         working-directory: backend/scraping
@@ -85,13 +101,3 @@ jobs:
           git add frontend/src/data/staticEvents.ts
           git commit -m "chore: update static events from DB" || echo "No changes to commit"
           git push
-
-      - name: Upload logs as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: scraping-logs-${{ github.run_number }}
-          path: |
-            backend/scraping/logs/
-            backend/scraping/*.log
-            backend/scraping/*.csv
-          retention-days: 30
