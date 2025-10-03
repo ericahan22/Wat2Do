@@ -17,13 +17,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from django.db import connection
+
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 from services.openai_service import extract_event_from_caption
-from services.storage_service import upload_image_from_url, delete_image
-
+from services.storage_service import delete_image, upload_image_from_url
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
