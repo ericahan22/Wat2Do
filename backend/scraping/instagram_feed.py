@@ -19,7 +19,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
-from example.embedding_utils import generate_event_embedding, is_duplicate_event
+from example.embedding_utils import is_duplicate_event
+from services.openai_service import generate_embedding
 from example.models import Clubs, Events
 from services.openai_service import extract_events_from_caption
 from services.storage_service import upload_image_from_url
@@ -186,7 +187,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             return False
 
         # Generate embedding
-        embedding = generate_event_embedding(event_data)
+        embedding = generate_embedding(event_data["description"])
 
         # Create event using Django ORM
         Events.objects.create(
@@ -223,7 +224,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         try:
-            embedding = generate_event_embedding(event_data)
+            embedding = generate_embedding(event_data["description"])
             append_event_to_csv(
                 event_data, club_ig, post_url, status="failed", embedding=embedding
             )
@@ -319,7 +320,7 @@ def process_recent_feed(
                     logger.warning(
                         f"Missing required fields for event '{event_data.get('name', 'Unknown')}': {missing_fields}, skipping event"
                     )
-                    embedding = generate_event_embedding(event_data)
+                    embedding = generate_embedding(event_data["description"])
                     append_event_to_csv(
                         event_data,
                         post.owner_username,

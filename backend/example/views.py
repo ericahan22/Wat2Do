@@ -18,7 +18,7 @@ from rest_framework.throttling import AnonRateThrottle
 
 from services.openai_service import generate_embedding
 
-from .embedding_utils import find_similar_events, generate_event_embedding
+from .embedding_utils import find_similar_events
 from .models import Clubs, Events
 
 
@@ -30,7 +30,6 @@ def home(_request):
         {
             "message": "Instagram Event Scraper API with Vector Similarity",
             "endpoints": {
-                "GET /api/events/": "Get upcoming events",
                 "GET /api/events/?search=search_text": "Search events using vector similarity",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
@@ -171,7 +170,7 @@ def create_mock_event(request):
         }
 
         # Check if this would be a duplicate
-        embedding = generate_event_embedding(event_data)
+        embedding = generate_embedding(event_data["description"])
         similar_events = find_similar_events(embedding, limit=1)
 
         if similar_events:
@@ -239,7 +238,7 @@ def test_similarity(request):
     try:
         search_text = request.GET.get("text", "Test Event at Test Location")
         # Generate embedding for search text
-        search_embedding = generate_event_embedding(search_text)
+        search_embedding = generate_embedding(search_text)
 
         similar_events = find_similar_events(search_embedding, threshold=0.38)
 
