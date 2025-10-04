@@ -101,8 +101,8 @@ def get_events(request):
             )
             similar_event_ids = [event["id"] for event in similar_events]
             filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
-            else:
-                filtered_queryset = Events.objects.none()
+        else:
+            filtered_queryset = Events.objects.none()
 
         # Return event IDs
         event_ids = [str(event.id) for event in filtered_queryset]
