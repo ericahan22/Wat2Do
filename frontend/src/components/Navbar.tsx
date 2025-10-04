@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GitHubLink from "@/components/GitHubLink";
@@ -23,7 +23,13 @@ function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex gap-6 items-center">
             <div className="text-base font-bold text-gray-900 dark:text-white">
-              Wat2Do
+              <Link to="/">
+                <img
+                  src="/wat2do-logo.svg"
+                  alt="Wat2Do"
+                  className="h-14 w-14"
+                />
+              </Link>
             </div>
             <div className="flex gap-2">
               <Button
