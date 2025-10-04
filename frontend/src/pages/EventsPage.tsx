@@ -63,7 +63,7 @@ function EventsPage() {
         <div className="flex items-center justify-center py-8">
           <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
-            <span>Loading events...</span>
+            <span>Loading events... (This may take a few seconds)</span>
           </div>
         </div>
       )}
