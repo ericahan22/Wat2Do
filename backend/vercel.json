@@ -1,17 +1,19 @@
 {
-  "builds": [
-    {
-      "src": "api/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "15mb"
-      }
+  "functions": {
+    "api/wsgi.py": {
+      "maxDuration": 30
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
       "dest": "api/wsgi.py"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "PYTHONPATH": "."
+    }
+  },
+  "outputDirectory": "."
 }
