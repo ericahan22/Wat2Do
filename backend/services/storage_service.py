@@ -9,7 +9,6 @@ import logging
 import os
 import uuid
 from io import BytesIO
-from typing import List, Optional
 
 import boto3
 import requests
@@ -28,8 +27,8 @@ def get_s3_client():
     try:
         s3_client = boto3.client("s3")
         return s3_client
-    except Exception as e:
-        logger.error(f"Failed to initialize S3 client: {e}")
+    except Exception:
+        logger.exception("Failed to initialize S3 client")
         return None
 
 
@@ -49,28 +48,29 @@ def _validate_image(image_data: bytes) -> bool:
             return False
 
         return True
-    except Exception as e:
-        logger.error(f"Image validation failed: {e}")
+    except Exception:
+        logger.exception("Image validation failed")
         return False
 
 
-def _download_image_from_url(image_url: str) -> Optional[bytes]:
+def _download_image_from_url(image_url: str) -> bytes | None:
     try:
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            )
         }
         response = requests.get(image_url, headers=headers, timeout=30)
         response.raise_for_status()
 
         return response.content
-    except Exception as e:
-        logger.error(f"Failed to download image from {image_url}: {e}")
+    except Exception:
+        logger.exception(f"Failed to download image from {image_url}")
         return None
 
 
-def upload_image_from_url(
-    image_url: str, filename: Optional[str] = None
-) -> Optional[str]:
+def upload_image_from_url(image_url: str, filename: str | None = None) -> str | None:
     try:
         image_data = _download_image_from_url(image_url)
         if not image_data:
@@ -109,15 +109,15 @@ def upload_image_from_url(
 
         return public_url
 
-    except ClientError as e:
-        logger.error(f"AWS S3 error uploading image: {e}")
+    except ClientError:
+        logger.exception("AWS S3 error uploading image")
         return None
-    except Exception as e:
-        logger.error(f"Unexpected error uploading image: {e}")
+    except Exception:
+        logger.exception("Unexpected error uploading image")
         return None
 
 
-def upload_image_data(image_data: bytes, filename: str) -> Optional[str]:
+def upload_image_data(image_data: bytes, filename: str) -> str | None:
     try:
         if not _validate_image(image_data):
             return None
@@ -138,15 +138,15 @@ def upload_image_data(image_data: bytes, filename: str) -> Optional[str]:
 
         return public_url
 
-    except ClientError as e:
-        logger.error(f"AWS S3 error uploading image data: {e}")
+    except ClientError:
+        logger.exception("AWS S3 error uploading image data")
         return None
-    except Exception as e:
-        logger.error(f"Unexpected error uploading image data: {e}")
+    except Exception:
+        logger.exception("Unexpected error uploading image data")
         return None
 
 
-def delete_images(filenames: List[str]) -> int:
+def delete_images(filenames: list[str]) -> int:
     logger.info(f"Deleting {len(filenames)} images from S3...")
     try:
         delete_objects = [{"Key": key} for key in filenames]
@@ -160,15 +160,15 @@ def delete_images(filenames: List[str]) -> int:
         logger.info(f"Successfully deleted {deleted_count} images")
         return deleted_count
 
-    except ClientError as e:
-        logger.error(f"AWS S3 error deleting images: {e}")
+    except ClientError:
+        logger.exception("AWS S3 error deleting images")
         return 0
-    except Exception as e:
-        logger.error(f"Unexpected error deleting images: {e}")
+    except Exception:
+        logger.exception("Unexpected error deleting images")
         return 0
 
 
-def list_all_s3_objects() -> List[str]:
+def list_all_s3_objects() -> list[str]:
     logger.info("Listing all objects in S3 bucket...")
     try:
         all_keys = []
@@ -176,15 +176,14 @@ def list_all_s3_objects() -> List[str]:
 
         for page in paginator.paginate(Bucket=bucket_name):
             if "Contents" in page:
-                for obj in page["Contents"]:
-                    all_keys.append(obj["Key"])
+                all_keys.extend(obj["Key"] for obj in page["Contents"])
 
         logger.info(f"Found {len(all_keys)} total objects in S3 bucket")
         return all_keys
 
-    except ClientError as e:
-        logger.error(f"Error listing S3 objects: {e}")
+    except ClientError:
+        logger.exception("Error listing S3 objects")
         raise
-    except Exception as e:
-        logger.error(f"Unexpected error listing S3 objects: {e}")
+    except Exception:
+        logger.exception("Unexpected error listing S3 objects")
         raise

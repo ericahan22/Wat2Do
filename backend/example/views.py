@@ -8,7 +8,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import connection
 from django.db.models import OuterRef, Subquery
-
 from pytz import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -25,7 +24,7 @@ from .models import Clubs, Events
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def home(request):
+def home(_request):
     """Home endpoint with basic info"""
     return Response(
         {
@@ -35,15 +34,23 @@ def home(request):
                 "GET /api/events/?view=calendar": "Get events in calendar view",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
-                "POST /api/mock-event/": "Create a mock event with vector embedding (admin only)",
-                "GET /api/test-similarity/?text=search_text": "Test vector similarity search",
+                "POST /api/mock-event/": (
+                    "Create a mock event with vector embedding (admin only)"
+                ),
+                "GET /api/test-similarity/?text=search_text": (
+                    "Test vector similarity search"
+                ),
                 "POST /api/auth/register/": "Register a new user account",
-                "POST /api/auth/token/": "Get authentication token with username/password",
+                "POST /api/auth/token/": (
+                    "Get authentication token with username/password"
+                ),
             },
             "auth": {
                 "info": "POST routes (except auth endpoints) require admin privileges",
                 "header": "Authorization: Token <admin-token>",
-                "admin_note": "Only admin users can access POST endpoints like /api/mock-event/",
+                "admin_note": (
+                    "Only admin users can access POST endpoints like /api/mock-event/"
+                ),
                 "register_example": {
                     "username": "your_username",
                     "password": "your_password",
@@ -53,7 +60,9 @@ def home(request):
                     "username": "your_username",
                     "password": "your_password",
                 },
-                "make_admin": "Use Django admin or manage.py createsuperuser to create admin users",
+                "make_admin": (
+                    "Use Django admin or manage.py createsuperuser to create admin users"
+                ),
             },
         }
     )
@@ -61,7 +70,7 @@ def home(request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-def health(request):
+def health(_request):
     """Health check endpoint"""
     return Response({"status": "healthy", "message": "Server is running"})
 
@@ -189,7 +198,9 @@ def create_mock_event(request):
         if similar_events:
             return Response(
                 {
-                    "message": "Duplicate event detected! A similar event already exists.",
+                    "message": (
+                        "Duplicate event detected! A similar event already exists."
+                    ),
                     "event_data": event_data,
                     "similar_event": similar_events[0],
                 },
@@ -201,7 +212,7 @@ def create_mock_event(request):
             cursor.execute(
                 """
                 INSERT INTO events (
-                    club_handle, url, name, date, start_time, end_time, 
+                    club_handle, url, name, date, start_time, end_time,
                     location, price, food, registration, image_url, embedding
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector)
                 RETURNING id
@@ -236,7 +247,7 @@ def create_mock_event(request):
 
     except Exception as e:
         return Response(
-            {"error": f"Failed to create mock event: {str(e)}"},
+            {"error": f"Failed to create mock event: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -276,7 +287,7 @@ def test_similarity(request):
 
     except Exception as e:
         return Response(
-            {"error": f"Failed to test similarity: {str(e)}"},
+            {"error": f"Failed to test similarity: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -317,7 +328,7 @@ def create_auth_token(request):
 
     except Exception as e:
         return Response(
-            {"error": f"Failed to create token: {str(e)}"},
+            {"error": f"Failed to create token: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -362,6 +373,6 @@ def create_user(request):
 
     except Exception as e:
         return Response(
-            {"error": f"Failed to create user: {str(e)}"},
+            {"error": f"Failed to create user: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

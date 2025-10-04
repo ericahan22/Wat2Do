@@ -1,5 +1,3 @@
-import json
-
 from services.openai_service import extract_event_from_caption
 
 # Test data
@@ -23,7 +21,9 @@ post = {
     "brs_severity": None,
     "pk": "3721572472337849724",
     "inventory_source": "media_or_ad",
-    "logging_info_token": "GCAyMDdiZDNiYTgwYTU0OTU3ODk5YWRhNzNmNjlkN2E4Ykbiq7eMDSbiq7eMDRgDbmNnFuCrt4wNAA==",
+    "logging_info_token": (
+        "GCAyMDdiZDNiYTgwYTU0OTU3ODk5YWRhNzNmNjlkN2E4Ykbiq7eMDSbiq7eMDRgDbmNnFuCrt4wNAA=="
+    ),
     "explore": None,
     "main_feed_carousel_starting_media_id": None,
     "carousel_media": None,
@@ -62,7 +62,11 @@ post = {
     "number_of_qualities": None,
     "video_dash_manifest": None,
     "video_versions": None,
-    "accessibility_caption": "Photo by UWaterloo Dragon Boat on September 14, 2025. May be an image of 8 people, poster and text that says 'LEARN UWDBC AT CLUBS FAIR DRAGON BOT + SEPT 18T 11am- 3pT MEET OUR EXECS :) SEPT 19TH 11am- 11am-2pm 2pm SLC RHKK\u0438Ebe VRKAA hinOek CUSHOU.COM'.",
+    "accessibility_caption": (
+        "Photo by UWaterloo Dragon Boat on September 14, 2025. May be an image of 8 people, "
+        "poster and text that says 'LEARN UWDBC AT CLUBS FAIR DRAGON BOT + SEPT 18T 11am- 3pT "
+        "MEET OUR EXECS :) SEPT 19TH 11am- 11am-2pm 2pm SLC RHKK\u0438Ebe VRKAA hinOek CUSHOU.COM'."
+    ),
     "image_versions2": {
         "candidates": [
             {
@@ -138,7 +142,9 @@ post = {
     "link": None,
     "story_cta": None,
     "like_count": 1,
-    "organic_tracking_token": "eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjp0cnVlLCJ1dWlkIjoiZGNiNjUzMmU2MjMyNDUxODlkMTdkN2I5ZDczY2NhOWQzNzIxNTcyNDcyMzM3ODQ5NzI0Iiwic2VydmVyX3Rva2VuIjoiMTc1Nzg2NjczNzg1MHwzNzIxNTcyNDcyMzM3ODQ5NzI0fDc2***fGQxNGZkMTg0NjU1MWNhODcyZjZlMmE2NDUxNzAwMWZkNzFlNjYxMWZmYzc5MTk5MzMxNDdmYmU3YTE5MGVkN2QifSwic2lnbmF0dXJlIjoiIn0=",
+    "organic_tracking_token": (
+        "eyJ2ZXJzaW9uIjo1LCJwYXlsb2FkIjp7ImlzX2FuYWx5dGljc190cmFja2VkIjp0cnVlLCJ1dWlkIjoiZGNiNjUzMmU2MjMyNDUxODlkMTdkN2I5ZDczY2NhOWQzNzIxNTcyNDcyMzM3ODQ5NzI0Iiwic2VydmVyX3Rva2VuIjoiMTc1Nzg2NjczNzg1MHwzNzIxNTcyNDcyMzM3ODQ5NzI0fDc2***fGQxNGZkMTg0NjU1MWNhODcyZjZlMmE2NDUxNzAwMWZkNzFlNjYxMWZmYzc5MTk5MzMxNDdmYmU3YTE5MGVkN2QifSwic2lnbmF0dXJlIjoiIn0="
+    ),
     "preview": None,
     "product_type": "feed",
     "invited_coauthor_producers": [],
@@ -153,7 +159,14 @@ post = {
     "clips_metadata": None,
     "location": None,
     "wearable_attribution_info": None,
-    "caption": "\ud83d\udea3\u200d\u2640\ufe0f Come find us at the Clubs Fair! \ud83d\udc09\u2728\nLooking for a fun way to get active and meet new people? Dragon Boat might be the perfect fit. \nIf you missed us at the Athletics Fair, here\u2019s your chance to meet the team!\n\ud83d\udccd SLC\n \ud83d\uddd3\ufe0f Sept 18 | 11 AM \u2013 3 PM\n \ud83d\uddd3\ufe0f Sept 19 | 11 AM \u2013 2 PM\nStop by our booth to learn more and see how YOU can be part of the team \ud83d\udcaa",
+    "caption": (
+        "\ud83d\udea3\u200d\u2640\ufe0f Come find us at the Clubs Fair! \ud83d\udc09\u2728\n"
+        "Looking for a fun way to get active and meet new people? Dragon Boat might be the perfect fit. \n"
+        "If you missed us at the Athletics Fair, here\u2019s your chance to meet the team!\n"
+        "\ud83d\udccd SLC\n \ud83d\uddd3\ufe0f Sept 18 | 11 AM \u2013 3 PM\n "
+        "\ud83d\uddd3\ufe0f Sept 19 | 11 AM \u2013 2 PM\n"
+        "Stop by our booth to learn more and see how YOU can be part of the team \ud83d\udcaa"
+    ),
     "caption_is_edited": False,
     "headline": None,
     "comment_count": 0,
@@ -190,4 +203,4 @@ image_url = "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a0e6f
 
 # Test AI client
 result = extract_event_from_caption(post["caption"], image_url)
-print(json.dumps(result, indent=2))
+# print(json.dumps(result, indent=2))  # Commented out for linting

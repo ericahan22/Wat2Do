@@ -1,6 +1,5 @@
 import os
 import sys
-from typing import List
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from django.db import connection
@@ -8,13 +7,13 @@ from django.db import connection
 from services.openai_service import generate_embedding
 
 
-def generate_event_embedding(event_data: dict) -> List[float]:
+def generate_event_embedding(event_data: dict) -> list[float]:
     return generate_embedding(repr(event_data))
 
 
 def find_similar_events(
-    embedding: List[float], threshold: float = 0.985, limit: int = None
-) -> List[dict]:
+    embedding: list[float], threshold: float = 0.985, limit: int = None
+) -> list[dict]:
     with connection.cursor() as cursor:
         if limit is not None:
             cursor.execute(

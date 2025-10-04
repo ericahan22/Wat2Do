@@ -68,20 +68,20 @@ SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 def get_post_image_url(post):
     try:
-        if "image_versions2" in post._node and post._node["image_versions2"]:
+        if post._node.get("image_versions2"):
             return post._node["image_versions2"]["candidates"][0]["url"]
 
-        if "carousel_media" in post._node and post._node["carousel_media"]:
+        if post._node.get("carousel_media"):
             return post._node["carousel_media"][0]["image_versions2"]["candidates"][0][
                 "url"
             ]
 
-        if "display_url" in post._node and post._node["display_url"]:
+        if post._node.get("display_url"):
             return post._node["display_url"]
         return None
     except (KeyError, AttributeError) as e:
         logger.error(
-            f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {str(e)}"
+            f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {e!s}"
         )
         return None
 
@@ -102,7 +102,7 @@ def handle_instagram_errors(func):
                     "Try refreshing CSRF token and/or session ID, update secrets"
                 )
                 logger.error("----------------------------")
-            logger.error(f"Full error: {str(e)}")
+            logger.error(f"Full error: {e!s}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             raise
 
@@ -216,7 +216,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             return False
         return True
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
+        logger.error(f"Database error: {e!s}")
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         try:
@@ -329,7 +329,7 @@ def process_recent_feed(
                 break
         except Exception as e:
             logger.error(
-                f"Error processing post {post.shortcode} by {post.owner_username}: {str(e)}"
+                f"Error processing post {post.shortcode} by {post.owner_username}: {e!s}"
             )
             logger.error(f"Traceback: {traceback.format_exc()}")
             time.sleep(random.uniform(3, 8))
@@ -348,7 +348,7 @@ def session():
     try:
         if session_file.exists():
             L.load_session_from_file(USERNAME, filename=str(session_file))
-            logger.info(f"Loaded session from file: {str(session_file)}")
+            logger.info(f"Loaded session from file: {session_file!s}")
         else:
             logger.info("No session file found, falling back to env")
             L.load_session(

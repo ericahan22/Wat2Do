@@ -12,7 +12,6 @@ import logging
 import os
 import traceback
 from datetime import datetime
-from typing import Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -26,7 +25,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-def generate_embedding(text: str, model: str = "text-embedding-3-small") -> List[float]:
+def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
     """
     Generate an embedding vector for the given text.
 
@@ -45,8 +44,8 @@ def generate_embedding(text: str, model: str = "text-embedding-3-small") -> List
 
 
 def extract_event_from_caption(
-    caption_text: str, image_url: Optional[str] = None
-) -> Dict[str, Union[str, bool, float, None]]:
+    caption_text: str, image_url: str | None = None
+) -> dict[str, str | bool | float | None]:
     """
     Parse an Instagram caption to extract event information.
 
@@ -82,7 +81,6 @@ def extract_event_from_caption(
         "registration": boolean  // true if registration is required/mentioned, false otherwise
         "image_url": string  // URL of the event image if provided, empty string if not
     }}
-    
     Guidelines:
     - PRIORITIZE CAPTION TEXT: Always extract information from the caption text first and use it as the primary source of truth
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
@@ -168,14 +166,14 @@ def extract_event_from_caption(
 
             return event_data
 
-        except json.JSONDecodeError as e:
-            logger.error(f"Error parsing JSON response: {e}")
+        except json.JSONDecodeError:
+            logger.exception("Error parsing JSON response")
             logger.error(f"Response text: {response_text}")
             # Return default structure if JSON parsing fails
             return _get_default_event_structure(image_url)
 
-    except Exception as e:
-        logger.error(f"Error parsing caption: {str(e)}")
+    except Exception:
+        logger.exception("Error parsing caption")
         logger.error(f"Caption text: {caption_text}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         # Return default structure if API call fails
@@ -183,8 +181,8 @@ def extract_event_from_caption(
 
 
 def _get_default_event_structure(
-    image_url: Optional[str] = None,
-) -> Dict[str, Union[str, bool, float, None]]:
+    image_url: str | None = None,
+) -> dict[str, str | bool | float | None]:
     """Return the default event structure with empty/null values."""
     return {
         "name": "",

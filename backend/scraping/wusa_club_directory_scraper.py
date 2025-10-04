@@ -151,7 +151,7 @@ def save_to_csv(data, filename="club_info.csv"):
 
     existing_data = []
     try:
-        with open(filename, "r", newline="", encoding="utf-8") as f:
+        with open(filename, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             existing_data = list(reader)
     except FileNotFoundError:
@@ -174,7 +174,7 @@ def save_to_csv(data, filename="club_info.csv"):
 def sort_csv_alphabetically(filename="club_info.csv"):
     """Sort existing CSV file alphabetically by club name"""
     # Read the CSV
-    with open(filename, "r", newline="", encoding="utf-8") as f:
+    with open(filename, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         data = list(reader)
 

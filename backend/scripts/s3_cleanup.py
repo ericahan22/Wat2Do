@@ -4,7 +4,6 @@ import argparse
 import logging
 import os
 import sys
-from typing import Set
 from urllib.parse import urlparse
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -27,11 +26,13 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def get_referenced_s3_keys() -> Set[str]:
+def get_referenced_s3_keys() -> set[str]:
     logger.info("Querying events table for referenced image URLs...")
 
     try:
-        events = Events.objects.filter(image_url__isnull=False).values_list("image_url", flat=True)
+        events = Events.objects.filter(image_url__isnull=False).values_list(
+            "image_url", flat=True
+        )
         referenced_keys = {urlparse(image_url).path.lstrip("/") for image_url in events}
         logger.info(f"Found {len(referenced_keys)} referenced S3 keys")
         return referenced_keys

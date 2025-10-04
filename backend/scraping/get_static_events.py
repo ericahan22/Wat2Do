@@ -1,6 +1,8 @@
 import logging
 import os
+import sys
 from datetime import date, datetime, time
+from pathlib import Path
 
 import psycopg2
 from dotenv import load_dotenv
@@ -12,7 +14,7 @@ def format_value(value):
     """Format values for TypeScript file"""
     if value is None:
         return "null"
-    if isinstance(value, (date, time, datetime)):
+    if isinstance(value, date | time | datetime):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
         escaped_value = (
@@ -35,10 +37,9 @@ def main():
     try:
         conn_string = os.environ.get("SUPABASE_DB_URL")
         logging.info("Connecting to the database...")
-        with psycopg2.connect(conn_string) as conn:
-            with conn.cursor() as cur:
-                logging.info("Executing query...")
-                query = """
+        with psycopg2.connect(conn_string) as conn, conn.cursor() as cur:
+            logging.info("Executing query...")
+            query = """
                 SELECT
                     e.id,
                     e.club_handle,
@@ -61,21 +62,19 @@ def main():
                     events e
                 ORDER BY e.date DESC, e.start_time DESC;
                 """
-                cur.execute(query)
-                columns = [desc[0] for desc in cur.description]
-                events = [dict(zip(columns, row)) for row in cur.fetchall()]
-                logging.info(f"Fetched {len(events)} events.")
-        output_path = os.path.join(
-            os.path.dirname(__file__),
-            "..",
-            "..",
-            "frontend",
-            "src",
-            "data",
-            "staticEvents.ts",
+            cur.execute(query)
+            columns = [desc[0] for desc in cur.description]
+            events = [dict(zip(columns, row, strict=False)) for row in cur.fetchall()]
+            logging.info(f"Fetched {len(events)} events.")
+        output_path = (
+            Path(__file__).parent.parent.parent
+            / "frontend"
+            / "src"
+            / "data"
+            / "staticEvents.ts"
         )
         logging.info(f"Writing to {output_path}...")
-        with open(output_path, "w", encoding="utf-8") as f:
+        with output_path.open("w", encoding="utf-8") as f:
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
             f.write("export const staticEventsData: Record<string, Event> = {\n")
             for i, event in enumerate(events):
@@ -101,9 +100,9 @@ def main():
                 f.write("\n")
             f.write("};\n")
         logging.info("Successfully updated staticEvents.ts")
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
-        exit(1)
+    except Exception:
+        logging.exception("An error occurred")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

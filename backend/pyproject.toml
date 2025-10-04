@@ -1,43 +1,14 @@
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
-# Enable the same rules as your previous flake8 setup
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings  
-    "F",  # Pyflakes
-    "I",  # isort
-]
+select = ["E", "W", "F", "I", "N", "UP", "B", "A", "C4", "T20", "SIM", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
+ignore = ["T201", "TRY300", "TRY400", "RUF012", "ARG001", "E501", "W293", "PTH118", "PTH120", "PTH100", "PTH123", "PLR0912", "PLR0915", "B008", "N806", "PLR2004", "B007", "PERF102", "ERA001", "C414", "RUF013", "W291"]
 
-# Ignore rules (Ruff uses different codes than flake8)
-ignore = [
-    "E203",  # whitespace before ':' (conflicts with formatter)
-    "E501",  # line too long (handled by formatter)
-    "W291",  # trailing whitespace
-    "W292",  # no newline at end of file
-    "W293",  # blank line contains whitespace
-]
-
-# Per-file ignores (same as your .flake8 setup)
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
-"*/migrations/*" = ["E", "W", "F", "I"]  # Ignore all rules in migrations
-"*/embedding_utils.py" = ["E402"]  # Allow imports not at top (Django setup)
-"*/instagram_feed.py" = ["E402"]   # Allow imports not at top (Django setup)
-
-[tool.ruff.lint.isort]
-# Configure import sorting (same as your previous isort setup)
-known-first-party = ["api", "example", "services", "scraping"]
-known-third-party = ["django"]
-section-order = ["future", "standard-library", "django", "third-party", "first-party", "local-folder"]
-
-[tool.ruff.lint.isort.sections]
-django = ["django"]
-
-[tool.ruff.format]
-# Use Black-compatible formatting
-quote-style = "double"
-indent-style = "space"
-line-ending = "auto"
+"scripts/s3_cleanup.py" = ["E402"]
+"scraping/instagram_feed.py" = ["E402", "E501", "PTH100", "PTH120"]
+"example/migrations/*.py" = ["T201", "ARG001", "RUF012", "W291", "PERF203"]
+"manage.py" = ["TRY003"]
+"test_openai_service.py" = ["T201", "E501"]
