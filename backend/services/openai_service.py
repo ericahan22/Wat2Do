@@ -26,16 +26,6 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
-    """
-    Generate an embedding vector for the given text.
-
-    Args:
-        text: Text to generate embedding for
-        model: OpenAI embedding model to use
-
-    Returns:
-        List of floats representing the embedding vector
-    """
     text = text.replace("\n", " ").strip()
 
     response = client.embeddings.create(input=[text], model=model)
@@ -43,20 +33,9 @@ def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list
     return response.data[0].embedding
 
 
-def extract_event_from_caption(
+def extract_events_from_caption(
     caption_text: str, image_url: str | None = None
-) -> dict[str, str | bool | float | None]:
-    """
-    Parse an Instagram caption to extract event information.
-
-    Args:
-        caption_text: Instagram caption text (can be None)
-        image_url: Optional URL to image for enhanced analysis
-
-    Returns:
-        Dictionary with event information in consistent format
-    """
-
+) -> list[dict[str, str | bool | float | None]]:
     # Get current date and day of week for context
     now = datetime.now()
     current_date = now.strftime("%Y-%m-%d")
@@ -69,20 +48,26 @@ def extract_event_from_caption(
     
     Caption: {caption_text}
     
-    Return a JSON object with the following structure (all fields must be present):
-    {{
-        "name": string,  // name of the event
-        "date": string,  // date in YYYY-MM-DD format if found, empty string if not
-        "start_time": string,  // start time in HH:MM format if found, empty string if not
-        "end_time": string,  // end time in HH:MM format if found, empty string if not
-        "location": string,,  // location of the event
-        "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
-        "food": string,  // food information if mentioned, empty string if not
-        "registration": boolean  // true if registration is required/mentioned, false otherwise
-        "image_url": string  // URL of the event image if provided, empty string if not
-    }}
+    Return a JSON array of event objects. Each event should have the following structure (all fields must be present):
+    [
+        {{
+            "name": string,  // name of the event
+            "date": string,  // date in YYYY-MM-DD format if found, empty string if not
+            "start_time": string,  // start time in HH:MM format if found, empty string if not
+            "end_time": string,  // end time in HH:MM format if found, empty string if not
+            "location": string,  // location of the event
+            "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
+            "food": string,  // food information if mentioned, empty string if not
+            "registration": boolean,  // true if registration is required/mentioned, false otherwise
+            "image_url": string  // URL of the event image if provided, empty string if not
+        }}
+    ]
+    
     Guidelines:
     - PRIORITIZE CAPTION TEXT: Always extract information from the caption text first and use it as the primary source of truth
+    - Return an array of events - if multiple events are mentioned, create separate objects for each
+    - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
+    - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
     - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
@@ -92,7 +77,8 @@ def extract_event_from_caption(
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
-    - Return ONLY the JSON object, no additional text
+    - Return ONLY the JSON array, no additional text
+    - If no events are found, return an empty array []
     {f"- An image is provided at: {image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if image_url else ""}
     """
 
@@ -137,53 +123,62 @@ def extract_event_from_caption(
             if response_text.endswith("```"):
                 response_text = response_text[:-3]
 
-            event_data = json.loads(response_text.strip())
+            events_data = json.loads(response_text.strip())
+            
+            # Ensure events_data is a list
+            if not isinstance(events_data, list):
+                logger.warning("Response is not a list, wrapping in array")
+                events_data = [events_data] if events_data else []
 
-            # Ensure all required fields are present
-            required_fields = [
-                "name",
-                "date",
-                "start_time",
-                "end_time",
-                "location",
-                "price",
-                "food",
-                "registration",
-                "image_url",
-            ]
-            for field in required_fields:
-                if field not in event_data:
-                    if field == "price":
-                        event_data[field] = None
-                    elif field == "registration":
-                        event_data[field] = False
-                    else:
-                        event_data[field] = ""
+            # Process each event in the array
+            processed_events = []
+            for event_data in events_data:
+                # Ensure all required fields are present
+                required_fields = [
+                    "name",
+                    "date",
+                    "start_time",
+                    "end_time",
+                    "location",
+                    "price",
+                    "food",
+                    "registration",
+                    "image_url",
+                ]
+                for field in required_fields:
+                    if field not in event_data:
+                        if field == "price":
+                            event_data[field] = None
+                        elif field == "registration":
+                            event_data[field] = False
+                        else:
+                            event_data[field] = ""
 
-            # Set image_url if provided
-            if image_url and not event_data.get("image_url"):
-                event_data["image_url"] = image_url
+                # Set image_url if provided
+                if image_url and not event_data.get("image_url"):
+                    event_data["image_url"] = image_url
+                
+                processed_events.append(event_data)
 
-            return event_data
+            return processed_events
 
         except json.JSONDecodeError:
             logger.exception("Error parsing JSON response")
             logger.error(f"Response text: {response_text}")
             # Return default structure if JSON parsing fails
-            return _get_default_event_structure(image_url)
+            return [_get_default_event_structure(image_url)]
 
     except Exception:
         logger.exception("Error parsing caption")
         logger.error(f"Caption text: {caption_text}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         # Return default structure if API call fails
-        return _get_default_event_structure(image_url)
+        return [_get_default_event_structure(image_url)]
 
 
 def _get_default_event_structure(
     image_url: str | None = None,
 ) -> dict[str, str | bool | float | None]:
-    """Return the default event structure with empty/null values."""
     return {
         "name": "",
         "date": "",

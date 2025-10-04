@@ -7,6 +7,7 @@ import {
   MapPin,
   ExternalLink,
   DollarSign,
+  Utensils,
 } from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
@@ -39,12 +40,12 @@ const getEventStatus = (event: Event): "live" | "soon" | "none" => {
 
 const isEventNew = (event: Event): boolean => {
   if (!event.added_at) return false;
-  
+
   const now = new Date();
   const addedAt = new Date(event.added_at);
   const nineteenHoursInMs = 19 * 60 * 60 * 1000;
-  
-  return (now.getTime() - addedAt.getTime()) <= nineteenHoursInMs;
+
+  return now.getTime() - addedAt.getTime() <= nineteenHoursInMs;
 };
 
 const EventStatusBadge = ({ event }: { event: Event }) => {
@@ -61,7 +62,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
   if (status === "soon") {
     return (
       <Badge variant="soon" className="absolute top-1 right-1 z-10">
-        Starts in 1 hr
+        Starting soon
       </Badge>
     );
   }
@@ -143,9 +144,24 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 <span className="truncate">
                   {event.price === null || event.price === 0
                     ? "Free"
-                    : `${event.price}`}
+                    : `$${event.price}`}
                 </span>
               </div>
+
+              {event.food && (
+                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                  <Utensils className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="line-clamp-1" title={event.food}>
+                    {event.food}
+                  </span>
+                </div>
+              )}
+
+              {event.registration && (
+                <div className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
+                  Registration required
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-2 w-full mt-auto">

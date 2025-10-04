@@ -21,7 +21,7 @@ from instaloader import Instaloader
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
 from example.models import Clubs, Events
-from services.openai_service import extract_event_from_caption
+from services.openai_service import extract_events_from_caption
 from services.storage_service import upload_image_from_url
 
 USER_AGENTS = [
@@ -287,40 +287,43 @@ def process_recent_feed(
                 )
                 image_url = None
 
-            event_data = extract_event_from_caption(post.caption, image_url)
-            if event_data is None:
-                logger.warning(f"AI client returned None for post {post.shortcode}")
+            events_data = extract_events_from_caption(post.caption, image_url)
+            if not events_data or len(events_data) == 0:
+                logger.warning(f"AI client returned no events for post {post.shortcode}")
                 continue
 
             post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-            if (
-                event_data.get("name")
-                and event_data.get("date")
-                and event_data.get("location")
-                and event_data.get("start_time")
-            ):
-                if insert_event_to_db(event_data, post.owner_username, post_url):
-                    events_added += 1
-                    logger.info(f"Successfully added event from {post.owner_username}")
+            
+            # Process each event returned by the AI
+            for event_data in events_data:
+                if (
+                    event_data.get("name")
+                    and event_data.get("date")
+                    and event_data.get("location")
+                    and event_data.get("start_time")
+                ):
+                    if insert_event_to_db(event_data, post.owner_username, post_url):
+                        events_added += 1
+                        logger.info(f"Successfully added event '{event_data.get('name')}' from {post.owner_username}")
+                    else:
+                        logger.error(f"Failed to add event '{event_data.get('name')}' from {post.owner_username}")
                 else:
-                    logger.error(f"Failed to add event from {post.owner_username}")
-            else:
-                missing_fields = [
-                    key
-                    for key in ["name", "date", "location", "start_time"]
-                    if not event_data.get(key)
-                ]
-                logger.warning(
-                    f"Missing required fields: {missing_fields}, skipping event"
-                )
-                embedding = generate_event_embedding(event_data)
-                append_event_to_csv(
-                    event_data,
-                    post.owner_username,
-                    post_url,
-                    status="missing_fields",
-                    embedding=embedding,
-                )
+                    missing_fields = [
+                        key
+                        for key in ["name", "date", "location", "start_time"]
+                        if not event_data.get(key)
+                    ]
+                    logger.warning(
+                        f"Missing required fields for event '{event_data.get('name', 'Unknown')}': {missing_fields}, skipping event"
+                    )
+                    embedding = generate_event_embedding(event_data)
+                    append_event_to_csv(
+                        event_data,
+                        post.owner_username,
+                        post_url,
+                        status="missing_fields",
+                        embedding=embedding,
+                    )
 
             time.sleep(random.uniform(15, 45))
 
