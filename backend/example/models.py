@@ -42,6 +42,7 @@ class Events(models.Model):
     embedding = VectorField(dimensions=1536, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True, null=True)
     club_type = models.CharField(max_length=50, blank=True, null=True)
+    reactions = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "events"

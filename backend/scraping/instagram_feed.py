@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
+from example.models import Events, Clubs
 from services.openai_service import extract_event_from_caption
 from services.storage_service import delete_image, upload_image_from_url
 
@@ -113,10 +114,13 @@ def handle_instagram_errors(func):
 def extract_s3_filename_from_url(image_url: str) -> str:
     if not image_url:
         return None
-    filename = image_url.split('/')[-1]
+    filename = image_url.split("/")[-1]
     return f"events/{filename}"
 
-def append_event_to_csv(event_data, club_ig, post_url, status="success", embedding=None):
+
+def append_event_to_csv(
+    event_data, club_ig, post_url, status="success", embedding=None
+):
     csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
@@ -135,7 +139,7 @@ def append_event_to_csv(event_data, club_ig, post_url, status="success", embeddi
             "registration",
             "image_url",
             "status",
-            "embedding"
+            "embedding",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         if not file_exists:
@@ -154,7 +158,7 @@ def append_event_to_csv(event_data, club_ig, post_url, status="success", embeddi
                 "registration": event_data.get("registration", False),
                 "image_url": event_data.get("image_url", ""),
                 "status": status,
-                "embedding": embedding or ""
+                "embedding": embedding or "",
             }
         )
 
@@ -165,60 +169,46 @@ def insert_event_to_db(event_data, club_ig, post_url):
     event_date = event_data.get("date")
     event_location = event_data.get("location")  # .title()
     try:
-        with connection.cursor() as cur:
-            # Get club_type from club handle
-            cur.execute("SELECT club_type FROM clubs WHERE ig = %s", (club_ig,))
-            club_row = cur.fetchone()
-            club_type = club_row[0] if club_row else None
-            if not club_type:
-                logger.warning(
-                    f"Club with handle {club_ig} not found in clubs. Inserting event with null club_type."
-                )
-
-            # Check duplicates using vector similarity
-            logger.debug(
-                f"Checking for duplicates using vector similarity: {event_data}"
-            )
-
-            # Check if this event is a duplicate using vector similarity
-            if is_duplicate_event(event_data):
-                logger.debug(
-                    f"Duplicate event found using vector similarity: {event_name} at {event_location}"
-                )
-                return False
-
-            # Generate embedding for the event
-            embedding = generate_event_embedding(event_data)
-
-            insert_query = """
-            INSERT INTO events (
-                club_handle, url, name, date, start_time, end_time, location, price, food, registration, image_url, embedding, club_type
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::vector, %s)
-            ON CONFLICT DO NOTHING;
-            """
-            cur.execute(
-                insert_query,
-                (
-                    club_ig,
-                    post_url,
-                    event_name,
-                    event_date,
-                    event_data["start_time"],
-                    event_data["end_time"] or None,
-                    event_location,
-                    event_data.get("price", None),
-                    event_data.get("food") or "",
-                    bool(event_data.get("registration", False)),
-                    event_data.get("image_url"),
-                    embedding,
-                    club_type,
-                ),
-            )
-            logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
-
+        # Get club_type based on club handle
         try:
-            append_event_to_csv(event_data, club_ig, post_url, status="success", embedding=embedding)
+            club = Clubs.objects.get(ig=club_ig)
+            club_type = club.club_type
+        except Clubs.DoesNotExist:
+            club_type = None
+            logger.warning(
+                f"Club with handle {club_ig} not found, inserting event with null club_type"
+            )
+
+        # Check duplicates using vector sim
+        logger.debug(f"Checking duplicates for event with data: {event_data}")
+        if is_duplicate_event(event_data):
+            logger.debug(f"Duplicate event found: {event_name} at {event_location}")
+            return False
+
+        # Generate embedding
+        embedding = generate_event_embedding(event_data)
+
+        # Create event using Django ORM
+        event = Events.objects.create(
+            club_handle=club_ig,
+            url=post_url,
+            name=event_name,
+            date=event_date,
+            start_time=event_data["start_time"],
+            end_time=event_data["end_time"] or None,
+            location=event_location,
+            price=event_data.get("price", None),
+            food=event_data.get("food") or "",
+            registration=bool(event_data.get("registration", False)),
+            image_url=event_data.get("image_url"),
+            embedding=embedding,
+            club_type=club_type,
+        )
+        logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
+        try:
+            append_event_to_csv(
+                event_data, club_ig, post_url, status="success", embedding=embedding
+            )
             logger.info(f"Appended event to CSV: {event_data.get('name')}")
         except Exception as csv_err:
             logger.error(
@@ -226,23 +216,20 @@ def insert_event_to_db(event_data, club_ig, post_url):
             )
             logger.error(f"Traceback: {traceback.format_exc()}")
             return False
-
         return True
     except Exception as e:
         logger.error(f"Database error: {str(e)}")
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
-
         try:
             embedding = generate_event_embedding(event_data)
-            append_event_to_csv(event_data, club_ig, post_url, status="failed", embedding=embedding)
+            append_event_to_csv(
+                event_data, club_ig, post_url, status="failed", embedding=embedding
+            )
             logger.info(f"Appended event to CSV: {event_data.get('name')}")
         except Exception as csv_err:
-            logger.error(
-                f"Database insert failed, and failed to append to CSV: {csv_err}"
-            )
+            logger.error(f"Database and CSV inserts failed: {csv_err}")
             logger.error(f"Traceback: {traceback.format_exc()}")
-
         return False
 
 
@@ -250,15 +237,13 @@ def get_seen_shortcodes():
     """Fetches all post shortcodes from events table in DB"""
     logger.info("Fetching seen shortcodes from the database...")
     try:
-        with connection.cursor() as cur:
-            cur.execute("SELECT url FROM events WHERE url IS NOT NULL")
-            urls = cur.fetchall()
-            shortcodes = {url[0].split('/')[-2] for url in urls if url[0]}
-            return shortcodes
+        events = Events.objects.filter(url__isnull=False).values_list("url", flat=True)
+        shortcodes = {url.split("/")[-2] for url in events if url}
+        return shortcodes
     except Exception as e:
         logger.error(f"Could not fetch shortcodes from database: {e}")
         return set()
-    
+
 
 def process_recent_feed(
     loader,
@@ -272,7 +257,7 @@ def process_recent_feed(
     posts_processed = 0
     consec_old_posts = 0
     logger.info(f"Starting feed processing with cutoff: {cutoff}")
-    
+
     seen_shortcodes = get_seen_shortcodes()
 
     for post in loader.get_feed_posts():
@@ -286,7 +271,7 @@ def process_recent_feed(
                     )
                     break
                 continue  # to next post
-            
+
             consec_old_posts = 0
             posts_processed += 1
             logger.info("\n" + "-" * 50)
@@ -311,7 +296,9 @@ def process_recent_feed(
                 if image_url:
                     s3_filename = extract_s3_filename_from_url(image_url)
                     if s3_filename and delete_image(s3_filename):
-                        logger.info(f"Deleted S3 file for failed event extraction: {s3_filename}")
+                        logger.info(
+                            f"Deleted S3 file for failed event extraction: {s3_filename}"
+                        )
                 continue
 
             post_url = f"https://www.instagram.com/p/{post.shortcode}/"
@@ -329,7 +316,9 @@ def process_recent_feed(
                     if image_url:
                         s3_filename = extract_s3_filename_from_url(image_url)
                         if s3_filename and delete_image(s3_filename):
-                            logger.info(f"Deleted S3 file for failed DB insert: {s3_filename}")
+                            logger.info(
+                                f"Deleted S3 file for failed DB insert: {s3_filename}"
+                            )
             else:
                 missing_fields = [
                     key
@@ -344,13 +333,19 @@ def process_recent_feed(
                 if image_url:
                     s3_filename = extract_s3_filename_from_url(image_url)
                     if s3_filename and delete_image(s3_filename):
-                        logger.info(f"Deleted S3 file for event with missing fields: {s3_filename}")
+                        logger.info(
+                            f"Deleted S3 file for event with missing fields: {s3_filename}"
+                        )
                 append_event_to_csv(
-                    event_data, post.owner_username, post_url, status="missing_fields", embedding=embedding
+                    event_data,
+                    post.owner_username,
+                    post_url,
+                    status="missing_fields",
+                    embedding=embedding,
                 )
-                
+
             time.sleep(random.uniform(15, 45))
-            
+
             if posts_processed >= max_posts:
                 logger.info(f"Reached max post limit of {max_posts}, stopping")
                 break
