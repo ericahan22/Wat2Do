@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "installCommand": "pip3 install --no-cache-dir -r requirements.txt",
   "builds": [
     {
       "src": "api/wsgi.py",

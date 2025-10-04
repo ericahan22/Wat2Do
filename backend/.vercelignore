@@ -56,6 +56,9 @@ coverage.xml
 # Large binary dependencies (will be installed during build)
 # wheels/ - Comment out to include during build
 
+# Linting config (not needed for runtime)
+pyproject.toml
+
 # Jupyter notebooks
 .ipynb_checkpoints/
 
