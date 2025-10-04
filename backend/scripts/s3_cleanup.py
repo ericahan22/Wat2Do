@@ -7,11 +7,15 @@ import sys
 from typing import Set
 from urllib.parse import urlparse
 
-import psycopg2
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import django
 from dotenv import load_dotenv
 
-# Add the parent directory to the path so we can import from services
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+django.setup()
+
+from example.models import Events
 from services.storage_service import delete_images, list_all_s3_objects
 
 # Configure logging
@@ -26,31 +30,15 @@ load_dotenv()
 def get_referenced_s3_keys() -> Set[str]:
     logger.info("Querying events table for referenced image URLs...")
 
-    database_url = os.getenv("DATABASE_URL")
-
     try:
-        conn = psycopg2.connect(database_url)
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT DISTINCT image_url FROM events WHERE image_url IS NOT NULL"
-            )
-            rows = cur.fetchall()
-
-        referenced_keys = set()
-        for (image_url,) in rows:
-            s3_key = urlparse(image_url).path.lstrip("/")
-            if s3_key:
-                referenced_keys.add(s3_key)
-
+        events = Events.objects.filter(image_url__isnull=False).values_list("image_url", flat=True)
+        referenced_keys = {urlparse(image_url).path.lstrip("/") for image_url in events}
         logger.info(f"Found {len(referenced_keys)} referenced S3 keys")
         return referenced_keys
 
     except Exception as e:
         logger.error(f"Error querying database: {e}")
         raise
-    finally:
-        if "conn" in locals():
-            conn.close()
 
 
 def main():
