@@ -1,4 +1,6 @@
 {
+  "installCommand": "pip install -r requirements.txt",
+  "buildCommand": "python3 manage.py collectstatic --noinput && python3 manage.py migrate --noinput",
   "functions": {
     "api/wsgi.py": {
       "maxDuration": 30
