@@ -35,12 +35,11 @@ const fetchEvents = async ({
 }): Promise<EventsResponse> => {
   const searchTerm = queryKey[1] || "";
   const searchParam = searchTerm
-    ? `&search=${encodeURIComponent(searchTerm)}`
+    ? `?search=${encodeURIComponent(searchTerm)}`
     : "";
-  const view = queryKey[2] || "grid";
 
   const response = await fetch(
-    `${API_BASE_URL}/api/events/?view=${view}${searchParam}`
+    `${API_BASE_URL}/api/events/${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
@@ -56,7 +55,7 @@ export function useEvents(view: "grid" | "calendar") {
   const hasActiveFilters = searchTerm !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, view],
+    queryKey: ["events", searchTerm],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
@@ -68,9 +67,8 @@ export function useEvents(view: "grid" | "calendar") {
     let rawEvents: Event[];
     
     if (hasActiveFilters && data?.event_ids) {
-      // Get events from static data using the returned IDs
       rawEvents = data.event_ids
-        .map(id => staticEventsData[id]) 
+        .map(id => staticEventsData[id])
     } else { 
       rawEvents = Object.values(staticEventsData);
     }
@@ -84,46 +82,30 @@ export function useEvents(view: "grid" | "calendar") {
         "-" +
         String(now.getDate()).padStart(2, "0");
         
-      return rawEvents
-        .filter((event) => {
-          const eventDateStr = event.date; // e.g., "2025-09-24"
+      // Filter for future events and events happening today that haven't finished
+      return rawEvents.filter((event) => {
+        const eventDateStr = event.date;
 
-          // If event is on a future date, include it
-          if (eventDateStr > todayStr) {
-            return true;
-          }
+        // If event is on a future date, include it
+        if (eventDateStr > todayStr) {
+          return true;
+        }
 
-          // If event is today, check if it hasn't finished yet
-          if (eventDateStr === todayStr) {
-            const [hours, minutes] = event.end_time.split(":").map(Number);
-            const eventEndDateTime = new Date();
-            eventEndDateTime.setHours(hours, minutes, 0, 0);
+        // If event is today, check if it hasn't finished yet
+        if (eventDateStr === todayStr) {
+          const [hours, minutes] = event.end_time.split(":").map(Number);
+          const eventEndDateTime = new Date();
+          eventEndDateTime.setHours(hours, minutes, 0, 0);
 
-            // Include if event hasn't finished yet (current time < event end time)
-            return now < eventEndDateTime;
-          }
+          // Include if event hasn't finished yet (current time < event end time)
+          return now < eventEndDateTime;
+        }
 
-          return false;
-        })
-        .sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-
-          // First sort by date
-          const dateDiff = dateA.getTime() - dateB.getTime();
-          if (dateDiff !== 0) {
-            return dateDiff;
-          }
-
-          // If same date, sort by start time
-          const [hoursA, minutesA] = a.start_time.split(":").map(Number);
-          const [hoursB, minutesB] = b.start_time.split(":").map(Number);
-          const timeA = hoursA * 60 + minutesA; // Convert to minutes for easy comparison
-          const timeB = hoursB * 60 + minutesB;
-
-          return timeA - timeB;
-        });
+        return false;
+      });
     }
+    
+    // For calendar view, return all events (backend already sorted them)
     return rawEvents;
   }, [hasActiveFilters, data?.event_ids, view]);
 

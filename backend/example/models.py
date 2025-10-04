@@ -46,6 +46,7 @@ class Events(models.Model):
 
     class Meta:
         db_table = "events"
+        ordering = ["date", "start_time"]
 
     def __str__(self):
         return self.name

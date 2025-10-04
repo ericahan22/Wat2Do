@@ -60,7 +60,7 @@ def main():
                     e.added_at
                 FROM
                     events e
-                ORDER BY e.date DESC, e.start_time DESC;
+                ORDER BY e.date ASC, e.start_time ASC;
                 """
             cur.execute(query)
             columns = [desc[0] for desc in cur.description]
