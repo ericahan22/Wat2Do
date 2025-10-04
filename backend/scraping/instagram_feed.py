@@ -20,9 +20,8 @@ from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from example.embedding_utils import is_duplicate_event
-from services.openai_service import generate_embedding
 from example.models import Clubs, Events
-from services.openai_service import extract_events_from_caption
+from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
 
 USER_AGENTS = [
@@ -293,11 +292,13 @@ def process_recent_feed(
 
             events_data = extract_events_from_caption(post.caption, image_url)
             if not events_data or len(events_data) == 0:
-                logger.warning(f"AI client returned no events for post {post.shortcode}")
+                logger.warning(
+                    f"AI client returned no events for post {post.shortcode}"
+                )
                 continue
 
             post_url = f"https://www.instagram.com/p/{post.shortcode}/"
-            
+
             # Process each event returned by the AI
             for event_data in events_data:
                 if (
@@ -308,9 +309,13 @@ def process_recent_feed(
                 ):
                     if insert_event_to_db(event_data, post.owner_username, post_url):
                         events_added += 1
-                        logger.info(f"Successfully added event '{event_data.get('name')}' from {post.owner_username}")
+                        logger.info(
+                            f"Successfully added event '{event_data.get('name')}' from {post.owner_username}"
+                        )
                     else:
-                        logger.error(f"Failed to add event '{event_data.get('name')}' from {post.owner_username}")
+                        logger.error(
+                            f"Failed to add event '{event_data.get('name')}' from {post.owner_username}"
+                        )
                 else:
                     missing_fields = [
                         key

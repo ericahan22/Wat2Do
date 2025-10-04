@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from example.embedding_utils import generate_event_embedding
+from services.openai_service import generate_embedding
 
 
 def repopulate_embeddings(apps, schema_editor):
@@ -40,8 +40,7 @@ def repopulate_embeddings(apps, schema_editor):
                     "price": price,
                     "registration": registration or False,
                 }
-
-                embedding = generate_event_embedding(event_data)
+                embedding = generate_embedding(repr(event_data))
 
                 # Update the event with the embedding
                 cursor.execute(

@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from example.embedding_utils import generate_event_embedding
+from services.openai_service import generate_embedding
 
 
 def regenerate_embeddings_simple(apps, schema_editor):
@@ -31,8 +31,7 @@ def regenerate_embeddings_simple(apps, schema_editor):
                     "location": location or "",
                     "food": food or "",
                 }
-
-                embedding = generate_event_embedding(event_data)
+                embedding = generate_embedding(repr(event_data))
 
                 # Update the event with the embedding
                 cursor.execute(
