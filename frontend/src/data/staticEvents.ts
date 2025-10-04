@@ -1,7 +1,7 @@
 import { Event } from "@/hooks/useEvents";
 
-export const staticEventsData: Record<string, Event> = {
-  "4": {
+export const staticEventsData = new Map<string, Event>([
+  ["4", {
     id: "4",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DM8TDLRR6PD/",
@@ -16,8 +16,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "13": {
+  }],
+  ["13", {
     id: "13",
     club_handle: "uwmoot",
     url: "https://www.instagram.com/p/DNBFLu1Mlmo/",
@@ -32,8 +32,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "5": {
+  }],
+  ["5", {
     id: "5",
     club_handle: "seruwaterloo",
     url: "https://www.instagram.com/p/DM9Bgw3tsKP/",
@@ -48,8 +48,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "2": {
+  }],
+  ["2", {
     id: "2",
     club_handle: "hillelwaterloolaurier",
     url: "https://www.instagram.com/p/DM8JBcHMooG/",
@@ -64,8 +64,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "1": {
+  }],
+  ["1", {
     id: "1",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DM3l978RmM5/",
@@ -80,8 +80,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "25": {
+  }],
+  ["25", {
     id: "25",
     club_handle: "waterboo_uw",
     url: "https://www.instagram.com/p/DNMVwt3ga2G/",
@@ -96,8 +96,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "18": {
+  }],
+  ["18", {
     id: "18",
     club_handle: "uwcsa",
     url: "https://www.instagram.com/p/DNE7UZcM5OR/",
@@ -112,8 +112,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "17": {
+  }],
+  ["17", {
     id: "17",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DNA42WOsD03/",
@@ -128,8 +128,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "33": {
+  }],
+  ["33", {
     id: "33",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DNZFuQ4gyWL/",
@@ -144,8 +144,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "45": {
+  }],
+  ["45", {
     id: "45",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOHG0muD8_r/",
@@ -160,8 +160,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "43": {
+  }],
+  ["43", {
     id: "43",
     club_handle: "kc_waterloo",
     url: "https://www.instagram.com/p/DN_gg1vEXyL/",
@@ -176,8 +176,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "61": {
+  }],
+  ["61", {
     id: "61",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOMi-Ztj6Au/",
@@ -192,8 +192,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "64": {
+  }],
+  ["64", {
     id: "64",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOONcmKgEM0/",
@@ -208,8 +208,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "73": {
+  }],
+  ["73", {
     id: "73",
     club_handle: "uwccf",
     url: "https://www.instagram.com/p/DOO-tQvEuQx/",
@@ -224,8 +224,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "36": {
+  }],
+  ["36", {
     id: "36",
     club_handle: "akcse_uw",
     url: "https://www.instagram.com/p/DNZAplpPEAp/",
@@ -240,8 +240,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "32": {
+  }],
+  ["32", {
     id: "32",
     club_handle: "uwaterloo_ksa",
     url: "https://www.instagram.com/p/DNWYrYYzKR0/",
@@ -256,8 +256,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "38": {
+  }],
+  ["38", {
     id: "38",
     club_handle: "uwaterloo_ksa",
     url: "https://www.instagram.com/p/DNf9D1dvgKG/",
@@ -272,8 +272,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "46": {
+  }],
+  ["46", {
     id: "46",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOKo3sNjHFs/",
@@ -288,8 +288,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "55": {
+  }],
+  ["55", {
     id: "55",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOICu9ZDP14/",
@@ -304,8 +304,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "41": {
+  }],
+  ["41", {
     id: "41",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN81pn_iS1a/",
@@ -320,8 +320,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "67": {
+  }],
+  ["67", {
     id: "67",
     club_handle: "techplusuw",
     url: "https://www.instagram.com/p/DOO2hl2kvef/",
@@ -336,8 +336,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "52": {
+  }],
+  ["52", {
     id: "52",
     club_handle: "uw_ux",
     url: "https://www.instagram.com/p/DOCLwzKj4SZ/",
@@ -352,8 +352,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "60": {
+  }],
+  ["60", {
     id: "60",
     club_handle: "_afroxdance_",
     url: "https://www.instagram.com/p/DOOoNAPgFBK/",
@@ -368,8 +368,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "48": {
+  }],
+  ["48", {
     id: "48",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DOJzAbij9jN/",
@@ -384,8 +384,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "40": {
+  }],
+  ["40", {
     id: "40",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN8dBt1jwQI/",
@@ -400,8 +400,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "77": {
+  }],
+  ["77", {
     id: "77",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOUjhWZDGKn/",
@@ -416,8 +416,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "53": {
+  }],
+  ["53", {
     id: "53",
     club_handle: "uwvelocity",
     url: "https://www.instagram.com/p/DOG1aqAjrEG/",
@@ -432,8 +432,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "42": {
+  }],
+  ["42", {
     id: "42",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN-6bDqjj2Y/",
@@ -448,8 +448,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "95": {
+  }],
+  ["95", {
     id: "95",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOXg4F_AO2G/",
@@ -464,8 +464,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "84": {
+  }],
+  ["84", {
     id: "84",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOUP6VngZBG/",
@@ -480,8 +480,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "57": {
+  }],
+  ["57", {
     id: "57",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DOMbvWogUCj/",
@@ -496,8 +496,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "86": {
+  }],
+  ["86", {
     id: "86",
     club_handle: "wlooartisticswimming",
     url: "https://www.instagram.com/p/DOPCEwdDy2K/",
@@ -512,8 +512,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "49": {
+  }],
+  ["49", {
     id: "49",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DOJXRrAkR9j/",
@@ -528,8 +528,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "88": {
+  }],
+  ["88", {
     id: "88",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DOLpCTfDfhC/",
@@ -544,8 +544,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "96": {
+  }],
+  ["96", {
     id: "96",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOW5iZNgC-q/",
@@ -560,8 +560,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "81": {
+  }],
+  ["81", {
     id: "81",
     club_handle: "uwaterloodj",
     url: "https://www.instagram.com/p/DOWgwuVEVmM/\r\n",
@@ -576,8 +576,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "101": {
+  }],
+  ["101", {
     id: "101",
     club_handle: "uw_ace",
     url: "https://www.instagram.com/p/DOZ6XlXDMn9/",
@@ -592,8 +592,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "99": {
+  }],
+  ["99", {
     id: "99",
     club_handle: "uwdebate",
     url: "https://www.instagram.com/p/DOWBnR4jVJV/",
@@ -608,8 +608,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "80": {
+  }],
+  ["80", {
     id: "80",
     club_handle: "uwaterloogg",
     url: "https://www.instagram.com/p/DOPLDDskn0J/",
@@ -624,8 +624,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "71": {
+  }],
+  ["71", {
     id: "71",
     club_handle: "nasawaterloo",
     url: "https://www.instagram.com/p/DOPMc4tgXZK/",
@@ -640,8 +640,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "114": {
+  }],
+  ["114", {
     id: "114",
     club_handle: "uw.chess.club",
     url: "https://www.instagram.com/p/DObTrEjDvyd/",
@@ -656,8 +656,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "82": {
+  }],
+  ["82", {
     id: "82",
     club_handle: "uw_sofa",
     url: "https://www.instagram.com/p/DOJzLdQgRV_/",
@@ -672,8 +672,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "62": {
+  }],
+  ["62", {
     id: "62",
     club_handle: "seruwaterloo",
     url: "https://www.instagram.com/p/DOMiVwDEckT/",
@@ -688,8 +688,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "58": {
+  }],
+  ["58", {
     id: "58",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DOMsL3NjaIu/",
@@ -704,8 +704,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "68": {
+  }],
+  ["68", {
     id: "68",
     club_handle: "uwrepairclub",
     url: "https://www.instagram.com/p/DOL_PncEX3C/",
@@ -720,8 +720,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "44": {
+  }],
+  ["44", {
     id: "44",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN_YmQpiS3F/",
@@ -736,8 +736,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "70": {
+  }],
+  ["70", {
     id: "70",
     club_handle: "uwvsa",
     url: "https://www.instagram.com/p/DOPAFI8CTIq/",
@@ -752,8 +752,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "109": {
+  }],
+  ["109", {
     id: "109",
     club_handle: "uwvisualartsclub",
     url: "https://www.instagram.com/p/DObX2LIDZFh/",
@@ -768,8 +768,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "90": {
+  }],
+  ["90", {
     id: "90",
     club_handle: "wloo.outersclub",
     url: "https://www.instagram.com/p/DOMgVyVkdsA/",
@@ -784,8 +784,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "47": {
+  }],
+  ["47", {
     id: "47",
     club_handle: "uwcarivybz",
     url: "https://www.instagram.com/p/DOLmUPkDcVL/",
@@ -800,8 +800,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "14": {
+  }],
+  ["14", {
     id: "14",
     club_handle: "waterlootechweek",
     url: "https://www.instagram.com/p/DNByOM6TFKX/",
@@ -816,8 +816,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "65": {
+  }],
+  ["65", {
     id: "65",
     club_handle: "wasawaterloo",
     url: "https://www.instagram.com/p/DOOm07EkYDc/",
@@ -832,8 +832,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "34": {
+  }],
+  ["34", {
     id: "34",
     club_handle: "waterlootechweek",
     url: "https://www.instagram.com/p/DNZC2rNyiot/",
@@ -848,8 +848,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "106": {
+  }],
+  ["106", {
     id: "106",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOYjHxSjeRw/",
@@ -864,8 +864,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "78": {
+  }],
+  ["78", {
     id: "78",
     club_handle: "uw_aviation",
     url: "https://www.instagram.com/p/DOWTQq8EXiX/",
@@ -880,8 +880,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "66": {
+  }],
+  ["66", {
     id: "66",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DOOV_u-gJ07/",
@@ -896,8 +896,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "119": {
+  }],
+  ["119", {
     id: "119",
     club_handle: "uwmccf",
     url: "https://www.instagram.com/p/DObRgQBkXIi/",
@@ -912,8 +912,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "97": {
+  }],
+  ["97", {
     id: "97",
     club_handle: "_uwasa",
     url: "https://www.instagram.com/p/DOXR68ZkSbY/",
@@ -928,8 +928,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "105": {
+  }],
+  ["105", {
     id: "105",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOZLrcgkbq3/",
@@ -944,8 +944,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "102": {
+  }],
+  ["102", {
     id: "102",
     club_handle: "uwstrengthclub",
     url: "https://www.instagram.com/p/DOY-UT7ibv7/",
@@ -960,8 +960,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "116": {
+  }],
+  ["116", {
     id: "116",
     club_handle: "uwindianca",
     url: "https://www.instagram.com/p/DOevpG9AftQ/",
@@ -976,8 +976,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "159": {
+  }],
+  ["159", {
     id: "159",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DOmxy-HjEW0",
@@ -992,8 +992,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/62b0eaea-724a-4674-93fb-2199e2ea46d0.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "148": {
+  }],
+  ["148", {
     id: "148",
     club_handle: "wloorunning",
     url: "https://www.instagram.com/p/DOhOdB4kZzM/",
@@ -1008,8 +1008,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "147": {
+  }],
+  ["147", {
     id: "147",
     club_handle: "wloolacrosse",
     url: "https://www.instagram.com/p/DOgrvfMiSfU/",
@@ -1024,8 +1024,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "74": {
+  }],
+  ["74", {
     id: "74",
     club_handle: "arbussociety",
     url: "https://www.instagram.com/p/DOUQyteDs66/",
@@ -1040,8 +1040,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "83": {
+  }],
+  ["83", {
     id: "83",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOPNgwPgbWQ/",
@@ -1056,8 +1056,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "158": {
+  }],
+  ["158", {
     id: "158",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DOmzQAJDNeE",
@@ -1072,8 +1072,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/839a794a-e27e-4eeb-aa9a-acce68b0cf52.webp",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "165": {
+  }],
+  ["165", {
     id: "165",
     club_handle: "uwcheeseclub",
     url: "https://www.instagram.com/p/DOoqRthDeSq",
@@ -1088,8 +1088,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c921aa46-fb74-4349-9b3f-530b37d175d0.webp",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "160": {
+  }],
+  ["160", {
     id: "160",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DOZJhhiAQ_D/",
@@ -1104,8 +1104,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "111": {
+  }],
+  ["111", {
     id: "111",
     club_handle: "gbdasoc",
     url: "https://www.instagram.com/p/DOcPAsoDCaY/",
@@ -1120,8 +1120,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "166": {
+  }],
+  ["166", {
     id: "166",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DOpixFPgBWq",
@@ -1136,8 +1136,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6741f153-0db2-4f54-b00e-2c6a4e5cc2e2.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "169": {
+  }],
+  ["169", {
     id: "169",
     club_handle: "uwaterloobhangra",
     url: "https://www.instagram.com/p/DOovKgMD2bo",
@@ -1152,8 +1152,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/969ec663-946d-410e-8ff1-b7e6c280f25e.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "51": {
+  }],
+  ["51", {
     id: "51",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DOCK1AZiUJ4/",
@@ -1168,8 +1168,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "129": {
+  }],
+  ["129", {
     id: "129",
     club_handle: "uw.mariokart",
     url: "https://www.instagram.com/p/DOgyqvrCR_d/",
@@ -1184,8 +1184,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ff45779a-1d67-4651-8e91-4a3f5916ec81.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "162": {
+  }],
+  ["162", {
     id: "162",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DOpDxV_DoXp",
@@ -1200,8 +1200,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/615746ac-5882-4b7e-b2f3-9331ee786602.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "173": {
+  }],
+  ["173", {
     id: "173",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DOoti3cj4d4",
@@ -1216,8 +1216,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/41ec3726-f1e5-496b-ad27-3345ef841775.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "175": {
+  }],
+  ["175", {
     id: "175",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOr--9ZjL_O",
@@ -1232,8 +1232,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8b5fcd06-9d7a-490e-a1e6-2a5405b57d39.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "196": {
+  }],
+  ["196", {
     id: "196",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DN52w2GERJF/",
@@ -1248,8 +1248,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "180": {
+  }],
+  ["180", {
     id: "180",
     club_handle: "uwmusoc",
     url: "https://www.instagram.com/p/DOuNgi9D7-A/",
@@ -1264,8 +1264,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/30fd1ac0-c7ac-418c-bd91-ced8088a6378.webp",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "59": {
+  }],
+  ["59", {
     id: "59",
     club_handle: "esawaterloo",
     url: "https://www.instagram.com/p/DONF2MCDtAy/",
@@ -1280,8 +1280,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "178": {
+  }],
+  ["178", {
     id: "178",
     club_handle: "uwvisualartsclub",
     url: "https://www.instagram.com/p/DOsEsfeDVV4",
@@ -1296,8 +1296,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dbeb7740-bf81-498e-97d4-ca1d4931e7b3.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "183": {
+  }],
+  ["183", {
     id: "183",
     club_handle: "uwrepairclub",
     url: "https://www.instagram.com/p/DOuairtkWZx/",
@@ -1312,8 +1312,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/32826e32-7a03-419e-b283-ad845f3cfa07.jpg",
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "176": {
+  }],
+  ["176", {
     id: "176",
     club_handle: "wlooquadball",
     url: "https://www.instagram.com/p/DOr8QUYjPQj",
@@ -1328,8 +1328,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cc1fb28d-6c63-462d-ba76-90dbd86e693c.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "112": {
+  }],
+  ["112", {
     id: "112",
     club_handle: "uwyoungliberals",
     url: "https://www.instagram.com/p/DOcmJWqDF-k/",
@@ -1344,8 +1344,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "230": {
+  }],
+  ["230", {
     id: "230",
     club_handle: "kc_waterloo",
     url: "https://www.instagram.com/p/DOrTDHkkdIY/",
@@ -1360,8 +1360,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfa7657c-f2f9-4080-b4b9-a3ff95a78b86.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "191": {
+  }],
+  ["191", {
     id: "191",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DOq6B5tEeFS/",
@@ -1376,8 +1376,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bdd6bb86-4426-4e3a-9b0d-1df4442da5c9.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "121": {
+  }],
+  ["121", {
     id: "121",
     club_handle: "uwcsa",
     url: "https://www.instagram.com/p/DOenmr2DkDB/",
@@ -1392,8 +1392,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "170": {
+  }],
+  ["170", {
     id: "170",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOo4PjyAWrT",
@@ -1408,8 +1408,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7c27d8b4-3114-45b8-9f8d-e0974cfbc2b9.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "168": {
+  }],
+  ["168", {
     id: "168",
     club_handle: "uwanthsoc",
     url: "https://www.instagram.com/p/DOoUy45gKF2",
@@ -1424,8 +1424,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e76b4397-56f0-4b74-9794-e1d8a7b2b87d.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "200": {
+  }],
+  ["200", {
     id: "200",
     club_handle: "uwboardgames",
     url: "https://www.instagram.com/p/DOy1korjmV7/",
@@ -1440,8 +1440,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_3.png",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "179": {
+  }],
+  ["179", {
     id: "179",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DOqxN80Dv7e",
@@ -1456,8 +1456,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e0f35338-6751-432d-8690-8b4e7bd13cac.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "228": {
+  }],
+  ["228", {
     id: "228",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOvyH9Kjaa-/",
@@ -1472,8 +1472,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b2926e29-8556-473d-8b4a-4a95df6e0b3d.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "161": {
+  }],
+  ["161", {
     id: "161",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DOpmwGWAHWN",
@@ -1488,8 +1488,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/41f64182-2e9b-4151-94fe-568a4bcf24a4.webp",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "269": {
+  }],
+  ["269", {
     id: "269",
     club_handle: "uwaterlooacs",
     url: "https://www.instagram.com/p/DOwjcRmEVyD/",
@@ -1504,8 +1504,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b24b8967-aa1b-48ea-acf3-1c0e82163032.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "37": {
+  }],
+  ["37", {
     id: "37",
     club_handle: "uw.gsa",
     url: "https://www.instagram.com/p/DNZTcw_NGM1/",
@@ -1520,8 +1520,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "177": {
+  }],
+  ["177", {
     id: "177",
     club_handle: "uw.mwa",
     url: "https://www.instagram.com/p/DOrLyjFAbrv",
@@ -1536,8 +1536,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/11a1d80e-f7bb-4ae4-868a-5234c12676dd.jpg",
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "231": {
+  }],
+  ["231", {
     id: "231",
     club_handle: "uw.unaccompaniedminors",
     url: "https://www.instagram.com/p/DOy2kPiESW6/",
@@ -1552,8 +1552,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9ada6d63-7d57-49b6-b617-c8e57938b511.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "144": {
+  }],
+  ["144", {
     id: "144",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOglm0ZDpNJ/",
@@ -1568,8 +1568,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "141": {
+  }],
+  ["141", {
     id: "141",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DOhD7VAkhVb/",
@@ -1584,8 +1584,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "107": {
+  }],
+  ["107", {
     id: "107",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DOaHtQ_DCg5/",
@@ -1600,8 +1600,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "189": {
+  }],
+  ["189", {
     id: "189",
     club_handle: "uw_breakers",
     url: "https://www.instagram.com/p/DOtjgvxgJvy/",
@@ -1616,8 +1616,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0b1fef4d-d839-4b8c-b33a-bda503f7b1aa.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "150": {
+  }],
+  ["150", {
     id: "150",
     club_handle: "uwaterloodj",
     url: "https://www.instagram.com/p/DOZup2SkVHb/",
@@ -1632,8 +1632,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "140": {
+  }],
+  ["140", {
     id: "140",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DOgaFl5DeUw/",
@@ -1648,8 +1648,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "171": {
+  }],
+  ["171", {
     id: "171",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOpGWpWjDSR",
@@ -1664,8 +1664,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/24011285-d620-41e8-9165-9ec109bf898c.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "197": {
+  }],
+  ["197", {
     id: "197",
     club_handle: "uwyugioh",
     url: "https://www.instagram.com/p/DOzFtRUEr5d/",
@@ -1680,8 +1680,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f6efa8c6-e392-4735-b5cb-f109177a95d2.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "120": {
+  }],
+  ["120", {
     id: "120",
     club_handle: "uwaterloohksa",
     url: "https://www.instagram.com/p/DOfTkC5jMwF/",
@@ -1696,8 +1696,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "203": {
+  }],
+  ["203", {
     id: "203",
     club_handle: "wloocricket",
     url: "https://www.instagram.com/p/DOzDXVkEVwg/",
@@ -1712,8 +1712,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/926d6b03-09e6-4c45-9c43-ddc6572fef7a.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "214": {
+  }],
+  ["214", {
     id: "214",
     club_handle: "wlooringette",
     url: "https://www.instagram.com/p/DO1fgKOEWnW/",
@@ -1728,8 +1728,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4e3d83de-9ad8-4161-ac62-89daaa6735eb.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "181": {
+  }],
+  ["181", {
     id: "181",
     club_handle: "uwriichi_mahjong",
     url: "https://www.instagram.com/p/DOugA6Ekfl4/",
@@ -1744,8 +1744,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/34033e79-6c28-4256-9f06-e36aabeab25e.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "117": {
+  }],
+  ["117", {
     id: "117",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOe4n0QDZiI/",
@@ -1760,8 +1760,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "209": {
+  }],
+  ["209", {
     id: "209",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOynuEPDvyE/",
@@ -1776,8 +1776,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/15c00a0f-c54f-483d-b32a-2e68afe11964.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "208": {
+  }],
+  ["208", {
     id: "208",
     club_handle: "uw.psa",
     url: "https://www.instagram.com/p/DO1X-0FDubu/",
@@ -1792,8 +1792,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e91f1128-99fc-49f0-be94-da9a7f205e37.webp",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "202": {
+  }],
+  ["202", {
     id: "202",
     club_handle: "uwtrgbookclub",
     url: "https://www.instagram.com/p/DOyq7j6juI_/",
@@ -1808,8 +1808,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/22312bb1-f966-4181-a327-6d1c713082e0.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "152": {
+  }],
+  ["152", {
     id: "152",
     club_handle: "wlooclimbingclub",
     url: "https://www.instagram.com/p/DOjOr5_Ef49/",
@@ -1824,8 +1824,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "151": {
+  }],
+  ["151", {
     id: "151",
     club_handle: "susawaterloo",
     url: "https://www.instagram.com/p/DOj4TJDAH9y/",
@@ -1840,8 +1840,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "251": {
+  }],
+  ["251", {
     id: "251",
     club_handle: "wloo.dboat",
     url: "https://www.instagram.com/p/DOxGHSdjGSD/",
@@ -1856,8 +1856,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "213": {
+  }],
+  ["213", {
     id: "213",
     club_handle: "uwaterlooacs",
     url: "https://www.instagram.com/p/DO1NHy3kayg/",
@@ -1872,8 +1872,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b84ec909-ff2b-4a83-87b5-a13d4a445ca9.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "223": {
+  }],
+  ["223", {
     id: "223",
     club_handle: "wloofencing",
     url: "https://www.instagram.com/p/DO3mfE8juX1/",
@@ -1888,8 +1888,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1a2a6132-8940-4e1c-af15-2193f034ef4f.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "234": {
+  }],
+  ["234", {
     id: "234",
     club_handle: "uwtetris",
     url: "https://www.instagram.com/p/DOrGgLZgYkx/",
@@ -1904,8 +1904,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/650147f0-d32b-4547-b5a2-76daf0caf2f4.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "163": {
+  }],
+  ["163", {
     id: "163",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DOphsnnDRfc",
@@ -1920,8 +1920,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0a5ee855-854f-42f3-b665-75dd94ecc513.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "174": {
+  }],
+  ["174", {
     id: "174",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DOosl8UgQHI",
@@ -1936,8 +1936,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d151c727-23ee-466a-b362-ad41741bd051.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "222": {
+  }],
+  ["222", {
     id: "222",
     club_handle: "uwdebate",
     url: "https://www.instagram.com/p/DO3pr61jTTd/",
@@ -1952,8 +1952,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0b009dbb-2eca-4151-8dda-a4bc0b7b4e2d.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "93": {
+  }],
+  ["93", {
     id: "93",
     club_handle: "uw.pssa",
     url: "https://www.instagram.com/p/DOXY5voDYE6/",
@@ -1968,8 +1968,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "186": {
+  }],
+  ["186", {
     id: "186",
     club_handle: "uw.fsa",
     url: "https://www.instagram.com/p/DOuMdVPAdpM/",
@@ -1984,8 +1984,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/72f953c4-ff5b-43be-ad56-60a1dd73382a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "249": {
+  }],
+  ["249", {
     id: "249",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOyxx-cALMT/",
@@ -2000,8 +2000,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "256": {
+  }],
+  ["256", {
     id: "256",
     club_handle: "uwlegalstudiessociety",
     url: "https://www.instagram.com/p/DO30O7hkehM/",
@@ -2016,8 +2016,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "257": {
+  }],
+  ["257", {
     id: "257",
     club_handle: "uwcampuscompost",
     url: "https://www.instagram.com/p/DOrLMMfE01L/",
@@ -2032,8 +2032,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "115": {
+  }],
+  ["115", {
     id: "115",
     club_handle: "uwmathnews",
     url: "https://www.instagram.com/p/DOflnPujTK5/",
@@ -2048,8 +2048,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_9.png",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "292": {
+  }],
+  ["292", {
     id: "292",
     club_handle: "uwdeception",
     url: "https://www.instagram.com/p/DO6r9TbknUB/",
@@ -2064,8 +2064,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/098ba6e5-d9b4-4f80-bbf3-a2c905d1320f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "258": {
+  }],
+  ["258", {
     id: "258",
     club_handle: "arbussociety",
     url: "https://www.instagram.com/p/DOtfK8-DrM9/",
@@ -2080,8 +2080,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "265": {
+  }],
+  ["265", {
     id: "265",
     club_handle: "knituw",
     url: "https://www.instagram.com/p/DO55VQujTJ8/",
@@ -2096,8 +2096,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/94a119d1-f0c3-43b7-a65d-cd1710eafc66.webp",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "164": {
+  }],
+  ["164", {
     id: "164",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DOpNjgMDUL_",
@@ -2112,8 +2112,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1f60c933-306d-4350-aad4-e8931eac65e6.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "192": {
+  }],
+  ["192", {
     id: "192",
     club_handle: "uwneuro",
     url: "https://www.instagram.com/p/DOuFLKzgIYQ/",
@@ -2128,8 +2128,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/797776b2-9a6f-40dd-9e1a-ddb71fe02f07.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "288": {
+  }],
+  ["288", {
     id: "288",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO6PbNIjgkc/",
@@ -2144,8 +2144,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4fc0f532-3a8b-4424-aeea-beeab4b62a54.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "239": {
+  }],
+  ["239", {
     id: "239",
     club_handle: "uw_aises",
     url: "https://www.instagram.com/p/DOdzMZgESPe/",
@@ -2160,8 +2160,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "185": {
+  }],
+  ["185", {
     id: "185",
     club_handle: "tma.waterloo",
     url: "https://www.instagram.com/p/DOtopKwDR65/",
@@ -2176,8 +2176,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a082b196-4a97-4429-955d-0457383e13e7.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "252": {
+  }],
+  ["252", {
     id: "252",
     club_handle: "uwcsclub",
     url: "https://www.instagram.com/p/DOtm3sijhAz/",
@@ -2192,8 +2192,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "247": {
+  }],
+  ["247", {
     id: "247",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DOyjpGwjip3/",
@@ -2208,8 +2208,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "282": {
+  }],
+  ["282", {
     id: "282",
     club_handle: "uwfilmclub_",
     url: "https://www.instagram.com/p/DO6sVKhgTVu/",
@@ -2224,8 +2224,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c35f6744-9402-49a6-a3dd-c024fef2fdc3.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "172": {
+  }],
+  ["172", {
     id: "172",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DOonDzLjtXT",
@@ -2240,8 +2240,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6ce37e21-f2fd-492b-b44a-b492e72a5f6d.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "315": {
+  }],
+  ["315", {
     id: "315",
     club_handle: "uwquizbowl",
     url: "https://www.instagram.com/p/DO9VkngjwN5/",
@@ -2256,8 +2256,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6b5fb970-a2b9-4bf7-95af-81b3c986eb42.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "190": {
+  }],
+  ["190", {
     id: "190",
     club_handle: "uw.mehfil",
     url: "https://www.instagram.com/p/DOtxH0AEi2d/",
@@ -2272,8 +2272,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f5ca2f07-5a2d-4532-b989-c731c777b0b8.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "254": {
+  }],
+  ["254", {
     id: "254",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DOrOLTDj3nR/",
@@ -2288,8 +2288,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "276": {
+  }],
+  ["276", {
     id: "276",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DO6n5Btkojw/",
@@ -2304,8 +2304,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c5090c14-64dd-497f-b972-69a69f8a7a7f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "205": {
+  }],
+  ["205", {
     id: "205",
     club_handle: "envwags",
     url: "https://www.instagram.com/p/DOyHXMnjT5Q/",
@@ -2320,8 +2320,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ad7146ba-705a-4f5b-861d-f3c322475b22.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "280": {
+  }],
+  ["280", {
     id: "280",
     club_handle: "uwmusoc",
     url: "https://www.instagram.com/p/DO6aUFRDj0E/",
@@ -2336,8 +2336,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0a6009c-18e0-4fb2-ab03-79cf470b9964.webp",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "378": {
+  }],
+  ["378", {
     id: "378",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DO_d8nzjedQ/",
@@ -2352,8 +2352,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a6bfc452-1e96-4040-9e04-fea2d8d4aa1a.webp",
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "316": {
+  }],
+  ["316", {
     id: "316",
     club_handle: "femphys",
     url: "https://www.instagram.com/p/DO8i7OgDRdK/",
@@ -2368,8 +2368,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/463acfb5-9218-42f3-bc5d-c1144f5233e5.jpg",
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "242": {
+  }],
+  ["242", {
     id: "242",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOWisrHkzMv/",
@@ -2384,8 +2384,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "153": {
+  }],
+  ["153", {
     id: "153",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOiqm0Ok6xE/",
@@ -2400,8 +2400,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "246": {
+  }],
+  ["246", {
     id: "246",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DOwtFMHjYct/",
@@ -2416,8 +2416,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "336": {
+  }],
+  ["336", {
     id: "336",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO9W3NEAR6c/",
@@ -2432,8 +2432,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/56c5cc7a-9535-43ef-b89f-f4b564f68f4b.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "281": {
+  }],
+  ["281", {
     id: "281",
     club_handle: "uwaterloobhangra",
     url: "https://www.instagram.com/p/DO6uMFbj39J/",
@@ -2448,8 +2448,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2afc9c7e-c282-45e7-95d1-71d92ebc130a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "289": {
+  }],
+  ["289", {
     id: "289",
     club_handle: "uwimprovisation",
     url: "https://www.instagram.com/p/DO6zp1pkfKB/",
@@ -2464,8 +2464,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/455eff65-b2e9-4076-8279-e88edc779d4b.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "363": {
+  }],
+  ["363", {
     id: "363",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DPARe_BD6zb/",
@@ -2480,8 +2480,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1597deeb-04c3-42dd-afab-3f4eaaa5f4b5.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "278": {
+  }],
+  ["278", {
     id: "278",
     club_handle: "uwcsclub",
     url: "https://www.instagram.com/p/DO6XKC6jU7L/",
@@ -2496,8 +2496,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/370907b7-ae59-4d64-8453-29a659538ab4.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "211": {
+  }],
+  ["211", {
     id: "211",
     club_handle: "mns.soc",
     url: "https://www.instagram.com/p/DOyaL9QgEAc/",
@@ -2512,8 +2512,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0ef8a344-9cad-47cb-b424-ddf505152b2d.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "286": {
+  }],
+  ["286", {
     id: "286",
     club_handle: "uwsbsa",
     url: "https://www.instagram.com/p/DO64LJBAcRr/",
@@ -2528,8 +2528,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0985858d-244f-48f8-9a5d-ca36fa8b1f3a.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "142": {
+  }],
+  ["142", {
     id: "142",
     club_handle: "uw_psychsoc",
     url: "https://www.instagram.com/p/DOhUUaJkeoj/",
@@ -2544,8 +2544,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "267": {
+  }],
+  ["267", {
     id: "267",
     club_handle: "uwaterloopremed",
     url: "https://www.instagram.com/p/DO5-nZ6kcT_/",
@@ -2560,8 +2560,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d360ff69-a995-45e1-ad4f-2dbe6ba5e15c.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "199": {
+  }],
+  ["199", {
     id: "199",
     club_handle: "uwbiochem",
     url: "https://www.instagram.com/p/DOylBhlDiE9/",
@@ -2576,8 +2576,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d5af707e-fd4c-4881-bc16-95d59dc9829b.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "270": {
+  }],
+  ["270", {
     id: "270",
     club_handle: "uwvisualartsclub",
     url: "https://www.instagram.com/p/DO7cr86DT18/",
@@ -2592,8 +2592,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/202b6381-9158-4619-a818-ee359a3ce444.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "357": {
+  }],
+  ["357", {
     id: "357",
     club_handle: "uwskate",
     url: "https://www.instagram.com/p/DPAfmFskUfL/",
@@ -2608,8 +2608,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f5194588-c450-4e89-825f-6f066c1e5d13.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "369": {
+  }],
+  ["369", {
     id: "369",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO_4LFnAUok/",
@@ -2624,8 +2624,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2be448ef-29c1-4c62-bbf3-dbeaf52c9fcb.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "271": {
+  }],
+  ["271", {
     id: "271",
     club_handle: "uwaterloondp",
     url: "https://www.instagram.com/p/DO8fq0ZkWjK/",
@@ -2640,8 +2640,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e7949bb2-5f7f-499d-bef2-3ab91c4db901.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "318": {
+  }],
+  ["318", {
     id: "318",
     club_handle: "eesa_uw",
     url: "https://www.instagram.com/p/DO9rhrxkaCO/",
@@ -2656,8 +2656,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/42e46134-83d6-4fd1-ba0b-5f63cccd4d7f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "279": {
+  }],
+  ["279", {
     id: "279",
     club_handle: "uwteaclub",
     url: "https://www.instagram.com/p/DO7G0ohDSm0/",
@@ -2672,8 +2672,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/575c7509-61a5-4f01-9812-3eaa076179d5.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "349": {
+  }],
+  ["349", {
     id: "349",
     club_handle: "uw_sofa",
     url: "https://www.instagram.com/p/DPAHdTVDdQ4/",
@@ -2688,8 +2688,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e1d632a4-27f2-489b-916c-5ed8cc6d258f.jpg",
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "324": {
+  }],
+  ["324", {
     id: "324",
     club_handle: "_uwasa",
     url: "https://www.instagram.com/p/DO9VbUPEf5A/",
@@ -2704,8 +2704,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e7a5c554-ff1d-4df3-8ee2-9a0431055cd6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "300": {
+  }],
+  ["300", {
     id: "300",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO-Ab4Qjn_L/",
@@ -2720,8 +2720,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d141f7b6-e032-40bb-a6f2-e18bd40f0503.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "366": {
+  }],
+  ["366", {
     id: "366",
     club_handle: "uwhiphop",
     url: "https://www.instagram.com/p/DPAQ7ZkjMxA/",
@@ -2736,8 +2736,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2f9b3f48-c54f-4a85-bdfd-4578514004e5.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "309": {
+  }],
+  ["309", {
     id: "309",
     club_handle: "uw_yaf",
     url: "https://www.instagram.com/p/DO-H6dBjvCK/",
@@ -2752,8 +2752,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/80169fa8-9a62-4078-86f0-b22babac582e.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "374": {
+  }],
+  ["374", {
     id: "374",
     club_handle: "uw.movie.watchers.club",
     url: "https://www.instagram.com/p/DPBnvA_keg4/",
@@ -2768,8 +2768,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/23988d27-6b58-4e71-980d-3c6e71ee20c6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "353": {
+  }],
+  ["353", {
     id: "353",
     club_handle: "uwcccf",
     url: "https://www.instagram.com/p/DO_lgsqjrAy/",
@@ -2784,8 +2784,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/643cfb93-8b82-4d9d-a20b-2053f1800126.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "351": {
+  }],
+  ["351", {
     id: "351",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DPB1Amsjht3/",
@@ -2800,8 +2800,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c3846ae5-5a36-48a2-982c-dcf97f0d2f8e.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "299": {
+  }],
+  ["299", {
     id: "299",
     club_handle: "wlooartisticswimming",
     url: "https://www.instagram.com/p/DO-IyDlDV9k/",
@@ -2816,8 +2816,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b19fb4e7-c12c-4551-9d84-c451d3546f7b.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "260": {
+  }],
+  ["260", {
     id: "260",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOqf5IyE4m2/",
@@ -2832,8 +2832,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "370": {
+  }],
+  ["370", {
     id: "370",
     club_handle: "uwvelocity",
     url: "https://www.instagram.com/p/DPB1zohjorB/",
@@ -2848,8 +2848,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/efb9261b-0089-4ee8-9919-1bb4542bc081.jpg",
     club_type: null,
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "275": {
+  }],
+  ["275", {
     id: "275",
     club_handle: "uw_phys_club",
     url: "https://www.instagram.com/p/DO7AT7JkTm4/",
@@ -2864,8 +2864,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/86aa9936-0bd8-411e-896f-9c2f3c1c6d35.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "283": {
+  }],
+  ["283", {
     id: "283",
     club_handle: "uw_psychsoc",
     url: "https://www.instagram.com/p/DO7Ji0_kWrt/",
@@ -2880,8 +2880,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2c92e8bb-a177-4e9a-ab8f-a7bb97b0e2d5.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "331": {
+  }],
+  ["331", {
     id: "331",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DO9hbkpDjxJ/",
@@ -2896,8 +2896,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1571b244-862f-454e-83ac-11676c77f8b5.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "383": {
+  }],
+  ["383", {
     id: "383",
     club_handle: "uwboardgames",
     url: "https://www.instagram.com/p/DPDeQCgDVeg/",
@@ -2912,8 +2912,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_3.png",
     club_type: "WUSA",
     added_at: "2025-09-26T14:43:25.625363",
-  },
-  "250": {
+  }],
+  ["250", {
     id: "250",
     club_handle: "uwindianca",
     url: "https://www.instagram.com/p/DOyi1lQEXog/",
@@ -2928,8 +2928,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "337": {
+  }],
+  ["337", {
     id: "337",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DO8rJJ_AC4F/",
@@ -2944,8 +2944,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/23b1e498-9ce8-4897-8679-d7a2c9c356cf.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "371": {
+  }],
+  ["371", {
     id: "371",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DPAfIXejA3p/",
@@ -2960,8 +2960,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ec51c52d-5e57-42af-a4c0-b5706ce582f2.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "206": {
+  }],
+  ["206", {
     id: "206",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOynYcZDghl/",
@@ -2976,8 +2976,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3aa09df9-1cc7-4151-ba95-a2b6e53658b3.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "342": {
+  }],
+  ["342", {
     id: "342",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DO_u5t1kVCn/",
@@ -2992,8 +2992,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4c79161a-49a6-49e7-b337-478d1eb2a801.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "365": {
+  }],
+  ["365", {
     id: "365",
     club_handle: "uwccf",
     url: "https://www.instagram.com/p/DO_d9_LjR67/",
@@ -3008,8 +3008,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0a432345-59af-4a60-8699-7a1aade593e4.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "368": {
+  }],
+  ["368", {
     id: "368",
     club_handle: "wloorunning",
     url: "https://www.instagram.com/p/DO_6cqckedF/",
@@ -3024,8 +3024,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3efcc7d4-9792-4726-a914-3004af8916d5.jpg",
     club_type: "Athletics",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "287": {
+  }],
+  ["287", {
     id: "287",
     club_handle: "uwkpopclub",
     url: "https://www.instagram.com/p/DO7JZqIDVqZ/",
@@ -3040,8 +3040,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2386bf71-fc86-447d-84aa-ae9fcad0956f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "262": {
+  }],
+  ["262", {
     id: "262",
     club_handle: "uw.tsu",
     url: "https://www.instagram.com/p/DOZU_0REva5/",
@@ -3056,8 +3056,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: null,
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "422": {
+  }],
+  ["422", {
     id: "422",
     club_handle: "wlooringette",
     url: "https://www.instagram.com/p/DPEVLHTjesU/",
@@ -3072,8 +3072,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d6958c88-b65a-482a-a750-b6685bbc28d7.jpg",
     club_type: "Athletics",
     added_at: "2025-09-27T12:49:57.226044",
-  },
-  "431": {
+  }],
+  ["431", {
     id: "431",
     club_handle: "uwaterloodance",
     url: "https://www.instagram.com/p/DO88e9TEf7F/",
@@ -3088,8 +3088,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.15.22%E2%80%AFPM.png",
     club_type: "Athletics",
     added_at: "2025-09-27T14:16:33.493923",
-  },
-  "243": {
+  }],
+  ["243", {
     id: "243",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DOWM9WQjle-/",
@@ -3104,8 +3104,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.32.13%E2%80%AFPM.png",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "76": {
+  }],
+  ["76", {
     id: "76",
     club_handle: "uw.tsu",
     url: "https://www.instagram.com/p/DORelsNkp0K/",
@@ -3120,8 +3120,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.32.04%E2%80%AFPM.png",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "325": {
+  }],
+  ["325", {
     id: "325",
     club_handle: "wloo.outersclub",
     url: "https://www.instagram.com/p/DO9DjFBkSYh/",
@@ -3136,8 +3136,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6431cee0-70a3-476a-9131-de76381d4fd8.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "274": {
+  }],
+  ["274", {
     id: "274",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DO7MFTyjVaa/",
@@ -3152,8 +3152,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4dbe3530-033e-4c0e-b584-5f50f9ebdf5a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "360": {
+  }],
+  ["360", {
     id: "360",
     club_handle: "uwaterloopsa",
     url: "https://www.instagram.com/p/DPAjJSZjUn0/",
@@ -3168,8 +3168,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ac5a1ca3-9bde-45bc-872a-80fe100c0297.jpg",
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "453": {
+  }],
+  ["453", {
     id: "453",
     club_handle: "hillelwaterloolaurier",
     url: "https://www.instagram.com/p/DPKq_tRESkr/",
@@ -3184,8 +3184,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6ec19c84-58af-4c65-bfea-41c0b147010d.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:50:16.776912",
-  },
-  "455": {
+  }],
+  ["455", {
     id: "455",
     club_handle: "uwsewciety",
     url: "https://www.instagram.com/p/DPKYNebj6ob/",
@@ -3200,8 +3200,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a6e8b912-f578-4b7e-b725-b025793fd41a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:51:40.461145",
-  },
-  "343": {
+  }],
+  ["343", {
     id: "343",
     club_handle: "medlife_uwaterloo",
     url: "https://www.instagram.com/p/DPAd6P3jqVl/",
@@ -3216,8 +3216,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/459f3281-17a3-4a1b-9a80-91bfb5035df4.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "449": {
+  }],
+  ["449", {
     id: "449",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DPLY0tHDojV/",
@@ -3232,8 +3232,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b5419f23-7ae7-4257-a3e0-f47ec12f6088.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:47:00.185924",
-  },
-  "321": {
+  }],
+  ["321", {
     id: "321",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DO945j6jfHt/",
@@ -3248,8 +3248,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bfd2f7bf-d330-43ed-9c1e-2e3b07be9afc.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "457": {
+  }],
+  ["457", {
     id: "457",
     club_handle: "uwdeception",
     url: "https://www.instagram.com/p/DPJoMNFjRM5/",
@@ -3264,8 +3264,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cdbc297e-e4ff-4474-8aba-babfbd578d0d.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:56:05.744896",
-  },
-  "489": {
+  }],
+  ["489", {
     id: "489",
     club_handle: "uwccf",
     url: "https://www.instagram.com/p/DPMB-ixDawj/",
@@ -3280,8 +3280,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d1e1f033-f9ee-4541-a6ad-bf3ffa71410b.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T13:02:27.132815",
-  },
-  "399": {
+  }],
+  ["399", {
     id: "399",
     club_handle: "uwpokerclub",
     url: "https://www.instagram.com/p/DPCzbsRCauW/",
@@ -3296,8 +3296,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f89ca77b-9870-4a89-9375-b43be5368f90.jpg",
     club_type: "WUSA",
     added_at: "2025-09-26T14:43:25.625363",
-  },
-  "317": {
+  }],
+  ["317", {
     id: "317",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DO7prtYDbYj/",
@@ -3312,8 +3312,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4ad20cf8-6135-48d7-b75e-847cca2b8baa.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "438": {
+  }],
+  ["438", {
     id: "438",
     club_handle: "letstockaboutit",
     url: "https://www.instagram.com/p/DPLMej1jVJC/",
@@ -3328,8 +3328,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c106f638-3688-4547-a9e7-344e8153a4ff.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:41:15.332589",
-  },
-  "420": {
+  }],
+  ["420", {
     id: "420",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPGtqZSDl4N/",
@@ -3344,8 +3344,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0eae844a-8360-4422-b7b7-e42ea18cb126.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:48:45.777261",
-  },
-  "486": {
+  }],
+  ["486", {
     id: "486",
     club_handle: "uwaterloosc",
     url: "https://www.instagram.com/p/DPMNRYDEe3K/",
@@ -3360,8 +3360,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3bbae305-3af9-4703-ad4b-0333523675ba.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:57:28.192979",
-  },
-  "348": {
+  }],
+  ["348", {
     id: "348",
     club_handle: "cocawaterloolaurier",
     url: "https://www.instagram.com/p/DO_8joCAe_2/",
@@ -3376,8 +3376,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7361e224-a9bc-4e9d-a7db-e185dc668450.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "481": {
+  }],
+  ["481", {
     id: "481",
     club_handle: "uwbiochem",
     url: "https://www.instagram.com/p/DPMcK4wDrXd/",
@@ -3392,8 +3392,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4c7a5087-2875-4b19-9f7a-a2f922434381.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:54:27.241208",
-  },
-  "344": {
+  }],
+  ["344", {
     id: "344",
     club_handle: "uwbuilders",
     url: "https://www.instagram.com/p/DPAg63UjOxU/",
@@ -3408,8 +3408,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ff281995-5509-4f22-a4dd-f4ece1f24f6e.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "468": {
+  }],
+  ["468", {
     id: "468",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPM3xbhjq_P/",
@@ -3424,8 +3424,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39843718-f173-4913-a292-6ea3054156f1.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:46:04.323833",
-  },
-  "467": {
+  }],
+  ["467", {
     id: "467",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DPMeFXAEYhO/",
@@ -3440,8 +3440,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d7a88fc-1d39-4631-94d3-17022f2fef77.webp",
     club_type: "Student Society",
     added_at: "2025-09-30T12:44:49.598132",
-  },
-  "259": {
+  }],
+  ["259", {
     id: "259",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DOenL-qjg1q/",
@@ -3456,8 +3456,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.31.21%E2%80%AFPM.png",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "464": {
+  }],
+  ["464", {
     id: "464",
     club_handle: "uwcheeseclub",
     url: "https://www.instagram.com/p/DPNPBJ6EUxN/",
@@ -3472,8 +3472,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4b513f08-d247-45e0-be80-db21ed78965e.webp",
     club_type: "WUSA",
     added_at: "2025-09-30T12:43:21.132745",
-  },
-  "413": {
+  }],
+  ["413", {
     id: "413",
     club_handle: "uw.fsa",
     url: "https://www.instagram.com/p/DPEjtl7EZPZ/",
@@ -3488,8 +3488,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d4e9648-2319-40ba-8bfa-775308c0acf7.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:45:20.887933",
-  },
-  "465": {
+  }],
+  ["465", {
     id: "465",
     club_handle: "uw_pokemon_club",
     url: "https://www.instagram.com/p/DPL-v6OkUK9/",
@@ -3504,8 +3504,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0b67dc9b-ffd7-4595-9499-58071febf8c7.webp",
     club_type: "WUSA",
     added_at: "2025-09-30T12:43:38.916383",
-  },
-  "454": {
+  }],
+  ["454", {
     id: "454",
     club_handle: "uwhiphop",
     url: "https://www.instagram.com/p/DPKzUEhDNZK/",
@@ -3520,8 +3520,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c2fb38ab-bd28-4884-9b3a-209a49da9467.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:50:39.609281",
-  },
-  "442": {
+  }],
+  ["442", {
     id: "442",
     club_handle: "waterloolaurierssa",
     url: "https://www.instagram.com/p/DPL0-1ake5i/",
@@ -3536,8 +3536,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6220f656-9826-40ad-87a2-cea97a3b8d32.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:43:44.232562",
-  },
-  "253": {
+  }],
+  ["253", {
     id: "253",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DOWbwKbkZ64/",
@@ -3552,8 +3552,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.30.39%E2%80%AFPM.png",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "461": {
+  }],
+  ["461", {
     id: "461",
     club_handle: "isaw.ca",
     url: "https://www.instagram.com/p/DPM0fsqEj4r/",
@@ -3568,8 +3568,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1f7fe3eb-0800-4d51-a79e-41c71be21b21.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:42:19.697467",
-  },
-  "484": {
+  }],
+  ["484", {
     id: "484",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPMuKGLjppa/",
@@ -3584,8 +3584,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7dd6fef7-9f82-4b30-a35d-c8919a5f6cc2.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:55:57.694080",
-  },
-  "350": {
+  }],
+  ["350", {
     id: "350",
     club_handle: "tma.waterloo",
     url: "https://www.instagram.com/p/DO_n13VkdKn/",
@@ -3600,8 +3600,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2c0b4aae-6e95-42d0-bafb-3414917fcc3d.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "508": {
+  }],
+  ["508", {
     id: "508",
     club_handle: "yourwusa",
     url: "https://www.instagram.com/p/DPO3kH0DuKG/",
@@ -3616,8 +3616,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/36148140-7c00-491c-af77-02665c173521.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:28:27.702286",
-  },
-  "421": {
+  }],
+  ["421", {
     id: "421",
     club_handle: "uwhistory",
     url: "https://www.instagram.com/p/DPB9V32DYqV/",
@@ -3632,8 +3632,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/55fca79f-13f3-4246-9db1-5dee3d2d0670.jpg",
     club_type: "Student Society",
     added_at: "2025-09-27T12:49:47.017055",
-  },
-  "266": {
+  }],
+  ["266", {
     id: "266",
     club_handle: "ahsum.waterloo",
     url: "https://www.instagram.com/p/DO6G4G0gFrG/",
@@ -3648,8 +3648,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39448e1a-47b6-4b63-8484-4c935e65e850.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "411": {
+  }],
+  ["411", {
     id: "411",
     club_handle: "uwsoccerwpclub",
     url: "https://www.instagram.com/p/DPF_a8HgJQP/",
@@ -3664,8 +3664,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b19f685c-be95-4898-bda4-5501327e501a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:44:59.427612",
-  },
-  "446": {
+  }],
+  ["446", {
     id: "446",
     club_handle: "uw.entomology",
     url: "https://www.instagram.com/p/DPJqwoJDdvV/",
@@ -3680,8 +3680,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d26900ed-c9e8-48a5-9ac7-beb676f665a6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:46:12.073248",
-  },
-  "417": {
+  }],
+  ["417", {
     id: "417",
     club_handle: "wreaclub",
     url: "https://www.instagram.com/p/DPFRk6wj8DM/",
@@ -3696,8 +3696,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ac08d32b-8b8c-4c83-acc7-7160c1dbd232.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:47:18.807320",
-  },
-  "273": {
+  }],
+  ["273", {
     id: "273",
     club_handle: "uwenglishsociety",
     url: "https://www.instagram.com/p/DO61gXckbke/",
@@ -3712,8 +3712,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/08976337-4edb-4d13-b947-439a4f54b812.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "430": {
+  }],
+  ["430", {
     id: "430",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DPCB-NHDfNU/",
@@ -3728,8 +3728,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.15.52%E2%80%AFPM.png",
     club_type: "Student Society",
     added_at: "2025-09-27T14:11:36.619877",
-  },
-  "483": {
+  }],
+  ["483", {
     id: "483",
     club_handle: "uwmathsoc",
     url: "https://www.instagram.com/p/DPNfHePjKu5/",
@@ -3744,8 +3744,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/49a270ee-77aa-4095-b223-c7903b05d8cd.webp",
     club_type: "Student Society",
     added_at: "2025-09-30T12:55:36.982791",
-  },
-  "507": {
+  }],
+  ["507", {
     id: "507",
     club_handle: "uwdeception",
     url: "https://www.instagram.com/p/DPPmeXnjxtN/",
@@ -3760,8 +3760,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/585f1044-588b-4e80-bf46-8ba183d2f0dc.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:27:41.950680",
-  },
-  "426": {
+  }],
+  ["426", {
     id: "426",
     club_handle: "uwzoologyclub",
     url: "https://www.instagram.com/p/DPB-tooj0k9/",
@@ -3776,8 +3776,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.16.29%E2%80%AFPM.png",
     club_type: "WUSA",
     added_at: "2025-09-27T14:03:03.278326",
-  },
-  "416": {
+  }],
+  ["416", {
     id: "416",
     club_handle: "uw.mehfil",
     url: "https://www.instagram.com/p/DPFN4D4kpRC/",
@@ -3792,8 +3792,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bf9a7b35-e135-4ece-8848-1b4d81fb19f6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:46:33.843680",
-  },
-  "440": {
+  }],
+  ["440", {
     id: "440",
     club_handle: "uwyoungliberals",
     url: "https://www.instagram.com/p/DPKb-V3kXuS/",
@@ -3808,8 +3808,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/fc7f404d-fe8c-4654-ae68-8e3a570fe9a6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:42:36.802767",
-  },
-  "477": {
+  }],
+  ["477", {
     id: "477",
     club_handle: "uwaterloodsc",
     url: "https://www.instagram.com/p/DPNQ4nNDJVA/",
@@ -3824,8 +3824,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7efc51bd-1339-4ae4-bc32-f415d5023fe4.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:51:17.868219",
-  },
-  "447": {
+  }],
+  ["447", {
     id: "447",
     club_handle: "uwquantum",
     url: "https://www.instagram.com/p/DPL7CV0DUSE/",
@@ -3840,8 +3840,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/75f15305-1160-4dee-886e-3d040382ed74.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:46:30.423356",
-  },
-  "519": {
+  }],
+  ["519", {
     id: "519",
     club_handle: "kc_waterloo",
     url: "https://www.instagram.com/p/DPMcbUXiOu8/",
@@ -3856,8 +3856,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1b7784c4-12d9-42c2-b790-8081e896e739.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:36:32.905203",
-  },
-  "517": {
+  }],
+  ["517", {
     id: "517",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPP99pTjo_9/",
@@ -3872,8 +3872,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c84ac17f-66ec-452f-8253-387e21a22306.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:35:31.058236",
-  },
-  "470": {
+  }],
+  ["470", {
     id: "470",
     club_handle: "uwstreetdance",
     url: "https://www.instagram.com/p/DPNT2pWDPld/",
@@ -3888,8 +3888,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0e261157-5945-494c-bdd0-f0183e76f28f.webp",
     club_type: "WUSA",
     added_at: "2025-09-30T12:47:45.263375",
-  },
-  "423": {
+  }],
+  ["423", {
     id: "423",
     club_handle: "uwenglishsociety",
     url: "https://www.instagram.com/p/DPEWQLzDVnp/",
@@ -3904,8 +3904,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f8901a3a-880a-46b3-8f9e-3929421f89e1.jpg",
     club_type: "Student Society",
     added_at: "2025-09-27T12:50:08.539418",
-  },
-  "537": {
+  }],
+  ["537", {
     id: "537",
     club_handle: "iicuwaterloo",
     url: "https://www.instagram.com/p/DPSHwSZEZ0D/",
@@ -3920,8 +3920,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/71abf984-00fe-401e-9a2c-fd48df6c190b.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:18:13.900899",
-  },
-  "261": {
+  }],
+  ["261", {
     id: "261",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOtIGtPkyEW/",
@@ -3936,8 +3936,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.29.14%E2%80%AFPM.png",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "425": {
+  }],
+  ["425", {
     id: "425",
     club_handle: "mns.soc",
     url: "https://www.instagram.com/p/DPEdgLPAI_2/",
@@ -3952,8 +3952,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e10a9c5a-8065-47af-b072-a3afe3b7e73d.jpg",
     club_type: "Student Society",
     added_at: "2025-09-27T12:52:11.732054",
-  },
-  "524": {
+  }],
+  ["524", {
     id: "524",
     club_handle: "uwaterloowim",
     url: "https://www.instagram.com/p/DPO4AVuDnYl/",
@@ -3968,8 +3968,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d4e859e-23b3-492b-b041-05f4cfac1aa0.jpg",
     club_type: "Student Society",
     added_at: "2025-10-01T15:25:27.387842",
-  },
-  "504": {
+  }],
+  ["504", {
     id: "504",
     club_handle: "uwsmileclub",
     url: "https://www.instagram.com/p/DPOwtb6Dh9s/",
@@ -3984,8 +3984,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be26569c-8040-4c65-addd-144be22c7a5c.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:24:51.745045",
-  },
-  "502": {
+  }],
+  ["502", {
     id: "502",
     club_handle: "climatejusticeuw",
     url: "https://www.instagram.com/p/DPPZjRgjsl9/",
@@ -4000,8 +4000,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d2a72fd7-e6ec-457b-94ad-1186a224346c.jpg",
     club_type: null,
     added_at: "2025-10-01T11:20:31.642440",
-  },
-  "471": {
+  }],
+  ["471", {
     id: "471",
     club_handle: "uw_hhss",
     url: "https://www.instagram.com/p/DPMvQjCjqRR/",
@@ -4016,8 +4016,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8e2f654c-4a81-4996-afb4-08c6d8d43c5b.jpg",
     club_type: null,
     added_at: "2025-09-30T12:48:21.717448",
-  },
-  "389": {
+  }],
+  ["389", {
     id: "389",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DPCxzBxDbTV/",
@@ -4032,8 +4032,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3d466625-3d27-434e-a5c1-198b3c570674.jpg",
     club_type: "Student Society",
     added_at: "2025-09-26T14:43:25.625363",
-  },
-  "498": {
+  }],
+  ["498", {
     id: "498",
     club_handle: "uwpreoptclub",
     url: "https://www.instagram.com/p/DPPbEHpCTc3/",
@@ -4048,8 +4048,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/08048a4b-4b90-49de-932a-74f3564c6ca4.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:17:44.543732",
-  },
-  "493": {
+  }],
+  ["493", {
     id: "493",
     club_handle: "uwteaclub",
     url: "https://www.instagram.com/p/DPPDqFoCZYb/",
@@ -4064,8 +4064,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d7ec4c5d-5f59-4cbb-8f6f-12a6cb9271f2.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:12:50.520646",
-  },
-  "525": {
+  }],
+  ["525", {
     id: "525",
     club_handle: "uwblackscience",
     url: "https://www.instagram.com/p/DPRVwUwEZhD/",
@@ -4080,8 +4080,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c93b1e98-b719-443f-84e8-07ff8b2497dd.jpg",
     club_type: null,
     added_at: "2025-10-02T11:11:41.475516",
-  },
-  "406": {
+  }],
+  ["406", {
     id: "406",
     club_handle: "uw.crafts4charity",
     url: "https://www.instagram.com/p/DPErhoKDmxr/",
@@ -4096,8 +4096,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/cfe8c228-82a3-49ed-b903-2dbef2cb34a9.jpg",
     club_type: "WUSA",
     added_at: "2025-09-26T20:35:48.685713",
-  },
-  "301": {
+  }],
+  ["301", {
     id: "301",
     club_handle: "uw.psa",
     url: "https://www.instagram.com/p/DO9S00KDrCL/",
@@ -4112,8 +4112,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/47d89055-1baf-4824-81ed-80b180617936.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "428": {
+  }],
+  ["428", {
     id: "428",
     club_handle: "uw.lasa",
     url: "https://www.instagram.com/p/DPCzEK8jtRB/",
@@ -4128,8 +4128,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.16.13%E2%80%AFPM.png",
     club_type: "WUSA",
     added_at: "2025-09-27T14:07:58.556127",
-  },
-  "462": {
+  }],
+  ["462", {
     id: "462",
     club_handle: "uwclecwaterloo",
     url: "https://www.instagram.com/p/DPN0tdPjZfA/",
@@ -4144,8 +4144,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c7db728a-5ab3-4036-9ad5-caa7c6e9c144.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:42:35.830511",
-  },
-  "398": {
+  }],
+  ["398", {
     id: "398",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DPDVr54DDXc/",
@@ -4160,8 +4160,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a58e921e-4c8d-4577-acd4-c539a7d6d853.jpg",
     club_type: "WUSA",
     added_at: "2025-09-26T14:43:25.625363",
-  },
-  "433": {
+  }],
+  ["433", {
     id: "433",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DPHZeK_EYaf/",
@@ -4176,8 +4176,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/82813410-e913-4a3d-8a22-924d8b648394.jpg",
     club_type: "WUSA",
     added_at: "2025-09-28T12:46:12.848387",
-  },
-  "497": {
+  }],
+  ["497", {
     id: "497",
     club_handle: "uw.movie.watchers.club",
     url: "https://www.instagram.com/p/DPPm43IkddM/",
@@ -4192,8 +4192,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/042c0bdf-dbae-4efc-a03a-b20529d35b20.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:17:01.459457",
-  },
-  "550": {
+  }],
+  ["550", {
     id: "550",
     club_handle: "waterboo_uw",
     url: "https://www.instagram.com/p/DPRmiEJjgZe/",
@@ -4208,8 +4208,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/32248eb1-500f-467c-bdc8-50af3736930a.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:27:15.283933",
-  },
-  "533": {
+  }],
+  ["533", {
     id: "533",
     club_handle: "uwcccf",
     url: "https://www.instagram.com/p/DPSAOpvkh8D/",
@@ -4224,8 +4224,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e53fe676-d46d-42c8-b49c-8273b4212982.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:14:34.280728",
-  },
-  "459": {
+  }],
+  ["459", {
     id: "459",
     club_handle: "uw.mariokart",
     url: "https://www.instagram.com/p/DPMaGQ3CRTa/",
@@ -4240,8 +4240,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/09992cae-35bb-40df-a205-bb3aa3b74232.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:41:23.452512",
-  },
-  "515": {
+  }],
+  ["515", {
     id: "515",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DPMXbk7ADMQ/",
@@ -4256,8 +4256,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7d26e1a9-37f0-4a2b-a8e1-944b588d81d9.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:34:54.673790",
-  },
-  "450": {
+  }],
+  ["450", {
     id: "450",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DPKJ6N3jldx/",
@@ -4272,8 +4272,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/68a79777-8305-422f-8c94-d2ffb77a80b2.jpg",
     club_type: "Athletics",
     added_at: "2025-09-29T12:48:01.287075",
-  },
-  "591": {
+  }],
+  ["591", {
     id: "591",
     club_handle: "watrox1017",
     url: "https://www.instagram.com/p/DPURVtlD_W-/",
@@ -4288,8 +4288,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/25512f43-ffbc-49d3-ac07-85f3de0b1cad.jpg",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "606": {
+  }],
+  ["606", {
     id: "606",
     club_handle: "watrox1017",
     url: "https://www.instagram.com/p/DPUSoxND_m_/",
@@ -4304,8 +4304,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9fb59575-43fc-4158-8883-d6acae459415.jpg",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "599": {
+  }],
+  ["599", {
     id: "599",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPU7O4ujhWu/",
@@ -4320,8 +4320,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8d4f333e-5390-4e25-a99c-e6b069957055.jpg",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "552": {
+  }],
+  ["552", {
     id: "552",
     club_handle: "gbdasoc",
     url: "https://www.instagram.com/p/DPRIzEbDtDS/",
@@ -4336,8 +4336,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/57d29f47-1754-42a5-bb60-3c01c2bf8c58.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T14:35:21.293773",
-  },
-  "373": {
+  }],
+  ["373", {
     id: "373",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DPBpKS0ET14/",
@@ -4352,8 +4352,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4317af99-74a7-470a-a649-3d0242cb7224.jpg",
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "466": {
+  }],
+  ["466", {
     id: "466",
     club_handle: "uw_kiss",
     url: "https://www.instagram.com/p/DPMVeHUjniG/",
@@ -4368,8 +4368,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bca20b15-217f-4925-bc8d-a5328df06a75.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:44:05.982826",
-  },
-  "341": {
+  }],
+  ["341", {
     id: "341",
     club_handle: "uwerssa",
     url: "https://www.instagram.com/p/DPARtk9jODp/",
@@ -4384,8 +4384,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ffb57ac0-57e8-4c24-8dde-e3cc1bc9216e.jpg",
     club_type: "Student Society",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "263": {
+  }],
+  ["263", {
     id: "263",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DOsASg6DVhF/",
@@ -4400,8 +4400,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/Screenshot+2025-09-27+at+12.28.09%E2%80%AFPM.png",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "585": {
+  }],
+  ["585", {
     id: "585",
     club_handle: "uwphys10",
     url: "https://www.instagram.com/p/DPVfIWqDvMO/",
@@ -4416,8 +4416,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9cc26fd1-06a2-4934-a2e7-89361ecb541a.jpg",
     club_type: null,
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "272": {
+  }],
+  ["272", {
     id: "272",
     club_handle: "uwscisoc",
     url: "https://www.instagram.com/p/DO8cluhjUeY/",
@@ -4432,8 +4432,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e2d3629a-3bad-41aa-bab5-0a21f96ac474.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "463": {
+  }],
+  ["463", {
     id: "463",
     club_handle: "uw_aviation",
     url: "https://www.instagram.com/p/DPMrpCVkbdN/",
@@ -4448,8 +4448,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d91abafb-6e89-42ff-9775-81b1a59cab4a.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:42:56.430332",
-  },
-  "404": {
+  }],
+  ["404", {
     id: "404",
     club_handle: "uw_base",
     url: "https://www.instagram.com/p/DO_vg_8j36e/",
@@ -4464,8 +4464,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/00802e8f-28be-4ffe-8e11-bea19af36308.jpg",
     club_type: "WUSA",
     added_at: "2025-09-26T14:55:42.505592",
-  },
-  "518": {
+  }],
+  ["518", {
     id: "518",
     club_handle: "kcfwaterloo",
     url: "https://www.instagram.com/p/DPOqFKOgDBS/",
@@ -4480,8 +4480,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/56beec1a-807d-4dc8-b8f8-1748e9c8be33.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:35:46.145386",
-  },
-  "285": {
+  }],
+  ["285", {
     id: "285",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DO6xLImjk2o/",
@@ -4496,8 +4496,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be103ec5-82cb-4092-ba36-b2438b3b060c.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "511": {
+  }],
+  ["511", {
     id: "511",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DPPh68OgcYM/",
@@ -4512,8 +4512,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0c188dba-7c7f-43c4-b9d4-8b4ca610d05d.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:30:25.695801",
-  },
-  "478": {
+  }],
+  ["478", {
     id: "478",
     club_handle: "uwchaiandverse",
     url: "https://www.instagram.com/p/DPNcHZ5DgGC/",
@@ -4528,8 +4528,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8a2eaac9-c490-4d1d-8df9-c3539068c291.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:51:58.814567",
-  },
-  "607": {
+  }],
+  ["607", {
     id: "607",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DPUWWZZEVKz/",
@@ -4544,8 +4544,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7f5f94cf-5ca0-47a3-982f-1ecdeac89740.jpg",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "611": {
+  }],
+  ["611", {
     id: "611",
     club_handle: "uwpokerclub",
     url: "https://www.instagram.com/p/DPWaFhHDkYK/",
@@ -4560,8 +4560,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c8448aef-0d04-44b0-abc8-8eb0611afa81.jpg",
     club_type: "WUSA",
     added_at: "2025-10-03T16:16:05.357170",
-  },
-  "434": {
+  }],
+  ["434", {
     id: "434",
     club_handle: "uw.dhamaka",
     url: "https://www.instagram.com/p/DPHJ0cnDX8H/",
@@ -4576,8 +4576,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/6f53dcd1-c8e7-41ed-996b-cacd397457fc.jpg",
     club_type: "WUSA",
     added_at: "2025-09-28T12:46:24.828521",
-  },
-  "439": {
+  }],
+  ["439", {
     id: "439",
     club_handle: "uwskate",
     url: "https://www.instagram.com/p/DPKJMhkkc3-/",
@@ -4592,8 +4592,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/873cc629-9120-4be6-aad1-08b4dc88a10f.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:42:03.119730",
-  },
-  "347": {
+  }],
+  ["347", {
     id: "347",
     club_handle: "uw_jsa",
     url: "https://www.instagram.com/p/DPAEyY8Ds4D/",
@@ -4608,8 +4608,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/202a5b77-beb6-4c90-becf-f980d5ac06a9.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "523": {
+  }],
+  ["523", {
     id: "523",
     club_handle: "uwyugioh",
     url: "https://www.instagram.com/p/DPNmQJkjYkZ/",
@@ -4624,8 +4624,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/68f7076d-9c2d-45c5-be1f-d205093e1d20.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T15:25:27.387842",
-  },
-  "375": {
+  }],
+  ["375", {
     id: "375",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DO_5s7UAY7s/",
@@ -4640,8 +4640,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a9916696-9b49-4743-8b73-451d815a37b2.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "444": {
+  }],
+  ["444", {
     id: "444",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DPK693aDTHD/",
@@ -4656,8 +4656,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bbcdc0eb-8812-4aeb-9c27-ab0dd20fad74.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:44:22.541933",
-  },
-  "429": {
+  }],
+  ["429", {
     id: "429",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DPCVdYWkezD/",
@@ -4672,8 +4672,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_1.png",
     club_type: "WUSA",
     added_at: "2025-09-27T14:10:14.846196",
-  },
-  "443": {
+  }],
+  ["443", {
     id: "443",
     club_handle: "wlookarate",
     url: "https://www.instagram.com/p/DPKkQScjHMh/",
@@ -4688,8 +4688,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0d8891b8-5ca8-4cfa-9c98-4d913897ee9c.jpg",
     club_type: "Athletics",
     added_at: "2025-09-29T12:44:07.461102",
-  },
-  "500": {
+  }],
+  ["500", {
     id: "500",
     club_handle: "uwtss",
     url: "https://www.instagram.com/p/DPPF5yoiQp_/",
@@ -4704,8 +4704,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3e83957d-587e-472a-b8a7-f0e007da501f.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:18:51.161731",
-  },
-  "595": {
+  }],
+  ["595", {
     id: "595",
     club_handle: "uwboardgames",
     url: "https://www.instagram.com/p/DPVpLFfDvQP/",
@@ -4720,8 +4720,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_3.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "586": {
+  }],
+  ["586", {
     id: "586",
     club_handle: "wloochinesemartialarts",
     url: "https://www.instagram.com/p/DPVSmG7jMlU/",
@@ -4736,8 +4736,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_2.png",
     club_type: "Athletics",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "284": {
+  }],
+  ["284", {
     id: "284",
     club_handle: "spaceapps.kw",
     url: "https://www.instagram.com/p/DO6snOIDzJK/",
@@ -4752,8 +4752,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7d617538-fd70-4065-9c6f-6584e1914925.jpg",
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "546": {
+  }],
+  ["546", {
     id: "546",
     club_handle: "wloolacrosse",
     url: "https://www.instagram.com/p/DPSYGYSCQHx/",
@@ -4768,8 +4768,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7f03745d-e2af-4aec-ab03-37cdf6c71c02.jpg",
     club_type: "Athletics",
     added_at: "2025-10-02T11:23:32.777212",
-  },
-  "445": {
+  }],
+  ["445", {
     id: "445",
     club_handle: "wloowrestling",
     url: "https://www.instagram.com/p/DPJuI7xj33R/",
@@ -4784,8 +4784,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2d8cf3c5-e6a0-4614-b109-b0b4a46b6d44.jpg",
     club_type: "Athletics",
     added_at: "2025-09-29T12:45:09.292788",
-  },
-  "427": {
+  }],
+  ["427", {
     id: "427",
     club_handle: "hillelwaterloolaurier",
     url: "https://www.instagram.com/p/DPCeILbEhd1/",
@@ -4800,8 +4800,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_4.png",
     club_type: "WUSA",
     added_at: "2025-09-27T14:05:26.676873",
-  },
-  "358": {
+  }],
+  ["358", {
     id: "358",
     club_handle: "uwmun",
     url: "https://www.instagram.com/p/DPAor1jDSqd/",
@@ -4816,8 +4816,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be5f9697-911e-49d0-9068-79e62d5a0f26.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "553": {
+  }],
+  ["553", {
     id: "553",
     club_handle: "wloowomensfootball",
     url: "https://www.instagram.com/p/DPRS6kkkV5y/",
@@ -4832,8 +4832,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/87b46ebc-6cf7-4ce1-81d4-8a97d0c69b5d.jpg",
     club_type: "Athletics",
     added_at: "2025-10-02T14:35:21.293773",
-  },
-  "460": {
+  }],
+  ["460", {
     id: "460",
     club_handle: "uwpmclub",
     url: "https://www.instagram.com/p/DPMRn5XjsFQ/",
@@ -4848,8 +4848,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/bda5383a-5114-451d-ac55-9b797710e4eb.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:42:04.407034",
-  },
-  "534": {
+  }],
+  ["534", {
     id: "534",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DPSMoj_joR9/",
@@ -4864,8 +4864,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dd5bb9ec-447f-448d-9912-dd196ffbb0f3.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:14:51.734892",
-  },
-  "496": {
+  }],
+  ["496", {
     id: "496",
     club_handle: "wloocurling",
     url: "https://www.instagram.com/p/DPPAiZSjslq/",
@@ -4880,8 +4880,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/29c176bb-664f-4493-8e48-0df912e6305d.jpg",
     club_type: "Athletics",
     added_at: "2025-10-01T11:14:33.976768",
-  },
-  "490": {
+  }],
+  ["490", {
     id: "490",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DPMGzZPDldO/",
@@ -4896,8 +4896,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9903e0a0-fdb6-48b9-997b-5ae7f60b513a.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T13:03:36.127522",
-  },
-  "594": {
+  }],
+  ["594", {
     id: "594",
     club_handle: "uwrehabsci",
     url: "https://www.instagram.com/p/DPULeMDAHLp/",
@@ -4912,8 +4912,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_5.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "598": {
+  }],
+  ["598", {
     id: "598",
     club_handle: "uwchemclub",
     url: "https://www.instagram.com/p/DPU9G0mDMmF/",
@@ -4928,8 +4928,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_7.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "584": {
+  }],
+  ["584", {
     id: "584",
     club_handle: "uwmssa",
     url: "https://www.instagram.com/p/DPT9pSBANlW/",
@@ -4944,8 +4944,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_6.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "587": {
+  }],
+  ["587", {
     id: "587",
     club_handle: "prismcollectiv_",
     url: "https://www.instagram.com/p/DPVGmDiDQtZ/",
@@ -4960,8 +4960,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_8.png",
     club_type: null,
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "615": {
+  }],
+  ["615", {
     id: "615",
     club_handle: "uw_bmsa",
     url: "https://www.instagram.com/p/DPXAHN-kVpK/",
@@ -4976,8 +4976,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3f914ba8-e885-4a32-b997-f23c97244f8a.jpg",
     club_type: "Student Society",
     added_at: "2025-10-04T11:15:37.608697",
-  },
-  "415": {
+  }],
+  ["415", {
     id: "415",
     club_handle: "kwcommunists",
     url: "https://www.instagram.com/p/DPCkVJ1ibss/",
@@ -4992,8 +4992,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/85694f15-c463-484f-86a6-36646256e1c6.jpg",
     club_type: "WUSA",
     added_at: "2025-09-27T12:45:52.187264",
-  },
-  "475": {
+  }],
+  ["475", {
     id: "475",
     club_handle: "uwatsfic",
     url: "https://www.instagram.com/p/DPNB2qVje_Y/",
@@ -5008,8 +5008,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/206af2ef-72bd-4c1d-80e6-e0ad4658c916.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:50:11.946443",
-  },
-  "535": {
+  }],
+  ["535", {
     id: "535",
     club_handle: "wloorunning",
     url: "https://www.instagram.com/p/DPSHUxUEclH/",
@@ -5024,8 +5024,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/5692cfcc-fdd7-493d-b191-0780fd993ae2.jpg",
     club_type: "Athletics",
     added_at: "2025-10-02T11:16:05.461193",
-  },
-  "592": {
+  }],
+  ["592", {
     id: "592",
     club_handle: "uwmathnews",
     url: "https://www.instagram.com/p/DPUnxWICQ-d/",
@@ -5040,8 +5040,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_9.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "542": {
+  }],
+  ["542", {
     id: "542",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DPR09LjERok/",
@@ -5056,8 +5056,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f375f347-119a-4d24-b54a-e2abf15e7303.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:20:21.242409",
-  },
-  "441": {
+  }],
+  ["441", {
     id: "441",
     club_handle: "uwballroom",
     url: "https://www.instagram.com/p/DPKKcUzjqCz/",
@@ -5072,8 +5072,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0fcdba4-ffbc-40aa-90ec-6684677815a6.jpg",
     club_type: "Athletics",
     added_at: "2025-09-29T12:43:28.644144",
-  },
-  "476": {
+  }],
+  ["476", {
     id: "476",
     club_handle: "arbussociety",
     url: "https://www.instagram.com/p/DPNXqQ0Dn-2/",
@@ -5088,8 +5088,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/74356a14-991f-4d8a-8b34-12658321a8a1.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:50:52.333934",
-  },
-  "532": {
+  }],
+  ["532", {
     id: "532",
     club_handle: "uwmates",
     url: "https://www.instagram.com/p/DPSXp79iUoF/",
@@ -5104,8 +5104,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d35cf6a7-f47b-4fd3-ba4c-dd6a6b5d9d85.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:14:13.374426",
-  },
-  "501": {
+  }],
+  ["501", {
     id: "501",
     club_handle: "uwaterloopremed",
     url: "https://www.instagram.com/p/DPPdw0BkVyE/",
@@ -5120,8 +5120,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/226ac5b6-4828-4bca-b484-3fe4a9440f76.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:19:53.195979",
-  },
-  "604": {
+  }],
+  ["604", {
     id: "604",
     club_handle: "uwsbsa",
     url: "https://www.instagram.com/p/DPUmKs5khj7/",
@@ -5136,8 +5136,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_10.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "603": {
+  }],
+  ["603", {
     id: "603",
     club_handle: "uwbeautyclub",
     url: "https://www.instagram.com/p/DPUrVq6gIW2/",
@@ -5152,8 +5152,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_11.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "616": {
+  }],
+  ["616", {
     id: "616",
     club_handle: "uwerssa",
     url: "https://www.instagram.com/p/DPXW7w8klTC/",
@@ -5168,8 +5168,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/72f313de-6433-4301-ad87-bd3114de4a1e.jpg",
     club_type: "Student Society",
     added_at: "2025-10-04T11:19:45.037087",
-  },
-  "619": {
+  }],
+  ["619", {
     id: "619",
     club_handle: "uwaterloopremed",
     url: "https://www.instagram.com/p/DPW4c1HkfDz/",
@@ -5184,8 +5184,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9e58081b-c8ff-4bd4-8ff8-cac3293cd732.jpg",
     club_type: "WUSA",
     added_at: "2025-10-04T11:23:16.475721",
-  },
-  "547": {
+  }],
+  ["547", {
     id: "547",
     club_handle: "uwchemclub",
     url: "https://www.instagram.com/p/DPStdswjMkb/",
@@ -5200,8 +5200,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/58b1b45e-de5b-474b-bd0e-722b0946995b.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:24:14.330670",
-  },
-  "531": {
+  }],
+  ["531", {
     id: "531",
     club_handle: "uweconsoc",
     url: "https://www.instagram.com/p/DPSAEsRErL3/",
@@ -5216,8 +5216,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8655865a-5241-4486-8071-4eb7dbd5254a.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:13:51.023533",
-  },
-  "540": {
+  }],
+  ["540", {
     id: "540",
     club_handle: "uwtsa",
     url: "https://www.instagram.com/p/DPSSeBZkVkS/",
@@ -5232,8 +5232,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/424547ee-b88e-4e00-880b-3cae2020c561.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:19:22.457366",
-  },
-  "544": {
+  }],
+  ["544", {
     id: "544",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DPR8dh9jne3/",
@@ -5248,8 +5248,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d487d25c-a2bc-45f6-b4ad-aaf3011a378b.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:22:55.150829",
-  },
-  "503": {
+  }],
+  ["503", {
     id: "503",
     club_handle: "uwaterlooacs",
     url: "https://www.instagram.com/p/DPPp3EMEfbH/",
@@ -5264,8 +5264,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/573ff55d-f7ab-4bb9-88be-15b7d06d0668.jpg",
     club_type: "WUSA",
     added_at: "2025-10-01T11:21:22.344614",
-  },
-  "545": {
+  }],
+  ["545", {
     id: "545",
     club_handle: "tma.waterloo",
     url: "https://www.instagram.com/p/DPRZp1FjfYt/",
@@ -5280,8 +5280,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a2a84dab-2549-4cb4-ad60-752eae3bab20.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:23:10.012054",
-  },
-  "614": {
+  }],
+  ["614", {
     id: "614",
     club_handle: "uwtaekwondoacademy",
     url: "https://www.instagram.com/p/DPXM9pdkrx2/",
@@ -5296,8 +5296,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1748a067-f2d0-4cdf-bc0c-6102f53ede35.jpg",
     club_type: "Athletics",
     added_at: "2025-10-04T11:15:07.877067",
-  },
-  "536": {
+  }],
+  ["536", {
     id: "536",
     club_handle: "uwchemclub",
     url: "https://www.instagram.com/p/DPSsrbeDGd0/",
@@ -5312,8 +5312,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c38dac02-3247-45b3-ac03-c2a3b82c8bcd.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:16:23.485332",
-  },
-  "541": {
+  }],
+  ["541", {
     id: "541",
     club_handle: "uw_ess",
     url: "https://www.instagram.com/p/DPRlqwsEcaM/",
@@ -5328,8 +5328,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/983ad0b6-3cf6-439c-b984-6595079e0f39.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:19:42.243101",
-  },
-  "617": {
+  }],
+  ["617", {
     id: "617",
     club_handle: "uw_aviation",
     url: "https://www.instagram.com/p/DPW0dsNEazD/",
@@ -5344,8 +5344,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3784c5eb-154f-4496-9465-57476c020f58.jpg",
     club_type: "WUSA",
     added_at: "2025-10-04T11:20:29.227974",
-  },
-  "264": {
+  }],
+  ["264", {
     id: "264",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DOYgs9lEyok/",
@@ -5360,8 +5360,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_12.png",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "528": {
+  }],
+  ["528", {
     id: "528",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DPRmKXWkZWu/",
@@ -5376,8 +5376,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d1e6ee75-3e4e-4aea-bb70-d185b9b67788.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:12:48.236266",
-  },
-  "551": {
+  }],
+  ["551", {
     id: "551",
     club_handle: "jamnetwork_uw",
     url: "https://www.instagram.com/p/DPScijqjKHy/",
@@ -5392,8 +5392,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/26421419-4214-4abc-b9e0-8c9e4090aaf1.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:30:26.488433",
-  },
-  "608": {
+  }],
+  ["608", {
     id: "608",
     club_handle: "uwvelocity",
     url: "https://www.instagram.com/p/DPWUdxSjh1u/",
@@ -5408,8 +5408,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_14.png",
     club_type: null,
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "543": {
+  }],
+  ["543", {
     id: "543",
     club_handle: "uwvsa",
     url: "https://www.instagram.com/p/DPR0R7_icKU/",
@@ -5424,8 +5424,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/193d166d-b466-4436-8e77-18a75534c2f7.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:21:43.348808",
-  },
-  "589": {
+  }],
+  ["589", {
     id: "589",
     club_handle: "uwactsciclub",
     url: "https://www.instagram.com/p/DPUGYbcDQjJ/",
@@ -5440,8 +5440,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_13.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "623": {
+  }],
+  ["623", {
     id: "623",
     club_handle: "wreaclub",
     url: "https://www.instagram.com/p/DPXEUpQDzZ5/",
@@ -5456,8 +5456,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/5054ec56-b0d8-467d-b9e4-56beafffad29.jpg",
     club_type: "WUSA",
     added_at: "2025-10-04T11:30:07.817605",
-  },
-  "473": {
+  }],
+  ["473", {
     id: "473",
     club_handle: "uwmusoc",
     url: "https://www.instagram.com/p/DPMtFkrD5lm/",
@@ -5472,8 +5472,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a422d09f-39a1-479e-a794-2f84189f5086.jpg",
     club_type: "Student Society",
     added_at: "2025-09-30T12:49:09.235878",
-  },
-  "527": {
+  }],
+  ["527", {
     id: "527",
     club_handle: "wasa.arch",
     url: "https://www.instagram.com/p/DPSi9_FjXR0/",
@@ -5488,8 +5488,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7f7d90d1-033e-485b-b418-b7d15b8a886f.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:12:31.110380",
-  },
-  "539": {
+  }],
+  ["539", {
     id: "539",
     club_handle: "uwcsclub",
     url: "https://www.instagram.com/p/DPSkljYDYHb/",
@@ -5504,8 +5504,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/781b202f-e2a8-44b5-ae08-d49d0423cefc.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:19:03.522539",
-  },
-  "583": {
+  }],
+  ["583", {
     id: "583",
     club_handle: "wlooquantclub",
     url: "https://www.instagram.com/p/DPUXK6TjueQ/",
@@ -5520,8 +5520,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_15.png",
     club_type: null,
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "405": {
+  }],
+  ["405", {
     id: "405",
     club_handle: "uw.bmlt",
     url: "https://www.instagram.com/p/DO_TQyuEYIT/",
@@ -5536,8 +5536,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/61dc7058-99d7-4cd2-a7a0-d8b51cbb896b.jpg",
     club_type: "WUSA",
     added_at: "2025-09-26T14:59:17.055733",
-  },
-  "313": {
+  }],
+  ["313", {
     id: "313",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DO9XVOQE2ST/",
@@ -5552,8 +5552,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4e840cfd-bd50-4fe6-9f80-1b7697208037.jpg",
     club_type: "Student Society",
     added_at: "2025-09-20T00:00:00",
-  },
-  "472": {
+  }],
+  ["472", {
     id: "472",
     club_handle: "p2cwaterloo",
     url: "https://www.instagram.com/p/DPM79ZpAB_M/",
@@ -5568,8 +5568,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dda1ee59-d650-4f03-a55d-10839b2a1efc.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:48:45.011434",
-  },
-  "597": {
+  }],
+  ["597", {
     id: "597",
     club_handle: "uwaterloowics",
     url: "https://www.instagram.com/p/DPUbeVYES63/",
@@ -5584,8 +5584,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_16.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "494": {
+  }],
+  ["494", {
     id: "494",
     club_handle: "uwanthsoc",
     url: "https://www.instagram.com/p/DPPB5x5DcB9/",
@@ -5600,8 +5600,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/747f7163-1045-439e-85aa-97702cf5272e.jpg",
     club_type: "Student Society",
     added_at: "2025-10-01T11:13:39.396712",
-  },
-  "605": {
+  }],
+  ["605", {
     id: "605",
     club_handle: "uwaterloostemcellclub",
     url: "https://www.instagram.com/p/DPU1YjdDKX9/",
@@ -5616,8 +5616,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_17.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "437": {
+  }],
+  ["437", {
     id: "437",
     club_handle: "uwphotographyclub",
     url: "https://www.instagram.com/p/DPKFrcLCSV_/",
@@ -5632,8 +5632,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_18.png",
     club_type: "WUSA",
     added_at: "2025-09-29T00:50:06.073545",
-  },
-  "526": {
+  }],
+  ["526", {
     id: "526",
     club_handle: "uw_ux",
     url: "https://www.instagram.com/p/DPRwYJKD3lB/",
@@ -5648,8 +5648,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d6a2350c-6fe2-4744-99e6-490429d9749e.jpg",
     club_type: "WUSA",
     added_at: "2025-10-02T11:12:06.180588",
-  },
-  "618": {
+  }],
+  ["618", {
     id: "618",
     club_handle: "uw_sofa",
     url: "https://www.instagram.com/p/DPWoQXtjb6f/",
@@ -5664,8 +5664,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9e7a476b-7f46-4125-80d8-486d393dcd99.jpg",
     club_type: "Student Society",
     added_at: "2025-10-04T11:22:39.508316",
-  },
-  "495": {
+  }],
+  ["495", {
     id: "495",
     club_handle: "envwags",
     url: "https://www.instagram.com/p/DPPSgMnj7Nw/",
@@ -5680,8 +5680,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e07b709f-d1f2-4f39-b808-97aa061c8e97.jpg",
     club_type: "Student Society",
     added_at: "2025-10-01T11:14:05.538219",
-  },
-  "625": {
+  }],
+  ["625", {
     id: "625",
     club_handle: "uwengsoc",
     url: "https://www.instagram.com/p/DPWu8VNDqWa/",
@@ -5696,8 +5696,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9863c235-be81-44ce-b2c1-d5dccaf5b546.jpg",
     club_type: "Student Society",
     added_at: "2025-10-04T11:32:13.527535",
-  },
-  "588": {
+  }],
+  ["588", {
     id: "588",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DPUWxuTkXqT/",
@@ -5712,8 +5712,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_19.png",
     club_type: "Student Society",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "304": {
+  }],
+  ["304", {
     id: "304",
     club_handle: "fass.theatre.company",
     url: "https://www.instagram.com/p/DO9OHmcjzcJ/",
@@ -5728,8 +5728,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b2c071a2-a508-4db8-af69-7a28509cb7df.jpg",
     club_type: null,
     added_at: "2025-09-20T00:00:00",
-  },
-  "609": {
+  }],
+  ["609", {
     id: "609",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DPUBS0mDdEs/",
@@ -5744,8 +5744,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_20.png",
     club_type: "Athletics",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "612": {
+  }],
+  ["612", {
     id: "612",
     club_handle: "claudeuwaterloo",
     url: "https://www.instagram.com/p/DPXIF6QiU3h/",
@@ -5760,8 +5760,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/19108126-20a7-4ce2-9a8b-121a2f035d1d.jpg",
     club_type: null,
     added_at: "2025-10-04T11:10:26.801391",
-  },
-  "367": {
+  }],
+  ["367", {
     id: "367",
     club_handle: "wlooserve",
     url: "https://www.instagram.com/p/DPADOcADWKI/",
@@ -5776,8 +5776,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9b653fef-a187-4576-9f2e-59b8f34966a1.jpg",
     club_type: "Athletics",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "184": {
+  }],
+  ["184", {
     id: "184",
     club_handle: "wloo.lifesaving",
     url: "https://www.instagram.com/p/DOtU_gEjdfY/",
@@ -5792,8 +5792,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4a276ccc-80bc-449b-a56f-12900ac9f47b.jpg",
     club_type: "Athletics",
     added_at: "2025-09-20T00:00:00",
-  },
-  "412": {
+  }],
+  ["412", {
     id: "412",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPF0UZuDdyw/",
@@ -5808,8 +5808,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/asdfasdfgasgdsg23423fasdfsafsdfasdsadfasfsdf.png",
     club_type: "WUSA",
     added_at: "2025-09-27T12:45:10.236068",
-  },
-  "372": {
+  }],
+  ["372", {
     id: "372",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPAo06LjSvV/",
@@ -5824,8 +5824,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/ed12f829-109a-4b4f-b210-3988aed77e55.jpg",
     club_type: "WUSA",
     added_at: "2025-09-25T15:35:01.613015",
-  },
-  "448": {
+  }],
+  ["448", {
     id: "448",
     club_handle: "susawaterloo",
     url: "https://www.instagram.com/p/DPKNhiED23H/",
@@ -5840,8 +5840,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/609f3682-7816-4fd7-b13b-41c08c760f4c.jpg",
     club_type: "WUSA",
     added_at: "2025-09-29T12:46:46.581765",
-  },
-  "432": {
+  }],
+  ["432", {
     id: "432",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPH_V-7jW_v/",
@@ -5856,8 +5856,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0c16854-261d-4936-9cc4-62ef0086eeda.jpg",
     club_type: "WUSA",
     added_at: "2025-09-28T12:46:01.939442",
-  },
-  "474": {
+  }],
+  ["474", {
     id: "474",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPMFIQfDXT2/",
@@ -5872,8 +5872,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7c0d7216-f62b-4462-b68a-02fa40af2b15.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:49:52.644675",
-  },
-  "601": {
+  }],
+  ["601", {
     id: "601",
     club_handle: "uwmsa",
     url: "https://www.instagram.com/p/DPUqVo2DdPY/",
@@ -5888,8 +5888,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_21.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "499": {
+  }],
+  ["499", {
     id: "499",
     club_handle: "uw_psychsoc",
     url: "https://www.instagram.com/p/DPPs7JmkRGn/",
@@ -5904,8 +5904,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3bb6084e-8eea-48b3-aec3-7a1fb8595685.jpg",
     club_type: "Student Society",
     added_at: "2025-10-01T11:18:27.140982",
-  },
-  "593": {
+  }],
+  ["593", {
     id: "593",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DPULAEeERoi/",
@@ -5920,8 +5920,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_22.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220",
-  },
-  "479": {
+  }],
+  ["479", {
     id: "479",
     club_handle: "uwwistem",
     url: "https://www.instagram.com/p/DPMSxQCkQlT/",
@@ -5936,8 +5936,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1e9d099e-8744-4219-a0a6-40994733dcd3.jpg",
     club_type: "WUSA",
     added_at: "2025-09-30T12:52:30.810340",
-  },
-  "255": {
+  }],
+  ["255", {
     id: "255",
     club_handle: "ascenduw",
     url: "https://www.instagram.com/p/DOgUojiAMJO/",
@@ -5952,8 +5952,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_23.png",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "530": {
+  }],
+  ["530", {
     id: "530",
     club_handle: "uw.tsu",
     url: "https://www.instagram.com/p/DPSMPP8DSSm/",
@@ -5968,8 +5968,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9f20ef9a-5734-4b90-90d8-2033af383e1d.jpg",
     club_type: "Student Society",
     added_at: "2025-10-02T11:13:30.812073",
-  },
-  "297": {
+  }],
+  ["297", {
     id: "297",
     club_handle: "uwatna",
     url: "https://www.instagram.com/p/DO6SKyNDnI9/",
@@ -5984,8 +5984,8 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2815409c-0e5b-4208-9222-21283bd18ccc.jpg",
     club_type: "WUSA",
     added_at: "2025-09-20T00:00:00",
-  },
-  "613": {
+  }],
+  ["613", {
     id: "613",
     club_handle: "uwaterloowie",
     url: "https://www.instagram.com/p/DPW4OzFkf3E/",
@@ -6000,5 +6000,5 @@ export const staticEventsData: Record<string, Event> = {
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/34e93a00-ca87-437a-972f-7c35f64430e4.jpg",
     club_type: "Student Society",
     added_at: "2025-10-04T11:14:23.511316",
-  }
-};
+  }]
+]);
