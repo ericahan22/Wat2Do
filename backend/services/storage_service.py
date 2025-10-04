@@ -9,7 +9,7 @@ import logging
 import os
 import uuid
 from io import BytesIO
-from typing import Optional
+from typing import Optional, List
 
 import boto3
 import requests
@@ -118,16 +118,6 @@ def upload_image_from_url(
 
 
 def upload_image_data(image_data: bytes, filename: str) -> Optional[str]:
-    """
-    Upload raw image data directly to S3.
-
-    Args:
-        image_data: Raw image bytes
-        filename: Filename/key for the uploaded object
-
-    Returns:
-        Public URL of uploaded image if successful, None otherwise
-    """
     try:
         if not _validate_image(image_data):
             return None
@@ -156,11 +146,49 @@ def upload_image_data(image_data: bytes, filename: str) -> Optional[str]:
         return None
 
 
-def delete_image(filename: str) -> bool:
+def delete_images(filenames: List[str]) -> int:
+    logger.info(f"Deleting {len(filenames)} images from S3...")
     try:
-        s3_client.delete_object(Bucket=bucket_name, Key=filename)
-        logger.info(f"Successfully deleted image: {filename}")
-        return True
+        delete_objects = [{'Key': key} for key in filenames]
+        
+        response = s3_client.delete_objects(
+            Bucket=bucket_name,
+            Delete={
+                'Objects': delete_objects,
+                'Quiet': False
+            }
+        )
+        
+        deleted_count = len(response.get('Deleted', []))
+                
+        logger.info(f"Successfully deleted {deleted_count} images")
+        return deleted_count
+        
+    except ClientError as e:
+        logger.error(f"AWS S3 error deleting images: {e}")
+        return 0
     except Exception as e:
-        logger.error(f"Error deleting image {filename}: {e}")
-        return False
+        logger.error(f"Unexpected error deleting images: {e}")
+        return 0
+
+
+def list_all_s3_objects() -> List[str]:
+    logger.info("Listing all objects in S3 bucket...")
+    try:
+        all_keys = []
+        paginator = s3_client.get_paginator('list_objects_v2')
+        
+        for page in paginator.paginate(Bucket=bucket_name):
+            if 'Contents' in page:
+                for obj in page['Contents']:
+                    all_keys.append(obj['Key'])
+                    
+        logger.info(f"Found {len(all_keys)} total objects in S3 bucket")
+        return all_keys
+        
+    except ClientError as e:
+        logger.error(f"Error listing S3 objects: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error listing S3 objects: {e}")
+        raise
