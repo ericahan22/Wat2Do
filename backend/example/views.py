@@ -30,8 +30,8 @@ def home(_request):
         {
             "message": "Instagram Event Scraper API with Vector Similarity",
             "endpoints": {
-                "GET /api/events/?view=grid": "Get events in grid view",
-                "GET /api/events/?view=calendar": "Get events in calendar view",
+                "GET /api/events/": "Get upcoming events",
+                "GET /api/events/?search=search_text": "Search events using vector similarity",
                 "GET /api/clubs/": "Get all clubs from database",
                 "GET /api/health/": "Health check",
                 "POST /api/mock-event/": (
@@ -81,41 +81,35 @@ def health(_request):
 def get_events(request):
     """Get all events from database (no pagination)"""
     try:
-        search_term = request.GET.get("search", "").strip()  # Get search term
-        view = request.GET.get("view", "grid")
+        search_term = request.GET.get("search", "").strip()
 
-        # Build base queryset
-        base_queryset = Events.objects.all().order_by("date", "start_time")
-
-        # Apply filters to create filtered queryset
-        filtered_queryset = base_queryset
-
-        # Hide past events in grid view only
-        if view == "grid":
-            # Include events from today onwards (interpret as EST)
-            est = timezone("America/New_York")
-            today = datetime.now(est).date()
-            filtered_queryset = filtered_queryset.filter(date__gte=today)
-
+        # Filter for events from today onwards (EST)
+        est = timezone("America/New_York")
+        today = datetime.now(est).date()
+        
         if search_term:
+            # Search using vector similarity
             search_embedding = generate_embedding(search_term)
             similar_events = find_similar_events(
                 embedding=search_embedding, threshold=0.275
             )
             if similar_events:
                 similar_event_ids = [event["id"] for event in similar_events]
-                filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
+                # Filter by IDs and date, ordering is handled by model Meta
+                filtered_queryset = Events.objects.filter(
+                    id__in=similar_event_ids,
+                    date__gte=today
+                )
             else:
-                filtered_queryset = filtered_queryset.none()
+                filtered_queryset = Events.objects.none()
+        else:
+            # Return all future events, ordering is handled by model Meta
+            filtered_queryset = Events.objects.filter(date__gte=today)
 
-        # Return only event IDs for search results
+        # Return only event IDs
         event_ids = [str(event.id) for event in filtered_queryset]
 
-        return Response(
-            {
-                "event_ids": event_ids,
-            }
-        )
+        return Response({"event_ids": event_ids})
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

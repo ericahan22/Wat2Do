@@ -40,19 +40,18 @@ const SearchInput = memo(
 
     return (
       <div
-        className={`relative ${className} border border-gray-300 dark:border-gray-700 rounded-md`}
+        className={`relative ${className} border border-gray-300 dark:border-gray-700 overflow-hidden rounded-md`}
       >
         <Input
           ref={inputRef}
           placeholder={placeholder}
           defaultValue={searchParams.get("search") || ""}
-          // onChange={handleInputChange}
           onKeyDown={handleKeyPress}
-          className="pr-12 shadow-none border-none"
+          className="pr-12 shadow-none border-none h-8"
         />
         <Button
           onMouseDown={handleSearch}
-          className="absolute right-0 top-0 h-full w-12 !rounded-l-none rounded-r-md border-l-0 bg-gray-100 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800"
+          className="absolute right-0 top-0 w-12 h-full !rounded-l-none rounded-r-md border-l-0 bg-gray-100 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800"
           size="sm"
           variant="ghost"
         >
