@@ -99,9 +99,8 @@ def get_events(request):
             similar_events = find_similar_events(
                 embedding=search_embedding, threshold=0.275
             )
-            if similar_events:
-                similar_event_ids = [event["id"] for event in similar_events]
-                filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
+            similar_event_ids = [event["id"] for event in similar_events]
+            filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
             else:
                 filtered_queryset = Events.objects.none()
 

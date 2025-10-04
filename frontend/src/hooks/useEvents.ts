@@ -82,10 +82,10 @@ export function useEvents(view: "grid" | "calendar") {
     
     if (hasActiveFilters && data?.event_ids) {
       rawEvents = data.event_ids
-        .map(id => staticEventsData[id])
-        .filter(Boolean);
+        .map(id => staticEventsData.get(id))
+        .filter(Boolean) as Event[];
     } else { 
-      rawEvents = Object.values(staticEventsData);
+      rawEvents = Array.from(staticEventsData.values());
     }
 
     if (view === "grid") {

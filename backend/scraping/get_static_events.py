@@ -76,10 +76,10 @@ def main():
         logging.info(f"Writing to {output_path}...")
         with output_path.open("w", encoding="utf-8") as f:
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
-            f.write("export const staticEventsData: Record<string, Event> = {\n")
+            f.write("export const staticEventsData = new Map<string, Event>([\n")
             for i, event in enumerate(events):
                 event_id = str(event["id"])
-                f.write(f"  {format_value(event_id)}: {{\n")
+                f.write(f"  [{format_value(event_id)}, {{\n")
                 f.write(f"    id: {format_value(event_id)},\n")
                 f.write(f'    club_handle: {format_value(event["club_handle"])},\n')
                 f.write(f'    url: {format_value(event["url"])},\n')
@@ -94,11 +94,11 @@ def main():
                 f.write(f'    image_url: {format_value(event["image_url"])},\n')
                 f.write(f'    club_type: {format_value(event["club_type"])},\n')
                 f.write(f'    added_at: {format_value(event["added_at"])},\n')
-                f.write("  }")
+                f.write("  }]")
                 if i < len(events) - 1:
                     f.write(",")
                 f.write("\n")
-            f.write("};\n")
+            f.write("]);\n")
         logging.info("Successfully updated staticEvents.ts")
     except Exception:
         logging.exception("An error occurred")
