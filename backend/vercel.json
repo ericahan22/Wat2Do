@@ -1,21 +1,18 @@
 {
-  "installCommand": "pip3 install -r requirements.txt",
-  "buildCommand": "python3 manage.py collectstatic --noinput && python3 manage.py migrate --noinput",
-  "functions": {
-    "api/wsgi.py": {
-      "maxDuration": 30
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/wsgi.py",
+      "use": "@vercel/python"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
       "dest": "api/wsgi.py"
     }
   ],
-  "build": {
-    "env": {
-      "PYTHONPATH": "."
-    }
-  },
-  "outputDirectory": "."
+  "env": {
+    "PYTHONPATH": "."
+  }
 }
