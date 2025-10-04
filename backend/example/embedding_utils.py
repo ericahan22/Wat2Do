@@ -7,10 +7,6 @@ from django.db import connection
 from services.openai_service import generate_embedding
 
 
-def generate_event_embedding(event_data: dict) -> list[float]:
-    return generate_embedding(event_data["description"])
-
-
 def find_similar_events(
     embedding: list[float], threshold: float = 0.985, limit: int = None
 ) -> list[dict]:
@@ -45,7 +41,7 @@ def find_similar_events(
 
 
 def is_duplicate_event(event_data: dict) -> bool:
-    embedding = generate_event_embedding(event_data)
+    embedding = generate_embedding(event_data["description"])
     similar_events = find_similar_events(embedding, limit=1)
 
     return len(similar_events) > 0
