@@ -34,12 +34,21 @@ const fetchEvents = async ({
   queryKey: string[];
 }): Promise<EventsResponse> => {
   const searchTerm = queryKey[1] || "";
-  const searchParam = searchTerm
-    ? `?search=${encodeURIComponent(searchTerm)}`
-    : "";
+  const startDate = queryKey[2] || "";
+  
+  const params = new URLSearchParams();
+  
+  if (searchTerm) {
+    params.append("search", searchTerm);
+  }
+  
+  if (startDate) {
+    params.append("start_date", startDate);
+  }
 
+  const queryString = params.toString() ? `?${params.toString()}` : "";
   const response = await fetch(
-    `${API_BASE_URL}/api/events/${searchParam}`
+    `${API_BASE_URL}/api/events/${queryString}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
@@ -52,10 +61,15 @@ export function useEvents(view: "grid" | "calendar") {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
+  // Calculate start date based on view
+  const startDate = view === "grid" 
+    ? new Date().toISOString().split('T')[0] // YYYY-MM-DD format for today
+    : "";  
+
   const hasActiveFilters = searchTerm !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm],
+    queryKey: ["events", searchTerm, startDate],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
@@ -69,6 +83,7 @@ export function useEvents(view: "grid" | "calendar") {
     if (hasActiveFilters && data?.event_ids) {
       rawEvents = data.event_ids
         .map(id => staticEventsData[id])
+        .filter(Boolean);
     } else { 
       rawEvents = Object.values(staticEventsData);
     }

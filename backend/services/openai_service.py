@@ -126,7 +126,7 @@ def extract_events_from_caption(
                 response_text = response_text[:-3]
 
             events_data = json.loads(response_text.strip())
-            
+
             # Ensure events_data is a list
             if not isinstance(events_data, list):
                 logger.warning("Response is not a list, wrapping in array")
@@ -160,7 +160,7 @@ def extract_events_from_caption(
                 # Set image_url if provided
                 if image_url and not event_data.get("image_url"):
                     event_data["image_url"] = image_url
-                
+
                 processed_events.append(event_data)
 
             return processed_events

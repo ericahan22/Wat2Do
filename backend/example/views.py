@@ -2,13 +2,11 @@
 Views for the app.
 """
 
-from datetime import date, datetime, time
+from datetime import date, time
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import connection
-from django.db.models import OuterRef, Subquery
-from pytz import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -19,6 +17,7 @@ from rest_framework.throttling import AnonRateThrottle
 from services.openai_service import generate_embedding
 
 from .embedding_utils import find_similar_events
+from .filters import EventFilter
 from .models import Clubs, Events
 
 
@@ -78,37 +77,38 @@ def health(_request):
 @permission_classes([AllowAny])
 @throttle_classes([AnonRateThrottle])
 def get_events(request):
-    """Get all events from database (no pagination)"""
+    """Get all events from database with optional filtering"""
     try:
         search_term = request.GET.get("search", "").strip()
 
-        # Filter for events from today onwards (EST)
-        est = timezone("America/New_York")
-        today = datetime.now(est).date()
-        
+        # Start with base queryset (ordering handled by model Meta)
+        queryset = Events.objects.all()
+
+        # Apply standard filters (dates, price, club_type, etc.)
+        filterset = EventFilter(request.GET, queryset=queryset)
+        if not filterset.is_valid():
+            return Response(
+                {"error": "Invalid filter parameters", "details": filterset.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        filtered_queryset = filterset.qs
+
+        # Apply vector similarity search if search term provided
         if search_term:
-            # Search using vector similarity
             search_embedding = generate_embedding(search_term)
             similar_events = find_similar_events(
                 embedding=search_embedding, threshold=0.275
             )
             if similar_events:
                 similar_event_ids = [event["id"] for event in similar_events]
-                # Filter by IDs and date, ordering is handled by model Meta
-                filtered_queryset = Events.objects.filter(
-                    id__in=similar_event_ids,
-                    date__gte=today
-                )
+                filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
             else:
                 filtered_queryset = Events.objects.none()
-        else:
-            # Return all future events, ordering is handled by model Meta
-            filtered_queryset = Events.objects.filter(date__gte=today)
 
-        # Return only event IDs
+        # Return event IDs
         event_ids = [str(event.id) for event in filtered_queryset]
-
         return Response({"event_ids": event_ids})
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
