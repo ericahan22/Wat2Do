@@ -37,14 +37,10 @@ const fetchEvents = async ({
   const searchParam = searchTerm
     ? `&search=${encodeURIComponent(searchTerm)}`
     : "";
-  const categoryFilter = queryKey[2] || "all";
-  const categoryParam = categoryFilter
-    ? `&category=${encodeURIComponent(categoryFilter)}`
-    : "";
-  const view = queryKey[3] || "grid";
+  const view = queryKey[2] || "grid";
 
   const response = await fetch(
-    `${API_BASE_URL}/api/events/?view=${view}${searchParam}${categoryParam}`
+    `${API_BASE_URL}/api/events/?view=${view}${searchParam}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch events");
@@ -56,33 +52,16 @@ const fetchEvents = async ({
 export function useEvents(view: "grid" | "calendar") {
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
-  const categoryFilter = searchParams.get("category") || "all";
 
-  const hasActiveFilters = searchTerm !== "" || categoryFilter !== "all";
+  const hasActiveFilters = searchTerm !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, categoryFilter, view],
+    queryKey: ["events", searchTerm, view],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
   });
 
-  const uniqueCategories = useMemo(() => {
-    return [
-      "Academic",
-      "Athletics",
-      "Business and Entrepreneurial",
-      "Charitable, Community Service & International Development",
-      "Creative Arts, Dance and Music",
-      "Cultural",
-      "Environmental and Sustainability",
-      "Games, Recreational and Social",
-      "Health Promotion",
-      "Media, Publications and Web Development",
-      "Political and Social Awareness",
-      "Religious and Spiritual",
-    ];
-  }, []);
 
   // Get events from static data using IDs from search results
   const events = useMemo(() => {
@@ -150,7 +129,6 @@ export function useEvents(view: "grid" | "calendar") {
 
   return {
     data: events,
-    uniqueCategories,
     isLoading: hasActiveFilters ? isLoading : false,
     error: hasActiveFilters ? error : null,
   };

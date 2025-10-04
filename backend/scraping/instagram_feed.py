@@ -136,6 +136,7 @@ def append_event_to_csv(
             "food",
             "registration",
             "image_url",
+            "description",
             "status",
             "embedding",
         ]
@@ -155,6 +156,7 @@ def append_event_to_csv(
                 "food": event_data.get("food", ""),
                 "registration": event_data.get("registration", False),
                 "image_url": event_data.get("image_url", ""),
+                "description": event_data.get("description", ""),
                 "status": status,
                 "embedding": embedding or "",
             }
@@ -199,6 +201,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             food=event_data.get("food") or "",
             registration=bool(event_data.get("registration", False)),
             image_url=event_data.get("image_url"),
+            description=event_data.get("description") or "",
             embedding=embedding,
             club_type=club_type,
         )

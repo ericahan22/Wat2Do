@@ -79,10 +79,9 @@ def health(_request):
 @permission_classes([AllowAny])
 @throttle_classes([AnonRateThrottle])
 def get_events(request):
-    """Get all events from database (no pagination). Event categories are based on club categories"""
+    """Get all events from database (no pagination)"""
     try:
         search_term = request.GET.get("search", "").strip()  # Get search term
-        category_filter = request.GET.get("category", "").strip()
         view = request.GET.get("view", "grid")
 
         # Build base queryset
@@ -108,20 +107,6 @@ def get_events(request):
                 filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
             else:
                 filtered_queryset = filtered_queryset.none()
-        if category_filter and category_filter.lower() != "all":
-            filtered_queryset = filtered_queryset.filter(
-                club_handle__in=Clubs.objects.filter(
-                    categories__icontains=category_filter
-                ).values("ig")
-            )
-
-        filtered_queryset = filtered_queryset.annotate(
-            club_categories=Subquery(
-                Clubs.objects.filter(ig=OuterRef("club_handle")).values("categories")[
-                    :1
-                ]
-            )
-        )
 
         # Return only event IDs for search results
         event_ids = [str(event.id) for event in filtered_queryset]
