@@ -1,5 +1,4 @@
 {
-  "buildCommand": "bash vercel-build.sh",
   "builds": [
     {
       "src": "api/wsgi.py",
@@ -14,8 +13,5 @@
       "src": "/(.*)",
       "dest": "api/wsgi.py"
     }
-  ],
-  "env": {
-    "PYTHONPATH": "."
-  }
+  ]
 }
