@@ -1,15 +1,7 @@
 import React, { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutGrid } from "lucide-react";
 import { useEvents } from "@/hooks";
-import { useCategoryParam } from "@/hooks/useCategoryParam";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
@@ -18,9 +10,7 @@ import SearchInput from "@/components/SearchInput";
 function EventsPage() {
   const [view, setView] = useState<"grid" | "calendar">("grid");
 
-  const { data, uniqueCategories, isLoading, error } = useEvents(view);
-
-  const { categoryParam, setCategoryParam } = useCategoryParam();
+  const { data, isLoading, error } = useEvents(view);
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,20 +28,6 @@ function EventsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <SearchInput placeholder="Search events..." className="flex-1" />
-
-          <Select value={categoryParam} onValueChange={setCategoryParam}>
-            <SelectTrigger className="w-full sm:w-auto">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
-              {uniqueCategories.map((category: string) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
           {/* View toggle tabs */}
           <Tabs

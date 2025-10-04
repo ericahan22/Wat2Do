@@ -8,7 +8,7 @@ from services.openai_service import generate_embedding
 
 
 def generate_event_embedding(event_data: dict) -> list[float]:
-    return generate_embedding(repr(event_data))
+    return generate_embedding(event_data["description"])
 
 
 def find_similar_events(

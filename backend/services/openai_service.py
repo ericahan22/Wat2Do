@@ -59,7 +59,8 @@ def extract_events_from_caption(
             "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
             "food": string,  // food information if mentioned, empty string if not
             "registration": boolean,  // true if registration is required/mentioned, false otherwise
-            "image_url": string  // URL of the event image if provided, empty string if not
+            "image_url": string,  // URL of the event image if provided, empty string if not
+            "description": string  // brief description under 15 words highlighting key terms and keywords
         }}
     ]
     
@@ -75,6 +76,7 @@ def extract_events_from_caption(
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
     - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks")
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
+    - For description: create a concise, keyword-rich description under 20 words that highlights the most important aspects like event type, key activities, food, location, date, or special features
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text
@@ -144,6 +146,7 @@ def extract_events_from_caption(
                     "food",
                     "registration",
                     "image_url",
+                    "description",
                 ]
                 for field in required_fields:
                     if field not in event_data:
@@ -189,4 +192,5 @@ def _get_default_event_structure(
         "food": "",
         "registration": False,
         "image_url": image_url if image_url else "",
+        "description": "",
     }
