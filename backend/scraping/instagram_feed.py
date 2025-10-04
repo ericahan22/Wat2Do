@@ -16,13 +16,11 @@ import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from django.db import connection
-
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from example.embedding_utils import generate_event_embedding, is_duplicate_event
-from example.models import Events, Clubs
+from example.models import Clubs, Events
 from services.openai_service import extract_event_from_caption
 from services.storage_service import upload_image_from_url
 
@@ -189,7 +187,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
         embedding = generate_event_embedding(event_data)
 
         # Create event using Django ORM
-        event = Events.objects.create(
+        Events.objects.create(
             club_handle=club_ig,
             url=post_url,
             name=event_name,
@@ -292,13 +290,6 @@ def process_recent_feed(
             event_data = extract_event_from_caption(post.caption, image_url)
             if event_data is None:
                 logger.warning(f"AI client returned None for post {post.shortcode}")
-                # Delete uploaded S3 file if event extraction failed
-                if image_url:
-                    s3_filename = extract_s3_filename_from_url(image_url)
-                    if s3_filename and delete_image(s3_filename):
-                        logger.info(
-                            f"Deleted S3 file for failed event extraction: {s3_filename}"
-                        )
                 continue
 
             post_url = f"https://www.instagram.com/p/{post.shortcode}/"
@@ -312,13 +303,7 @@ def process_recent_feed(
                     events_added += 1
                     logger.info(f"Successfully added event from {post.owner_username}")
                 else:
-                    # Event failed to insert to DB, delete S3 file
-                    if image_url:
-                        s3_filename = extract_s3_filename_from_url(image_url)
-                        if s3_filename and delete_image(s3_filename):
-                            logger.info(
-                                f"Deleted S3 file for failed DB insert: {s3_filename}"
-                            )
+                    logger.error(f"Failed to add event from {post.owner_username}")
             else:
                 missing_fields = [
                     key
@@ -329,13 +314,6 @@ def process_recent_feed(
                     f"Missing required fields: {missing_fields}, skipping event"
                 )
                 embedding = generate_event_embedding(event_data)
-                # Delete S3 file for events with missing required fields
-                if image_url:
-                    s3_filename = extract_s3_filename_from_url(image_url)
-                    if s3_filename and delete_image(s3_filename):
-                        logger.info(
-                            f"Deleted S3 file for event with missing fields: {s3_filename}"
-                        )
                 append_event_to_csv(
                     event_data,
                     post.owner_username,
