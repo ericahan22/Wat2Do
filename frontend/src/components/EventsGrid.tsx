@@ -16,6 +16,7 @@ import {
   formatTimeRange,
   formatPrettyTime,
 } from "@/lib/dateUtils";
+import { useTheme } from "@/hooks";
 
 interface EventsGridProps {
   data: Event[];
@@ -50,12 +51,20 @@ const isEventNew = (event: Event): boolean => {
 
 const EventStatusBadge = ({ event }: { event: Event }) => {
   const status = getEventStatus(event);
+  const { theme } = useTheme();
 
   if (status === "live") {
     return (
+      <>
+        <img
+          src={theme === "dark" ? "/test1-dark.svg" : "/test1.svg"}
+          alt=""
+          className="absolute top-0 right-0 z-10 w-13"
+        />
       <Badge variant="live" className="absolute top-0 right-0 z-10">
         LIVE
       </Badge>
+      </>
     );
   }
 
@@ -63,7 +72,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
     return (
       <>
         <img
-          src="/test2.svg"
+          src={theme === "dark" ? "/test2-dark.svg" : "/test2.svg"}
           alt=""
           className="absolute top-0 right-0 z-10 w-25"
         />
@@ -78,12 +87,13 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 };
 
 const NewEventBadge = ({ event }: { event: Event }) => {
+  const { theme } = useTheme();
   if (!isEventNew(event)) return null;
 
   return (
     <>
       <img
-        src="/test3.svg"
+        src={theme === "dark" ? "/test3-dark.svg" : "/test3.svg"}
         alt=""
         className="absolute top-0 left-0 z-10 w-13"
       />
