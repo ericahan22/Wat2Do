@@ -131,7 +131,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 />
               </div>
             )}
-            <CardHeader className="p-3.5 pb-0">
+            <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
               <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
                 {event.name}
               </CardTitle>
@@ -139,7 +139,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
                 @{event.club_handle}
               </p>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1 h-full p-3.5 pt-2.5">
+            <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-2.5">
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">{formatPrettyDate(event.date)}</span>
