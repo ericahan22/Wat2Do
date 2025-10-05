@@ -145,6 +145,7 @@ const EventsGrid = memo(({ data, isSelectMode = false, selectedEvents = new Set(
                 <img
                   src={event.image_url}
                   alt={event.name}
+                  loading="lazy"
                   className="w-full h-40 object-cover brightness-75"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
