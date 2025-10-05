@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -21,10 +21,16 @@ function ClubsPage() {
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
 
-  // Generate document title based on data length
+  const previousTitleRef = useRef<string>("Clubs - Wat2Do");
+
   const documentTitle = useMemo(() => {
-    if (isLoading) return "Loading...";
-    return `${data.length} Total Clubs - Wat2Do`;
+    const title = `${data.length} Total Clubs - Wat2Do`;
+    
+    if (!isLoading) {
+      previousTitleRef.current = title;
+    }
+    
+    return previousTitleRef.current;
   }, [data.length, isLoading]);
 
   useDocumentTitle(documentTitle);

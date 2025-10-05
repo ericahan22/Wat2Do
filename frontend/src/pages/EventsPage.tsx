@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutGrid } from "lucide-react";
@@ -11,16 +11,29 @@ import SearchInput from "@/components/SearchInput";
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
+  const searchTerm = searchParams.get("search") || "";
 
   const { data, isLoading, error } = useEvents(view);
 
-  // Generate document title based on view and data length
+  const previousTitleRef = useRef<string>("Events - Wat2Do");
+
   const documentTitle = useMemo(() => {
-    if (isLoading) return "Loading...";
-    return view === "grid" 
-      ? `${data.length} Upcoming Events - Wat2Do`
-      : `${data.length} Total Events - Wat2Do`;
-  }, [view, data.length, isLoading]);
+    let title: string;
+    
+    if (searchTerm) {
+      title = `${data.length} Found Events - Wat2Do`;
+    } else {
+      title = view === "grid" 
+        ? `${data.length} Upcoming Events - Wat2Do`
+        : `${data.length} Total Events - Wat2Do`;
+    }
+    
+    if (!isLoading) {
+      previousTitleRef.current = title;
+    }
+    
+    return previousTitleRef.current;
+  }, [view, data.length, isLoading, searchTerm]);
 
   useDocumentTitle(documentTitle);
 
@@ -71,6 +84,8 @@ function EventsPage() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {isLoading
               ? "Loading..."
+              : searchTerm
+              ? `Showing ${data.length} found events`
               : view === "grid"
               ? `Showing ${data.length} upcoming events`
               : `Showing ${data.length} events`}

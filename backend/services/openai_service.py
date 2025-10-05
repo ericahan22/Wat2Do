@@ -60,7 +60,7 @@ def extract_events_from_caption(
             "food": string,  // food information if mentioned, empty string if not
             "registration": boolean,  // true if registration is required/mentioned, false otherwise
             "image_url": string,  // URL of the event image if provided, empty string if not
-            "description": string  // brief description under 15 words highlighting key terms and keywords
+            "description": string  // brief description under 20 words highlighting key terms and keywords
         }}
     ]
     
