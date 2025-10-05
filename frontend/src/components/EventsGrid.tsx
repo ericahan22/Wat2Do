@@ -53,7 +53,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 
   if (status === "live") {
     return (
-      <Badge variant="live" className="absolute top-1 right-1 z-10">
+      <Badge variant="live" className="absolute top-0 right-0 z-10">
         LIVE
       </Badge>
     );
@@ -61,9 +61,16 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 
   if (status === "soon") {
     return (
-      <Badge variant="soon" className="absolute top-1 right-1 z-10">
-        Starting soon
-      </Badge>
+      <>
+        <img
+          src="/test2.svg"
+          alt=""
+          className="absolute top-0 right-0 z-10 w-25"
+        />
+        <Badge variant="soon" className="absolute top-0 right-0 z-10">
+          Starting soon
+        </Badge>
+      </>
     );
   }
 
@@ -74,9 +81,16 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   if (!isEventNew(event)) return null;
 
   return (
-    <Badge variant="new" className="absolute top-1 left-1 z-10">
-      NEW
-    </Badge>
+    <>
+      <img
+        src="/test3.svg"
+        alt=""
+        className="absolute top-0 left-0 z-10 w-13"
+      />
+      <Badge variant="new" className="absolute top-0 left-0 z-10">
+        NEW
+      </Badge>
+    </>
   );
 };
 
@@ -88,7 +102,7 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
         {data.map((event) => (
           <Card
             key={event.id}
-            className="relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
+            className="border-none relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
           >
             <EventStatusBadge event={event} />
             <NewEventBadge event={event} />
