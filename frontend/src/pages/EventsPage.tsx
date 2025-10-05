@@ -13,7 +13,9 @@ function EventsPage() {
   const [searchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
 
-  const { data, isLoading, error, searchTerm, handleViewChange } = useEvents(view);
+  const { data, isLoading, error, searchTerm, handleViewChange } = useEvents(
+    view
+  );
   const {
     isSelectMode,
     selectedEvents,
@@ -41,21 +43,6 @@ function EventsPage() {
 
           {/* View toggle tabs */}
           <div className="flex gap-2">
-            <Tabs
-              value={view}
-              onValueChange={handleViewChange}
-            >
-              <TabsList>
-                <TabsTrigger value="grid" className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger value="calendar" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Calendar
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
             {view === "grid" && (
               <Button
                 variant={isSelectMode ? "default" : "outline"}
@@ -76,6 +63,21 @@ function EventsPage() {
                 )}
               </Button>
             )}
+            <Tabs value={view} onValueChange={handleViewChange}>
+              <TabsList>
+                <TabsTrigger value="grid" className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger
+                  value="calendar"
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         </div>
 
@@ -115,8 +117,8 @@ function EventsPage() {
       {!isLoading && !error && (
         <>
           {view === "grid" ? (
-            <EventsGrid 
-              data={data} 
+            <EventsGrid
+              data={data}
               isSelectMode={isSelectMode}
               selectedEvents={selectedEvents}
               onToggleEvent={toggleEventSelection}
@@ -135,24 +137,31 @@ function EventsPage() {
         className={
           `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform-gpu ` +
           `transition-all duration-300 ease-out ` +
-          `${view === 'grid' && isSelectMode && selectedEvents.size > 0 ? 'opacity-100 translate-y-0 scale-100' : 'pointer-events-none opacity-0 translate-y-2 scale-95'}`
+          `${
+            view === "grid" && isSelectMode && selectedEvents.size > 0
+              ? "opacity-100 translate-y-0 scale-100"
+              : "pointer-events-none opacity-0 translate-y-2 scale-95"
+          }`
         }
-        aria-hidden={view !== 'grid' || !isSelectMode || selectedEvents.size === 0}
+        aria-hidden={
+          view !== "grid" || !isSelectMode || selectedEvents.size === 0
+        }
       >
         <div className="bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center gap-4">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {selectedEvents.size} event{selectedEvents.size !== 1 ? 's' : ''} selected
+            {selectedEvents.size} event{selectedEvents.size !== 1 ? "s" : ""}{" "}
+            selected
           </span>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onMouseDown={toggleSelectMode}
             className="rounded-full"
           >
             <X className="h-4 w-4" />
             Cancel
           </Button>
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             onClick={() => exportToCalendar(data)}
             className="rounded-full"
           >
