@@ -24,7 +24,7 @@ function ClubsPage() {
   // Generate document title based on data length
   const documentTitle = useMemo(() => {
     if (isLoading) return "Loading...";
-    return `${data.length} Total Clubs`;
+    return `${data.length} Total Clubs - Wat2Do`;
   }, [data.length, isLoading]);
 
   useDocumentTitle(documentTitle);

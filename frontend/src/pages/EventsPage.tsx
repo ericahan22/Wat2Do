@@ -18,8 +18,8 @@ function EventsPage() {
   const documentTitle = useMemo(() => {
     if (isLoading) return "Loading...";
     return view === "grid" 
-      ? `${data.length} Upcoming Events`
-      : `${data.length} Total Events`;
+      ? `${data.length} Upcoming Events - Wat2Do`
+      : `${data.length} Total Events - Wat2Do`;
   }, [view, data.length, isLoading]);
 
   useDocumentTitle(documentTitle);
