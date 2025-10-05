@@ -27,6 +27,7 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
     text = text.replace("\n", " ").strip()
+    if not text: return None
 
     response = client.embeddings.create(input=[text], model=model)
 
