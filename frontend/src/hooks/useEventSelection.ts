@@ -55,7 +55,7 @@ export function useEventSelection(view: "grid" | "calendar") {
 
     // Current timestamp in UTC for DTSTAMP
     const now = new Date();
-    const dtstamp = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const dtstamp = now.toISOString().replace(/[-:]/g, '').split('.')[0];
 
     events.forEach((event) => {
       const startDate = event.date.replace(/-/g, '');
@@ -63,8 +63,8 @@ export function useEventSelection(view: "grid" | "calendar") {
       const endTime = event.end_time ? event.end_time.replace(/:/g, '') : startTime;
 
       lines.push('BEGIN:VEVENT');
-      lines.push(`DTSTART:${startDate}T${startTime}Z`);
-      lines.push(`DTEND:${startDate}T${endTime}Z`);
+      lines.push(`DTSTART:${startDate}T${startTime}`);
+      lines.push(`DTEND:${startDate}T${endTime}`);
       lines.push(`DTSTAMP:${dtstamp}`);
       lines.push(`SUMMARY:${escapeText(event.name)}`);
       if (event.location) {
