@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClubs } from "@/hooks";
+import { useClubs, useDocumentTitle } from "@/hooks";
 import { useCategoryParam } from "@/hooks/useCategoryParam";
 import SearchInput from "@/components/SearchInput";
 import ClubsGrid from "@/components/ClubsGrid";
@@ -20,6 +20,14 @@ function ClubsPage() {
   } = useClubs();
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
+
+  // Generate document title based on data length
+  const documentTitle = useMemo(() => {
+    if (isLoading) return "Loading...";
+    return `${data.length} Total Clubs`;
+  }, [data.length, isLoading]);
+
+  useDocumentTitle(documentTitle);
 
   return (
     <div className="flex flex-col gap-4">

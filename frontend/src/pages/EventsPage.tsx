@@ -1,16 +1,36 @@
-import React, { useState } from "react";
+import React, { useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutGrid } from "lucide-react";
-import { useEvents } from "@/hooks";
+import { useEvents, useDocumentTitle } from "@/hooks";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
 
 function EventsPage() {
-  const [view, setView] = useState<"grid" | "calendar">("grid");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
 
   const { data, isLoading, error } = useEvents(view);
+
+  // Generate document title based on view and data length
+  const documentTitle = useMemo(() => {
+    if (isLoading) return "Loading...";
+    return view === "grid" 
+      ? `${data.length} Upcoming Events`
+      : `${data.length} Total Events`;
+  }, [view, data.length, isLoading]);
+
+  useDocumentTitle(documentTitle);
+
+  const handleViewChange = (newView: string) => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+      nextParams.set("view", newView);
+      return nextParams;
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -32,7 +52,7 @@ function EventsPage() {
           {/* View toggle tabs */}
           <Tabs
             value={view}
-            onValueChange={(value) => setView(value as "grid" | "calendar")}
+            onValueChange={handleViewChange}
           >
             <TabsList>
               <TabsTrigger value="grid" className="flex items-center gap-2">
