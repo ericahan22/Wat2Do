@@ -1,49 +1,26 @@
-import React, { useMemo, useRef } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, LayoutGrid } from "lucide-react";
-import { useEvents, useDocumentTitle } from "@/hooks";
+import { Calendar, LayoutGrid, MousePointerClick, X } from "lucide-react";
+import { useEvents, useEventSelection } from "@/hooks";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
+import { Button } from "@/components/ui/button";
 
 function EventsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
-  const searchTerm = searchParams.get("search") || "";
 
-  const { data, isLoading, error } = useEvents(view);
-
-  const previousTitleRef = useRef<string>("Events - Wat2Do");
-
-  const documentTitle = useMemo(() => {
-    let title: string;
-    
-    if (searchTerm) {
-      title = `${data.length} Found Events - Wat2Do`;
-    } else {
-      title = view === "grid" 
-        ? `${data.length} Upcoming Events - Wat2Do`
-        : `${data.length} Total Events - Wat2Do`;
-    }
-    
-    if (!isLoading) {
-      previousTitleRef.current = title;
-    }
-    
-    return previousTitleRef.current;
-  }, [view, data.length, isLoading, searchTerm]);
-
-  useDocumentTitle(documentTitle);
-
-  const handleViewChange = (newView: string) => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      nextParams.set("view", newView);
-      return nextParams;
-    });
-  };
+  const { data, isLoading, error, searchTerm, handleViewChange } = useEvents(view);
+  const {
+    isSelectMode,
+    selectedEvents,
+    toggleSelectMode,
+    toggleEventSelection,
+    exportToCalendar,
+  } = useEventSelection(view);
 
   return (
     <div className="flex flex-col gap-4">
@@ -63,21 +40,43 @@ function EventsPage() {
           <SearchInput placeholder="Search events..." className="flex-1" />
 
           {/* View toggle tabs */}
-          <Tabs
-            value={view}
-            onValueChange={handleViewChange}
-          >
-            <TabsList>
-              <TabsTrigger value="grid" className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4" />
-                Grid
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Calendar
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex gap-2">
+            <Tabs
+              value={view}
+              onValueChange={handleViewChange}
+            >
+              <TabsList>
+                <TabsTrigger value="grid" className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger value="calendar" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            {view === "grid" && (
+              <Button
+                variant={isSelectMode ? "default" : "outline"}
+                size="default"
+                className="h-9"
+                onMouseDown={toggleSelectMode}
+              >
+                {isSelectMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <MousePointerClick className="h-4 w-4" />
+                    Export
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -116,7 +115,12 @@ function EventsPage() {
       {!isLoading && !error && (
         <>
           {view === "grid" ? (
-            <EventsGrid data={data} />
+            <EventsGrid 
+              data={data} 
+              isSelectMode={isSelectMode}
+              selectedEvents={selectedEvents}
+              onToggleEvent={toggleEventSelection}
+            />
           ) : (
             <>
               <EventsCalendar events={data} />
@@ -125,6 +129,38 @@ function EventsPage() {
           )}
         </>
       )}
+
+      {/* Floating Export Bar */}
+      <div
+        className={
+          `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform-gpu ` +
+          `transition-all duration-300 ease-out ` +
+          `${view === 'grid' && isSelectMode && selectedEvents.size > 0 ? 'opacity-100 translate-y-0 scale-100' : 'pointer-events-none opacity-0 translate-y-2 scale-95'}`
+        }
+        aria-hidden={view !== 'grid' || !isSelectMode || selectedEvents.size === 0}
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center gap-4">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {selectedEvents.size} event{selectedEvents.size !== 1 ? 's' : ''} selected
+          </span>
+          <Button 
+            size="sm" 
+            onMouseDown={toggleSelectMode}
+            className="rounded-full"
+          >
+            <X className="h-4 w-4" />
+            Cancel
+          </Button>
+          <Button 
+            size="sm" 
+            onClick={() => exportToCalendar(data)}
+            className="rounded-full"
+          >
+            <Calendar className="h-4 w-4" />
+            Export to iCalendar
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

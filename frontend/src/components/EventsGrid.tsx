@@ -8,6 +8,7 @@ import {
   ExternalLink,
   DollarSign,
   Utensils,
+  Check,
 } from "lucide-react";
 import { Event } from "@/hooks";
 import { memo } from "react";
@@ -20,6 +21,9 @@ import { useTheme } from "@/hooks";
 
 interface EventsGridProps {
   data: Event[];
+  isSelectMode?: boolean;
+  selectedEvents?: Set<string>;
+  onToggleEvent?: (eventId: string) => void;
 }
 
 const getEventStatus = (event: Event): "live" | "soon" | "none" => {
@@ -104,18 +108,36 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   );
 };
 
-const EventsGrid = memo(({ data }: EventsGridProps) => {
+const EventsGrid = memo(({ data, isSelectMode = false, selectedEvents = new Set(), onToggleEvent }: EventsGridProps) => {
   return (
     <div className="space-y-8">
       {/* Events Grid */}
       <div className="grid sm:grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5">
-        {data.map((event) => (
+        {data.map((event) => {
+          const isSelected = selectedEvents.has(event.id);
+          return (
           <Card
             key={event.id}
-            className="border-none relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden "
+            className={`border-none relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden ${isSelectMode ? 'cursor-pointer' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+            onMouseDown={() => isSelectMode && onToggleEvent?.(event.id)}
           >
             <EventStatusBadge event={event} />
             <NewEventBadge event={event} />
+            
+            {/* Selection Circle */}
+            {isSelectMode && (
+              <div 
+                className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full border-2 border-white bg-gray-800/70 dark:bg-gray-200/70 flex items-center justify-center cursor-pointer"
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  onToggleEvent?.(event.id);
+                }}
+              >
+                {isSelected && (
+                  <Check className="h-4 w-4 text-white dark:text-gray-800" />
+                )}
+              </div>
+            )}
 
             {/* Event Image */}
             {event.image_url && (
@@ -188,28 +210,31 @@ const EventsGrid = memo(({ data }: EventsGridProps) => {
               )}
 
               {/* Action Buttons */}
-              <div className="flex space-x-3 pt-2 w-full mt-auto">
-                {event.url ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 w-full"
-                    onMouseDown={() => window.open(event.url, "_blank")}
-                  >
-                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                    Open Event
-                  </Button>
-                ) : (
-                  <div className="text-center py-2 w-full">
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      No event link available
-                    </p>
-                  </div>
-                )}
-              </div>
+              {!isSelectMode && (
+                <div className="flex space-x-3 pt-2 w-full mt-auto">
+                  {event.url ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 w-full"
+                      onMouseDown={() => window.open(event.url, "_blank")}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                      Open Event
+                    </Button>
+                  ) : (
+                    <div className="text-center py-2 w-full">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        No event link available
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
-        ))}
+        );
+        })}
       </div>
 
       {/* No results message */}

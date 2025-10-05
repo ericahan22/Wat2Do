@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { staticEventsData } from "@/data/staticEvents";
+import { useDocumentTitle } from "./useDocumentTitle";
 
 export interface Event {
   id: string;
@@ -58,7 +59,7 @@ const fetchEvents = async ({
 };
 
 export function useEvents(view: "grid" | "calendar") {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
   // Calculate start date based on view
@@ -124,9 +125,43 @@ export function useEvents(view: "grid" | "calendar") {
     return rawEvents;
   }, [hasActiveFilters, data?.event_ids, view]);
 
+  const previousTitleRef = useRef<string>("Events - Wat2Do");
+  
+  const documentTitle = useMemo(() => {
+    const isLoadingData = hasActiveFilters ? isLoading : false;
+    
+    let title: string;
+    
+    if (searchTerm) {
+      title = `${events.length} Found Events - Wat2Do`;
+    } else {
+      title = view === "grid" 
+        ? `${events.length} Upcoming Events - Wat2Do`
+        : `${events.length} Total Events - Wat2Do`;
+    }
+    
+    if (!isLoadingData) {
+      previousTitleRef.current = title;
+    }
+    
+    return previousTitleRef.current;
+  }, [view, events.length, isLoading, searchTerm, hasActiveFilters]);
+
+  useDocumentTitle(documentTitle);
+
+  const handleViewChange = (newView: string) => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+      nextParams.set("view", newView);
+      return nextParams;
+    });
+  };
+
   return {
     data: events,
     isLoading: hasActiveFilters ? isLoading : false,
     error: hasActiveFilters ? error : null,
+    searchTerm,
+    handleViewChange,
   };
 }
