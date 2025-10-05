@@ -27,7 +27,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
     text = text.replace("\n", " ").strip()
-    if not text: return None
+    if not text:
+        return None
 
     response = client.embeddings.create(input=[text], model=model)
 
@@ -61,7 +62,7 @@ def extract_events_from_caption(
             "food": string,  // food information if mentioned, empty string if not
             "registration": boolean,  // true if registration is required/mentioned, false otherwise
             "image_url": string,  // URL of the event image if provided, empty string if not
-            "description": string  // brief description under 20 words highlighting key terms and keywords
+            "description": string  // the caption text word-for-word, followed by any additional insights from the image not in the caption
         }}
     ]
     
@@ -77,7 +78,7 @@ def extract_events_from_caption(
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
     - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks")
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
-    - For description: create a concise, keyword-rich description under 20 words that highlights the most important aspects like event type, key activities, food, location, date, or special features
+    - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
     - If information is not available, use empty string "" for strings, null for price, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text

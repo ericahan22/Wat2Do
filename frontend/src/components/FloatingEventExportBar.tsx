@@ -1,24 +1,28 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, X } from "lucide-react";
+import { X } from "lucide-react";
+import { SiApple } from "react-icons/si";
+import { FcGoogle } from "react-icons/fc";
 import { Event } from "@/hooks";
 
-interface FloatingExportBarProps {
+interface FloatingEventExportBarProps {
   view: "grid" | "calendar";
   isSelectMode: boolean;
   selectedEvents: Set<string>;
   onCancel: () => void;
-  onExport: (events: Event[]) => void;
+  onExportICalendar: (events: Event[]) => void;
+  onExportGoogleCalendar: (events: Event[]) => void;
   data: Event[];
 }
 
-export default function FloatingExportBar({
+export default function FloatingEventExportBar({
   view,
   isSelectMode,
   selectedEvents,
   onCancel,
-  onExport,
+  onExportICalendar,
+  onExportGoogleCalendar,
   data,
-}: FloatingExportBarProps) {
+}: FloatingEventExportBarProps) {
   return (
     <div
       className={
@@ -35,22 +39,31 @@ export default function FloatingExportBar({
       }
     >
       <div className="bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center gap-4">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {selectedEvents.size} event{selectedEvents.size !== 1 ? "s" : ""}{" "}
-          selected
-        </span>
         <Button
           size="sm"
-          onClick={() => onExport(data)}
+          onClick={() => onExportICalendar(data)}
           className="rounded-full"
+          variant="default"
         >
-          <Calendar className="h-4 w-4" />
-          Export to iCalendar
+          <SiApple className="h-4 w-4" />
+          Export {selectedEvents.size} to iCalendar
         </Button>
+        {selectedEvents.size === 1 && (
+          <Button
+            size="sm"
+            onClick={() => onExportGoogleCalendar(data)}
+            className="rounded-full"
+            variant="default"
+          >
+            <FcGoogle className="h-4 w-4" />
+            Export {selectedEvents.size} to Google Calendar
+          </Button>
+        )}
         <Button
           size="sm"
           onMouseDown={onCancel}
           className="rounded-full"
+          variant="outline"
         >
           <X className="h-4 w-4" />
           Cancel

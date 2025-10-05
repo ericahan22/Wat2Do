@@ -1,13 +1,13 @@
 import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, LayoutGrid, MousePointerClick, X } from "lucide-react";
+import { Calendar, LayoutGrid, X } from "lucide-react";
 import { useEvents, useEventSelection } from "@/hooks";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
 import SearchInput from "@/components/SearchInput";
-import FloatingExportBar from "@/components/FloatingExportBar";
+import FloatingEventExportBar from "@/components/FloatingEventExportBar";
 import { Button } from "@/components/ui/button";
 
 function EventsPage() {
@@ -23,6 +23,7 @@ function EventsPage() {
     toggleSelectMode,
     toggleEventSelection,
     exportToCalendar,
+    exportToGoogleCalendar,
   } = useEventSelection(view);
 
   return (
@@ -46,7 +47,7 @@ function EventsPage() {
           <div className="flex gap-2">
             {view === "grid" && (
               <Button
-                variant={isSelectMode ? "default" : "outline"}
+                variant="outline"
                 size="default"
                 className="h-9"
                 onMouseDown={toggleSelectMode}
@@ -58,7 +59,7 @@ function EventsPage() {
                   </>
                 ) : (
                   <>
-                    <MousePointerClick className="h-4 w-4" />
+                    <Calendar className="h-4 w-4" />
                     Export
                   </>
                 )}
@@ -134,12 +135,13 @@ function EventsPage() {
       )}
 
       {/* Floating Export Bar */}
-      <FloatingExportBar
+      <FloatingEventExportBar
         view={view}
         isSelectMode={isSelectMode}
         selectedEvents={selectedEvents}
         onCancel={toggleSelectMode}
-        onExport={exportToCalendar}
+        onExportICalendar={exportToCalendar}
+        onExportGoogleCalendar={exportToGoogleCalendar}
         data={data}
       />
     </div>

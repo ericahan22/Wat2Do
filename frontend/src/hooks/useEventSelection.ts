@@ -82,15 +82,86 @@ export function useEventSelection(view: "grid" | "calendar") {
     const eventsToExport = events.filter((event) => selectedEvents.has(event.id));
     const icsContent = generateICS(eventsToExport);
     
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'events.ics';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Check if user is on mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // For mobile devices, use data URI to directly open calendar app
+      // This works better on iOS Safari and Android
+      const dataUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+      
+      // Try to open in a new window first (works on some mobile browsers)
+      const newWindow = window.open(dataUri, '_blank');
+      
+      // Fallback: if popup was blocked or didn't work, create a link
+      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = 'events.ics';
+        link.target = '_blank';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up after a delay
+        setTimeout(() => {
+          document.body.removeChild(link);
+        }, 100);
+      }
+    } else {
+      // Desktop: use blob URL approach
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'events.ics';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const exportToGoogleCalendar = (events: Event[]) => {
+    const eventsToExport = events.filter((event) => selectedEvents.has(event.id));
+    
+    if (eventsToExport.length === 0) {
+      return;
+    }
+    
+    // Google Calendar only supports adding one event at a time via URL
+    // So we'll open a new tab for the first event, or create multiple tabs if user wants
+    // For better UX, let's create a single event if only one is selected, or batch them
+    
+    eventsToExport.forEach((event, index) => {
+      // Parse the date and time
+      const startDateTime = `${event.date}T${event.start_time}`;
+      const endDateTime = event.end_time ? `${event.date}T${event.end_time}` : startDateTime;
+      
+      // Format dates for Google Calendar (need to remove hyphens and colons)
+      const formatGoogleDate = (dateTime: string) => {
+        return dateTime.replace(/[-:]/g, '');
+      };
+      
+      const start = formatGoogleDate(startDateTime);
+      const end = formatGoogleDate(endDateTime);
+      
+      // Build Google Calendar URL
+      const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: event.name,
+        dates: `${start}/${end}`,
+        details: event.url || '',
+        location: event.location || '',
+      });
+      
+      const googleCalendarUrl = `https://calendar.google.com/calendar/render?${params.toString()}`;
+      
+      // Open in new tab with a small delay between each to avoid popup blocking
+      setTimeout(() => {
+        window.open(googleCalendarUrl, '_blank');
+      }, index * 300);
+    });
   };
 
   return {
@@ -100,5 +171,6 @@ export function useEventSelection(view: "grid" | "calendar") {
     clearSelection,
     toggleEventSelection,
     exportToCalendar,
+    exportToGoogleCalendar,
   };
 }
