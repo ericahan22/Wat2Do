@@ -1,28 +1,23 @@
 import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import django
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
-django.setup()
-
-import csv
-import logging
 import random
 import time
 import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-
 from dotenv import load_dotenv
 from instaloader import Instaloader
-
-from example.embedding_utils import is_duplicate_event
-from example.models import Clubs, Events
+from scraping.scraping_utils import (
+    MAX_CONSEC_OLD_POSTS,
+    MAX_POSTS,
+    append_event_to_csv,
+    get_seen_shortcodes,
+    insert_event_to_db,
+    logger,
+    CUTOFF_DAYS
+)
 from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
+
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
@@ -32,27 +27,6 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
 ]
 
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
-LOG_FILE = LOG_DIR / "scraping.log"
-
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
-    ],
-)
-logger = logging.getLogger(__name__)
-
-MAX_POSTS = 50
-MAX_CONSEC_OLD_POSTS = 10
-CUTOFF_DAYS = 2
-
-# Load environment variables from .env file
 load_dotenv()
 
 # Get credentials from environment variables
@@ -63,10 +37,10 @@ SESSIONID = os.getenv("SESSIONID")
 DS_USER_ID = os.getenv("DS_USER_ID")
 MID = os.getenv("MID")
 IG_DID = os.getenv("IG_DID")
-SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
 def get_post_image_url(post):
+    """Extracts best image from post"""
     try:
         if post._node.get("image_versions2"):
             return post._node["image_versions2"]["candidates"][0]["url"]
@@ -79,7 +53,7 @@ def get_post_image_url(post):
         if post._node.get("display_url"):
             return post._node["display_url"]
         return None
-    except (KeyError, AttributeError) as e:
+    except (KeyError, AttributeError, IndexError) as e:
         logger.error(
             f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {e!s}"
         )
@@ -87,7 +61,7 @@ def get_post_image_url(post):
 
 
 def handle_instagram_errors(func):
-    # Handle common Instagram errors?
+    """Handle common Instagram auth/request errors"""
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -101,149 +75,10 @@ def handle_instagram_errors(func):
                 logger.error(
                     "Try refreshing CSRF token and/or session ID, update secrets"
                 )
-                logger.error("----------------------------")
             logger.error(f"Full error: {e!s}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             raise
-
     return wrapper
-
-
-def extract_s3_filename_from_url(image_url: str) -> str:
-    if not image_url:
-        return None
-    filename = image_url.split("/")[-1]
-    return f"events/{filename}"
-
-
-def append_event_to_csv(
-    event_data, club_ig, post_url, status="success", embedding=None
-):
-    csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
-    csv_file.parent.mkdir(parents=True, exist_ok=True)
-    file_exists = csv_file.exists()
-
-    with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
-        fieldnames = [
-            "club_handle",
-            "url",
-            "name",
-            "date",
-            "start_time",
-            "end_time",
-            "location",
-            "price",
-            "food",
-            "registration",
-            "image_url",
-            "description",
-            "status",
-            "embedding",
-        ]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(
-            {
-                "club_handle": club_ig,
-                "url": post_url,
-                "name": event_data.get("name", ""),
-                "date": event_data.get("date", ""),
-                "start_time": event_data.get("start_time", ""),
-                "end_time": event_data.get("end_time", ""),
-                "location": event_data.get("location", ""),
-                "price": event_data.get("price", ""),
-                "food": event_data.get("food", ""),
-                "registration": event_data.get("registration", False),
-                "image_url": event_data.get("image_url", ""),
-                "description": event_data.get("description", ""),
-                "status": status,
-                "embedding": embedding or "",
-            }
-        )
-
-
-def insert_event_to_db(event_data, club_ig, post_url):
-    # Check if an event already exists in db and insert it if not
-    event_name = event_data.get("name")  # .title()
-    event_date = event_data.get("date")
-    event_location = event_data.get("location")  # .title()
-    try:
-        # Get club_type based on club handle
-        try:
-            club = Clubs.objects.get(ig=club_ig)
-            club_type = club.club_type
-        except Clubs.DoesNotExist:
-            club_type = None
-            logger.warning(
-                f"Club with handle {club_ig} not found, inserting event with null club_type"
-            )
-
-        # Check duplicates using vector sim
-        logger.debug(f"Checking duplicates for event with data: {event_data}")
-        if is_duplicate_event(event_data):
-            logger.debug(f"Duplicate event found: {event_name} at {event_location}")
-            return False
-
-        # Generate embedding
-        embedding = generate_embedding(event_data["description"])
-
-        # Create event using Django ORM
-        Events.objects.create(
-            club_handle=club_ig,
-            url=post_url,
-            name=event_name,
-            date=event_date,
-            start_time=event_data["start_time"],
-            end_time=event_data["end_time"] or None,
-            location=event_location,
-            price=event_data.get("price", None),
-            food=event_data.get("food") or "",
-            registration=bool(event_data.get("registration", False)),
-            image_url=event_data.get("image_url"),
-            description=event_data.get("description") or "",
-            embedding=embedding,
-            club_type=club_type,
-        )
-        logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
-        try:
-            append_event_to_csv(
-                event_data, club_ig, post_url, status="success", embedding=embedding
-            )
-            logger.info(f"Appended event to CSV: {event_data.get('name')}")
-        except Exception as csv_err:
-            logger.error(
-                f"Database insert succeeded, but failed to append to CSV: {csv_err}"
-            )
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
-        return True
-    except Exception as e:
-        logger.error(f"Database error: {e!s}")
-        logger.error(f"Event data: {event_data}")
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        try:
-            embedding = generate_embedding(event_data["description"])
-            append_event_to_csv(
-                event_data, club_ig, post_url, status="failed", embedding=embedding
-            )
-            logger.info(f"Appended event to CSV: {event_data.get('name')}")
-        except Exception as csv_err:
-            logger.error(f"Database and CSV inserts failed: {csv_err}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-        return False
-
-
-def get_seen_shortcodes():
-    """Fetches all post shortcodes from events table in DB"""
-    logger.info("Fetching seen shortcodes from the database...")
-    try:
-        events = Events.objects.filter(url__isnull=False).values_list("url", flat=True)
-        shortcodes = {url.split("/")[-2] for url in events if url}
-        return shortcodes
-    except Exception as e:
-        logger.error(f"Could not fetch shortcodes from database: {e}")
-        return set()
 
 
 def process_recent_feed(
@@ -252,8 +87,7 @@ def process_recent_feed(
     max_posts=MAX_POSTS,
     max_consec_old_posts=MAX_CONSEC_OLD_POSTS,
 ):
-    # Process Instagram feed posts and extract event info. Stops
-    #   scraping once posts become older than cutoff.
+    """Processes feed, extracts event info, stores in db"""
     events_added = 0
     posts_processed = 0
     consec_old_posts = 0
@@ -301,18 +135,21 @@ def process_recent_feed(
 
             # Process each event returned by the AI
             for event_data in events_data:
-                if (
+                status = "unknown"
+                has_required_fields = (
                     event_data.get("name")
                     and event_data.get("date")
                     and event_data.get("location")
                     and event_data.get("start_time")
-                ):
-                    if insert_event_to_db(event_data, post.owner_username, post_url):
+                )
+                if has_required_fields:
+                    if insert_event_to_db(event_data, post.owner_username, post_url, image_url):
                         events_added += 1
                         logger.info(
                             f"Successfully added event '{event_data.get('name')}' from {post.owner_username}"
                         )
                     else:
+                        status = "failed"
                         logger.error(
                             f"Failed to add event '{event_data.get('name')}' from {post.owner_username}"
                         )
@@ -322,17 +159,18 @@ def process_recent_feed(
                         for key in ["name", "date", "location", "start_time"]
                         if not event_data.get(key)
                     ]
+                    status = "missing_fields"
                     logger.warning(
                         f"Missing required fields for event '{event_data.get('name', 'Unknown')}': {missing_fields}, skipping event"
                     )
-                    embedding = generate_embedding(event_data["description"])
-                    append_event_to_csv(
-                        event_data,
-                        post.owner_username,
-                        post_url,
-                        status="missing_fields",
-                        embedding=embedding,
-                    )
+                embedding = generate_embedding(event_data.get("description", ""))
+                append_event_to_csv(
+                    event_data,
+                    post.owner_username,
+                    post_url,
+                    status=status,
+                    embedding=embedding,
+                )
 
             time.sleep(random.uniform(15, 45))
 
@@ -381,7 +219,7 @@ def session():
 
 
 if __name__ == "__main__":
-    logger.info("Attemping to load Instagram session...")
+    logger.info("Attempting to load Instagram session...")
     L = session()
     if L:
         logger.info("Session created successfully!")

@@ -11,6 +11,7 @@ pgvector==0.4.1
 --find-links=./wheels
 setuptools>=65.5.0
 instaloader==4.14.2+custom1
+selenium
 python-dotenv
 requests==2.31.0
 beautifulsoup4

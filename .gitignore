@@ -14,3 +14,4 @@ backend/testing
 node_modules/
 
 .vscode
+chrome_profile/

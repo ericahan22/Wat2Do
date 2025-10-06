@@ -9,6 +9,10 @@ on:
         required: true
         type: boolean
         default: true
+      scroll_limit:
+        description: 'Number of scrolls of home feed'
+        required: false
+        default: '50'
 
 jobs:
   instagram_feed:
@@ -46,11 +50,11 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Cache session file
+      - name: Cache Chrome profile
         uses: actions/cache@v4
         with:
-          path: backend/session-${{ secrets.USERNAME }}
-          key: ${{ runner.os }}-instaloader-session-${{ secrets.USERNAME }}
+          path: backend/scraping/chrome_profile
+          key: ${{ runner.os }}-chrome-profile-${{ secrets.USERNAME }}
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -74,7 +78,7 @@ jobs:
         if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
         working-directory: backend/scraping
         run: |
-          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
+          xvfb-run -a python -u selenium_scraper.py --scroll-limit ${{ github.event.inputs.scroll_limit }} 2>&1 | tee logs/scraping.log
         continue-on-error: false
 
       - name: Upload logs as artifacts
