@@ -1,5 +1,5 @@
 export { useClubs, type Club } from './useClubs'
-export { useEvents, type Event } from './useEvents'
+export { useEvents, type Event, getLastUpdatedText } from './useEvents'
 export { useDocumentTitle } from './useDocumentTitle'
 export { useTheme } from './useTheme'
 export { useEventSelection } from './useEventSelection'

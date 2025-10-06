@@ -2,7 +2,7 @@ import React from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, LayoutGrid, X } from "lucide-react";
-import { useEvents, useEventSelection } from "@/hooks";
+import { useEvents, useEventSelection, getLastUpdatedText } from "@/hooks";
 import EventsGrid from "@/components/EventsGrid";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventLegend from "@/components/EventLegend";
@@ -26,6 +26,9 @@ function EventsPage() {
     exportToGoogleCalendar,
   } = useEventSelection(view);
 
+  // Get formatted last updated time
+  const lastUpdatedText = getLastUpdatedText();
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
@@ -35,6 +38,11 @@ function EventsPage() {
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Discover and explore upcoming events. Updates daily at ~8:30am EST.
+          {lastUpdatedText && (
+            <span className="ml-1">
+              {lastUpdatedText}.
+            </span>
+          )}
         </p>
       </div>
 

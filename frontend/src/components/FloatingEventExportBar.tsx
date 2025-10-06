@@ -38,16 +38,18 @@ export default function FloatingEventExportBar({
         view !== "grid" || !isSelectMode || selectedEvents.size === 0
       }
     >
-      <div className="bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 px-6 py-3 flex items-center gap-4">
-        <Button
-          size="sm"
-          onClick={() => onExportICalendar(data)}
-          className="rounded-full"
-          variant="default"
-        >
-          <SiApple className="h-4 w-4" />
-          Export {selectedEvents.size} to iCalendar
-        </Button>
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-full shadow-lg border border-gray-200/50 dark:border-gray-700/50 px-6 py-3 flex items-center gap-4">
+        {selectedEvents.size > 0 && (
+          <Button
+            size="sm"
+            onClick={() => onExportICalendar(data)}
+            className="rounded-full"
+            variant="default"
+          >
+            <SiApple className="h-4 w-4" />
+            Export {selectedEvents.size} to iCalendar
+          </Button>
+        )}
         {selectedEvents.size === 1 && (
           <Button
             size="sm"

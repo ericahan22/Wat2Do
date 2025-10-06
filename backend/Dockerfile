@@ -1,28 +1,31 @@
-FROM python:3.10-slim
+# Use official Python runtime as base image
+FROM python:3.11-slim
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 # Set work directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        gcc \
-        g++ \
-    && rm -rf /var/lib/apt/lists/*
+# Copy requirements files and wheels directory
+COPY requirements.txt .
+COPY wheels/ ./wheels/
 
 # Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-# Copy project
+# Copy project files
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Copy and set up entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "my_django_project.wsgi:application"] 
+# Expose port
+EXPOSE 8000
+
+# Use entrypoint script
+ENTRYPOINT ["docker-entrypoint.sh"]
+

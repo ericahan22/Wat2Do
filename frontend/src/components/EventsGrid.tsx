@@ -63,7 +63,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
         <img
           src={theme === "dark" ? "/test1-dark.svg" : "/test1.svg"}
           alt=""
-          className="absolute top-0 right-0 z-10 w-13"
+          className="absolute top-0 right-0 z-10 w-12"
         />
       <Badge variant="live" className="absolute top-0 right-0 z-10">
         LIVE
@@ -118,7 +118,7 @@ const EventsGrid = memo(({ data, isSelectMode = false, selectedEvents = new Set(
           return (
           <Card
             key={event.id}
-            className={`border-none relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden ${isSelectMode ? 'cursor-pointer' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+            className={`border-none rounded-md relative p-0 hover:shadow-lg gap-0 h-full overflow-hidden ${isSelectMode ? 'cursor-pointer' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
             onMouseDown={() => isSelectMode && onToggleEvent?.(event.id)}
           >
             <EventStatusBadge event={event} />
@@ -162,7 +162,7 @@ const EventsGrid = memo(({ data, isSelectMode = false, selectedEvents = new Set(
                 @{event.club_handle}
               </p>
             </CardHeader>
-            <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-2.5">
+            <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-md border-r gap-1 h-full p-3.5 pt-2.5">
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">{formatPrettyDate(event.date)}</span>

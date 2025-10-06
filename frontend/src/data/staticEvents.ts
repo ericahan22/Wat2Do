@@ -1,5 +1,7 @@
 import { Event } from "@/hooks/useEvents";
 
+export const LAST_UPDATED = "2025-01-05T12:30:00";
+
 export const staticEventsData = new Map<string, Event>([
   ["4", {
     id: "4",

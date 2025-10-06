@@ -1,0 +1,29 @@
+# Python / project
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# git/artifacts
+.git
+.gitignore
+
+# local IDE/editor
+.vscode
+.idea
+
+# build artifacts / node_modules
+dist/
+build/
+node_modules/
+
+# tests / docs
+tests/
+docs/
+
+# docker files (so build context is smaller)
+*.egg-info

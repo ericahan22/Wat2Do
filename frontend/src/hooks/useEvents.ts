@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { staticEventsData } from "@/data/staticEvents";
+import { staticEventsData, LAST_UPDATED } from "@/data/staticEvents";
 import { useDocumentTitle } from "./useDocumentTitle";
 
 export interface Event {
@@ -28,6 +28,40 @@ interface EventsResponse {
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+// Format the last updated timestamp into a human-readable format
+export const getLastUpdatedText = (): string => {
+  const timestamp = LAST_UPDATED;
+  
+  if (!timestamp) return "";
+  
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return "Updated just now";
+  } else if (diffMins < 60) {
+    return `Updated ${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `Updated ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else if (diffDays === 1) {
+    return "Updated yesterday";
+  } else if (diffDays < 7) {
+    return `Updated ${diffDays} days ago`;
+  } else {
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `Updated on ${dateStr} at ${timeStr}`;
+  }
+};
 
 const fetchEvents = async ({
   queryKey,

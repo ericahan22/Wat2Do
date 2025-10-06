@@ -69,7 +69,7 @@ const EventPopup: React.FC<{
   style: React.CSSProperties;
 }> = ({ event, onClose, style }) => (
   <div
-    className="event-popup absolute bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-80 z-50 border border-gray-200 dark:border-gray-700"
+    className="event-popup absolute bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 w-80 z-50 border border-gray-200 dark:border-gray-700"
     style={style}
     onClick={(e) => e.stopPropagation()}
   >

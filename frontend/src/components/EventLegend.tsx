@@ -5,7 +5,7 @@ const EventLegend: React.FC = () => {
   const clubTypes = getAllClubTypes();
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-6 mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+    <div className="flex flex-wrap items-center justify-center gap-6 mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
       {clubTypes.map((clubType, index) => (
         <div key={index} className="flex items-center gap-2">
           <div

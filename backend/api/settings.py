@@ -27,7 +27,14 @@ SECRET_KEY = os.getenv(
 )
 DEBUG = os.getenv("PRODUCTION") != "1"  # Fixed the DEBUG logic
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".vercel.app"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
+    ".elasticbeanstalk.com",
+    ".elb.amazonaws.com",
+    "*",  # Temporary - allows any host. Replace with specific IP/domain in production
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",

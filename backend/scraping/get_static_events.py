@@ -75,7 +75,10 @@ def main():
         )
         logging.info(f"Writing to {output_path}...")
         with output_path.open("w", encoding="utf-8") as f:
+            # Write the last updated timestamp
+            current_time = datetime.now().isoformat()
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
+            f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
             f.write("export const staticEventsData = new Map<string, Event>([\n")
             for i, event in enumerate(events):
                 event_id = str(event["id"])
