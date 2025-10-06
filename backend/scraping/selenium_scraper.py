@@ -2,17 +2,13 @@ import random
 import os
 import sys
 import traceback
-import time
 import logging
 import argparse
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from pathlib import Path
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+import zendriver
+import asyncio
 
 load_dotenv()
 
@@ -44,139 +40,109 @@ logging.getLogger('selenium').setLevel(logging.WARNING)
 logging.getLogger('openai').setLevel(logging.WARNING)
 logging.getLogger('httpcore').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger("zendriver").setLevel(logging.WARNING)
+logging.getLogger("uc.connection").setLevel(logging.WARNING)
+logging.getLogger("websockets.client").setLevel(logging.WARNING)
 
-IG_USERNAME = os.getenv("USERNAME")
+IG_USERNAME = "xmdkjgjsjfj" # os.getenv("USERNAME")
 IG_PASSWORD = os.getenv("PASSWORD")
 
 
 # ----- Selenium setup -----
 
 def get_driver():
-    """Initializes Selenium WebDriver"""
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    chrome_options.add_experimental_option('useAutomationExtension', False)
-    chrome_options.add_experimental_option("prefs", {
+    """Initializes Zendriver Chrome WebDriver"""
+    chrome_options = [
+        "--user-data-dir=" + str(Path(__file__).resolve().parent / "chrome_profile"),
+        # "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "--disable-blink-features=AutomationControlled"
+    ]
+    prefs = {
         "credentials_enable_service": False,
         "profile.password_manager_enabled": False
-    })
-    user_data_dir = Path(__file__).resolve().parent / "chrome_profile"
-    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
-    chrome_options.add_argument("--headless=new")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
-        'source': '''
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined
-            })
-        '''
-    })
-    return driver
+    }
+    return zendriver.start(options=chrome_options, prefs=prefs)
 
 
 # ----- Helper functions -----
         
-def typing(element, text):
-    for char in text:
-        element.send_keys(char)
-        wait(0.1, 0.3)
+async def dismiss_popups(page):
+    popups = [
+        "Not Now",
+        "Not now",
+        "Allow all cookies",
+        "Allow essential cookies only",
+        "Accept All",
+        "OK"
+    ]
+    for text in popups:
+        try:
+            button = await page.find(text, best_match=True)
+            if button:
+                print(f"Found popup button: {button.text_all}")
+                await button.click()
+                print(f"Clicked '{text}' button to dismiss popup.")
+                await page.wait(0.5)
+        except Exception:
+            pass
+        await asyncio.sleep(1)
         
-def wait(min_time, max_time):
-    time.sleep(random.uniform(min_time, max_time))
-
-def login(driver):
+        
+async def login(page):
     logger.info("Checking Instagram login status...")
-    driver.get('https://www.instagram.com/')
-    wait(2, 4)
-    
-    try:
-        username_field = WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.NAME, "username"))
-        )
-        logger.info("Logging in...")
-        password_field = driver.find_element(By.NAME, "password")
-        typing(username_field, IG_USERNAME)
-        wait(0.5, 1.5)
-        typing(password_field, IG_PASSWORD)
-        wait(0.5, 1.5)
+    await asyncio.sleep(3)
+    logger.info("Logging in...")
+    username_field = await page.query_selector('input[name="username"]')
+    password_field = await page.query_selector('input[name="password"]')
+    await username_field.send_keys(IG_USERNAME)
+    await asyncio.sleep(1)
+    await password_field.send_keys(IG_PASSWORD)
+    await asyncio.sleep(1)
 
-        login_button = driver.find_element(By.XPATH, "//button[@type='submit']")
-        login_button.click()
-            
-        # Dismiss popups
-        popups = [
-            "//div[text()='Not Now']",
-            "//button[text()='Not Now']",
-            "//button[text()='Allow all cookies']",
-            "//*[text()='Not now']",
-        ]
-        for xpath in popups:
-            try:
-                button = WebDriverWait(driver, 3).until(
-                    EC.element_to_be_clickable((By.XPATH, xpath))
-                )
-                button.click()
-                logger.info(f"Dismissed popup: {xpath}")
-                wait(1, 2)
-            except TimeoutException:
-                continue
-        
-        # load homepage
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//*[local-name()='svg' and @aria-label='New post']")))
+    login_button = await page.query_selector('button[type="submit"]')
+    await login_button.click()
+    await asyncio.sleep(10)
+    
+    await dismiss_popups(page)
+    
+    # load homepage
+    new_post_icon = await page.query_selector('svg[aria-label="New post"]')
+    if new_post_icon:
         logger.info(f"Login successful, home page loaded!")
+        await page.save_screenshot(f"{LOG_DIR}/login_success.png")
         return True
-    except TimeoutException:
-        logger.info("Login form not found, assuming session is active")
-        driver.save_screenshot(f"{LOG_DIR}/login_failed.png")
-        return True
-    except Exception as e:
-        logger.error(f"An error occurred during login: {e}")
-        logger.error(traceback.format_exc())
-        driver.save_screenshot(f"{LOG_DIR}/login_error.png")
+    else:
+        logger.error("Login failed or challenge encountered")
+        await page.save_screenshot(f"{LOG_DIR}/login_error.png")
         return False
     
     
-def extract_post_data(article):
+async def extract_post_data(article):
     caption = ""
     raw_image_url = None
 
     # Extract caption
-    try:
-        caption_el = article.find_element(
-            By.XPATH,
-            ".//span[contains(@class,'_ap3a') and contains(@class,'_aaco') and contains(@class,'_aacu')]"
-        )
-        caption = caption_el.text.strip()
-    except NoSuchElementException:
-        logger.debug("Caption not found")
-        pass
-
+    caption_el = await article.query_selector("span")
+    if caption_el:
+        caption = await caption_el.inner_text()
+        
     # Extract image
-    try:
-        image_el = article.find_element(
-            By.XPATH,
-            ".//div[contains(@class,'_aagu')]/div[contains(@class,'_aagv')]/img"
-        )
-        raw_image_url = image_el.get_attribute("src")
-    except NoSuchElementException:
-        # Fallback: extract video thumbnail
-        try:
-            image_el = article.find_element(By.XPATH, ".//video")
-            raw_image_url = image_el.get_attribute("poster") or image_el.get_attribute("src")
-        except NoSuchElementException:
-            logger.debug("Image not found")
-            pass
+    image_el = await article.query_selector("img")
+    if image_el:
+        raw_image_url = image_el.get("src")
+    else:
+        video_el = await article.query_selector("video")
+        if video_el:
+            raw_image_url = video_el.get("poster") or video_el.get("src")
 
     return caption, raw_image_url
 
 
-def process_feed(driver, scroll_limit=50):
+async def process_feed(page, scroll_limit=50):
     cutoff = datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS)
     events_added = 0
     posts_processed = 0
@@ -185,36 +151,36 @@ def process_feed(driver, scroll_limit=50):
     seen_shortcodes = get_seen_shortcodes()
     processed_in_session = set()
     
-    try:
-        logger.info("Waiting for feed to load...")
-        WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.TAG_NAME, "article"))
-        )
-        logger.info("Feed loaded, starting feed processing...")
-    except TimeoutException:
+    for _ in range(20):
+        posts = await page.query_selector_all('article')
+        if posts:
+            break
+        await asyncio.sleep(1)
+    if not posts:
         logger.error("Feed not loaded, no posts found")
-        driver.save_screenshot(f"{LOG_DIR}/feed_not_loaded.png")
+        await page.save_screenshot(f"{LOG_DIR}/feed_not_loaded.png")
         return 0, 0
-    
-    # Scroll and scrape
+
+    logger.info("Feed loaded, starting feed processing...")
     for _ in range(scroll_limit):
-        posts = driver.find_elements(By.TAG_NAME, "article")
+        posts = await page.query_selector_all('article')
         logger.info(f"Found {len(posts)} posts in feed")
         if len(posts) == 0:
+            html = await page.content()
             with open(f"{LOG_DIR}/debug_feed.html", "w", encoding="utf-8") as f:
-                f.write(driver.page_source)
+                f.write(html)
             logger.warning("Saved HTML snapshot to debug_feed.html for inspection")
         for p in posts:
             try:
-                link_element = p.find_element(By.XPATH, ".//a[contains(@href, '/p/')]")
-                post_url = link_element.get_attribute('href')
+                link_element = await p.query_selector('a[href*="/p/"]')
+                post_url = link_element.get('href')
                 shortcode = post_url.split('/')[-2]
                 if shortcode in seen_shortcodes or shortcode in processed_in_session:
                     continue
                 processed_in_session.add(shortcode)
 
-                time_element = p.find_element(By.TAG_NAME, "time")
-                post_time = datetime.fromisoformat(time_element.get_attribute("datetime").replace('Z', '+00:00'))
+                time_element = await p.query_selector('time')
+                post_time = datetime.fromisoformat(time_element.get("datetime").replace('Z', '+00:00'))
                 if post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(f"Post {shortcode} is older than cutoff, consecutive old posts: {consec_old_posts}")
@@ -228,17 +194,18 @@ def process_feed(driver, scroll_limit=50):
                 
                 # Extract data
                 try:
-                    username = p.find_element(By.XPATH, ".//a[contains(@href, '/')]").text
-                except NoSuchElementException:
+                    username_el = await p.query_selector('a[href^="/"]')
+                    username = await username_el.inner_text()
+                except Exception:
                     username = "unknown"
                     
                 logger.info(f"Processing post {shortcode} by {username}")
                 
-                caption, raw_image_url = extract_post_data(p)
+                caption, raw_image_url = await extract_post_data(p)
                 
                 # Process data
                 if raw_image_url:
-                    wait(1, 3)
+                    await asyncio.sleep(2)
                     image_url = upload_image_from_url(raw_image_url)
                     logger.info(f"Uploaded image to S3: {image_url}")
                 else:
@@ -271,26 +238,24 @@ def process_feed(driver, scroll_limit=50):
                         logger.warning(f"Missing {missing_fields} for event, skipping...") 
                     embedding = generate_embedding(data.get("description", ""))
                     append_event_to_csv(data, username, post_url, status=status, embedding=embedding)
-                wait(15, 45)
+                
+                await asyncio.sleep(random.uniform(15, 45))
                 
                 if posts_processed >= MAX_POSTS:
                     logger.info(f"Reached max post limit of {MAX_POSTS}, stopping...")
                     return events_added, posts_processed
-            except NoSuchElementException:
-                logger.debug("Could not parse article element, likely not user post")
-                continue
             except Exception as e:
                 logger.error(f"Error processing post: {e}")
                 logger.error(traceback.format_exc())
                 continue
         logger.info("Scrolling... loading more posts...")
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        wait(5, 15)
+        await page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
+        await asyncio.sleep(random.uniform(5, 15))
         
     return events_added, posts_processed
 
 
-if __name__ == "__main__":
+async def main():
     parser = argparse.ArgumentParser(description="Scrape feed with Selenium")
     parser.add_argument(
         "--scroll-limit",
@@ -300,13 +265,18 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     
-    driver = get_driver()
-    if login(driver):
-        driver.save_screenshot(f"{LOG_DIR}/post_login.png")       
-        events_added, posts_processed = process_feed(driver, scroll_limit=args.scroll_limit)
+    browser = await get_driver()
+    page = await browser.get('https://www.instagram.com/')
+    if await login(page):
+        await page.save_screenshot(f"{LOG_DIR}/post_login.png")       
+        events_added, posts_processed = await process_feed(page, scroll_limit=args.scroll_limit)
         logger.info("\n----------------------- SUMMARY -----------------------")
         logger.info(f"Processed {posts_processed} posts, added {events_added} events :D")
     else:
         logger.critical("Could not log in :( aborting...")
-    driver.quit()
+    await browser.stop()
+    
+    
+if __name__ == "__main__":
+    asyncio.run(main())
     

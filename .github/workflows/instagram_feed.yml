@@ -50,11 +50,11 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Cache Chrome profile
+      - name: Cache Chrome profile (save only)
         uses: actions/cache@v4
         with:
           path: backend/scraping/chrome_profile
-          key: ${{ runner.os }}-chrome-profile-${{ secrets.USERNAME }}
+          key: ${{ runner.os }}-chrome-profile-${{ github.run_id }}
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -80,10 +80,10 @@ jobs:
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           aws configure set default.region $AWS_DEFAULT_REGION
       
-      - name: Download Chrome profile from S3
-        run: |
-          mkdir -p backend/scraping/chrome_profile
-          aws s3 sync s3://$AWS_S3_BUCKET_NAME/chrome_profile/ backend/scraping/chrome_profile/
+      # - name: Download Chrome profile from S3
+      #   run: |
+      #     mkdir -p backend/scraping/chrome_profile
+      #     aws s3 sync s3://$AWS_S3_BUCKET_NAME/chrome_profile/ backend/scraping/chrome_profile/
           
       - name: Run scraper
         if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
