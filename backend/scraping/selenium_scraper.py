@@ -45,8 +45,8 @@ logging.getLogger('openai').setLevel(logging.WARNING)
 logging.getLogger('httpcore').setLevel(logging.WARNING)
 logging.getLogger('httpx').setLevel(logging.WARNING)
 
-USERNAME = os.getenv("INSTAGRAM_USERNAME")
-PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
+IG_USERNAME = os.getenv("USERNAME")
+IG_PASSWORD = os.getenv("PASSWORD")
 
 
 # ----- Selenium setup -----
@@ -62,11 +62,12 @@ def get_driver():
     })
     user_data_dir = Path(__file__).resolve().parent / "chrome_profile"
     chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
-    # chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 
     driver = webdriver.Chrome(options=chrome_options)
     driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
@@ -94,19 +95,25 @@ def login(driver):
     driver.get('https://www.instagram.com/')
     wait(2, 4)
     
-    if "/accounts/login/" not in driver.current_url:
+    driver.save_screenshot(f"{LOG_DIR}/login.png")
+    with open(f"{LOG_DIR}/feed_snapshot.html", "w", encoding="utf-8") as f:
+        f.write(driver.page_source)
+    
+    try:
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.TAG_NAME, "article"))
+        )
         logger.info("Session already active, skipping login...")
         return True
-
-    logger.info("Logging in to Instagram...")
+    except NoSuchElementException:
+        logger.info("Login required...")
+    
     try:
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "username")))
         username_field = driver.find_element(By.NAME, "username")
         password_field = driver.find_element(By.NAME, "password")
-                    
-        typing(username_field, USERNAME)
+        typing(username_field, IG_USERNAME)
         wait(0.5, 1.5)
-        typing(password_field, PASSWORD)
+        typing(password_field, IG_PASSWORD)
         wait(0.5, 1.5)
 
         login_button = driver.find_element(By.XPATH, "//button[@type='submit']")
@@ -121,18 +128,19 @@ def login(driver):
         ]
         for xpath in popups:
             try:
-                button = WebDriverWait(driver, 5).until(
+                button = WebDriverWait(driver, 3).until(
                     EC.element_to_be_clickable((By.XPATH, xpath))
                 )
                 button.click()
                 logger.info(f"Dismissed popup: {xpath}")
                 wait(1, 2)
             except TimeoutException:
-                logger.debug(f"No popups found: {xpath}")
-                pass
+                continue
+            except Exception as e:
+                logger.debug(f"Failed to dismiss popup {xpath}: {e}")
         
         # load homepage
-        WebDriverWait(driver, 15).until_not(EC.url_contains("/accounts/login"))
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
         logger.info(f"Login successful, {driver.current_url} loaded!")
         return True
     except TimeoutException:
@@ -305,7 +313,7 @@ if __name__ == "__main__":
     
     driver = get_driver()
     if login(driver):
-        time.sleep(5)
+        logger.info(f"Current URL: {driver.current_url}")        
         events_added, posts_processed = process_feed(driver, scroll_limit=args.scroll_limit)
         logger.info("\n----------------------- SUMMARY -----------------------")
         logger.info(f"Processed {posts_processed} posts, added {events_added} events :D")
