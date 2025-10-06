@@ -95,21 +95,11 @@ def login(driver):
     driver.get('https://www.instagram.com/')
     wait(2, 4)
     
-    driver.save_screenshot(f"{LOG_DIR}/login.png")
-    with open(f"{LOG_DIR}/feed_snapshot.html", "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
-    
     try:
-        WebDriverWait(driver, 5).until(
-            EC.presence_of_element_located((By.TAG_NAME, "article"))
+        username_field = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located((By.NAME, "username"))
         )
-        logger.info("Session already active, skipping login...")
-        return True
-    except NoSuchElementException:
-        logger.info("Login required...")
-    
-    try:
-        username_field = driver.find_element(By.NAME, "username")
+        logger.info("Logging in...")
         password_field = driver.find_element(By.NAME, "password")
         typing(username_field, IG_USERNAME)
         wait(0.5, 1.5)
@@ -136,20 +126,19 @@ def login(driver):
                 wait(1, 2)
             except TimeoutException:
                 continue
-            except Exception as e:
-                logger.debug(f"Failed to dismiss popup {xpath}: {e}")
         
         # load homepage
-        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "article")))
-        logger.info(f"Login successful, {driver.current_url} loaded!")
+        WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.XPATH, "//*[local-name()='svg' and @aria-label='New post']")))
+        logger.info(f"Login successful, home page loaded!")
         return True
     except TimeoutException:
-        logger.error("Login failed, timed out waiting for homepage :(")
+        logger.info("Login form not found, assuming session is active")
         driver.save_screenshot(f"{LOG_DIR}/login_failed.png")
         return False
     except Exception as e:
         logger.error(f"An error occurred during login: {e}")
         logger.error(traceback.format_exc())
+        driver.save_screenshot(f"{LOG_DIR}/login_error.png")
         return False
     
     
