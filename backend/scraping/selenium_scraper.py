@@ -313,7 +313,7 @@ if __name__ == "__main__":
     
     driver = get_driver()
     if login(driver):
-        logger.info(f"Current URL: {driver.current_url}")        
+        driver.save_screenshot(f"{LOG_DIR}/post_login.png")       
         events_added, posts_processed = process_feed(driver, scroll_limit=args.scroll_limit)
         logger.info("\n----------------------- SUMMARY -----------------------")
         logger.info(f"Processed {posts_processed} posts, added {events_added} events :D")
