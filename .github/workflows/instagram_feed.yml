@@ -50,6 +50,12 @@ jobs:
         with:
           python-version: '3.11'
       
+      - name: Cache Chrome profile
+        uses: actions/cache@v4
+        with:
+          path: backend/scraping/chrome_profile
+          key: ${{ runner.os }}-chrome-profile-${{ secrets.USERNAME }}
+
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -96,10 +102,6 @@ jobs:
             backend/scraping/*.log
             backend/scraping/*.csv
           retention-days: 30
-
-      - name: Upload Chrome profile to S3
-        run: |
-          aws s3 sync backend/scraping/chrome_profile/ s3://$AWS_S3_BUCKET_NAME/chrome_profile/
         
       - name: Generate static events file
         id: generate_static

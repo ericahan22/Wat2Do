@@ -134,7 +134,7 @@ def login(driver):
     except TimeoutException:
         logger.info("Login form not found, assuming session is active")
         driver.save_screenshot(f"{LOG_DIR}/login_failed.png")
-        return False
+        return True
     except Exception as e:
         logger.error(f"An error occurred during login: {e}")
         logger.error(traceback.format_exc())
