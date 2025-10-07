@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Calendar,
   dateFnsLocalizer,
@@ -8,6 +8,7 @@ import {
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { enUS } from "date-fns/locale/en-US";
+import { useLocalStorage } from "react-use";
 import {
   ChevronLeft,
   ChevronRight,
@@ -207,9 +208,31 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
 const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState<View>("month");
+  
+  // Use react-use's useLocalStorage for view persistence, default to "day"
+  const [currentView, setCurrentView] = useLocalStorage<View>("eventsCalendarView", "day");
+  
   const [selectedEvent, setSelectedEvent] = useState<(Event & { start: Date; end: Date; title: string }) | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+
+  // Auto-scroll to 4pm (16:00) in day view
+  useEffect(() => {
+    if (currentView === "day") {
+      // Use a small timeout to ensure the calendar has rendered
+      const timer = setTimeout(() => {
+        // Find the scrollable time content area
+        const timeContent = document.querySelector('.rbc-time-content');
+        if (timeContent) {
+          // Each hour is typically 48px in react-big-calendar
+          // Scroll to position that puts 4pm near the top of the viewport
+          const scrollPosition = 8 * 48;
+          timeContent.scrollTop = scrollPosition;
+        }
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentView, currentDate]); 
 
   const calendarEvents = events.map((event) => {
     const start = new Date(`${event.date}T${event.start_time}`);
