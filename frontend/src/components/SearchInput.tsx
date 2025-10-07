@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useRef, useEffect, memo, useCallback } from "react";
+import { useRef, useEffect, memo, useCallback, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 interface SearchInputProps {
@@ -13,6 +13,13 @@ const SearchInput = memo(
   ({ placeholder = "Search...", className = "flex-1" }: SearchInputProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
     const inputRef = useRef<HTMLInputElement>(null);
+    const searchParam = searchParams.get("search") || "";
+    const [inputValue, setInputValue] = useState(searchParam);
+
+    // Sync input value with URL search param
+    useEffect(() => {
+      setInputValue(searchParam);
+    }, [searchParam]);
 
     // Auto-focus on search input when component mounts
     useEffect(() => {
@@ -24,10 +31,10 @@ const SearchInput = memo(
     const handleSearch = useCallback(() => {
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
-        nextParams.set("search", inputRef.current?.value || "");
+        nextParams.set("search", inputValue);
         return nextParams;
       });
-    }, [setSearchParams]);
+    }, [setSearchParams, inputValue]);
 
     const handleKeyPress = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -38,6 +45,13 @@ const SearchInput = memo(
       [handleSearch]
     );
 
+    const handleChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+      },
+      []
+    );
+
     return (
       <div
         className={`relative ${className} border border-gray-300 h-9 dark:border-gray-700 overflow-hidden rounded-md`}
@@ -45,7 +59,8 @@ const SearchInput = memo(
         <Input
           ref={inputRef}
           placeholder={placeholder}
-          defaultValue={searchParams.get("search") || ""}
+          value={inputValue}
+          onChange={handleChange}
           onKeyDown={handleKeyPress}
           className="pr-12 shadow-none border-none h-8"
         />

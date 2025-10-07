@@ -215,9 +215,9 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const [selectedEvent, setSelectedEvent] = useState<(Event & { start: Date; end: Date; title: string }) | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
 
-  // Auto-scroll to 4pm (16:00) in day view
+  // Auto-scroll to 4pm (16:00) in day and week view
   useEffect(() => {
-    if (currentView === "day") {
+    if (currentView === "day" || currentView === "week") {
       // Use a small timeout to ensure the calendar has rendered
       const timer = setTimeout(() => {
         // Find the scrollable time content area
