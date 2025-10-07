@@ -26,7 +26,7 @@ export default function FloatingEventExportBar({
   return (
     <div
       className={
-        `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform-gpu ` +
+        `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform-gpu max-w-screen` +
         `transition-all duration-300 ease-out ` +
         `${
           view === "grid" && isSelectMode && selectedEvents.size > 0
@@ -38,7 +38,7 @@ export default function FloatingEventExportBar({
         view !== "grid" || !isSelectMode || selectedEvents.size === 0
       }
     >
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-full shadow-lg border border-gray-200/50 dark:border-gray-700/50 px-6 py-3 flex items-center gap-4">
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-4xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 px-6 py-3 sm:flex-row flex-col flex items-center gap-4">
         {selectedEvents.size > 0 && (
           <Button
             size="sm"

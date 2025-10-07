@@ -16,11 +16,11 @@ const badgeVariants = cva(
           "border-transparent bg-red-500 text-gray-50 hover:bg-red-500/80 dark:bg-red-900 dark:text-gray-50 dark:hover:bg-red-900/80",
         outline: "text-gray-950 dark:text-gray-50",
         live:
-          "border-transparent bg-red-500 shadow-sm shadow-red-500/50 text-white hover:bg-red-500/80 animate-pulse-live",
+          "border-transparent bg-red-500 text-white hover:bg-red-500/80 animate-pulse-live",
         soon:
-          "border-transparent bg-orange-500 shadow-sm shadow-orange-500/50 text-white hover:bg-orange-500/80",
+          "border-transparent bg-orange-500 text-white hover:bg-orange-500/80",
         new:
-          "border-transparent bg-blue-500 shadow-sm shadow-blue-500/50 text-white hover:bg-blue-500/80",
+          "border-transparent bg-blue-500 text-white hover:bg-blue-500/80",
       },
     },
     defaultVariants: {

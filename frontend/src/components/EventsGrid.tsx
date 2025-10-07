@@ -17,8 +17,10 @@ import {
   formatTimeRange,
   formatPrettyTime,
 } from "@/lib/dateUtils";
-import { useTheme } from "@/hooks";
-import Test1 from "@/assets/test1.svg?react";
+import { getEventStatus, isEventNew } from "@/lib/eventUtils";
+import EventBadgeMaskRight from "@/assets/event-badge-mask-right.svg?react";
+import EventBadgeMaskLeft from "@/assets/event-badge-mask-left.svg?react";
+import EventBadgeMaskRightLong from "@/assets/event-badge-mask-right-long.svg?react";
 
 interface EventsGridProps {
   data: Event[];
@@ -27,41 +29,13 @@ interface EventsGridProps {
   onToggleEvent?: (eventId: string) => void;
 }
 
-const getEventStatus = (event: Event): "live" | "soon" | "none" => {
-  const now = new Date();
-  const startDateTime = new Date(`${event.date}T${event.start_time}`);
-  const endDateTime = new Date(`${event.date}T${event.end_time}`);
-
-  const nowTime = now.getTime();
-  const startTime = startDateTime.getTime();
-  const endTime = endDateTime.getTime();
-  const oneHourInMs = 60 * 60 * 1000;
-
-  if (nowTime >= startTime && nowTime <= endTime) return "live";
-
-  if (startTime > nowTime && startTime - nowTime <= oneHourInMs) return "soon";
-
-  return "none";
-};
-
-const isEventNew = (event: Event): boolean => {
-  if (!event.added_at) return false;
-
-  const now = new Date();
-  const addedAt = new Date(event.added_at);
-  const nineteenHoursInMs = 19 * 60 * 60 * 1000;
-
-  return now.getTime() - addedAt.getTime() <= nineteenHoursInMs;
-};
-
 const EventStatusBadge = ({ event }: { event: Event }) => {
   const status = getEventStatus(event);
-  const { theme } = useTheme();
 
   if (status === "live") {
     return (
       <>
-        <Test1 className="absolute top-0 right-0 z-10 w-12 text-red-500" />
+        <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
         <Badge variant="live" className="absolute top-0 right-0 z-10">
           LIVE
         </Badge>
@@ -72,11 +46,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
   if (status === "soon") {
     return (
       <>
-        <img
-          src={theme === "dark" ? "/test2-dark.svg" : "/test2.svg"}
-          alt=""
-          className="absolute top-0 right-0 z-10 w-25"
-        />
+        <EventBadgeMaskRightLong className="absolute top-0 right-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
         <Badge variant="soon" className="absolute top-0 right-0 z-10">
           Starting soon
         </Badge>
@@ -88,16 +58,11 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 };
 
 const NewEventBadge = ({ event }: { event: Event }) => {
-  const { theme } = useTheme();
   if (!isEventNew(event)) return null;
 
   return (
     <>
-      <img
-        src={theme === "dark" ? "/test3-dark.svg" : "/test3.svg"}
-        alt=""
-        className="absolute top-0 left-0 z-10 w-13"
-      />
+      <EventBadgeMaskLeft className="absolute top-0 left-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
       <Badge variant="new" className="absolute top-0 left-0 z-10">
         NEW
       </Badge>
@@ -121,7 +86,7 @@ const EventsGrid = memo(
             return (
               <Card
                 key={event.id}
-                className={`border-none rounded-lg relative p-0 hover:shadow-lg gap-0 h-full ${
+                className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg gap-0 h-full ${
                   isSelectMode ? "cursor-pointer" : ""
                 } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
                 onMouseDown={() => isSelectMode && onToggleEvent?.(event.id)}
@@ -150,7 +115,7 @@ const EventsGrid = memo(
                     src={event.image_url}
                     alt={event.name}
                     loading="lazy"
-                    className="w-full h-40 object-cover brightness-75 rounded-t-lg"
+                    className="w-full h-40 object-cover brightness-75 rounded-t-xl"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";
@@ -165,7 +130,7 @@ const EventsGrid = memo(
                     @{event.club_handle}
                   </p>
                 </CardHeader>
-                <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-lg border-r gap-1 h-full p-3.5 pt-2.5">
+                <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-2.5">
                   <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                     <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                     <span className="truncate">
@@ -225,7 +190,7 @@ const EventsGrid = memo(
                           className="flex-1 w-full"
                           onMouseDown={() => window.open(event.url, "_blank")}
                         >
-                          <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                          <ExternalLink className="h-3.5 w-3.5" />
                           Open Event
                         </Button>
                       ) : (

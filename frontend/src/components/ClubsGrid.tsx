@@ -51,7 +51,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
                       window.open(url, "_blank");
                     }}
                   >
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <ExternalLink className="h-4 w-4" />
                     Website
                   </Button>
                 ) : (
@@ -78,7 +78,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
                         )
                       }
                     >
-                      <Instagram className="h-4 w-4 mr-2" />
+                      <Instagram className="h-4 w-4" />
                       Instagram
                     </Button>
                   )}
@@ -90,7 +90,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
                       className="flex-1 w-full"
                       onMouseDown={() => window.open(club.discord, "_blank")}
                     >
-                      <MessageCircle className="h-4 w-4 mr-2" />
+                      <MessageCircle className="h-4 w-4" />
                       Discord
                     </Button>
                   )}

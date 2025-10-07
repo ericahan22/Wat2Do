@@ -1,8 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { useRef, useEffect, memo, useCallback, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Search, X } from "lucide-react";
+import { useRef, useEffect, memo } from "react";
+import { useSearchState } from "@/hooks/useSearchState";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -11,46 +11,28 @@ interface SearchInputProps {
 
 const SearchInput = memo(
   ({ placeholder = "Search...", className = "flex-1" }: SearchInputProps) => {
-    const [searchParams, setSearchParams] = useSearchParams();
     const inputRef = useRef<HTMLInputElement>(null);
-    const searchParam = searchParams.get("search") || "";
-    const [inputValue, setInputValue] = useState(searchParam);
-
-    // Sync input value with URL search param
-    useEffect(() => {
-      setInputValue(searchParam);
-    }, [searchParam]);
+    const { inputValue, handleSearch, handleClear, handleChange } = useSearchState();
 
     // Auto-focus on search input when component mounts
     useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
+      inputRef.current?.focus();
     }, []);
 
-    const handleSearch = useCallback(() => {
-      setSearchParams((prev) => {
-        const nextParams = new URLSearchParams(prev);
-        nextParams.set("search", inputValue);
-        return nextParams;
-      });
-    }, [setSearchParams, inputValue]);
+    const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    };
 
-    const handleKeyPress = useCallback(
-      (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-          handleSearch();
-        }
-      },
-      [handleSearch]
-    );
+    const onClear = () => {
+      handleClear();
+      inputRef.current?.focus();
+    };
 
-    const handleChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value);
-      },
-      []
-    );
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleChange(e.target.value);
+    };
 
     return (
       <div
@@ -60,23 +42,45 @@ const SearchInput = memo(
           ref={inputRef}
           placeholder={placeholder}
           value={inputValue}
-          onChange={handleChange}
-          onKeyDown={handleKeyPress}
-          className="pr-12 shadow-none border-none h-8"
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          className={`shadow-none border-none h-8 ${
+            inputValue ? "pr-20" : "pr-12"
+          }`}
         />
-        <Button
-          onMouseDown={handleSearch}
-          className="absolute right-0 top-0 w-12 h-full !rounded-l-none rounded-r-md border-l-0 bg-gray-100 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800"
-          size="sm"
-          variant="ghost"
-        >
-          <Search className="h-4 w-4" />
-        </Button>
+        {inputValue && (
+          <ClearButton onClear={onClear} />
+        )}
+        <SearchButton onSearch={handleSearch} />
       </div>
     );
   }
 );
 
+const ClearButton = memo(({ onClear }: { onClear: () => void }) => (
+  <Button
+    onMouseDown={onClear}
+    className="absolute right-12 top-0 w-8 h-full rounded-none border-none bg-transparent hover:bg-gray-50 dark:hover:bg-gray-900"
+    size="sm"
+    variant="ghost"
+  >
+    <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+  </Button>
+));
+
+const SearchButton = memo(({ onSearch }: { onSearch: () => void }) => (
+  <Button
+    onMouseDown={onSearch}
+    className="absolute right-0 top-0 w-12 h-full !rounded-l-none rounded-r-md border-l-0 bg-gray-100 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-800"
+    size="sm"
+    variant="ghost"
+  >
+    <Search className="h-4 w-4" />
+  </Button>
+));
+
 SearchInput.displayName = "SearchInput";
+ClearButton.displayName = "ClearButton";
+SearchButton.displayName = "SearchButton";
 
 export default SearchInput;
