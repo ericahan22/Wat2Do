@@ -169,7 +169,9 @@ def get_event_details(request):
                     "name": event.name,
                     "date": event.date.isoformat(),
                     "start_time": event.start_time.isoformat(),
-                    "end_time": event.end_time.isoformat() if event.end_time else event.start_time.isoformat(),
+                    "end_time": event.end_time.isoformat()
+                    if event.end_time
+                    else event.start_time.isoformat(),
                     "location": event.location,
                     "url": event.url,
                     "description": event.description,

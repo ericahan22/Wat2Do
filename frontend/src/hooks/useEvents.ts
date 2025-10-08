@@ -124,7 +124,7 @@ export function useEvents(view: "grid" | "calendar") {
     }
 
     return rawEvents;
-  }, [hasActiveFilters, data?.event_ids, view]);
+  }, [hasActiveFilters, data?.event_ids]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
   

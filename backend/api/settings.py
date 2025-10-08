@@ -36,9 +36,6 @@ ALLOWED_HOSTS = [
     "*",  # Temporary - allows any host. Replace with specific IP/domain in production
 ]
 
-# Honor X-Forwarded-Proto from upstream proxies (e.g., Vercel/ELB)
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
