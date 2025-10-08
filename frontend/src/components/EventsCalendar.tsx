@@ -373,6 +373,11 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
         view={currentView}
         onSelectEvent={handleSelectEvent}
         components={{ toolbar: CustomToolbar }}
+        formats={{
+          // Shorten Day view header: e.g., Wed Oct 08
+          dayHeaderFormat: (date, culture, loc) =>
+            (loc || localizer).format(date, "EEE MMM dd", culture),
+        }}
         eventPropGetter={eventPropGetter}
       />
 

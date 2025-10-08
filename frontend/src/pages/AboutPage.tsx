@@ -76,22 +76,8 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          networking events (
-          <a
-            href="/events?view=calendar&search=Atlassian"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Atlassian
-          </a>
-          , Patreon,{" "}
-          <a
-            href="/events?view=calendar&search=Point72"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Point72
-          </a>
-          ). We realized we were missing out on so much happening around campus
-          and built this for ourselves in August 2025. After 2 months we're
+          networking events (Atlassian, Patreon, Point72). We realized we were missing out on so much happening around campus
+          and built this for ourselves in <a href="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/Screenshot+2025-10-08+at+4.20.42%E2%80%AFAM.png" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500 dark:hover:text-gray-200">August 2025</a>. After 2 months we're
           extroardinarily excited to be sharing it with the rest of you! P.S. We
           don't run ads or sponsors, everything runs out of our own pockets.
         </p>
