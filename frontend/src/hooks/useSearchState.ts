@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
 
@@ -10,10 +10,18 @@ export function useSearchState() {
   
   const searchParam = searchParams.get("search") || "";
   const [inputValue, setInputValue] = useState(searchParam || lastSearch || "");
+  const isInitialMount = useRef(true);
 
   // Sync input value with URL search param when it changes
   useEffect(() => {
-    if (searchParam) {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // On initial mount, only sync if there's an actual search param
+      if (searchParam) {
+        setInputValue(searchParam);
+      }
+    } else {
+      // On subsequent updates, always sync with URL
       setInputValue(searchParam);
     }
   }, [searchParam]);
@@ -24,6 +32,15 @@ export function useSearchState() {
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
         nextParams.set("search", inputValue);
+        return nextParams;
+      });
+    } else {
+      // If input is empty, clear the search
+      setInputValue("");
+      setLastSearch("");
+      setSearchParams((prev) => {
+        const nextParams = new URLSearchParams(prev);
+        nextParams.delete("search");
         return nextParams;
       });
     }

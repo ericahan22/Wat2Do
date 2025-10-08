@@ -82,7 +82,7 @@ python manage.py runserver
 ```bash
 cd backend
 docker build -t instagram-scraper-api .
-docker run -p 8000:8000 instagram-scraper-api
+docker run -p 3000:3000 instagram-scraper-api
 ```
 
 ## Dependencies
@@ -98,7 +98,7 @@ docker run -p 8000:8000 instagram-scraper-api
 
 ## Notes
 
-- The Django server runs on port 8000
+- The Django server runs on port 3000
 - CSV files are now located in `/backend/scripts/`
 - API endpoints are prefixed with `/api/`
 - CORS is enabled for frontend integration
@@ -108,9 +108,9 @@ docker run -p 8000:8000 instagram-scraper-api
 
 | Goal/Description | cURL Command |
 |------------------|--------------|
-| Get API info | `curl http://localhost:8000/api/` |
-| Health check | `curl http://localhost:8000/api/health/` |
-| Get all events | `curl http://localhost:8000/api/events/` |
-| Get all clubs | `curl http://localhost:8000/api/clubs/` |
-| Create mock event | `curl -X POST http://localhost:8000/api/mock-event/ -H "Content-Type: application/json" -d '{"name": "Test Event", "location": "Test Location", "food": "Pizza"}'` |
-| Find similar events | `curl "http://localhost:8000/api/test-similarity/?text=Your%20Search%20Text"` | 
+| Get API info | `curl http://localhost:3000/api/` |
+| Health check | `curl http://localhost:3000/health/` |
+| Get all events | `curl http://localhost:3000/api/events/` |
+| Get all clubs | `curl http://localhost:3000/api/clubs/` |
+| Create mock event | `curl -X POST http://localhost:3000/api/mock-event/ -H "Content-Type: application/json" -d '{"name": "Test Event", "location": "Test Location", "food": "Pizza"}'` |
+| Find similar events | `curl "http://localhost:3000/api/test-similarity/?text=Your%20Search%20Text"` | 

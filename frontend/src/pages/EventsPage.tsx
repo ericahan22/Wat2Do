@@ -62,7 +62,7 @@ function EventsPage() {
           <SearchInput placeholder="Search events..." className="flex-1" />
 
           {/* View toggle tabs */}
-          <div className="flex gap-2">
+          <div className="flex justify-between gap-2">
             {view === "grid" && (
               <Button
                 variant="outline"
@@ -78,7 +78,7 @@ function EventsPage() {
                 ) : (
                   <>
                     <Calendar className="h-4 w-4" />
-                    Export to Calendar
+                    Export
                   </>
                 )}
               </Button>

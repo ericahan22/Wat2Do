@@ -31,7 +31,7 @@ def home(_request):
             "endpoints": {
                 "GET /api/events/?search=search_text": "Search events using vector similarity",
                 "GET /api/clubs/": "Get all clubs from database",
-                "GET /api/health/": "Health check",
+                "GET /health/": "Health check",
                 "POST /api/mock-event/": (
                     "Create a mock event with vector embedding (admin only)"
                 ),
