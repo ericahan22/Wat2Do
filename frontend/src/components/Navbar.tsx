@@ -65,6 +65,17 @@ function Navbar() {
               >
                 About
               </Button>
+              <Button
+                variant="link"
+                onMouseDown={() => handleNavigation("/contact")}
+                className={`text-sm font-medium ${
+                  isActive("/contact")
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                Contact
+              </Button>
             </div>
           </div>
 
@@ -140,6 +151,13 @@ function Navbar() {
                 onMouseDown={() => handleNavigation("/about")}
               >
                 About
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                onMouseDown={() => handleNavigation("/contact")}
+              >
+                Contact
               </Button>
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
               <div className="flex gap-2">

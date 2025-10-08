@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/react'
 import EventsPage from '@/pages/EventsPage'
 import ClubsPage from '@/pages/ClubsPage'
 import AboutPage from '@/pages/AboutPage'
+import ContactPage from '@/pages/ContactPage'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 
@@ -17,6 +18,7 @@ function App() {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </main>
 

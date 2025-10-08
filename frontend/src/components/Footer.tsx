@@ -102,7 +102,7 @@ function Footer() {
               reserved.
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
             <a
               href="https://wat2do.instatus.com/"
               target="_blank"
@@ -128,6 +128,18 @@ function Footer() {
               className="hover:text-gray-900 dark:hover:text-gray-200"
             >
               Clubs
+            </a>
+            <a
+              href="/about"
+              className="hover:text-gray-900 dark:hover:text-gray-200"
+            >
+              About
+            </a>
+            <a
+              href="/contact"
+              className="hover:text-gray-900 dark:hover:text-gray-200"
+            >
+              Contact
             </a>
           </div>
         </div>
