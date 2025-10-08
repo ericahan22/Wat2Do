@@ -152,7 +152,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "50/hour"  # 100 requests per hour for all users
+        "anon": "150/hour"  # 150 requests per hour for all users
     },
 }
 

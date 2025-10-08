@@ -12,7 +12,7 @@ import FloatingEventExportBar from "@/components/FloatingEventExportBar";
 import { Button } from "@/components/ui/button";
 
 function EventsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
 
   const { data, isLoading, error, searchTerm, handleViewChange } = useEvents(
@@ -27,17 +27,7 @@ function EventsPage() {
     exportToGoogleCalendar,
   } = useEventSelection(view);
 
-  // Get formatted last updated time
   const lastUpdatedText = getLastUpdatedText();
-
-  // Handler for quick filter clicks
-  const handleFilterClick = (filter: string) => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      nextParams.set("search", filter);
-      return nextParams;
-    });
-  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -62,7 +52,7 @@ function EventsPage() {
           <SearchInput placeholder="Search events..." className="flex-1" />
 
           {/* View toggle tabs */}
-          <div className="flex justify-between gap-2">
+          <div className="flex justify-end ml-auto gap-2">
             {view === "grid" && (
               <Button
                 variant="outline"
@@ -102,7 +92,7 @@ function EventsPage() {
         </div>
 
         {/* Quick Filters */}
-        <QuickFilters onFilterClick={handleFilterClick} />
+        <QuickFilters />
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">

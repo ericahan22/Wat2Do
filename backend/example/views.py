@@ -18,7 +18,7 @@ from services.openai_service import generate_embedding
 
 from .embedding_utils import find_similar_events
 from .filters import EventFilter
-from .models import Clubs, Events
+from .models import Clubs, Events, NewsletterSubscriber
 
 
 @api_view(["GET"])
@@ -351,5 +351,120 @@ def create_user(request):
     except Exception as e:
         return Response(
             {"error": f"Failed to create user: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def newsletter_subscribe(request):
+    """Subscribe to the newsletter"""
+    email = request.data.get("email")
+
+    if not email:
+        return Response(
+            {"error": "Email is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Validate email format
+    if "@" not in email or "." not in email:
+        return Response(
+            {"error": "Please provide a valid email address"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        # Check if already subscribed
+        subscriber, created = NewsletterSubscriber.objects.get_or_create(
+            email=email.lower().strip(),
+            defaults={"is_active": True},
+        )
+
+        if not created:
+            if subscriber.is_active:
+                return Response(
+                    {"message": "You're already subscribed to our newsletter!"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                # Reactivate subscription
+                subscriber.is_active = True
+                subscriber.save()
+
+        # Send welcome email with mock events
+        from services.email_service import email_service
+
+        email_sent = email_service.send_welcome_email(
+            subscriber.email, str(subscriber.unsubscribe_token)
+        )
+
+        if email_sent:
+            return Response(
+                {
+                    "message": "Successfully subscribed! Check your email for upcoming events.",
+                    "email": subscriber.email,
+                },
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+        else:
+            return Response(
+                {
+                    "message": "Subscribed successfully, but email could not be sent. Please check back later.",
+                    "email": subscriber.email,
+                },
+                status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+            )
+
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to subscribe: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def newsletter_unsubscribe(request, token):
+    """Unsubscribe from the newsletter using token"""
+    if not token:
+        return Response(
+            {"error": "Unsubscribe token is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        # Find subscriber by token
+        subscriber = NewsletterSubscriber.objects.get(unsubscribe_token=token)
+
+        if not subscriber.is_active:
+            return Response(
+                {
+                    "message": "You're already unsubscribed from our newsletter.",
+                    "email": subscriber.email,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        # Deactivate subscription
+        subscriber.is_active = False
+        subscriber.save()
+
+        return Response(
+            {
+                "message": "Successfully unsubscribed from the newsletter.",
+                "email": subscriber.email,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except NewsletterSubscriber.DoesNotExist:
+        return Response(
+            {"error": "Invalid unsubscribe token"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to unsubscribe: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

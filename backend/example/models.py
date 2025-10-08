@@ -1,5 +1,23 @@
+import uuid
+
 from django.db import models
 from pgvector.django import VectorField
+
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    unsubscribe_token = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False
+    )
+
+    class Meta:
+        db_table = "newsletter_subscribers"
+        ordering = ["-subscribed_at"]
+
+    def __str__(self):
+        return self.email
 
 
 class Clubs(models.Model):

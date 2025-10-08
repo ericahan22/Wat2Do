@@ -1,89 +1,17 @@
-import React, { useRef, useState, useCallback } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { useQuickFilters } from "@/hooks";
 
-const filterOptions = [
-  "Bubble Tea",
-  "Domino's Pizza",
-  "Actuarial Science",
-  "Free Food",
-  "Computer Science",
-  "Networking",
-  "Engineering",
-  "Business",
-  "Math",
-  "Pizza",
-  "Coffee",
-  "Workshop",
-  "Career Fair",
-  "Social",
-  "Sports",
-  "Music",
-  "Art",
-  "Gaming",
-  "Hackathon",
-  "Study Group",
-];
-
-interface QuickFiltersProps {
-  onFilterClick?: (filter: string) => void;
-}
-
-const QuickFilters: React.FC<QuickFiltersProps> = ({ onFilterClick }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const [hasDragged, setHasDragged] = useState(false);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (!scrollContainerRef.current) return;
-    setIsDragging(true);
-    setHasDragged(false);
-    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
-    setScrollLeft(scrollContainerRef.current.scrollLeft);
-    scrollContainerRef.current.style.cursor = "grabbing";
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    setIsDragging(false);
-    scrollContainerRef.current.style.cursor = "grab";
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    if (!scrollContainerRef.current) return;
-    setIsDragging(false);
-    scrollContainerRef.current.style.cursor = "grab";
-    // Reset hasDragged after a short delay to allow click event to check it
-    setTimeout(() => setHasDragged(false), 100);
-  }, []);
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging || !scrollContainerRef.current) return;
-      e.preventDefault();
-      const x = e.pageX - scrollContainerRef.current.offsetLeft;
-      const walk = x - startX;
-      
-      // If moved more than 5 pixels, consider it a drag
-      if (Math.abs(walk) > 5) {
-        setHasDragged(true);
-      }
-      
-      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-    },
-    [isDragging, startX, scrollLeft]
-  );
-
-  const handleFilterClick = (filter: string) => {
-    // Don't trigger click if user was dragging
-    if (hasDragged) {
-      return;
-    }
-    if (onFilterClick) {
-      onFilterClick(filter);
-    }
-  };
+const QuickFilters: React.FC = () => {
+  const {
+    filterOptions,
+    scrollContainerRef,
+    handleMouseDown,
+    handleFilterClick,
+    handleFilterRemoveClick,
+    isFilterActive,
+  } = useQuickFilters();
 
   return (
     <div className="relative w-full">
@@ -96,21 +24,31 @@ const QuickFilters: React.FC<QuickFiltersProps> = ({ onFilterClick }) => {
           cursor: "grab",
         }}
         onMouseDown={handleMouseDown}
-        onMouseLeave={handleMouseLeave}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
       >
-        {filterOptions.map((filter) => (
-          <Button
-            key={filter}
-            variant="ghost"
-            size="sm"
-            className="shrink-0 h-8 px-3 text-xs border border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700 rounded-full"
-            onClick={() => handleFilterClick(filter)}
-          >
-            {filter}
-          </Button>
-        ))}
+        {filterOptions.map((filter) => {
+          const isActive = isFilterActive(filter);
+          return (
+            <Button
+              key={filter}
+              variant="ghost"
+              size="sm"
+              className={`shrink-0 h-8 px-3 text-xs border rounded-full flex items-center gap-1 ${
+                isActive
+                  ? "bg-gray-700 text-gray-200 border-gray-700 hover:bg-gray-600 hover:border-gray-600 dark:bg-gray-200 dark:text-gray-800 dark:border-gray-200 dark:hover:bg-gray-300 dark:hover:border-gray-300"
+                  : "border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700"
+              }`}
+              onClick={() => handleFilterClick(filter)}
+            >
+              {isActive && (
+                <X
+                  className="h-3 w-3"
+                  onClick={handleFilterRemoveClick}
+                />
+              )}
+              {filter}
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

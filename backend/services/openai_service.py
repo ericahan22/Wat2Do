@@ -18,32 +18,33 @@ from openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+class OpenAIService:
+    def __init__(self):
+        load_dotenv()
+        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+    def generate_embedding(
+        self, text: str, model: str = "text-embedding-3-small"
+    ) -> list[float]:
+        """Generate embedding vector for text using OpenAI API"""
+        text = text.replace("\n", " ").strip()
+        if not text:
+            return None
 
-def generate_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
-    text = text.replace("\n", " ").strip()
-    if not text:
-        return None
+        response = self.client.embeddings.create(input=[text], model=model)
+        return response.data[0].embedding
 
-    response = client.embeddings.create(input=[text], model=model)
+    def extract_events_from_caption(
+        self, caption_text: str, image_url: str | None = None
+    ) -> list[dict[str, str | bool | float | None]]:
+        """Extract event information from Instagram caption text and optional image"""
+        # Get current date and day of week for context
+        now = datetime.now()
+        current_date = now.strftime("%Y-%m-%d")
+        current_day_of_week = now.strftime("%A")
 
-    return response.data[0].embedding
-
-
-def extract_events_from_caption(
-    caption_text: str, image_url: str | None = None
-) -> list[dict[str, str | bool | float | None]]:
-    # Get current date and day of week for context
-    now = datetime.now()
-    current_date = now.strftime("%Y-%m-%d")
-    current_day_of_week = now.strftime("%A")
-
-    prompt = f"""
+        prompt = f"""
     Analyze the following Instagram caption and extract event information if it's an event post.
     
     Current context: Today is {current_day_of_week}, {current_date}
@@ -83,107 +84,108 @@ def extract_events_from_caption(
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text
     - If no events are found, return an empty array []
-    {f"- An image is provided at: {image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if image_url else ""}
-    """
+        {f"- An image is provided at: {image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if image_url else ""}
+        """
 
-    try:
-        logger.debug(
-            f"Parsing caption of length: {len(caption_text) if caption_text else 0}"
-        )
-        if caption_text:
-            logger.debug(f"Caption preview: {caption_text[:100]}...")
-
-        # Prepare messages for the API call
-        messages = [
-            {
-                "role": "system",
-                "content": "You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
-            },
-            {"role": "user", "content": [{"type": "text", "text": prompt}]},
-        ]
-
-        # Add image to the message if provided
-        if image_url:
-            logger.debug(f"Including image analysis from: {image_url}")
-            messages[1]["content"].append(
-                {"type": "image_url", "image_url": {"url": image_url}}
-            )
-            model = "gpt-4o-mini"  # Use vision-capable model
-        else:
-            model = "gpt-4o-mini"
-
-        response = client.chat.completions.create(
-            model=model, messages=messages, temperature=0.1, max_tokens=500
-        )
-
-        # Extract the JSON response
-        response_text = response.choices[0].message.content.strip()
-
-        # Try to parse the JSON response
         try:
-            # Remove any markdown formatting if present
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
+            logger.debug(
+                f"Parsing caption of length: {len(caption_text) if caption_text else 0}"
+            )
+            if caption_text:
+                logger.debug(f"Caption preview: {caption_text[:100]}...")
 
-            events_data = json.loads(response_text.strip())
+            # Prepare messages for the API call
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that extracts event information from social media posts. Always return valid JSON with the exact structure requested.",
+                },
+                {"role": "user", "content": [{"type": "text", "text": prompt}]},
+            ]
 
-            # Ensure events_data is a list
-            if not isinstance(events_data, list):
-                logger.warning("Response is not a list, wrapping in array")
-                events_data = [events_data] if events_data else []
+            # Add image to the message if provided
+            if image_url:
+                logger.debug(f"Including image analysis from: {image_url}")
+                messages[1]["content"].append(
+                    {"type": "image_url", "image_url": {"url": image_url}}
+                )
+                model = "gpt-4o-mini"  # Use vision-capable model
+            else:
+                model = "gpt-4o-mini"
 
-            # Process each event in the array
-            processed_events = []
-            for event_data in events_data:
-                # Ensure all required fields are present
-                required_fields = [
-                    "name",
-                    "date",
-                    "start_time",
-                    "end_time",
-                    "location",
-                    "price",
-                    "food",
-                    "registration",
-                    "image_url",
-                    "description",
-                ]
-                for field in required_fields:
-                    if field not in event_data:
-                        if field == "price":
-                            event_data[field] = None
-                        elif field == "registration":
-                            event_data[field] = False
-                        else:
-                            event_data[field] = ""
+            response = self.client.chat.completions.create(
+                model=model, messages=messages, temperature=0.1, max_tokens=500
+            )
 
-                # Set image_url if provided
-                if image_url and not event_data.get("image_url"):
-                    event_data["image_url"] = image_url
+            # Extract the JSON response
+            response_text = response.choices[0].message.content.strip()
 
-                processed_events.append(event_data)
+            # Try to parse the JSON response
+            try:
+                # Remove any markdown formatting if present
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:]
+                if response_text.endswith("```"):
+                    response_text = response_text[:-3]
 
-            return processed_events
+                events_data = json.loads(response_text.strip())
 
-        except json.JSONDecodeError:
-            logger.exception("Error parsing JSON response")
-            logger.error(f"Response text: {response_text}")
-            # Return default structure if JSON parsing fails
+                # Ensure events_data is a list
+                if not isinstance(events_data, list):
+                    logger.warning("Response is not a list, wrapping in array")
+                    events_data = [events_data] if events_data else []
+
+                # Process each event in the array
+                processed_events = []
+                for event_data in events_data:
+                    # Ensure all required fields are present
+                    required_fields = [
+                        "name",
+                        "date",
+                        "start_time",
+                        "end_time",
+                        "location",
+                        "price",
+                        "food",
+                        "registration",
+                        "image_url",
+                        "description",
+                    ]
+                    for field in required_fields:
+                        if field not in event_data:
+                            if field == "price":
+                                event_data[field] = None
+                            elif field == "registration":
+                                event_data[field] = False
+                            else:
+                                event_data[field] = ""
+
+                    # Set image_url if provided
+                    if image_url and not event_data.get("image_url"):
+                        event_data["image_url"] = image_url
+
+                    processed_events.append(event_data)
+
+                return processed_events
+
+            except json.JSONDecodeError:
+                logger.exception("Error parsing JSON response")
+                logger.error(f"Response text: {response_text}")
+                # Return default structure if JSON parsing fails
+                return [_get_default_event_structure(image_url)]
+
+        except Exception:
+            logger.exception("Error parsing caption")
+            logger.error(f"Caption text: {caption_text}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            # Return default structure if API call fails
             return [_get_default_event_structure(image_url)]
-
-    except Exception:
-        logger.exception("Error parsing caption")
-        logger.error(f"Caption text: {caption_text}")
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        # Return default structure if API call fails
-        return [_get_default_event_structure(image_url)]
 
 
 def _get_default_event_structure(
     image_url: str | None = None,
 ) -> dict[str, str | bool | float | None]:
+    """Helper function to create default event structure"""
     return {
         "name": "",
         "date": "",
@@ -196,3 +198,11 @@ def _get_default_event_structure(
         "image_url": image_url if image_url else "",
         "description": "",
     }
+
+
+# Singleton instance
+openai_service = OpenAIService()
+
+# Backward compatibility - export functions that use the singleton
+generate_embedding = openai_service.generate_embedding
+extract_events_from_caption = openai_service.extract_events_from_caption

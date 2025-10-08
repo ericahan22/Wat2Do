@@ -37,6 +37,8 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
       
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +94,12 @@ jobs:
         id: generate_static
         working-directory: backend/scraping
         run: python get_static_events.py
+      
+      - name: Send newsletter to subscribers
+        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
+        working-directory: backend/scripts
+        run: python send_newsletter.py
+        continue-on-error: true
       
       - name: Commit and push changes
         if: steps.generate_static.outcome == 'success'

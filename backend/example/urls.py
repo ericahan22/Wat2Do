@@ -17,4 +17,13 @@ urlpatterns = [
     # auth endpoints
     path("auth/token/", views.create_auth_token, name="create_auth_token"),
     path("auth/register/", views.create_user, name="create_user"),
+    # newsletter endpoints
+    path(
+        "newsletter/subscribe", views.newsletter_subscribe, name="newsletter_subscribe"
+    ),
+    path(
+        "newsletter/unsubscribe/<uuid:token>",
+        views.newsletter_unsubscribe,
+        name="newsletter_unsubscribe",
+    ),
 ]
