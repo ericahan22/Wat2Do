@@ -123,39 +123,6 @@ export function useEvents(view: "grid" | "calendar") {
       rawEvents = Array.from(staticEventsData.values());
     }
 
-    if (view === "grid") {
-      const now = new Date();
-      const todayStr =
-        now.getFullYear() +
-        "-" +
-        String(now.getMonth() + 1).padStart(2, "0") +
-        "-" +
-        String(now.getDate()).padStart(2, "0");
-        
-      // Filter for future events and events happening today that haven't finished
-      return rawEvents.filter((event) => {
-        const eventDateStr = event.date;
-
-        // If event is on a future date, include it
-        if (eventDateStr > todayStr) {
-          return true;
-        }
-
-        // If event is today, check if it hasn't finished yet
-        if (eventDateStr === todayStr) {
-          const [hours, minutes] = event.end_time.split(":").map(Number);
-          const eventEndDateTime = new Date();
-          eventEndDateTime.setHours(hours, minutes, 0, 0);
-
-          // Include if event hasn't finished yet (current time < event end time)
-          return now < eventEndDateTime;
-        }
-
-        return false;
-      });
-    }
-    
-    // For calendar view, return all events (backend already sorted them)
     return rawEvents;
   }, [hasActiveFilters, data?.event_ids, view]);
 

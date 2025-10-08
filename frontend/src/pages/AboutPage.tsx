@@ -68,7 +68,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          Canada's Wonderland for $40, and tons of great company{" "}
+          Canada's Wonderland, and tons of great company{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/People/Handshake.webp"
             alt="Handshake"

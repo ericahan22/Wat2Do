@@ -58,12 +58,12 @@ function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isPending || isSuccess}
-                className="flex-1"
               />
               <Button
+                variant="outline"
                 type="submit"
                 disabled={isPending || isSuccess}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap h-9"
               >
                 {isPending ? (
                   "Subscribing..."

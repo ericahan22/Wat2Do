@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Event } from "./useEvents";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 export function useEventSelection(view: "grid" | "calendar") {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
@@ -37,7 +39,7 @@ export function useEventSelection(view: "grid" | "calendar") {
     });
   };
 
-  const generateICS = (events: Event[]) => {
+  const generateICS = (events: (Event & { description?: string | null; url?: string | null; })[]) => {
     const lines = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -67,6 +69,9 @@ export function useEventSelection(view: "grid" | "calendar") {
       lines.push(`DTEND:${startDate}T${endTime}`);
       lines.push(`DTSTAMP:${dtstamp}`);
       lines.push(`SUMMARY:${escapeText(event.name)}`);
+      if (event.description && event.description.trim().length > 0) {
+        lines.push(`DESCRIPTION:${escapeText(event.description)}`);
+      }
       if (event.location) {
         lines.push(`LOCATION:${escapeText(event.location)}`);
       }
@@ -78,9 +83,11 @@ export function useEventSelection(view: "grid" | "calendar") {
     return lines.join('\r\n');
   };
 
-  const exportToCalendar = (events: Event[]) => {
+  const exportToCalendar = async (events: Event[]) => {
     const eventsToExport = events.filter((event) => selectedEvents.has(event.id));
-    const icsContent = generateICS(eventsToExport);
+    const detailedEvents = await fetchEventDetails(eventsToExport.map(e => e.id));
+    const enriched = mergeEventDetails(eventsToExport, detailedEvents);
+    const icsContent = generateICS(enriched);
     
     // Check if user is on mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -122,7 +129,7 @@ export function useEventSelection(view: "grid" | "calendar") {
     }
   };
 
-  const exportToGoogleCalendar = (events: Event[]) => {
+  const exportToGoogleCalendar = async (events: Event[]) => {
     const eventsToExport = events.filter((event) => selectedEvents.has(event.id));
     
     if (eventsToExport.length === 0) {
@@ -133,7 +140,10 @@ export function useEventSelection(view: "grid" | "calendar") {
     // So we'll open a new tab for the first event, or create multiple tabs if user wants
     // For better UX, let's create a single event if only one is selected, or batch them
     
-    eventsToExport.forEach((event, index) => {
+    const detailedEvents = await fetchEventDetails(eventsToExport.map(e => e.id));
+    const enriched = mergeEventDetails(eventsToExport, detailedEvents);
+
+    enriched.forEach((event, index) => {
       // Parse the date and time
       const startDateTime = `${event.date}T${event.start_time}`;
       const endDateTime = event.end_time ? `${event.date}T${event.end_time}` : startDateTime;
@@ -151,7 +161,7 @@ export function useEventSelection(view: "grid" | "calendar") {
         action: 'TEMPLATE',
         text: event.name,
         dates: `${start}/${end}`,
-        details: event.url || '',
+        details: event.description ? `${event.description}${event.url ? "\n\n" + event.url : ""}` : (event.url || ''),
         location: event.location || '',
       });
       
@@ -163,6 +173,23 @@ export function useEventSelection(view: "grid" | "calendar") {
       }, index * 300);
     });
   };
+
+  async function fetchEventDetails(ids: string[]) {
+    if (ids.length === 0) return [] as Array<{ id: string; description?: string | null; url?: string | null; }>;
+    const params = new URLSearchParams({ ids: ids.join(",") });
+    const res = await fetch(`${API_BASE_URL}/api/events/details/?${params.toString()}`);
+    if (!res.ok) return [];
+    const data: { events: Array<{ id: string; description?: string | null; url?: string | null; }> } = await res.json();
+    return data.events || [];
+  }
+
+  function mergeEventDetails(base: Event[], details: Array<{ id: string; description?: string | null; url?: string | null; }>) {
+    const byId = new Map(details.map(d => [d.id, d] as const));
+    return base.map(e => {
+      const d = byId.get(e.id);
+      return { ...e, description: d?.description ?? null, url: d?.url ?? e.url };
+    });
+  }
 
   return {
     isSelectMode,

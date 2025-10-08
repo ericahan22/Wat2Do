@@ -115,6 +115,76 @@ def get_events(request):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @throttle_classes([AnonRateThrottle])
+def get_event_details(request):
+    """Return event details for given comma-separated event IDs.
+
+    Query params:
+    - ids: comma-separated list of event IDs
+
+    Response:
+    {
+      "events": [
+        {
+          "id": str,
+          "name": str,
+          "date": str (YYYY-MM-DD),
+          "start_time": str (HH:MM:SS),
+          "end_time": str (HH:MM:SS),
+          "location": str,
+          "url": str|null,
+          "description": str|null
+        }, ...
+      ]
+    }
+    """
+    try:
+        ids_param = request.GET.get("ids", "").strip()
+        if not ids_param:
+            return Response(
+                {"error": "Missing required query parameter: ids"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Parse ids and ensure they are integers
+        try:
+            id_list = [int(x) for x in ids_param.split(",") if x]
+        except ValueError:
+            return Response(
+                {"error": "ids must be a comma-separated list of integers"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        events = Events.objects.filter(id__in=id_list)
+
+        # Preserve input order
+        event_map = {e.id: e for e in events}
+        result = []
+        for event_id in id_list:
+            event = event_map.get(event_id)
+            if not event:
+                continue
+            result.append(
+                {
+                    "id": str(event.id),
+                    "name": event.name,
+                    "date": event.date.isoformat(),
+                    "start_time": event.start_time.isoformat(),
+                    "end_time": event.end_time.isoformat() if event.end_time else event.start_time.isoformat(),
+                    "location": event.location,
+                    "url": event.url,
+                    "description": event.description,
+                }
+            )
+
+        return Response({"events": result}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@throttle_classes([AnonRateThrottle])
 def get_clubs(request):
     """Get all clubs from database (no pagination)"""
     try:

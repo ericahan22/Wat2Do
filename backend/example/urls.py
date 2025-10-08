@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("health/", views.health, name="health"),
     path("events/", views.get_events, name="events"),
+    path("events/details/", views.get_event_details, name="event_details"),
     path("clubs/", views.get_clubs, name="clubs"),
     # test endpoints
     path("mock-event/", views.create_mock_event, name="create_mock_event"),

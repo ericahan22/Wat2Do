@@ -60,6 +60,8 @@ def main():
                     e.added_at
                 FROM
                     events e
+                WHERE
+                    e.date >= CURRENT_DATE
                 ORDER BY e.date ASC, e.start_time ASC;
                 """
             cur.execute(query)

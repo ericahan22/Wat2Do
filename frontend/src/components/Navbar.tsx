@@ -1,21 +1,20 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Moon, Sun } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Moon, Sun, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GitHubLink from "@/components/GitHubLink";
-import { useTheme } from "@/hooks/useTheme";
+import { useNavbar } from "@/hooks";
 
 function Navbar() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
-
-  const isActive = (path: string) => {
-    return (
-      location.pathname === path ||
-      (path === "/events" && location.pathname === "/")
-    );
-  };
+  const {
+    isMobileMenuOpen,
+    theme,
+    isActive,
+    toggleMobileMenu,
+    closeMobileMenu,
+    handleNavigation,
+    toggleTheme,
+  } = useNavbar();
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">
@@ -31,10 +30,11 @@ function Navbar() {
                 />
               </Link>
             </div>
-            <div className="flex gap-2">
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex gap-2">
               <Button
                 variant="link"
-                onMouseDown={() => navigate("/events")}
+                onMouseDown={() => handleNavigation("/events")}
                 className={`text-sm font-medium ${
                   isActive("/events")
                     ? "text-gray-900 dark:text-white"
@@ -45,7 +45,7 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
-                onMouseDown={() => navigate("/clubs")}
+                onMouseDown={() => handleNavigation("/clubs")}
                 className={`text-sm font-medium ${
                   isActive("/clubs")
                     ? "text-gray-900 dark:text-white"
@@ -56,7 +56,7 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
-                onMouseDown={() => navigate("/about")}
+                onMouseDown={() => handleNavigation("/about")}
                 className={`text-sm font-medium ${
                   isActive("/about")
                     ? "text-gray-900 dark:text-white"
@@ -69,20 +69,38 @@ function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="link"
-              asChild
-              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <a
-                href="https://github.com/ericahan22/bug-free-octo-spork/issues"
-                target="_blank"
-                rel="noopener noreferrer"
+            {/* Desktop Right Side */}
+            <div className="hidden md:flex items-center gap-2">
+              <Button
+                variant="link"
+                asChild
+                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
-                Feedback
-              </a>
+                <a
+                  href="https://github.com/ericahan22/bug-free-octo-spork/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Feedback
+                </a>
+              </Button>
+              <GitHubLink />
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onMouseDown={toggleMobileMenu}
+              className="md:hidden p-2"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
             </Button>
-            <GitHubLink />
+            
             <Button
               variant="ghost"
               size="sm"
@@ -97,6 +115,55 @@ function Navbar() {
             </Button>
           </div>
         </div>
+        
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200/50 dark:border-gray-700/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+            <div className="px-4 py-2 space-y-1">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                onMouseDown={() => handleNavigation("/events")}
+              >
+                Events
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                onMouseDown={() => handleNavigation("/clubs")}
+              >
+                Clubs
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                onMouseDown={() => handleNavigation("/about")}
+              >
+                About
+              </Button>
+              <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  asChild
+                >
+                  <a
+                    href="https://github.com/ericahan22/bug-free-octo-spork/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={closeMobileMenu}
+                  >
+                    Feedback
+                  </a>
+                </Button>
+                <div className="flex items-center">
+                  <GitHubLink />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
