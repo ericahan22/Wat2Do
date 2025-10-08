@@ -49,7 +49,7 @@ function EventsPage() {
       {/* Filters */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <SearchInput placeholder="Search events..." className="flex-1" />
+          <SearchInput placeholder="Filter events by..." className="flex-1" />
 
           {/* View toggle tabs */}
           <div className="flex justify-end ml-auto gap-2">

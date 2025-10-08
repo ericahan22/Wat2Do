@@ -72,10 +72,10 @@ const EventPopup: React.FC<{
   <div
     className="event-popup absolute bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 w-80 z-50 border border-gray-200 dark:border-gray-700"
     style={style}
-    onClick={(e) => e.stopPropagation()}
+    onMouseDown={(e) => e.stopPropagation()}
   >
     <button
-      onClick={onClose}
+      onMouseDown={onClose}
       className="absolute top-2 right-2 text-gray-800 dark:text-gray-300 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700"
     >
       ✕
@@ -141,6 +141,7 @@ const EventPopup: React.FC<{
           </span>
         </div>
       )}
+      
 
       {event.registration && (
         <div className="italic">Registration required</div>
@@ -172,12 +173,13 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
 }) => {
   return (
     <div className="relative mb-4 flex items-center justify-end gap-12">
-      <div className="absolute left-0 sm:left-1/2 sm:-translate-x-1/2 flex items-center ">
+      <div className="absolute left-0 sm:left-1/2 gap-3 sm:-translate-x-1/2 flex items-center ">
         {/* Back button < */}
         <IconButton
           onMouseDown={() => onNavigate("PREV")}
           icon={ChevronLeft}
           aria-label="Previous Month"
+          size="sm"
         />
 
         {/* Month Year title */}
@@ -190,6 +192,7 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
           onMouseDown={() => onNavigate("NEXT")}
           icon={ChevronRight}
           aria-label="Next Month"
+          size="sm"
         />
       </div>
 
@@ -356,7 +359,7 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   return (
     <div 
       className="events-calendar-container relative" 
-      onClick={closePopup}
+      onMouseDown={closePopup}
       ref={calendarContainerRef}
     >
       <Calendar

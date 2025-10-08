@@ -33,6 +33,7 @@ function Navbar() {
             </div>
             <div className="flex gap-2">
               <Button
+                variant="link"
                 onMouseDown={() => navigate("/events")}
                 className={`text-sm font-medium ${
                   isActive("/events")
@@ -43,6 +44,7 @@ function Navbar() {
                 Events
               </Button>
               <Button
+                variant="link"
                 onMouseDown={() => navigate("/clubs")}
                 className={`text-sm font-medium ${
                   isActive("/clubs")
@@ -52,10 +54,34 @@ function Navbar() {
               >
                 Clubs
               </Button>
+              <Button
+                variant="link"
+                onMouseDown={() => navigate("/about")}
+                className={`text-sm font-medium ${
+                  isActive("/about")
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                About
+              </Button>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="link"
+              asChild
+              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              <a
+                href="https://github.com/ericahan22/bug-free-octo-spork/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Feedback
+              </a>
+            </Button>
             <GitHubLink />
             <Button
               variant="ghost"

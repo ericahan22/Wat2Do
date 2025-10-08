@@ -11,7 +11,6 @@ const filterOptions = [
   "Engineering",
   "Business",
   "Math",
-  "Pizza",
   "Coffee",
   "Workshop",
   "Career Fair",
