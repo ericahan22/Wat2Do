@@ -1,0 +1,60 @@
+name: Build and Deploy Backend to ECR (on backend changes)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ecr-deploy.yml'
+
+jobs:
+  build-push-and-redeploy:
+    name: Build, Push to ECR, and Redeploy ECS Service
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      AWS_REGION: us-east-2
+      ECR_REGISTRY: 058264255918.dkr.ecr.us-east-2.amazonaws.com
+      ECR_REPOSITORY: bug-free-octo-spork/backend
+      IMAGE_TAG: latest
+      ECS_SERVICE_NAME: bug-free-octo-spork-django-task-service-i1pnpewj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          echo "Building ${IMAGE_URI}"
+          docker build -f backend/Dockerfile -t ${IMAGE_URI} backend
+
+      - name: Push Docker image
+        run: |
+          IMAGE_URI=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker push ${IMAGE_URI}
+
+      - name: Force new deployment on ECS service
+        env:
+          ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }}
+        run: |
+          aws ecs update-service \
+            --cluster "${ECS_CLUSTER}" \
+            --service "${ECS_SERVICE_NAME}" \
+            --force-new-deployment \
+            --region "${AWS_REGION}"
+
+
