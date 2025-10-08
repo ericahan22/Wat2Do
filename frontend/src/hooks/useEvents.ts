@@ -69,16 +69,11 @@ const fetchEvents = async ({
   queryKey: string[];
 }): Promise<EventsResponse> => {
   const searchTerm = queryKey[1] || "";
-  const startDate = queryKey[2] || "";
   
   const params = new URLSearchParams();
   
   if (searchTerm) {
     params.append("search", searchTerm);
-  }
-  
-  if (startDate) {
-    params.append("start_date", startDate);
   }
 
   const queryString = params.toString() ? `?${params.toString()}` : "";
@@ -96,15 +91,10 @@ export function useEvents(view: "grid" | "calendar") {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
-  // Calculate start date based on view
-  const startDate = view === "grid" 
-    ? new Date().toISOString().split('T')[0] // YYYY-MM-DD format for today
-    : "";  
-
   const hasActiveFilters = searchTerm !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, startDate],
+    queryKey: ["events", searchTerm],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
@@ -136,9 +126,7 @@ export function useEvents(view: "grid" | "calendar") {
     if (searchTerm) {
       title = `${events.length} Found Events - Wat2Do`;
     } else {
-      title = view === "grid" 
-        ? `${events.length} Upcoming Events - Wat2Do`
-        : `${events.length} Total Events - Wat2Do`;
+      title = `${events.length} Upcoming Events - Wat2Do`;
     }
     
     if (!isLoadingData) {

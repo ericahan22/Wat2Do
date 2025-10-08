@@ -19,9 +19,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
-from example.embedding_utils import is_duplicate_event
+from example.embedding_utils import is_duplicate_event, find_similar_events
 from example.models import Clubs, Events
 from services.openai_service import extract_events_from_caption, generate_embedding
+from django.db import connection
 from services.storage_service import upload_image_from_url
 
 USER_AGENTS = [
@@ -179,16 +180,31 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 f"Club with handle {club_ig} not found, inserting event with null club_type"
             )
 
-        # Check duplicates using vector sim
-        logger.debug(f"Checking duplicates for event with data: {event_data}")
-        if is_duplicate_event(event_data):
-            logger.debug(f"Duplicate event found: {event_name} at {event_location}")
-            return False
-
-        # Generate embedding
         embedding = generate_embedding(event_data["description"])
 
-        # Create event using Django ORM
+        try:
+            # Pass event date as min_date to filter out past events first for performance
+            similar_events = find_similar_events(
+                embedding, threshold=0.90, limit=10, min_date=event_date
+            )
+            candidate_ids = [row["id"] for row in similar_events]
+            if candidate_ids:
+                for existing in Events.objects.filter(id__in=candidate_ids, date=event_date):
+                    if (
+                        (existing.location or "") == (event_location or "")
+                        and (existing.start_time or "") == (event_data.get("start_time") or "")
+                        and (
+                            (existing.end_time or None)
+                            == (event_data.get("end_time") or None)
+                        )
+                    ):
+                        logger.info(
+                            f"Deleting older duplicate event id={existing.id} before inserting refreshed version"
+                        )
+                        existing.delete()
+        except Exception as dedup_err:
+            logger.error(f"Duplicate check via utility failed: {dedup_err}")
+
         Events.objects.create(
             club_handle=club_ig,
             url=post_url,
