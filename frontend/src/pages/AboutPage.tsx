@@ -35,7 +35,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          italian cooking lessons in a studio kitchen, a free 2-hr{" "}
+          italian cooking lessons in a culinary school, a free 2-hr{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/People/Mechanical%20Arm.webp"
             alt="Mechanical Arm"
