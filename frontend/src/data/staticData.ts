@@ -1172,3 +1172,6 @@ export const staticEventsData = new Map<string, Event>([
     added_at: "2025-10-08T11:13:28.335927",
   }]
 ]);
+
+// Recommended filter keywords generated from upcoming events
+export const RECOMMENDED_FILTERS: string[] = [];

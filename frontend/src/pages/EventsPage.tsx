@@ -38,11 +38,7 @@ function EventsPage() {
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
           Discover and explore upcoming events. Updates daily at ~8:30am EST.
-          {lastUpdatedText && (
-            <span className="ml-1">
-              {lastUpdatedText}.
-            </span>
-          )}
+          {lastUpdatedText && <span className="ml-1">{lastUpdatedText}.</span>}
         </p>
       </div>
 
@@ -100,9 +96,7 @@ function EventsPage() {
               ? "Loading..."
               : searchTerm
               ? `Showing ${data.length} found events`
-              : view === "grid"
-              ? `Showing ${data.length} upcoming events`
-              : `Showing ${data.length} events`}
+              : `Showing ${data.length} upcoming events`}
           </p>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { RECOMMENDED_FILTERS } from "@/data/staticData";
 
-const filterOptions = [
+// Fallback filters if none are generated yet
+const FALLBACK_FILTERS = [
   "Bubble Tea",
   "Domino's Pizza",
   "Actuarial Science",
@@ -22,6 +24,11 @@ const filterOptions = [
   "Hackathon",
   "Study Group",
 ];
+
+// Use recommended filters if available, otherwise use fallback
+const filterOptions = RECOMMENDED_FILTERS && RECOMMENDED_FILTERS.length > 0 
+  ? RECOMMENDED_FILTERS 
+  : FALLBACK_FILTERS;
 
 export const useQuickFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();

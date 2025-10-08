@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { staticEventsData, LAST_UPDATED } from "@/data/staticEvents";
+import { staticEventsData, LAST_UPDATED } from "@/data/staticData";
 import { useDocumentTitle } from "./useDocumentTitle";
 
 export interface Event {

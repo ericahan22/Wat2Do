@@ -115,7 +115,7 @@ const EventsGrid = memo(
                     src={event.image_url}
                     alt={event.name}
                     loading="lazy"
-                    className="w-full h-40 object-cover brightness-75 rounded-t-xl"
+                    className="w-full h-40 object-cover rounded-t-xl"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = "none";

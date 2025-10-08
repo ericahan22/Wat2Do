@@ -181,6 +181,92 @@ class OpenAIService:
             # Return default structure if API call fails
             return [_get_default_event_structure(image_url)]
 
+    def generate_recommended_filters(
+        self, events_data: list[dict]
+    ) -> list[str]:
+        """Generate recommended filter keywords from upcoming events data using GPT"""
+        if not events_data:
+            logger.warning("No events data provided for filter generation")
+            return []
+
+        # Prepare event summaries for the prompt
+        event_summaries = []
+        for event in events_data[:200]:  # Limit to 200 events to avoid token limits
+            summary = f"- {event.get('name', 'Unnamed')} at {event.get('location', 'TBD')} on {event.get('date', 'TBD')}"
+            if event.get('food'):
+                summary += f" (food: {event.get('food')})"
+            if event.get('club_type'):
+                summary += f" [type: {event.get('club_type')}]"
+            event_summaries.append(summary)
+
+        prompt = f"""
+Analyze the following list of {len(event_summaries)} upcoming student events and generate 20-25 search filter keywords.
+
+Events:
+{chr(10).join(event_summaries)}
+
+Generate filter keywords that:
+1. Capture the most common themes students care about (networking, meeting people, large events, food, professional development, etc.)
+2. Are SHORT (1-3 words max) and SPECIFIC
+3. Reflect actual patterns in the event data above
+4. Focus on: event types, activities, professional topics, food/drinks, social aspects, clubs/organizations
+5. Are diverse enough to cover different student interests
+
+Return ONLY a JSON array of 20-25 keyword strings, like:
+["networking", "free food", "career fair", "live music", "workshop", ...]
+
+NO explanations, NO additional text, JUST the JSON array.
+"""
+
+        try:
+            logger.info(f"Generating recommended filters from {len(event_summaries)} events")
+            
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a helpful assistant that generates search keywords. Always return valid JSON arrays.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.3,
+                max_tokens=300,
+            )
+
+            response_text = response.choices[0].message.content.strip()
+
+            # Remove markdown formatting if present
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+
+            filters = json.loads(response_text.strip())
+
+            if not isinstance(filters, list):
+                logger.error("Response is not a list")
+                return []
+
+            # Clean and validate filters
+            cleaned_filters = [
+                str(f).strip()
+                for f in filters
+                if f and isinstance(f, str) and len(str(f).strip()) > 0
+            ]
+
+            logger.info(f"Generated {len(cleaned_filters)} recommended filters")
+            return cleaned_filters[:25]  # Cap at 25
+
+        except json.JSONDecodeError:
+            logger.exception("Error parsing JSON response for filters")
+            logger.error(f"Response text: {response_text}")
+            return []
+        except Exception:
+            logger.exception("Error generating recommended filters")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            return []
+
 
 def _get_default_event_structure(
     image_url: str | None = None,
@@ -206,3 +292,4 @@ openai_service = OpenAIService()
 # Backward compatibility - export functions that use the singleton
 generate_embedding = openai_service.generate_embedding
 extract_events_from_caption = openai_service.extract_events_from_caption
+generate_recommended_filters = openai_service.generate_recommended_filters

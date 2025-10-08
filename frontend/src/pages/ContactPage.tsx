@@ -25,10 +25,10 @@ const ContactPage: React.FC = () => {
             </a>{" "}
             and {" "}
             <a
-              href="mailto:ericahan.38@gmail.com"
+              href="mailto:e22han@uwaterloo.ca"
               className="underline hover:text-gray-900 dark:hover:text-gray-100"
             >
-              ericahan.38@gmail.com
+              e22han@uwaterloo.ca
             </a>
             .
           </p>
