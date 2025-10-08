@@ -19,6 +19,14 @@ export function useSearchState() {
       // On initial mount, only sync if there's an actual search param
       if (searchParam) {
         setInputValue(searchParam);
+      } else if (lastSearch && lastSearch.trim()) {
+        // If URL is empty but we have a last search, redirect to it
+        setInputValue(lastSearch);
+        setSearchParams((prev) => {
+          const nextParams = new URLSearchParams(prev);
+          nextParams.set("search", lastSearch);
+          return nextParams;
+        });
       }
     } else {
       // On subsequent updates, always sync with URL
