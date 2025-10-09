@@ -203,7 +203,7 @@ const AboutPage: React.FC = () => {
         </h2>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
           Check Wat2Do regularly for new events. Subscribe to our newsletter for
-          weekly updates. Don't be afraid to attend events alone! The best
+          daily updates. Don't be afraid to attend events alone! The best
           connections happen when you show up.
         </p>
 

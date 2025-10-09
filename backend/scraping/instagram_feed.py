@@ -404,24 +404,5 @@ if __name__ == "__main__":
         logger.info("Session created successfully!")
         process_recent_feed(L)
         
-        # Generate recommended filters after processing feed
-        logger.info("Generating recommended filters from upcoming events...")
-        try:
-            script_path = Path(__file__).resolve().parent.parent / "scripts" / "generate_recommended_filters.py"
-            result = subprocess.run(
-                [sys.executable, str(script_path)],
-                capture_output=True,
-                text=True,
-                timeout=120
-            )
-            if result.returncode == 0:
-                logger.info("✅ Recommended filters generated successfully")
-                if result.stdout:
-                    logger.info(f"Output: {result.stdout}")
-            else:
-                logger.error(f"❌ Failed to generate recommended filters: {result.stderr}")
-        except Exception as e:
-            logger.error(f"Error running filter generation script: {e}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
     else:
         logger.critical("Failed to initialize Instagram session, stopping...")
