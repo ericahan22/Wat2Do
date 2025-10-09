@@ -19,6 +19,7 @@ jobs:
       ECR_REGISTRY: 058264255918.dkr.ecr.us-east-2.amazonaws.com
       ECR_REPOSITORY: bug-free-octo-spork/backend
       IMAGE_TAG: latest
+      ECS_CLUSTER: bug-free-octo-spork-django-cluster
       ECS_SERVICE_NAME: bug-free-octo-spork-django-task-service-i1pnpewj
 
     steps:
@@ -48,8 +49,6 @@ jobs:
           docker push ${IMAGE_URI}
 
       - name: Force new deployment on ECS service
-        env:
-          ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }}
         run: |
           aws ecs update-service \
             --cluster "${ECS_CLUSTER}" \
