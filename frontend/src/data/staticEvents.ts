@@ -1,6 +1,6 @@
 import { Event } from "@/hooks/useEvents";
 
-export const LAST_UPDATED = "2025-10-09T13:05:32.556628";
+export const LAST_UPDATED = "2025-10-09T16:32:14.706964";
 
 export const staticEventsData = new Map<string, Event>([
   ["661", {
