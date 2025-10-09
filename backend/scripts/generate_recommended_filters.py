@@ -8,10 +8,10 @@ This script:
 3. Updates the frontend staticData.ts file with the new filters
 """
 
-import os
-import sys
 import logging
+import os
 import re
+import sys
 from datetime import date
 from pathlib import Path
 
@@ -23,8 +23,8 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 django.setup()
 
-from example.models import Events
-from services.openai_service import generate_recommended_filters
+from example.models import Events  # noqa: E402
+from services.openai_service import generate_recommended_filters  # noqa: E402
 
 # Setup logging
 logging.basicConfig(
@@ -38,11 +38,11 @@ def fetch_upcoming_events():
     """Fetch all events with dates >= today"""
     today = date.today()
     logger.info(f"Fetching upcoming events from {today}...")
-    
+
     events = Events.objects.filter(date__gte=today).values(
-        'name', 'location', 'date', 'food', 'club_type', 'description'
+        "name", "location", "date", "food", "club_type", "description"
     )
-    
+
     events_list = list(events)
     logger.info(f"Found {len(events_list)} upcoming events")
     return events_list
@@ -54,7 +54,7 @@ def update_static_data_file(recommended_filters):
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
     static_events_path = frontend_dir / "src" / "data" / "staticEvents.ts"
     static_data_path = frontend_dir / "src" / "data" / "staticData.ts"
-    
+
     # Determine which file exists
     if static_data_path.exists():
         target_file = static_data_path
@@ -65,12 +65,12 @@ def update_static_data_file(recommended_filters):
     else:
         logger.error("Could not find staticEvents.ts or staticData.ts")
         return False
-    
+
     try:
         # Read the current file
-        with open(target_file, 'r', encoding='utf-8') as f:
+        with open(target_file, encoding="utf-8") as f:
             content = f.read()
-        
+
         # Format the recommended filters as a TypeScript array
         filters_ts = "export const RECOMMENDED_FILTERS: string[] = [\n"
         for filter_keyword in recommended_filters:
@@ -78,27 +78,29 @@ def update_static_data_file(recommended_filters):
             escaped = filter_keyword.replace('"', '\\"')
             filters_ts += f'  "{escaped}",\n'
         filters_ts += "];\n"
-        
+
         # Check if RECOMMENDED_FILTERS already exists
         if "export const RECOMMENDED_FILTERS" in content:
             # Replace existing RECOMMENDED_FILTERS
-            pattern = r'export const RECOMMENDED_FILTERS:.*?\];'
-            content = re.sub(pattern, filters_ts.rstrip('\n'), content, flags=re.DOTALL)
+            pattern = r"export const RECOMMENDED_FILTERS:.*?\];"
+            content = re.sub(pattern, filters_ts.rstrip("\n"), content, flags=re.DOTALL)
             logger.info("Updated existing RECOMMENDED_FILTERS")
         else:
             # Append to the end of the file
             content += "\n" + filters_ts
             logger.info("Added new RECOMMENDED_FILTERS export")
-        
+
         # Write back to the file
-        with open(target_file, 'w', encoding='utf-8') as f:
+        with open(target_file, "w", encoding="utf-8") as f:
             f.write(content)
-        
-        logger.info(f"✅ Successfully updated {target_file.name} with {len(recommended_filters)} filters")
+
+        logger.info(
+            f"✅ Successfully updated {target_file.name} with {len(recommended_filters)} filters"
+        )
         return True
-        
-    except Exception as e:
-        logger.exception(f"Error updating static data file: {e}")
+
+    except Exception:
+        logger.exception("Error updating static data file")
         return False
 
 
@@ -107,27 +109,27 @@ def main():
     logger.info("=" * 60)
     logger.info("Starting recommended filters generation")
     logger.info("=" * 60)
-    
+
     # Step 1: Fetch upcoming events
     events_data = fetch_upcoming_events()
-    
+
     if not events_data:
         logger.warning("No upcoming events found, cannot generate filters")
         return 1
-    
+
     # Step 2: Generate recommended filters using OpenAI
     logger.info("Generating recommended filters using OpenAI...")
     recommended_filters = generate_recommended_filters(events_data)
-    
+
     if not recommended_filters:
         logger.error("Failed to generate recommended filters")
         return 1
-    
+
     logger.info(f"Generated {len(recommended_filters)} filters: {recommended_filters}")
-    
+
     # Step 3: Update the staticData.ts file
     success = update_static_data_file(recommended_filters)
-    
+
     if success:
         logger.info("=" * 60)
         logger.info("✅ Recommended filters generation completed successfully")
@@ -140,4 +142,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

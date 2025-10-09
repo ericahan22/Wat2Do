@@ -36,7 +36,7 @@ def fetch_events_for_static_data():
     """Fetch all upcoming events from the database for static data generation"""
     conn_string = os.environ.get("SUPABASE_DB_URL")
     logging.info("Connecting to the database...")
-    
+
     with psycopg2.connect(conn_string) as conn, conn.cursor() as cur:
         logging.info("Executing query...")
         query = """
@@ -76,14 +76,17 @@ def generate_recommended_filters(events_data):
     """Generate recommended filters using OpenAI service"""
     try:
         from services.openai_service import generate_recommended_filters
+
         logging.info("Generating recommended filters using OpenAI...")
         recommended_filters = generate_recommended_filters(events_data)
-        
+
         if not recommended_filters:
             logging.warning("Failed to generate recommended filters")
             return []
-        
-        logging.info(f"Generated {len(recommended_filters)} filters: {recommended_filters}")
+
+        logging.info(
+            f"Generated {len(recommended_filters)} filters: {recommended_filters}"
+        )
         return recommended_filters
     except Exception as e:
         logging.error(f"Error generating recommended filters: {e}")
@@ -98,10 +101,10 @@ def main():
     try:
         # Fetch upcoming events
         events = fetch_events_for_static_data()
-        
+
         # Generate recommended filters
         recommended_filters = generate_recommended_filters(events)
-        
+
         # Write to staticData.ts
         output_path = (
             Path(__file__).parent.parent.parent
@@ -116,7 +119,7 @@ def main():
             current_time = datetime.now().isoformat()
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
-            
+
             # Write static events data
             f.write("export const staticEventsData = new Map<string, Event>([\n")
             for i, event in enumerate(events):
@@ -141,7 +144,7 @@ def main():
                     f.write(",")
                 f.write("\n")
             f.write("]);\n\n")
-            
+
             # Write recommended filters
             if recommended_filters:
                 f.write("export const RECOMMENDED_FILTERS: string[] = [\n")
@@ -154,8 +157,10 @@ def main():
                 f.write("];\n")
             else:
                 f.write("export const RECOMMENDED_FILTERS: string[] = [];\n")
-        
-        logging.info("Successfully updated staticData.ts with events and recommended filters")
+
+        logging.info(
+            "Successfully updated staticData.ts with events and recommended filters"
+        )
     except Exception:
         logging.exception("An error occurred")
         sys.exit(1)

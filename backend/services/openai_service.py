@@ -181,9 +181,7 @@ class OpenAIService:
             # Return default structure if API call fails
             return [_get_default_event_structure(image_url)]
 
-    def generate_recommended_filters(
-        self, events_data: list[dict]
-    ) -> list[str]:
+    def generate_recommended_filters(self, events_data: list[dict]) -> list[str]:
         """Generate recommended filter keywords from upcoming events data using GPT"""
         if not events_data:
             logger.warning("No events data provided for filter generation")
@@ -193,9 +191,9 @@ class OpenAIService:
         event_summaries = []
         for event in events_data[:200]:  # Limit to 200 events to avoid token limits
             summary = f"- {event.get('name', 'Unnamed')} at {event.get('location', 'TBD')} on {event.get('date', 'TBD')}"
-            if event.get('food'):
+            if event.get("food"):
                 summary += f" (food: {event.get('food')})"
-            if event.get('club_type'):
+            if event.get("club_type"):
                 summary += f" [type: {event.get('club_type')}]"
             event_summaries.append(summary)
 
@@ -219,8 +217,10 @@ NO explanations, NO additional text, JUST the JSON array.
 """
 
         try:
-            logger.info(f"Generating recommended filters from {len(event_summaries)} events")
-            
+            logger.info(
+                f"Generating recommended filters from {len(event_summaries)} events"
+            )
+
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[

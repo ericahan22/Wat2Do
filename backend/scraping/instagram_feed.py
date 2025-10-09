@@ -11,7 +11,6 @@ django.setup()
 import csv
 import logging
 import random
-import subprocess
 import time
 import traceback
 from datetime import datetime, timedelta, timezone
@@ -20,10 +19,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
-from example.embedding_utils import is_duplicate_event, find_similar_events
+from example.embedding_utils import find_similar_events
 from example.models import Clubs, Events
 from services.openai_service import extract_events_from_caption, generate_embedding
-from django.db import connection
 from services.storage_service import upload_image_from_url
 
 USER_AGENTS = [
@@ -190,10 +188,13 @@ def insert_event_to_db(event_data, club_ig, post_url):
             )
             candidate_ids = [row["id"] for row in similar_events]
             if candidate_ids:
-                for existing in Events.objects.filter(id__in=candidate_ids, date=event_date):
+                for existing in Events.objects.filter(
+                    id__in=candidate_ids, date=event_date
+                ):
                     if (
                         (existing.location or "") == (event_location or "")
-                        and (existing.start_time or "") == (event_data.get("start_time") or "")
+                        and (existing.start_time or "")
+                        == (event_data.get("start_time") or "")
                         and (
                             (existing.end_time or None)
                             == (event_data.get("end_time") or None)
@@ -403,6 +404,6 @@ if __name__ == "__main__":
     if L:
         logger.info("Session created successfully!")
         process_recent_feed(L)
-        
+
     else:
         logger.critical("Failed to initialize Instagram session, stopping...")
