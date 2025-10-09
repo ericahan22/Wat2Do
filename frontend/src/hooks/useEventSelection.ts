@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Event } from "./useEvents";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+import { API_BASE_URL } from '@/constants/api';
 
 export function useEventSelection(view: "grid" | "calendar") {
   const [isSelectMode, setIsSelectMode] = useState(false);

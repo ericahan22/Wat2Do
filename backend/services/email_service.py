@@ -54,6 +54,7 @@ class EmailService:
                     "location": event.location,
                     "description": event.description or "No description available.",
                     "club": club_name,
+                    "image_url": event.image_url,
                 }
             )
 
@@ -101,6 +102,17 @@ class EmailService:
         """Generate HTML email from events data"""
         events_html = ""
         for event in events:
+            # Add event image if available
+            image_html = ""
+            if event.get('image_url'):
+                image_html = f"""
+                    <img
+                      src="{event['image_url']}"
+                      alt="{event['name']}"
+                      style="width:100%;max-width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:block"
+                    />
+                    """
+
             events_html += f"""
             <table
               align="center"
@@ -113,6 +125,7 @@ class EmailService:
               <tbody>
                 <tr>
                   <td>
+                    {image_html}
                     <h3
                       style="margin:0 0 8px;font-weight:bold;font-size:18px;line-height:24px;color:#0c0d0e">
                       {event['name']}
@@ -160,7 +173,7 @@ class EmailService:
             <div
               style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0"
               data-skip-in-text="true">
-              Your weekly UWaterloo events digest
+              Your daily UWaterloo events digest
             </div>
             <table
               align="center"
@@ -220,7 +233,7 @@ class EmailService:
                                     </h1>
                                     <p
                                       style="font-size:18px;line-height:26px;color:#fff;margin:0">
-                                      Your weekly digest of upcoming events at UWaterloo
+                                      Your daily digest of upcoming events at UWaterloo
                                     </p>
                                   </td>
                                 </tr>
@@ -243,11 +256,11 @@ class EmailService:
                           <td>
                             <h2
                               style="margin:0 0 20px;font-weight:bold;font-size:24px;line-height:28px;color:#0c0d0e">
-                              📅 Upcoming Events This Week
+                              📅 Today's New Events
                             </h2>
                             <p
                               style="font-size:15px;line-height:22px;color:#3c3f44;margin:0 0 24px 0">
-                              Here are some exciting events happening soon on campus. Don't miss out!
+                              Here are some exciting events that were just added to our platform. Don't miss out!
                             </p>
                             
                             {events_html}
@@ -305,7 +318,7 @@ class EmailService:
                       target="_blank"
                       >Visit Wat2Do</a
                     ><a
-                      href="https://wat2do.ca/api/newsletter/unsubscribe/{unsubscribe_token}"
+                      href="https://wat2do.ca/unsubscribe/{unsubscribe_token}"
                       style="color:#9199a1;text-decoration-line:none;display:inline-block;text-decoration:underline;font-size:12px;margin-right:16px"
                       target="_blank"
                       >Unsubscribe</a
@@ -332,9 +345,20 @@ class EmailService:
 </html>"""
 
     def generate_newsletter_html(self, events, unsubscribe_token):
-        """Generate HTML email for weekly newsletter (different from welcome email)"""
+        """Generate HTML email for daily newsletter (different from welcome email)"""
         events_html = ""
         for event in events:
+            # Add event image if available
+            image_html = ""
+            if event.get('image_url'):
+                image_html = f"""
+                    <img
+                      src="{event['image_url']}"
+                      alt="{event['name']}"
+                      style="width:100%;max-width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:block"
+                    />
+                    """
+
             events_html += f"""
             <table
               align="center"
@@ -347,6 +371,7 @@ class EmailService:
               <tbody>
                 <tr>
                   <td>
+                    {image_html}
                     <h3
                       style="margin:0 0 8px;font-weight:bold;font-size:18px;line-height:24px;color:#0c0d0e">
                       {event['name']}
@@ -394,7 +419,7 @@ class EmailService:
             <div
               style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0"
               data-skip-in-text="true">
-              Your weekly UWaterloo events digest
+              Your daily UWaterloo events digest
             </div>
             <table
               align="center"
@@ -450,11 +475,11 @@ class EmailService:
                                     style="padding:40px 30px">
                                     <h1
                                       style="color:#fff;font-size:32px;font-weight:bold;line-height:38px;margin:0 0 12px 0">
-                                      This Week's Events 🎓
+                                      Today's New Events 🎓
                                     </h1>
                                     <p
                                       style="font-size:18px;line-height:26px;color:#fff;margin:0">
-                                      Your weekly digest of upcoming events at UWaterloo
+                                      Your daily digest of upcoming events at UWaterloo
                                     </p>
                                   </td>
                                 </tr>
@@ -477,11 +502,11 @@ class EmailService:
                           <td>
                             <h2
                               style="margin:0 0 20px;font-weight:bold;font-size:24px;line-height:28px;color:#0c0d0e">
-                              📅 Upcoming Events This Week
+                              📅 Today's New Events
                             </h2>
                             <p
                               style="font-size:15px;line-height:22px;color:#3c3f44;margin:0 0 24px 0">
-                              Here are some exciting events happening soon on campus. Don't miss out!
+                              Here are some exciting events that were just added to our platform. Don't miss out!
                             </p>
                             
                             {events_html}
@@ -539,7 +564,7 @@ class EmailService:
                       target="_blank"
                       >Visit Wat2Do</a
                     ><a
-                      href="https://wat2do.ca/api/newsletter/unsubscribe/{unsubscribe_token}"
+                      href="https://wat2do.ca/unsubscribe/{unsubscribe_token}"
                       style="color:#9199a1;text-decoration-line:none;display:inline-block;text-decoration:underline;font-size:12px;margin-right:16px"
                       target="_blank"
                       >Unsubscribe</a
@@ -577,7 +602,7 @@ class EmailService:
         payload = {
             "from": f"Welcome to Wat2Do <{self.from_email}>",
             "to": [to_email],
-            "subject": "Welcome to Wat2Do! 🎉 Your Weekly UWaterloo Events",
+            "subject": "Welcome to Wat2Do! 🎉 Your Daily UWaterloo Events",
             "html": html_content,
         }
 
@@ -606,7 +631,7 @@ class EmailService:
         payload = {
             "from": f"Today's Events at Wat2Do <{self.from_email}>",
             "to": [to_email],
-            "subject": "This Week's Events at UWaterloo 🎓",
+            "subject": "Today's New Events at UWaterloo 🎓",
             "html": html_content,
         }
 

@@ -4,6 +4,8 @@ import EventsPage from '@/pages/EventsPage'
 import ClubsPage from '@/pages/ClubsPage'
 import AboutPage from '@/pages/AboutPage'
 import ContactPage from '@/pages/ContactPage'
+import UnsubscribePage from '@/pages/UnsubscribePage'
+import NotFoundPage from '@/pages/NotFoundPage'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 
@@ -19,6 +21,8 @@ function App() {
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
 

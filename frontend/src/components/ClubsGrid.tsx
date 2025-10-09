@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Tag, ExternalLink, Instagram, MessageCircle } from "lucide-react";
 import { Club } from "@/hooks";
 import { memo } from "react";
+import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 
 interface ClubsGridProps {
   data: Club[];
@@ -105,6 +106,7 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
       {data.length === 0 && (
         <div className="text-center py-12">
           <div className="max-w-md mx-auto">
+            <GeeveKickingRocks className="w-32 h-32 mb-6 mx-auto text-gray-400 dark:text-gray-600" />
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
               No clubs found
             </p>

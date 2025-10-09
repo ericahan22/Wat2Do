@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 import {
   Calendar,
   Clock,
@@ -212,6 +213,7 @@ const EventsGrid = memo(
         {data.length === 0 && (
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
+              <GeeveKickingRocks className="w-48 h-48 mb-6 mx-auto text-gray-400 dark:text-gray-600" />
               <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
                 No upcoming events found
               </p>

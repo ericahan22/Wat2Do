@@ -78,8 +78,8 @@ const AboutPage: React.FC = () => {
           />{" "}
           networking events (Atlassian, Patreon, Point72). We realized we were missing out on so much happening around campus
           and built this for ourselves in <a href="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/Screenshot+2025-10-08+at+4.20.42%E2%80%AFAM.png" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500 dark:hover:text-gray-200">August 2025</a>. After 2 months we're
-          extroardinarily excited to be sharing it with the rest of you! P.S. We
-          don't run ads or sponsors, everything runs out of our own pockets.
+          extroardinarily excited to be sharing it with the rest of you! All art is done by Erica. P.S. We
+          don't run ads, everything runs out of our own pockets.
         </p>
 
         <p className="text-lg font-bold text-gray-600 dark:text-gray-300 mb-12">

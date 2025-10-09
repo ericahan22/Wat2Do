@@ -11,6 +11,11 @@ class NewsletterSubscriber(models.Model):
     unsubscribe_token = models.UUIDField(
         default=uuid.uuid4, unique=True, editable=False
     )
+    unsubscribe_reason = models.CharField(
+        max_length=255, blank=True, null=True,
+        help_text="Reason provided when user unsubscribed"
+    )
+    unsubscribed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = "newsletter_subscribers"
