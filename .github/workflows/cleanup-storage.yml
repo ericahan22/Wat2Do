@@ -1,4 +1,4 @@
-name: S3 Cleanup - Manual Trigger
+name: Cleanup Storage
 
 on:
   workflow_dispatch:

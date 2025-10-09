@@ -1,4 +1,4 @@
-name: Scrape Instagram and Store Events
+name: Scrape Instagram, Update Events DB, Send Newsletter, Update Static Data
 
 on:
   schedule:

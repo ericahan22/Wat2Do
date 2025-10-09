@@ -1,4 +1,4 @@
-name: Build and Deploy Backend to ECR (on backend changes)
+name: Deploy Backend
 
 on:
   push:
