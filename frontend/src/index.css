@@ -11,6 +11,11 @@
 
 body {
   @apply bg-white dark:bg-gray-900;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 /* Pulsating animation for live badge */

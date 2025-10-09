@@ -53,14 +53,14 @@ def send_newsletter_to_all():
 
         if email_sent:
             success_count += 1
-            print(f"✅ Email sent successfully")
+            print("✅ Email sent successfully")
         else:
             failed_count += 1
             failed_emails.append(subscriber.email)
             if error:
                 print(f"❌ Error sending email: {error}")
             else:
-                print(f"❌ Failed to send email")
+                print("❌ Failed to send email")
 
     # Print summary
     print("\n" + "=" * 60)

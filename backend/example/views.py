@@ -3,14 +3,11 @@ Views for the app.
 """
 
 from datetime import date, time
-from django.utils import timezone
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db import connection
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -505,47 +502,51 @@ def newsletter_unsubscribe(request, token):
     """API endpoint for frontend unsubscribe functionality"""
     try:
         subscriber = NewsletterSubscriber.objects.get(unsubscribe_token=token)
-        
+
         if request.method == "GET":
             # Return subscriber info for frontend
-            return Response({
-                "already_unsubscribed": not subscriber.is_active,
-                "email": subscriber.email,
-                "message": "Already unsubscribed" if not subscriber.is_active else "Ready to unsubscribe",
-                "unsubscribed_at": subscriber.unsubscribed_at,
-            })
-        
+            return Response(
+                {
+                    "already_unsubscribed": not subscriber.is_active,
+                    "email": subscriber.email,
+                    "message": "Already unsubscribed"
+                    if not subscriber.is_active
+                    else "Ready to unsubscribe",
+                    "unsubscribed_at": subscriber.unsubscribed_at,
+                }
+            )
+
         # POST - Process unsubscribe
         if not subscriber.is_active:
             return Response(
-                {"error": "Already unsubscribed"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Already unsubscribed"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Get reason and feedback
         reason = request.data.get("reason", "").strip()
         feedback = request.data.get("feedback", "").strip()
         full_reason = f"{reason} - {feedback}" if feedback else reason
-        
+
         # Update subscriber
         subscriber.is_active = False
         subscriber.unsubscribe_reason = full_reason[:255]
         subscriber.unsubscribed_at = timezone.now()
         subscriber.save()
-        
-        return Response({
-            "message": "Successfully unsubscribed from the newsletter.",
-            "email": subscriber.email,
-            "unsubscribed_at": subscriber.unsubscribed_at,
-        })
-        
+
+        return Response(
+            {
+                "message": "Successfully unsubscribed from the newsletter.",
+                "email": subscriber.email,
+                "unsubscribed_at": subscriber.unsubscribed_at,
+            }
+        )
+
     except NewsletterSubscriber.DoesNotExist:
         return Response(
-            {"error": "Invalid unsubscribe token"}, 
-            status=status.HTTP_404_NOT_FOUND
+            {"error": "Invalid unsubscribe token"}, status=status.HTTP_404_NOT_FOUND
         )
     except Exception as e:
         return Response(
-            {"error": f"Failed to process request: {e!s}"}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": f"Failed to process request: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

@@ -104,7 +104,7 @@ class EmailService:
         for event in events:
             # Add event image if available
             image_html = ""
-            if event.get('image_url'):
+            if event.get("image_url"):
                 image_html = f"""
                     <img
                       src="{event['image_url']}"
@@ -350,7 +350,7 @@ class EmailService:
         for event in events:
             # Add event image if available
             image_html = ""
-            if event.get('image_url'):
+            if event.get("image_url"):
                 image_html = f"""
                     <img
                       src="{event['image_url']}"
