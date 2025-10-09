@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths:
       - 'backend/**'
-      - '.github/workflows/backend-ecr-deploy.yml'
+      - '.github/workflows/deploy-backend.yml'
 
 jobs:
   build-push-and-redeploy:
