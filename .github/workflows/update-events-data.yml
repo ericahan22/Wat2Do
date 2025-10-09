@@ -90,22 +90,11 @@ jobs:
             backend/scraping/*.csv
           retention-days: 30
 
-      - name: Generate static events file
+      - name: Generate static data file
         id: generate_static
         working-directory: backend/scraping
-        run: python get_static_events.py
-      
-      - name: Generate recommended filters
-        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
-        working-directory: backend/scripts
-        run: python generate_recommended_filters.py
-        continue-on-error: true
-      
-      - name: Send newsletter to subscribers
-        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
-        working-directory: backend/scripts
-        run: python send_newsletter.py
-        continue-on-error: true
+        run: python generate_static_data.py
+ 
       
       - name: Commit and push changes
         if: steps.generate_static.outcome == 'success'
@@ -113,5 +102,11 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add frontend/src/data/staticData.ts
-          git commit -m "chore: update static events and recommended filters from DB" || echo "No changes to commit"
+          git commit -m "chore: update static data from DB" || echo "No changes to commit"
           git push --force
+
+      - name: Send newsletter to subscribers
+        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
+        working-directory: backend/scripts
+        run: python send_newsletter.py
+        continue-on-error: true
