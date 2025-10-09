@@ -73,7 +73,7 @@ def main():
             / "frontend"
             / "src"
             / "data"
-            / "staticEvents.ts"
+            / "staticData.ts"
         )
         logging.info(f"Writing to {output_path}...")
         with output_path.open("w", encoding="utf-8") as f:
@@ -104,7 +104,7 @@ def main():
                     f.write(",")
                 f.write("\n")
             f.write("]);\n")
-        logging.info("Successfully updated staticEvents.ts")
+        logging.info("Successfully updated staticData.ts")
     except Exception:
         logging.exception("An error occurred")
         sys.exit(1)
