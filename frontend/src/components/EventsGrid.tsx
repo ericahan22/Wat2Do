@@ -37,7 +37,10 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
     return (
       <>
         <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-        <Badge variant="live" className="absolute top-0 right-0 z-10">
+        <Badge
+          variant="live"
+          className="font-extrabold tracking-[0.043em] absolute top-0 right-0 z-10"
+        >
           LIVE
         </Badge>
       </>
@@ -48,7 +51,10 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
     return (
       <>
         <EventBadgeMaskRightLong className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-        <Badge variant="soon" className="absolute top-0 right-0 z-10">
+        <Badge
+          variant="soon"
+          className="font-extrabold tracking-[0.03em] absolute top-0 right-0 z-10"
+        >
           Starting soon
         </Badge>
       </>
@@ -64,7 +70,10 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   return (
     <>
       <EventBadgeMaskLeft className="absolute top-0 left-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-      <Badge variant="new" className="absolute top-0 left-0 z-10">
+      <Badge
+        variant="new"
+        className="font-extrabold absolute top-0 left-0 z-10"
+      >
         NEW
       </Badge>
     </>
@@ -117,10 +126,6 @@ const EventsGrid = memo(
                     alt={event.name}
                     loading="lazy"
                     className="w-full h-40 object-cover rounded-t-xl"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = "none";
-                    }}
                   />
                 )}
                 <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">

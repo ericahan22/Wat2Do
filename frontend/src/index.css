@@ -1,8 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Satoshi Font */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-Variable.woff2') format('woff2');
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/WEB/fonts/Satoshi-VariableItalic.woff2') format('woff2');
+  font-display: swap;
+  font-style: italic;
+}
 
 :root {
   -webkit-font-smoothing: antialiased;
@@ -12,6 +26,8 @@
 body {
   @apply bg-white dark:bg-gray-900;
   overflow-x: hidden;
+  font-family: 'Satoshi', system-ui, sans-serif;
+  font-weight: 450;
 }
 
 html {
@@ -30,4 +46,10 @@ html {
 
 .animate-pulse-live {
   animation: pulse-live 4s ease-in-out infinite;
+}
+
+/* Headings with Satoshi font and bold weight */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Satoshi', system-ui, sans-serif;
+  font-weight: 800;
 }
