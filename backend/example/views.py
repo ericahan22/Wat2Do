@@ -97,7 +97,7 @@ def get_events(request):
         if search_term:
             search_embedding = generate_embedding(search_term)
             similar_events = find_similar_events(
-                embedding=search_embedding, threshold=0.35
+                embedding=search_embedding, threshold=0.2
             )
             similar_event_ids = [event["id"] for event in similar_events]
             filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
