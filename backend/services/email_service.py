@@ -37,8 +37,11 @@ class EmailService:
 
             # Format time range
             start_time = event.start_time.strftime("%I:%M %p").lstrip("0")
-            end_time = event.end_time.strftime("%I:%M %p").lstrip("0")
-            time_range = f"{start_time} - {end_time}"
+            if event.end_time:
+                end_time = event.end_time.strftime("%I:%M %p").lstrip("0")
+                time_range = f"{start_time} - {end_time}"
+            else:
+                time_range = f"Starting at {start_time}"
 
             # Get club name from club_handle or use club_type as fallback
             club_name = event.club_handle or event.club_type or "Unknown Club"
