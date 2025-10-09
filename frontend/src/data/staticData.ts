@@ -1,6 +1,6 @@
 import { Event } from "@/hooks/useEvents";
 
-export const LAST_UPDATED = "2025-10-09T17:16:54.825457";
+export const LAST_UPDATED = "2025-10-09T17:25:02.730343";
 
 export const staticEventsData = new Map<string, Event>([
   ["661", {
@@ -932,3 +932,30 @@ export const staticEventsData = new Map<string, Event>([
     added_at: "2025-10-08T11:13:28.335927",
   }]
 ]);
+
+export const RECOMMENDED_FILTERS: string[] = [
+  "cookies",
+  "snacks",
+  "boba",
+  "games night",
+  "photo walk",
+  "bonfire",
+  "mocktails",
+  "study session",
+  "networking",
+  "professional development",
+  "workshop",
+  "student society",
+  "WUSA",
+  "food sale",
+  "arts and crafts",
+  "tournament",
+  "info session",
+  "movie night",
+  "community event",
+  "social gathering",
+  "career fair",
+  "sports clinic",
+  "pumpkin carving",
+  "escape room"
+];
