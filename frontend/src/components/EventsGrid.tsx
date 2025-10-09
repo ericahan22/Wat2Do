@@ -36,7 +36,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
   if (status === "live") {
     return (
       <>
-        <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
+        <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
         <Badge variant="live" className="absolute top-0 right-0 z-10">
           LIVE
         </Badge>
@@ -47,7 +47,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
   if (status === "soon") {
     return (
       <>
-        <EventBadgeMaskRightLong className="absolute top-0 right-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
+        <EventBadgeMaskRightLong className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
         <Badge variant="soon" className="absolute top-0 right-0 z-10">
           Starting soon
         </Badge>
@@ -63,7 +63,7 @@ const NewEventBadge = ({ event }: { event: Event }) => {
 
   return (
     <>
-      <EventBadgeMaskLeft className="absolute top-0 left-0 z-10 h-8 w-fit text-white dark:text-gray-900" />
+      <EventBadgeMaskLeft className="absolute top-0 left-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
       <Badge variant="new" className="absolute top-0 left-0 z-10">
         NEW
       </Badge>
