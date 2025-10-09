@@ -1,7 +1,16 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
+import django
 import requests
+from django.conf import settings
+
+# Setup Django if not already configured
+if not settings.configured:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+    django.setup()
+
+from example.models import Events  # noqa: E402
 
 
 class EmailService:
@@ -10,8 +19,41 @@ class EmailService:
         self.from_email = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
         self.base_url = "https://api.resend.com/emails"
 
+    def _get_events_added_today(self):
+        """Fetch events that were added to the database today"""
+        today = date.today()
+        
+        # Get events added today, ordered by date and start time
+        events = Events.objects.filter(
+            added_at__date=today
+        ).select_related().order_by('date', 'start_time')
+        
+        events_data = []
+        for event in events:
+            # Format the event data for email template
+            event_date = event.date.strftime("%B %d, %Y")
+            
+            # Format time range
+            start_time = event.start_time.strftime("%I:%M %p").lstrip('0')
+            end_time = event.end_time.strftime("%I:%M %p").lstrip('0')
+            time_range = f"{start_time} - {end_time}"
+            
+            # Get club name from club_handle or use club_type as fallback
+            club_name = event.club_handle or event.club_type or "Unknown Club"
+            
+            events_data.append({
+                "name": event.name,
+                "date": event_date,
+                "time": time_range,
+                "location": event.location,
+                "description": event.description or "No description available.",
+                "club": club_name,
+            })
+        
+        return events_data
+    
     def get_mock_events(self):
-        """Generate mock event data for the newsletter"""
+        """Generate mock event data for the newsletter (DEPRECATED - use get_events_added_today instead)"""
         today = datetime.now()
         return [
             {
@@ -517,12 +559,12 @@ class EmailService:
 </html>"""
 
     def send_welcome_email(self, to_email, unsubscribe_token):
-        """Send welcome email with mock events to new subscriber"""
+        """Send welcome email with events added today to new subscriber"""
         if not self.api_key:
             print("Warning: RESEND_API_KEY not set. Email not sent.")
             return False
 
-        events = self.get_mock_events()
+        events = self._get_events_added_today()
         html_content = self.generate_email_html(events, unsubscribe_token)
 
         payload = {
@@ -546,12 +588,12 @@ class EmailService:
             return False
 
     def send_newsletter_email(self, to_email, unsubscribe_token):
-        """Send weekly newsletter email to subscriber"""
+        """Send newsletter email with events added today to subscriber"""
         if not self.api_key:
             print("Warning: RESEND_API_KEY not set. Email not sent.")
             return False
 
-        events = self.get_mock_events()
+        events = self._get_events_added_today()
         html_content = self.generate_newsletter_html(events, unsubscribe_token)
 
         payload = {

@@ -8,7 +8,11 @@ on:
       run_scraper:
         required: true
         type: boolean
-        default: true
+        default: false
+      send_newsletter:
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   instagram_feed:
@@ -106,7 +110,7 @@ jobs:
           git push --force
 
       - name: Send newsletter to subscribers
-        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
+        if: github.event_name == 'schedule' || github.event.inputs.send_newsletter == 'true'
         working-directory: backend/scripts
         run: python send_newsletter.py
         continue-on-error: true
