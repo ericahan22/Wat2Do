@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, date
+from datetime import date, datetime, timedelta
 
 import django
 import requests
@@ -10,7 +10,7 @@ if not settings.configured:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
     django.setup()
 
-from example.models import Events  # noqa: E402
+from example.models import Events
 
 
 class EmailService:
@@ -22,36 +22,40 @@ class EmailService:
     def _get_events_added_today(self):
         """Fetch events that were added to the database today"""
         today = date.today()
-        
+
         # Get events added today, ordered by date and start time
-        events = Events.objects.filter(
-            added_at__date=today
-        ).select_related().order_by('date', 'start_time')
-        
+        events = (
+            Events.objects.filter(added_at__date=today)
+            .select_related()
+            .order_by("date", "start_time")
+        )
+
         events_data = []
         for event in events:
             # Format the event data for email template
             event_date = event.date.strftime("%B %d, %Y")
-            
+
             # Format time range
-            start_time = event.start_time.strftime("%I:%M %p").lstrip('0')
-            end_time = event.end_time.strftime("%I:%M %p").lstrip('0')
+            start_time = event.start_time.strftime("%I:%M %p").lstrip("0")
+            end_time = event.end_time.strftime("%I:%M %p").lstrip("0")
             time_range = f"{start_time} - {end_time}"
-            
+
             # Get club name from club_handle or use club_type as fallback
             club_name = event.club_handle or event.club_type or "Unknown Club"
-            
-            events_data.append({
-                "name": event.name,
-                "date": event_date,
-                "time": time_range,
-                "location": event.location,
-                "description": event.description or "No description available.",
-                "club": club_name,
-            })
-        
+
+            events_data.append(
+                {
+                    "name": event.name,
+                    "date": event_date,
+                    "time": time_range,
+                    "location": event.location,
+                    "description": event.description or "No description available.",
+                    "club": club_name,
+                }
+            )
+
         return events_data
-    
+
     def get_mock_events(self):
         """Generate mock event data for the newsletter (DEPRECATED - use get_events_added_today instead)"""
         today = datetime.now()
