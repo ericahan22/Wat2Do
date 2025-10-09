@@ -112,6 +112,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add frontend/src/data/staticEvents.ts frontend/src/data/staticData.ts
+          git add frontend/src/data/staticData.ts
           git commit -m "chore: update static events and recommended filters from DB" || echo "No changes to commit"
           git push --force
