@@ -27,12 +27,13 @@ interface EventsResponse {
   event_ids: string[];
 }
 
-// Format the last updated timestamp into a human-readable format
+// Format the last updated timestamp into a human-readable format (in local time)
 export const getLastUpdatedText = (): string => {
   const timestamp = LAST_UPDATED;
 
   if (!timestamp) return "";
-
+  
+  // Convert timestamp to local time
   const date = new Date(timestamp);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -51,12 +52,13 @@ export const getLastUpdatedText = (): string => {
   } else if (diffDays < 7) {
     return `Updated ${diffDays} days ago`;
   } else {
-    const dateStr = date.toLocaleDateString("en-US", {
+    // Display full date and time in local timezone
+    const dateStr = date.toLocaleDateString(undefined, {
       month: "long",
       day: "numeric",
       year: "numeric",
     });
-    const timeStr = date.toLocaleTimeString([], {
+    const timeStr = date.toLocaleTimeString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
     });

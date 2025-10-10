@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 
 import psycopg2
@@ -115,8 +115,8 @@ def main():
         )
         logging.info(f"Writing to {output_path}...")
         with output_path.open("w", encoding="utf-8") as f:
-            # Write the last updated timestamp
-            current_time = datetime.now().isoformat()
+            # Write the last updated timestamp in UTC
+            current_time = datetime.now(timezone.utc).isoformat()
             f.write('import { Event } from "@/hooks/useEvents";\n\n')
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
 
