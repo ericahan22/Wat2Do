@@ -70,14 +70,16 @@ class OpenAIService:
     Guidelines:
     - PRIORITIZE CAPTION TEXT: Always extract information from the caption text first and use it as the primary source of truth
     - Return an array of events - if multiple events are mentioned, create separate objects for each
+    - Title-case event names (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
     - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
     - For weekly events, calculate the next occurrence based on the current date and day of week
+    - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
-    - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks")
+    - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks"). Always capitalize the first item mentioned
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
     - If information is not available, use empty string "" for strings, null for price, false for registration
