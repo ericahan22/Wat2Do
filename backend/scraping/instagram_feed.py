@@ -316,9 +316,16 @@ def process_recent_feed(
                 continue
 
             post_url = f"https://www.instagram.com/p/{post.shortcode}/"
+            today = datetime.now(timezone.utc).date()
 
             # Process each event returned by the AI
             for event_data in events_data:
+                
+                event_date = datetime.strptime(event_data.get("date"), "%Y-%m-%d").date()
+                if event_date < today:
+                    logger.info(f"Skipping event '{event_data.get('name')}' with past date {event_date}")
+                    continue
+                
                 if (
                     event_data.get("name")
                     and event_data.get("date")
