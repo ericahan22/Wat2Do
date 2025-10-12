@@ -10,7 +10,8 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("health/", views.health, name="health"),
     path("events/", views.get_events, name="events"),
-    path("events/details/", views.get_event_details, name="event_details"),
+    path("events/export.ics", views.export_events_ics, name="export_events_ics"),
+    path("events/google-calendar-urls/", views.get_google_calendar_urls, name="get_google_calendar_urls"),
     path("clubs/", views.get_clubs, name="clubs"),
     # test endpoints
     path("mock-event/", views.create_mock_event, name="create_mock_event"),

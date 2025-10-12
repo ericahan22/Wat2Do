@@ -146,7 +146,6 @@ function EventsPage() {
         onCancel={toggleSelectMode}
         onExportICalendar={exportToCalendar}
         onExportGoogleCalendar={exportToGoogleCalendar}
-        data={data}
       />
     </div>
   );
