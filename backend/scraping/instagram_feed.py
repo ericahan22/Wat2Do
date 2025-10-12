@@ -20,8 +20,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
-from example.embedding_utils import find_similar_events
-from example.models import Clubs, Events
+from utils.embedding_utils import find_similar_events
+from apps.clubs.models import Clubs
+from apps.events.models import Events
 from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
 

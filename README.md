@@ -85,6 +85,18 @@ docker build -t instagram-scraper-api .
 docker run -p 3000:3000 instagram-scraper-api
 ```
 
+### Database Migrations
+```bash
+# 1. Modify model file
+# 2. Generate migration
+python manage.py makemigrations events
+# 2.5 Double review the generated migration file before applying
+# 2.6 Run a dry run of the generated migration
+python manage.py migrate --dry-run
+# 3. Apply migration  
+python manage.py migrate events
+```
+
 ## Dependencies
 
 ### Backend Requirements:
@@ -112,5 +124,4 @@ docker run -p 3000:3000 instagram-scraper-api
 | Health check | `curl http://localhost:3000/health/` |
 | Get all events | `curl http://localhost:3000/api/events/` |
 | Get all clubs | `curl http://localhost:3000/api/clubs/` |
-| Create mock event | `curl -X POST http://localhost:3000/api/mock-event/ -H "Content-Type: application/json" -d '{"name": "Test Event", "location": "Test Location", "food": "Pizza"}'` |
 | Find similar events | `curl "http://localhost:3000/api/test-similarity/?text=Your%20Search%20Text"` | 

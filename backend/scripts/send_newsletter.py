@@ -17,7 +17,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 django.setup()
 
 # Import Django modules after setup
-from example.models import NewsletterSubscriber  # noqa: E402
+from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
 from services.email_service import email_service  # noqa: E402
 
 

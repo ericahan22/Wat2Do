@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
 django.setup()
 
-from example.models import Events
+from apps.events.models import Events
 from services.storage_service import delete_images, list_all_s3_objects
 
 # Configure logging

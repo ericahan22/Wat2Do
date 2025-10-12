@@ -10,7 +10,7 @@ if not settings.configured:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
     django.setup()
 
-from example.models import Events
+from apps.events.models import Events
 
 
 class EmailService:
@@ -304,7 +304,7 @@ class EmailService:
               cellpadding="0"
               cellspacing="0"
               role="presentation"
-              style="width:680px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
+              style="width:600px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
               <tbody>
                 <tr>
                   <td>
@@ -347,19 +347,10 @@ class EmailService:
     def generate_newsletter_html(self, events, unsubscribe_token):
         """Generate HTML email for daily newsletter (different from welcome email)"""
         events_html = ""
-        for event in events:
-            # Add event image if available
-            image_html = ""
-            if event.get("image_url"):
-                image_html = f"""
-                    <img
-                      src="{event['image_url']}"
-                      alt="{event['name']}"
-                      style="width:100%;max-width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:block"
-                    />
-                    """
-
-            events_html += f"""
+        
+        # Handle case when there are no events
+        if not events:
+            events_html = """
             <table
               align="center"
               width="100%"
@@ -367,36 +358,81 @@ class EmailService:
               cellpadding="0"
               cellspacing="0"
               role="presentation"
-              style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:20px">
+              style="background:#f8f9fa;border-radius:8px;padding:40px 20px;margin-bottom:20px;text-align:center">
               <tbody>
                 <tr>
                   <td>
-                    {image_html}
+                    <div style="font-size:48px;margin-bottom:16px">📅</div>
                     <h3
-                      style="margin:0 0 8px;font-weight:bold;font-size:18px;line-height:24px;color:#0c0d0e">
-                      {event['name']}
+                      style="margin:0 0 12px;font-weight:bold;font-size:20px;line-height:24px;color:#0c0d0e">
+                      No new events today
                     </h3>
                     <p
-                      style="font-size:14px;line-height:20px;color:#6a737c;margin:4px 0">
-                      <strong>📅 {event['date']}</strong> at {event['time']}
+                      style="font-size:16px;line-height:22px;color:#6a737c;margin:0 0 16px 0">
+                      Check back tomorrow for new events, or explore all available events on our platform!
                     </p>
-                    <p
-                      style="font-size:14px;line-height:20px;color:#6a737c;margin:4px 0">
-                      <strong>📍 {event['location']}</strong>
-                    </p>
-                    <p
-                      style="font-size:14px;line-height:20px;color:#3c3f44;margin:8px 0 4px 0">
-                      {event['description']}
-                    </p>
-                    <p
-                      style="font-size:13px;line-height:18px;color:#9199a1;margin:4px 0 0 0">
-                      Hosted by {event['club']}
-                    </p>
+                    <a
+                      href="https://wat2do.ca"
+                      style="color:#fff;text-decoration-line:none;background-color:#667eea;border:1px solid #5568d3;font-size:14px;line-height:14px;padding:12px 20px;border-radius:6px;display:inline-block;font-weight:600"
+                      target="_blank"
+                      >Browse All Events</a
+                    >
                   </td>
                 </tr>
               </tbody>
             </table>
             """
+        else:
+            for event in events:
+                # Add event image if available
+                image_html = ""
+                if event.get("image_url"):
+                    image_html = f"""
+                        <img
+                          src="{event['image_url']}"
+                          alt="{event['name']}"
+                          style="width:100%;max-width:100%;height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;display:block"
+                        />
+                        """
+
+                events_html += f"""
+                <table
+                  align="center"
+                  width="100%"
+                  border="0"
+                  cellpadding="0"
+                  cellspacing="0"
+                  role="presentation"
+                  style="background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:20px">
+                  <tbody>
+                    <tr>
+                      <td>
+                        {image_html}
+                        <h3
+                          style="margin:0 0 8px;font-weight:bold;font-size:18px;line-height:24px;color:#0c0d0e">
+                          {event['name']}
+                        </h3>
+                        <p
+                          style="font-size:14px;line-height:20px;color:#6a737c;margin:4px 0">
+                          <strong>📅 {event['date']}</strong> at {event['time']}
+                        </p>
+                        <p
+                          style="font-size:14px;line-height:20px;color:#6a737c;margin:4px 0">
+                          <strong>📍 {event['location']}</strong>
+                        </p>
+                        <p
+                          style="font-size:14px;line-height:20px;color:#3c3f44;margin:8px 0 4px 0">
+                          {event['description']}
+                        </p>
+                        <p
+                          style="font-size:13px;line-height:18px;color:#9199a1;margin:4px 0 0 0">
+                          Hosted by {event['club']}
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                """
 
         return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html dir="ltr" lang="en">
@@ -428,7 +464,7 @@ class EmailService:
               cellpadding="0"
               cellspacing="0"
               role="presentation"
-              style="max-width:100%;width:680px;margin:0 auto;background-color:#ffffff">
+              style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff">
               <tbody>
                 <tr style="width:100%">
                   <td>
@@ -550,7 +586,7 @@ class EmailService:
               cellpadding="0"
               cellspacing="0"
               role="presentation"
-              style="width:680px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
+              style="width:600px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
               <tbody>
                 <tr>
                   <td>
