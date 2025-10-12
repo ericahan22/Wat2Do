@@ -13,6 +13,7 @@ import logging
 import random
 import time
 import traceback
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -116,6 +117,32 @@ def extract_s3_filename_from_url(image_url: str) -> str:
     return f"events/{filename}"
 
 
+def normalize_string(s):
+    if not s:
+        return ""
+    return re.sub(r"\W+", "", s).lower().strip()
+
+
+def is_duplicate_event(event_data):
+    """Check for duplicate events (same name, date, location, time)"""
+    name = normalize_string(event_data.get("name"))
+    location = normalize_string(event_data.get("location"))
+    date = event_data.get("date")
+    start_time = event_data.get("start_time")
+    end_time = event_data.get("end_time")
+    
+    candidates = Events.objects.filter(date=date)
+    for c in candidates:
+        if (
+            normalize_string(c.name) == name and
+            normalize_string(c.location) == location and
+            str(c.start_time) == str(start_time) and
+            (not end_time or str(c.end_time) == str(end_time))
+        ):
+            return True
+    return False
+
+
 def append_event_to_csv(
     event_data, club_ig, post_url, status="success", embedding=None
 ):
@@ -169,6 +196,13 @@ def insert_event_to_db(event_data, club_ig, post_url):
     event_date = event_data.get("date")
     event_location = event_data.get("location")  # .title()
     try:
+        # Duplicate check
+        if is_duplicate_event(event_data):
+            logger.info(
+                f"Duplicate event detected, skipping {event_name} on {event_date} at {event_location}"
+            )
+            return False
+        
         # Get club_type based on club handle
         try:
             club = Clubs.objects.get(ig=club_ig)
@@ -191,17 +225,18 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 for existing in Events.objects.filter(
                     id__in=candidate_ids, date=event_date
                 ):
+                    # Only replace if new event has image but existing doesn't,
+                    # or if new description is longer (more info)
+                    new_img = event_data.get("image_url")
+                    old_img = existing.image_url
+                    new_desc = event_data.get("description") or ""
+                    old_desc = existing.description or ""
                     if (
-                        (existing.location or "") == (event_location or "")
-                        and (existing.start_time or "")
-                        == (event_data.get("start_time") or "")
-                        and (
-                            (existing.end_time or None)
-                            == (event_data.get("end_time") or None)
-                        )
+                        (not old_img and new_img)
+                        or (len(new_desc) > len(old_desc) + 10)
                     ):
                         logger.info(
-                            f"Deleting older duplicate event id={existing.id} before inserting refreshed version"
+                            f"Replacing older event: id={existing.id} with newer one"
                         )
                         existing.delete()
         except Exception as dedup_err:
