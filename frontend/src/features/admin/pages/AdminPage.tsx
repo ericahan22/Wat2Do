@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Event } from "@/features/events/types/events";
 
 /**
  * Admin page for managing event promotions
@@ -82,7 +83,7 @@ export default function AdminPage() {
   };
 
   const handleEventSelect = (eventId: string) => {
-    const event = events.find((e) => e.id === eventId);
+    const event = events.find((e: Event) => e.id === eventId);
     if (event) {
       setSelectedEventId(eventId);
       setSelectedEventName(event.name);
@@ -201,7 +202,7 @@ export default function AdminPage() {
                       <SelectValue placeholder="Select an event..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {events.map((event) => (
+                      {events.map((event: Event) => (
                         <SelectItem key={event.id} value={event.id}>
                           {event.name} (ID: {event.id})
                         </SelectItem>

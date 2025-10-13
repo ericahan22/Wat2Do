@@ -89,11 +89,11 @@ export function useEvents() {
       const rawEvents = staticEventsData;
       
       if (startDate) {
-        return rawEvents.filter((event) => event.date >= startDate);
+        return rawEvents.filter((event: Event) => event.date >= startDate);
       }
 
       const todayStr = getTodayString();
-      return rawEvents.filter((event) => {
+      return rawEvents.filter((event: Event) => {
         if (event.date > todayStr) return true;
         if (event.date === todayStr) {
           return isEventOngoing(event);
@@ -105,11 +105,11 @@ export function useEvents() {
     const rawEvents = hasActiveFilters && data ? data : staticEventsData;
 
     if (startDate) {
-      return rawEvents.filter((event) => event.date >= startDate);
+      return rawEvents.filter((event: Event) => event.date >= startDate);
     }
 
     const todayStr = getTodayString();
-    return rawEvents.filter((event) => {
+    return rawEvents.filter((event: Event) => {
       if (event.date > todayStr) return true;
       if (event.date === todayStr) {
         return isEventOngoing(event);
