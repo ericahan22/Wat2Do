@@ -5,7 +5,8 @@ from apps.core import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("health", views.health, name="health"),
+    path("health/", views.health, name="health"),
+    path("", views.home, name="root"),
     path("api/events/", include("apps.events.urls")),
     path("api/clubs/", include("apps.clubs.urls")),
     path("api/newsletter/", include("apps.newsletter.urls")),

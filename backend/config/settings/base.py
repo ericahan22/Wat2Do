@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     ".vercel.app",
     ".elasticbeanstalk.com",
     ".elb.amazonaws.com",
-    "*",  # Temporary - allows any host. Replace with specific IP/domain in production
+    "*",
 ]
 
 INSTALLED_APPS = [
@@ -150,11 +150,11 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "150/hour"  # 150 requests per hour for all users
+        "anon": "150/hour"
     },
 }
 

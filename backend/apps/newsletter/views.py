@@ -51,14 +51,14 @@ def newsletter_subscribe(request):
         from services.email_service import email_service
 
         email_sent = email_service.send_welcome_email(
-            email, str(subscriber.unsubscribe_token)   
+            email, str(subscriber.unsubscribe_token)
         )
 
         if email_sent:
             return Response(
                 {
                     "message": "Successfully subscribed! Check your email for upcoming events.",
-                    "email": email,  
+                    "email": email,
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -66,7 +66,7 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Subscribed successfully, but email could not be sent. Please check back later.",
-                    "email": email,  
+                    "email": email,
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -90,7 +90,7 @@ def newsletter_unsubscribe(request, token):
             return Response(
                 {
                     "already_unsubscribed": not subscriber.is_active,
-                    "email": subscriber.get_email_display(),   
+                    "email": subscriber.get_email_display(),
                     "message": "Already unsubscribed"
                     if not subscriber.is_active
                     else "Ready to unsubscribe",
@@ -118,7 +118,7 @@ def newsletter_unsubscribe(request, token):
         return Response(
             {
                 "message": "Successfully unsubscribed from the newsletter.",
-                "email": subscriber.get_email_display(),  
+                "email": subscriber.get_email_display(),
                 "unsubscribed_at": subscriber.unsubscribed_at,
             }
         )

@@ -1,12 +1,13 @@
 import hashlib
 import uuid
 
-from django.contrib.auth.hashers import make_password, check_password
 from django.db import models
 
 
 class NewsletterSubscriber(models.Model):
-    email_hash = models.CharField(max_length=128, unique=True, help_text="SHA-256 hash of the email")
+    email_hash = models.CharField(
+        max_length=128, unique=True, help_text="SHA-256 hash of the email"
+    )
     subscribed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     unsubscribe_token = models.UUIDField(
@@ -30,7 +31,7 @@ class NewsletterSubscriber(models.Model):
     @staticmethod
     def hash_email(email):
         """Create a SHA-256 hash of the email address"""
-        return hashlib.sha256(email.lower().strip().encode('utf-8')).hexdigest()
+        return hashlib.sha256(email.lower().strip().encode("utf-8")).hexdigest()
 
     @classmethod
     def get_by_email(cls, email):
