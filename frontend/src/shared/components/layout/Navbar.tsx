@@ -21,7 +21,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex gap-6 items-center">
-            <div className="text-base font-bold text-gray-900 dark:text-white">
+            <div className="text-base font-bold">
               <Link to="/">
                 <img
                   src="/wat2do-logo.svg"

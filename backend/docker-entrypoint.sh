@@ -38,5 +38,5 @@ exec gunicorn \
     --access-logfile - \
     --error-logfile - \
     --log-level info \
-    api.wsgi:app
+    config.wsgi:app
 

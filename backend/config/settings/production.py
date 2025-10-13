@@ -1,6 +1,4 @@
-from .base import (
-    BASE_DIR,
-)
+from .base import *
 
 # Production settings
 DEBUG = False

@@ -33,7 +33,7 @@ const UnsubscribePage: React.FC = () => {
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-600" />
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+          <p className="">Loading...</p>
         </div>
       </div>
     );
@@ -45,10 +45,10 @@ const UnsubscribePage: React.FC = () => {
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card className="max-w-md w-full p-6 text-center flex flex-col gap-4">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold ">
             Invalid Link
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="">
             This unsubscribe link is invalid or has expired.
           </p>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -64,10 +64,10 @@ const UnsubscribePage: React.FC = () => {
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card className="max-w-md w-full p-6 text-center flex flex-col gap-4">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold ">
             Error
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="">
             {error.message}
           </p>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -84,10 +84,10 @@ const UnsubscribePage: React.FC = () => {
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card className="max-w-md w-full p-6 text-center flex flex-col gap-4">
           <CheckCircle className="h-12 w-12 text-green-500 mx-auto" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold ">
             Successfully Unsubscribed
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="">
             You have been successfully unsubscribed from the Wat2Do newsletter.
           </p>
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
@@ -121,10 +121,10 @@ const UnsubscribePage: React.FC = () => {
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card className="max-w-md w-full p-6 text-center flex flex-col gap-4">
           <CheckCircle className="h-12 w-12 text-gray-400 mx-auto" />
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl font-bold ">
             Already Unsubscribed
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="">
             You're already unsubscribed from our newsletter.
           </p>
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
@@ -172,7 +172,7 @@ const UnsubscribePage: React.FC = () => {
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-        <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+        <p className="">Loading...</p>
       </div>
     </div>
   );

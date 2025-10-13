@@ -5,11 +5,11 @@ const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">
+        <h1 className="text-4xl font-bold mb-8">
           About Wat2Do
         </h1>
 
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-lg mb-4">
           Welcome to Wat2Do! We created this platform after stumbling upon way
           too many underrated events by sheer coincidence. We found ourselves at{" "}
           <img
@@ -82,24 +82,24 @@ const AboutPage: React.FC = () => {
           don't run ads, everything runs out of our own pockets.
         </p>
 
-        <p className="text-lg font-bold text-gray-600 dark:text-gray-300 mb-12">
+        <p className="text-lg font-bold mb-12">
           — Tony & Erica
         </p>
 
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-12">
+        <p className="text-lg mb-12">
           We believe there are helpful tips to making the most out of this site,
           so we went ahead and created a little guide for you, depending on your
           goals.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-bold mb-6">
           Networking
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className="mb-4">
           Skip the generic LinkedIn messages. The best networking happens at
           events where people are in-person, sharing the present with you.
         </p>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
+        <p className="mb-8">
           Check out events like{" "}
           <a
             href="/events?view=calendar&search=All Things Legal Panel"
@@ -126,15 +126,15 @@ const AboutPage: React.FC = () => {
           for industry connections.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-bold  mb-6">
           Finding Your Crowd
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className=" mb-4">
           Don't just join clubs that match your major. The most interesting
           people often come from completely different fields. Use our filters to
           discover niche communities you never knew existed.
         </p>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
+        <p className=" mb-8">
           Try events like{" "}
           <a
             href="/events?view=calendar&search=Gatka Classes"
@@ -161,17 +161,17 @@ const AboutPage: React.FC = () => {
           to find unexpected communities.
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-bold  mb-6">
           Making Memories With Yourself or Your Friends
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className=" mb-4">
           The best events for groups are the ones that don't require
           registration. You can show up with friends, leave early if it's not
           fun, or split up and meet different people. Pro tip: check the "food"
           filter for events with free meals, we experience them to be more
           social and less formal.
         </p>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
+        <p className=" mb-8">
           Great for groups:{" "}
           <a
             href="/events?view=calendar&search=Nature Hike"
@@ -198,10 +198,10 @@ const AboutPage: React.FC = () => {
           .
         </p>
 
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        <h2 className="text-2xl font-bold  mb-6">
           Start Exploring
         </h2>
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
+        <p className=" mb-8">
           Check Wat2Do regularly for new events. Subscribe to our newsletter for
           daily updates. Don't be afraid to attend events alone! The best
           connections happen when you show up.

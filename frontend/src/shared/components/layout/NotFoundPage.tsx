@@ -11,15 +11,15 @@ const NotFoundPage: React.FC = () => {
       <div className="text-center max-w-md mx-auto px-4">
           <GeeveKickingRocks className="w-48 h-48 mb-6 mx-auto text-gray-400 dark:text-gray-600" />
         
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 className="text-4xl font-bold mb-4">
           404
         </h1>
         
-        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+        <h2 className="text-xl font-semibold mb-4">
           Page Not Found
         </h2>
         
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
+        <p className="mb-8">
           Looks like this page decided to skip the event. Let's get you back to discovering what's happening on campus!
         </p>
         

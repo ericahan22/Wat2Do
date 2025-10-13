@@ -39,11 +39,11 @@ function Footer() {
         {/* Newsletter Section */}
         <div className="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-md">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
               <Mail className="h-5 w-5" />
               Stay Updated
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm mb-4">
               Get daily updates about upcoming events at UWaterloo delivered to
               your inbox.
             </p>
@@ -95,7 +95,7 @@ function Footer() {
         </div>
 
         {/* Footer Links */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm">
           <div className="space-y-1">
             <p>
               © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights
@@ -109,12 +109,12 @@ function Footer() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             >
-              <Button>
+              <Button variant="ghost">
                 <div className="relative">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <div className="absolute inset-0 w-2 h-2 bg-green-500 rounded-full animate-ping opacity-75"></div>
                 </div>
-                <span>All systems operational</span>
+                All systems operational
               </Button>
             </a>
             <a

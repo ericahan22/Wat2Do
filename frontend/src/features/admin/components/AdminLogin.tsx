@@ -3,8 +3,20 @@ import { useForm } from "react-hook-form";
 import { API_BASE_URL } from "@/shared/constants/api";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/components/ui/form";
 
 interface AdminLoginProps {
   onLogin: (token: string) => void;
@@ -46,10 +58,10 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
       if (response.ok) {
         const responseData = await response.json();
         const token = responseData.token;
-        
+
         // Store token in localStorage
         localStorage.setItem("admin_token", token);
-        
+
         // Notify parent component
         onLogin(token);
       } else {
@@ -68,14 +80,14 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-extrabold text-gray-900 dark:text-white">
+          <CardTitle className="text-3xl font-extrabold">
             Admin Login
           </CardTitle>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm">
             Sign in to manage event promotions
           </p>
         </CardHeader>
-        
+
         <CardContent>
           <Form {...form}>
             <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
@@ -84,8 +96,16 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                   <CardContent className="pt-6">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        <svg
+                          className="h-5 w-5 text-red-400"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       </div>
                       <div className="ml-3">
@@ -100,7 +120,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                   </CardContent>
                 </Card>
               )}
-              
+
               <div className="space-y-4">
                 <FormField
                   control={form.control}
@@ -121,7 +141,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="password"
@@ -143,18 +163,12 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
                 />
               </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Signing in..." : "Sign in"}
               </Button>
-              
+
               <div className="text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Need admin access? Contact your system administrator.
-                </p>
+                <p>Need admin access? Contact your system administrator.</p>
               </div>
             </form>
           </Form>

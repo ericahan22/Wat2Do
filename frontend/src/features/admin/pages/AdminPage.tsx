@@ -128,7 +128,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold ">
             Event Promotion Admin
           </h1>
           <Button onClick={handleLogout} variant="destructive">
@@ -224,10 +224,10 @@ export default function AdminPage() {
                 {selectedEventId && (
                   <Card className="mb-6 bg-gray-50 dark:bg-gray-700">
                     <CardContent className="pt-6">
-                      <h3 className="font-medium text-gray-900 dark:text-white mb-2">
+                      <h3 className="font-medium  mb-2">
                         Current Status
                       </h3>
-                      <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                      <div className="text-sm  space-y-2">
                         <p>
                           <strong>Event:</strong> {selectedEventName}
                         </p>
@@ -303,7 +303,7 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 {promotedEventsLoading ? (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                  <p className=" text-center py-8">
                     Loading promoted events...
                   </p>
                 ) : promotedEventsError ? (
@@ -311,7 +311,7 @@ export default function AdminPage() {
                     Error loading promoted events: {promotedEventsError.message}
                   </p>
                 ) : promotedEvents.length === 0 ? (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                  <p className=" text-center py-8">
                     No events are currently promoted
                   </p>
                 ) : (
@@ -325,10 +325,10 @@ export default function AdminPage() {
                         <CardContent className="pt-6">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h3 className="font-medium text-gray-900 dark:text-white">
+                              <h3 className="font-medium ">
                                 {event.name}
                               </h3>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                              <p className="text-sm ">
                                 {new Date(event.date).toLocaleDateString()} at{" "}
                                 {event.location}
                               </p>
@@ -354,7 +354,7 @@ export default function AdminPage() {
                               >
                                 {event.promotion.promotion_type}
                               </Badge>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                              <p className="text-xs ">
                                 Priority: {event.promotion.priority}
                               </p>
                             </div>
@@ -378,7 +378,7 @@ export default function AdminPage() {
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {promotedEvents.length}
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm ">
                       Total Promoted
                     </div>
                   </div>
@@ -390,7 +390,7 @@ export default function AdminPage() {
                         ).length
                       }
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm ">
                       Featured
                     </div>
                   </div>

@@ -37,7 +37,7 @@ function GitHubLink() {
       className="flex items-center text-gray-600 dark:text-gray-300 transition-colors"
       title="View on GitHub"
     >
-      <Button>
+      <Button variant="ghost">
         <Github className="h-4 w-4 text-gray-700 dark:text-gray-300" />
         {!isLoading && starCount !== null && (
           <span className="text-sm font-medium">{starCount}</span>

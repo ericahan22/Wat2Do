@@ -134,7 +134,7 @@ export function PromoteEventForm({
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+        <CardTitle className="text-2xl font-bold ">
           Promote Event
         </CardTitle>
       </CardHeader>
@@ -164,7 +164,7 @@ export function PromoteEventForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Event Info (Read-only) */}
           <div className="space-y-2">
-            <label htmlFor="event-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="event-name" className="block text-sm font-medium ">
               Event Name
             </label>
             <Input
@@ -172,12 +172,12 @@ export function PromoteEventForm({
               type="text"
               value={eventName}
               disabled
-              className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              className="bg-gray-50 dark:bg-gray-700  cursor-not-allowed"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="event-id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="event-id" className="block text-sm font-medium ">
               Event ID
             </label>
             <Input
@@ -185,7 +185,7 @@ export function PromoteEventForm({
               type="text"
               value={eventId}
               disabled
-              className="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+              className="bg-gray-50 dark:bg-gray-700  cursor-not-allowed"
             />
           </div>
 
@@ -202,7 +202,7 @@ export function PromoteEventForm({
                 <FormItem>
                   <FormLabel>
                     Priority (1-10)
-                    <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                    <span className="block text-xs  font-normal">
                       Lower values are more prominent
                     </span>
                   </FormLabel>
@@ -253,7 +253,7 @@ export function PromoteEventForm({
                 <FormItem>
                   <FormLabel>
                     Expires At (Optional)
-                    <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                    <span className="block text-xs  font-normal">
                       Leave blank for no expiration
                     </span>
                   </FormLabel>
@@ -278,7 +278,7 @@ export function PromoteEventForm({
                   <FormItem>
                     <FormLabel>
                       Promoted By (Optional)
-                      <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                      <span className="block text-xs  font-normal">
                         Username or email (defaults to you)
                       </span>
                     </FormLabel>
@@ -304,7 +304,7 @@ export function PromoteEventForm({
                 <FormItem>
                   <FormLabel>
                     Internal Notes (Optional)
-                    <span className="block text-xs text-gray-500 dark:text-gray-400 font-normal">
+                    <span className="block text-xs  font-normal">
                       Not visible to users
                     </span>
                   </FormLabel>

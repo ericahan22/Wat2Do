@@ -32,10 +32,10 @@ function EventsPage() {
     <div className="flex flex-col gap-4">
       {/* Header */}
       <div className="sm:text-left">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h1 className="text-3xl font-bold mb-2">
           Events
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p>
           Discover and explore upcoming events. Updates daily at ~8:30am EST.
           {lastUpdatedText && <span className="ml-1">{lastUpdatedText}.</span>}
         </p>

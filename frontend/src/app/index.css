@@ -48,8 +48,41 @@ html {
   animation: pulse-live 4s ease-in-out infinite;
 }
 
-/* Headings with Satoshi font and bold weight */
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, strong, b {
   font-family: 'Satoshi', system-ui, sans-serif;
   font-weight: 800;
+  @apply text-gray-900 dark:text-white;
+}
+
+strong, b {
+  font-weight: 600;
+}
+
+/* Secondary text - body content and emphasis */
+p, div, span, article, section, main, aside, nav, footer, header, ul, ol, li, label, em, i {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+/* Form inputs */
+input, textarea, select {
+  @apply text-gray-900 dark:text-white;
+}
+
+/* Links */
+a {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+a:hover {
+  @apply text-blue-700 dark:text-blue-300;
+}
+
+/* Code elements */
+code, pre {
+  @apply text-gray-800 dark:text-gray-200;
+}
+
+/* Muted text */
+blockquote, small {
+  @apply text-gray-500 dark:text-gray-400;
 }
