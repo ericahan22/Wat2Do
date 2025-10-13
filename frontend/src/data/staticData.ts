@@ -1,6 +1,6 @@
 import { Event } from "../features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-13T11:21:50.589052+00:00";
+export const LAST_UPDATED = "2025-10-13T19:14:35.349071+00:00";
 
 export const staticEventsData = new Map<string, Event>([
   ["715", {
@@ -147,22 +147,6 @@ export const staticEventsData = new Map<string, Event>([
     club_type: "WUSA",
     added_at: "2025-10-13T04:30:57.862150+00:00",
   }],
-  ["729", {
-    id: "729",
-    club_handle: "uwibtikar",
-    url: "https://www.instagram.com/p/DPq4Tw1jjaz/",
-    name: "TaqwaCon",
-    date: "2025-10-19",
-    start_time: "17:00:00",
-    end_time: "19:00:00",
-    location: "Wilfrid Laurier University",
-    price: null,
-    food: "",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b9cdf052-af4f-4591-9c6c-ada4e972e931.jpg",
-    club_type: null,
-    added_at: "2025-10-13T11:18:58.900727+00:00",
-  }],
   ["593", {
     id: "593",
     club_handle: "uwvfp",
@@ -178,22 +162,6 @@ export const staticEventsData = new Map<string, Event>([
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_22.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220+00:00",
-  }],
-  ["730", {
-    id: "730",
-    club_handle: "watsam_uw",
-    url: "https://www.instagram.com/p/DPubeyrDp9w/",
-    name: "Virus Among Us",
-    date: "2025-10-21",
-    start_time: "17:00:00",
-    end_time: "19:00:00",
-    location: "EIT 1st Floor Atrium",
-    price: null,
-    food: "",
-    registration: true,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2af758ed-f07f-450b-8a3c-dd516eb6e7b8.webp",
-    club_type: null,
-    added_at: "2025-10-13T11:20:25.920226+00:00",
   }],
   ["712", {
     id: "712",
@@ -510,9 +478,8 @@ export const RECOMMENDED_FILTERS: string[] = [
   "roundtable",
   "symposium",
   "midterm review",
-  "CASPer",
+  "snacks",
   "online event",
-  "tech workshop",
   "networking",
   "headshots",
   "brown bag",
@@ -520,11 +487,12 @@ export const RECOMMENDED_FILTERS: string[] = [
   "murder mystery",
   "bouldering",
   "dance class",
-  "graduate workshop",
+  "workshop",
+  "painting",
   "pumpkin carving",
-  "Halloween bash",
   "career fair",
-  "GIS Day",
-  "dodgeball tournament",
-  "snacks"
+  "dodgeball",
+  "large event",
+  "social",
+  "student society"
 ];
