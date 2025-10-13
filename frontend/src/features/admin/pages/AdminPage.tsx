@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { PromoteEventForm } from "../components/PromoteEventForm";
-import { AdminLogin } from "../components/AdminLogin";
+import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
+import { AdminLogin } from "@/features/admin/components/AdminLogin";
 import { useEvents } from "@/features/events/hooks/useEvents";
-import { useEventPromotion } from "../hooks/useEventPromotion";
+import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { API_BASE_URL } from "@/shared/constants/api";
-import type { EventPromotion, PromotedEvent } from "../types/promotion";
+import type { EventPromotion, PromotedEvent } from "@/features/admin/types/promotion";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";

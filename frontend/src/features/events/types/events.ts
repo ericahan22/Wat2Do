@@ -5,7 +5,7 @@ export interface Event {
   name: string;
   date: string;
   start_time: string;
-  end_time: string;
+  end_time: string | null;
   location: string;
   image_url: string | null;
   categories?: string[];

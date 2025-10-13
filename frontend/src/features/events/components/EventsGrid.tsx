@@ -1,6 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/shared/components/ui/pagination";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 import {
   Calendar,
@@ -11,8 +19,8 @@ import {
   Utensils,
   Check,
 } from "lucide-react";
-import { Event } from "../types/events";
-import { memo } from "react";
+import { Event } from "@/features/events/types/events";
+import { memo, useState, useMemo, useEffect } from "react";
 import {
   formatPrettyDate,
   formatTimeRange,
@@ -22,12 +30,14 @@ import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import EventBadgeMaskRight from "@/assets/event-badge-mask-right.svg?react";
 import EventBadgeMaskLeft from "@/assets/event-badge-mask-left.svg?react";
 import EventBadgeMaskRightLong from "@/assets/event-badge-mask-right-long.svg?react";
+import { EVENTS_PER_PAGE } from "@/features/events/constants/events";
 
 interface EventsGridProps {
   data: Event[];
   isSelectMode?: boolean;
   selectedEvents?: Set<string>;
   onToggleEvent?: (eventId: string) => void;
+  isLoading?: boolean;
 }
 
 const EventStatusBadge = ({ event }: { event: Event }) => {
@@ -86,12 +96,32 @@ const EventsGrid = memo(
     isSelectMode = false,
     selectedEvents = new Set(),
     onToggleEvent,
+    isLoading = false,
   }: EventsGridProps) => {
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const paginatedData = useMemo(() => {
+      const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
+      const endIndex = startIndex + EVENTS_PER_PAGE;
+      return data.slice(startIndex, endIndex);
+    }, [data, currentPage]);
+
+    const totalPages = Math.ceil(data.length / EVENTS_PER_PAGE);
+
+    const handlePageChange = (page: number) => {
+      setCurrentPage(page);
+    };
+
+    // Reset to first page when data changes
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [data]);
+
     return (
       <div className="space-y-8">
         {/* Events Grid */}
         <div className="grid sm:grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5">
-          {data.map((event) => {
+          {paginatedData.map((event) => {
             const isSelected = selectedEvents.has(event.id);
             return (
               <Card
@@ -215,7 +245,7 @@ const EventsGrid = memo(
         </div>
 
         {/* No results message */}
-        {data.length === 0 && (
+        {data.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <div className="max-w-md mx-auto">
               <GeeveKickingRocks className="w-48 h-48 mb-6 mx-auto text-gray-400 dark:text-gray-600" />
@@ -227,6 +257,39 @@ const EventsGrid = memo(
               </p>
             </div>
           </div>
+        )}
+
+        {/* Pagination */}
+        {data.length > 0 && totalPages > 1 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    onClick={() => handlePageChange(page)}
+                    isActive={currentPage === page}
+                    className="cursor-pointer"
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     );

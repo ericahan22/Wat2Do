@@ -467,7 +467,8 @@ export const staticEventsData = new Map<string, Event>([
     club_type: "Student Society",
     added_at: "2025-10-08T11:13:28.335927+00:00",
   }]
-]);
+] as [string, Event][])
+  .map(([, e]) => e);
 
 export const RECOMMENDED_FILTERS: string[] = [
   "hiking",

@@ -22,7 +22,7 @@ import {
 import "@/shared/styles/calendar.css";
 import { formatPrettyDate, formatTimeRange } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
-import { Event } from "../types/events";
+import { Event } from "@/features/events/types/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { IconButton } from "@/shared/components/ui/icon-button";
 

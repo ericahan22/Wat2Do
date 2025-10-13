@@ -34,15 +34,35 @@ def get_events(request):
         # Apply vector similarity search if search term provided
         if search_term:
             search_embedding = generate_embedding(search_term)
-            similar_events = find_similar_events(embedding=search_embedding)
+            start_date = request.GET.get("start_date")
+            similar_events = find_similar_events(
+                embedding=search_embedding, 
+                min_date=start_date
+            )
             for event in similar_events:
                 print(event["name"], event["similarity"])
             similar_event_ids = [event["id"] for event in similar_events]
             filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
 
-        # Return event IDs
-        event_ids = [str(event.id) for event in filtered_queryset]
-        return Response({"event_ids": event_ids})
+        # Return selected event fields (excluding description and embedding)
+        fields = [
+            "id",
+            "club_handle",
+            "url",
+            "name",
+            "date",
+            "start_time",
+            "end_time",
+            "location",
+            "price",
+            "food",
+            "registration",
+            "image_url",
+            "club_type",
+            "added_at",
+        ]
+        results = list(filtered_queryset.values(*fields))
+        return Response(results)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

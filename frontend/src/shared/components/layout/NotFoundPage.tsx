@@ -25,14 +25,14 @@ const NotFoundPage: React.FC = () => {
         
         <div className="space-y-3">
           <Button 
-            onClick={() => navigate("/")} 
+            onMouseDown={() => navigate("/")} 
             className="w-full"
           >
             Back to Events
           </Button>
           
           <Button 
-            onClick={() => navigate(-1)} 
+            onMouseDown={() => navigate(-1)} 
             variant="outline"
             className="w-full"
           >

@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { staticEventsData, LAST_UPDATED } from "@/data/staticData";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
-import { API_BASE_URL } from '@/shared/constants/api';
+import { API_BASE_URL } from "@/shared/constants/api";
+import { getTodayString } from "@/shared/lib/dateUtils";
+import { isEventOngoing } from "@/shared/lib/eventUtils";
 
 export interface Event {
   id: string;
@@ -12,7 +14,7 @@ export interface Event {
   name: string;
   date: string;
   start_time: string;
-  end_time: string;
+  end_time: string | null;
   location: string;
   image_url: string | null;
   categories?: string[];
@@ -23,55 +25,28 @@ export interface Event {
   added_at: string;
 }
 
-interface EventsResponse {
-  event_ids: string[];
-}
-
 // Format the last updated timestamp into a human-readable format (in local time)
 export const getLastUpdatedText = (): string => {
-  const timestamp = LAST_UPDATED;
-
-  if (!timestamp) return "";
-  
-  // Convert timestamp to local time
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) {
-    return "Updated just now";
-  } else if (diffMins < 60) {
-    return `Updated ${diffMins} minute${diffMins !== 1 ? "s" : ""} ago`;
-  } else if (diffHours < 24) {
-    return `Updated ${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
-  } else if (diffDays === 1) {
-    return "Updated yesterday";
-  } else if (diffDays < 7) {
-    return `Updated ${diffDays} days ago`;
-  } else {
-    // Display full date and time in local timezone
-    const dateStr = date.toLocaleDateString(undefined, {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timeStr = date.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return `Updated on ${dateStr} at ${timeStr}`;
-  }
+  const date = new Date(LAST_UPDATED);
+  const dateStr = date.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const timeStr = date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `Last updated on ${dateStr}, ${timeStr}`;
 };
 
 const fetchEvents = async ({
   queryKey,
 }: {
   queryKey: string[];
-}): Promise<EventsResponse> => {
+}): Promise<Event[]> => {
   const searchTerm = queryKey[1] || "";
+  const startDate = queryKey[2] || "";
 
   const params = new URLSearchParams();
 
@@ -79,69 +54,69 @@ const fetchEvents = async ({
     params.append("search", searchTerm);
   }
 
+  if (startDate) {
+    params.append("start_date", startDate);
+  }
+
   const queryString = params.toString() ? `?${params.toString()}` : "";
   const response = await fetch(`${API_BASE_URL}/api/events/${queryString}`);
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }
-  const data: EventsResponse = await response.json();
+  const data: Event[] = await response.json();
   return data;
 };
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
+  const startDate = searchParams.get("start_date") || "";
 
-  const hasActiveFilters = searchTerm !== "";
+  const hasActiveFilters = searchTerm !== "" || startDate !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm],
+    queryKey: ["events", searchTerm, startDate],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
   });
 
   const events = useMemo(() => {
-    let rawEvents: Event[];
+    // When we have active filters but no data yet (loading), keep showing the previous results
+    // This prevents the flickering from old results → empty → new results
+    if (hasActiveFilters && !data && isLoading) {
+      // Return static data filtered by current filters to show something while loading
+      const rawEvents = staticEventsData;
+      
+      if (startDate) {
+        return rawEvents.filter((event) => event.date >= startDate);
+      }
 
-    if (hasActiveFilters && data?.event_ids) {
-      rawEvents = data.event_ids
-        .map((id) => staticEventsData.get(id))
-        .filter(Boolean) as Event[];
-    } else {
-      rawEvents = Array.from(staticEventsData.values());
+      const todayStr = getTodayString();
+      return rawEvents.filter((event) => {
+        if (event.date > todayStr) return true;
+        if (event.date === todayStr) {
+          return isEventOngoing(event);
+        }
+        return false;
+      });
     }
 
-    const now = new Date();
-    const todayStr =
-      now.getFullYear() +
-      "-" +
-      String(now.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(now.getDate()).padStart(2, "0");
+    const rawEvents = hasActiveFilters && data ? data : staticEventsData;
 
-    // Filter for future events and events happening today that haven't finished
+    if (startDate) {
+      return rawEvents.filter((event) => event.date >= startDate);
+    }
+
+    const todayStr = getTodayString();
     return rawEvents.filter((event) => {
-      const eventDateStr = event.date;
-
-      // If event is on a future date, include it
-      if (eventDateStr > todayStr) {
-        return true;
+      if (event.date > todayStr) return true;
+      if (event.date === todayStr) {
+        return isEventOngoing(event);
       }
-
-      // If event is today, check if it hasn't finished yet
-      if (eventDateStr === todayStr) {
-        const [hours, minutes] = event.end_time.split(":").map(Number);
-        const eventEndDateTime = new Date();
-        eventEndDateTime.setHours(hours, minutes, 0, 0);
-
-        // Include if event hasn't finished yet (current time < event end time)
-        return now < eventEndDateTime;
-      }
-
       return false;
     });
-  }, [hasActiveFilters, data?.event_ids]);
+  }, [hasActiveFilters, data, startDate, isLoading]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -153,7 +128,7 @@ export function useEvents() {
     if (searchTerm) {
       title = `${events.length} Found Events - Wat2Do`;
     } else {
-      title = `${events.length} Upcoming Events - Wat2Do`;
+      title = `${events.length} Events - Wat2Do`;
     }
 
     if (!isLoadingData) {
@@ -173,11 +148,30 @@ export function useEvents() {
     });
   };
 
+  const handleToggleStartDate = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+
+      const todayStr = getTodayString();
+
+      if (startDate && startDate !== todayStr) {
+        // Remove start_date to show upcoming events
+        nextParams.delete("start_date");
+      } else {
+        // Set start_date to 2025-01-01 to show past events
+        nextParams.set("start_date", "2025-01-01");
+      }
+      return nextParams;
+    });
+  };
+
   return {
     data: events,
-    isLoading: hasActiveFilters ? isLoading : false,
-    error: hasActiveFilters ? error : null,
+    isLoading,
+    error,
     searchTerm,
+    startDate,
     handleViewChange,
+    handleToggleStartDate,
   };
 }

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Tag, ExternalLink, Instagram, MessageCircle } from "lucide-react";
-import { Club } from "../types/clubs";
+import { Club } from "@/features/clubs/types/clubs";
 import { memo } from "react";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 

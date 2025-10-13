@@ -8,9 +8,9 @@ import {
 } from "@/shared/components/ui/select";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useCategoryParam } from "@/shared/hooks/useCategoryParam";
-import { useClubs } from "../hooks/useClubs";
+import { useClubs } from "@/features/clubs/hooks/useClubs";
 import SearchInput from "@/features/search/components/SearchInput";
-import ClubsGrid from "../components/ClubsGrid";
+import ClubsGrid from "@/features/clubs/components/ClubsGrid";
 
 function ClubsPage() {
   const {

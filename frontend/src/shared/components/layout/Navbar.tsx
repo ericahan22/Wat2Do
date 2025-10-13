@@ -170,7 +170,7 @@ function Navbar() {
                     href="https://github.com/ericahan22/bug-free-octo-spork/issues"
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={closeMobileMenu}
+                    onMouseDown={closeMobileMenu}
                   >
                     Feedback
                   </a>

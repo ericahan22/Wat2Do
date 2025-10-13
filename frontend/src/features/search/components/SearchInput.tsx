@@ -2,7 +2,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Search, X } from "lucide-react";
 import { useRef, useEffect, memo } from "react";
-import { useSearchState } from "../hooks/useSearchState";
+import { useSearchState } from "@/features/search/hooks/useSearchState";
 
 interface SearchInputProps {
   placeholder?: string;

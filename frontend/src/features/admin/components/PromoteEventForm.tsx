@@ -1,11 +1,11 @@
 import { useForm } from "react-hook-form";
-import { useEventPromotion } from "../hooks/useEventPromotion";
+import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
-import type { PromotionType, EventPromotion } from "../types/promotion";
+import type { PromotionType, EventPromotion } from "@/features/admin/types/promotion";
 
 interface PromotionFormData {
   priority: number;

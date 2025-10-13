@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { useUnsubscribe } from "../hooks/useUnsubscribe";
-import UnsubscribeForm from "../components/UnsubscribeForm";
+import { useUnsubscribe } from "@/features/newsletter/hooks/useUnsubscribe";
+import UnsubscribeForm from "@/features/newsletter/components/UnsubscribeForm";
 
 const UnsubscribePage: React.FC = () => {
   const { token } = useParams<{ token: string }>();

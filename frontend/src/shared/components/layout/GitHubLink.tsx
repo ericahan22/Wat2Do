@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Github } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/shared/components/ui/button";
 
 const GITHUB_OWNER = "ericahan22";
 const GITHUB_REPO = "bug-free-octo-spork";

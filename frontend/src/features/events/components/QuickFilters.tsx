@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
-import { useQuickFilters } from "../hooks/useQuickFilters";
+import { useQuickFilters } from "@/features/events/hooks/useQuickFilters";
 
 const QuickFilters: React.FC = () => {
   const {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import { Mail, Check, X } from "lucide-react";
 import { useNewsletterSubscribe } from "@/features/newsletter/hooks/useNewsletterSubscribe";
 

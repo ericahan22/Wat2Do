@@ -42,7 +42,7 @@ export default function FloatingEventExportBar({
               size="sm"
               onClick={onExportICalendar}
               className="rounded-full"
-              variant="default"
+              variant="outline"
             >
               <SiApple className="h-4 w-4" />
               Export {selectedEvents.size} to Calendar
@@ -51,7 +51,7 @@ export default function FloatingEventExportBar({
               size="sm"
               onClick={onExportGoogleCalendar}
               className="rounded-full"
-              variant="default"
+              variant="outline"
             >
               <FcGoogle className="h-4 w-4" />
               Export {selectedEvents.size} to Google Calendar

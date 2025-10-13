@@ -9,7 +9,7 @@ import type {
   PromotionErrorResponse,
   PromotedEventsResponse,
   PromotionStatusResponse,
-} from "../types/promotion";
+} from "@/features/admin/types/promotion";
 
 const getAdminToken = (): string | null => {
   return localStorage.getItem("admin_token");

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { ClubsResponse } from "../types/clubs";
+import { ClubsResponse } from "@/features/clubs/types/clubs";
 import { API_BASE_URL } from "@/shared/constants/api";
 
 const fetchClubs = async ({

@@ -26,3 +26,17 @@ export const isEventNew = (event: Event): boolean => {
 
   return now.getTime() - addedAt.getTime() <= nineteenHoursInMs;
 };
+
+/**
+ * Check if an event is still ongoing (current time < end time)
+ */
+export const isEventOngoing = (event: Event): boolean => {
+  const now = new Date();
+  const currentTime = new Date(`1970-01-01T${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:00`);
+  
+  const endTimeStr = event.end_time || 
+    new Date(`1970-01-01T${event.start_time}`).getTime() + 60 * 60 * 1000; // +1 hour if no end_time
+  const eventEndTime = new Date(`1970-01-01T${endTimeStr}`);
+  
+  return currentTime < eventEndTime;
+};
