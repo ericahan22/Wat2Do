@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 from datetime import date
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -9,6 +9,7 @@ from django.db import connection
 from services.openai_service import generate_embedding
 
 logger = logging.getLogger(__name__)
+
 
 def find_similar_events(
     embedding: list[float],
@@ -19,7 +20,7 @@ def find_similar_events(
     """
     Find similar events using vector cosine similarity search
     """
-    
+
     with connection.cursor() as cursor:
         # Base query with proper cosine similarity calculation
         base_query = """
@@ -57,16 +58,18 @@ def find_similar_events(
 
         return [
             {
-                "id": row[0], 
+                "id": row[0],
                 "name": row[1],
                 "description": row[2],
                 "location": row[3],
                 "date": row[4],
                 "start_time": row[5],
                 "club_type": row[6],
-                "similarity": float(row[7])
-            } for row in cursor.fetchall()
+                "similarity": float(row[7]),
+            }
+            for row in cursor.fetchall()
         ]
+
 
 def is_duplicate_event(event_data: dict) -> bool:
     embedding = generate_embedding(event_data["description"])

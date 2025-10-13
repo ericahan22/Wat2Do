@@ -141,24 +141,25 @@ def test_email(request):
     """Internal testing route to send test email to e22han@uwaterloo.ca"""
     try:
         from services.email_service import email_service
-        
+
         # Send test newsletter email
         email_sent = email_service.send_newsletter_email(
-            "e22han@uwaterloo.ca", 
-            "test-unsubscribe-token"
+            "e22han@uwaterloo.ca", "test-unsubscribe-token"
         )
-        
+
         if email_sent:
-            return Response({
-                "message": "Test email sent successfully to e22han@uwaterloo.ca",
-                "status": "success"
-            })
+            return Response(
+                {
+                    "message": "Test email sent successfully to e22han@uwaterloo.ca",
+                    "status": "success",
+                }
+            )
         else:
-            return Response({
-                "message": "Failed to send test email",
-                "status": "error"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+            return Response(
+                {"message": "Failed to send test email", "status": "error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     except Exception as e:
         return Response(
             {"error": f"Failed to send test email: {e!s}"},

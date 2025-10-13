@@ -347,7 +347,7 @@ class EmailService:
     def generate_newsletter_html(self, events, unsubscribe_token):
         """Generate HTML email for daily newsletter (different from welcome email)"""
         events_html = ""
-        
+
         # Handle case when there are no events
         if not events:
             events_html = """

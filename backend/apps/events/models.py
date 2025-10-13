@@ -19,7 +19,9 @@ class Events(models.Model):
     added_at = models.DateTimeField(auto_now_add=True, null=True)
     club_type = models.CharField(max_length=50, blank=True, null=True)
     reactions = models.JSONField(default=dict, blank=True)
-    notes = models.TextField(blank=True, null=True, help_text="Internal notes for this event")
+    notes = models.TextField(
+        blank=True, null=True, help_text="Internal notes for this event"
+    )
 
     class Meta:
         db_table = "events"

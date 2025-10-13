@@ -30,24 +30,24 @@ class OpenAIService:
         """
         if not text:
             return None
-        
+
         # Clean up the text for better embedding quality
         text = text.replace("\n", " ").replace("\r", " ").strip()
-        
+
         # Remove extra whitespace
         import re
-        text = re.sub(r'\s+', ' ', text)
-        
+
+        text = re.sub(r"\s+", " ", text)
+
         try:
             response = self.client.embeddings.create(
-                input=[text], 
-                model="text-embedding-3-small"
+                input=[text], model="text-embedding-3-small"
             )
             return response.data[0].embedding
         except Exception as e:
             logger.error(f"Failed to generate embedding: {e}")
             return None
-    
+
     def generate_event_embedding(self, event) -> list[float]:
         """
         Generate embedding for an event using a rich text representation.
@@ -56,7 +56,7 @@ class OpenAIService:
         # Define field names to include
         field_names = [
             "name",
-            "description", 
+            "description",
             "location",
             "club_type",
             "club_handle",
@@ -66,13 +66,13 @@ class OpenAIService:
             "price",
             "registration",
         ]
-        
+
         parts = []
         for field_name in field_names:
             value = getattr(event, field_name, None)
             if value:
                 parts.append(f"{field_name}: {value}")
-        
+
         enhanced_text = " | ".join(parts)
         return self.generate_embedding(enhanced_text)
 

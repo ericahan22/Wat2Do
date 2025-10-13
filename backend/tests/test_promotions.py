@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.utils import timezone
+
 from apps.events.models import Events
 from apps.promotions.models import EventPromotion
 
@@ -11,7 +11,7 @@ class EventPromotionModelTest(TestCase):
             date="2025-10-15",
             start_time="10:00:00",
             end_time="12:00:00",
-            location="Test Location"
+            location="Test Location",
         )
 
     def test_promotion_creation(self):
@@ -20,7 +20,7 @@ class EventPromotionModelTest(TestCase):
             event=self.event,
             promoted_by="admin@example.com",
             priority=5,
-            promotion_type="featured"
+            promotion_type="featured",
         )
         self.assertEqual(promotion.event, self.event)
         self.assertEqual(promotion.promoted_by, "admin@example.com")
