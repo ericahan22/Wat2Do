@@ -180,12 +180,11 @@ export function useEventPromotion() {
     enabled: !!getAdminToken(),
   });
 
-  const getPromotionStatusQuery = (eventId: string) =>
-    useQuery({
-      queryKey: ["promotion-status", eventId],
-      queryFn: () => promotionApi.getPromotionStatus(eventId),
-      enabled: !!eventId && !!getAdminToken(),
-    });
+  const getPromotionStatusQueryOptions = (eventId: string) => ({
+    queryKey: ["promotion-status", eventId],
+    queryFn: () => promotionApi.getPromotionStatus(eventId),
+    enabled: !!eventId && !!getAdminToken(),
+  });
 
   return {
     // Mutations
@@ -215,7 +214,15 @@ export function useEventPromotion() {
     refetchPromotedEvents: promotedEventsQuery.refetch,
 
     // Helper functions
-    getPromotionStatus: getPromotionStatusQuery,
+    getPromotionStatusQueryOptions,
   };
+}
+
+export function usePromotionStatus(eventId: string) {
+  return useQuery({
+    queryKey: ["promotion-status", eventId],
+    queryFn: () => promotionApi.getPromotionStatus(eventId),
+    enabled: !!eventId && !!getAdminToken(),
+  });
 }
 

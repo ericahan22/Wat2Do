@@ -32,7 +32,7 @@ export function useSearchState() {
       // On subsequent updates, always sync with URL
       setInputValue(searchParam);
     }
-  }, [searchParam]);
+  }, [searchParam, lastSearch, setSearchParams]);
 
   const handleSearch = useCallback(() => {
     if (inputValue.trim()) {

@@ -4,6 +4,7 @@ import { AdminLogin } from "../components/AdminLogin";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventPromotion } from "../hooks/useEventPromotion";
 import { API_BASE_URL } from "@/shared/constants/api";
+import type { EventPromotion, PromotedEvent } from "../types/promotion";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
@@ -24,7 +25,7 @@ export default function AdminPage() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedEventName, setSelectedEventName] = useState<string>("");
   const [isPromoted, setIsPromoted] = useState<boolean>(false);
-  const [currentPromotion, setCurrentPromotion] = useState<any>(null);
+  const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Use the existing events hook
@@ -32,7 +33,7 @@ export default function AdminPage() {
     data: events,
     isLoading: eventsLoading,
     error: eventsError,
-  } = useEvents("grid");
+  } = useEvents();
 
   // Check authentication on component mount
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function AdminPage() {
   };
 
   const handleEventSelect = (eventId: string) => {
-    const event = events.find((e: any) => e.id === eventId);
+    const event = events.find((e) => e.id === eventId);
     if (event) {
       setSelectedEventId(eventId);
       setSelectedEventName(event.name);
@@ -200,7 +201,7 @@ export default function AdminPage() {
                       <SelectValue placeholder="Select an event..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {events.map((event: any) => (
+                      {events.map((event) => (
                         <SelectItem key={event.id} value={event.id}>
                           {event.name} (ID: {event.id})
                         </SelectItem>
@@ -315,7 +316,7 @@ export default function AdminPage() {
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {promotedEvents.map((event) => (
+                    {promotedEvents.map((event: PromotedEvent) => (
                       <Card
                         key={event.id}
                         className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"

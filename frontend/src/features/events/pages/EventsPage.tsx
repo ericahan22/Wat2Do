@@ -16,9 +16,7 @@ function EventsPage() {
   const [searchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
 
-  const { data, isLoading, error, searchTerm, handleViewChange } = useEvents(
-    view
-  );
+  const { data, isLoading, error, searchTerm, handleViewChange } = useEvents();
   const {
     isSelectMode,
     selectedEvents,

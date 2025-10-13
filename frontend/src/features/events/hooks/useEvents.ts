@@ -88,7 +88,7 @@ const fetchEvents = async ({
   return data;
 };
 
-export function useEvents(view: "grid" | "calendar") {
+export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
 
@@ -161,7 +161,7 @@ export function useEvents(view: "grid" | "calendar") {
     }
 
     return previousTitleRef.current;
-  }, [view, events.length, isLoading, searchTerm, hasActiveFilters]);
+  }, [events.length, isLoading, searchTerm, hasActiveFilters]);
 
   useDocumentTitle(documentTitle);
 

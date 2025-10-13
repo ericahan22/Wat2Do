@@ -5,7 +5,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
-import type { PromotionType } from "../types/promotion";
+import type { PromotionType, EventPromotion } from "../types/promotion";
 
 interface PromotionFormData {
   priority: number;
@@ -19,12 +19,7 @@ interface PromoteEventFormProps {
   eventId: string;
   eventName: string;
   isPromoted?: boolean;
-  currentPromotion?: {
-    priority: number;
-    expiresAt: string | null;
-    promotionType: PromotionType;
-    notes: string;
-  } | null;
+  currentPromotion?: EventPromotion | null;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -59,9 +54,9 @@ export function PromoteEventForm({
   const form = useForm<PromotionFormData>({
     defaultValues: {
       priority: currentPromotion?.priority ?? 1,
-      expiresAt: currentPromotion?.expiresAt ? new Date(currentPromotion.expiresAt).toISOString().slice(0, 16) : "",
-      promotedBy: "",
-      promotionType: currentPromotion?.promotionType ?? "standard",
+      expiresAt: currentPromotion?.expires_at ? new Date(currentPromotion.expires_at).toISOString().slice(0, 16) : "",
+      promotedBy: currentPromotion?.promoted_by ?? "",
+      promotionType: currentPromotion?.promotion_type ?? "standard",
       notes: currentPromotion?.notes ?? "",
     },
   });
@@ -82,9 +77,10 @@ export function PromoteEventForm({
         await promoteEvent(eventId, requestData);
         alert("Event promoted successfully!");
         onSuccess?.();
-      } catch (promoteError: any) {
+      } catch (promoteError: unknown) {
         // Check if the error is because event is already promoted
-        const errorMessage = promoteError?.response?.data?.error || promoteError?.message || "";
+        const error = promoteError as { response?: { data?: { error?: string } }; message?: string };
+        const errorMessage = error?.response?.data?.error || error?.message || "";
         if (errorMessage.includes("already promoted") || errorMessage.includes("Use PATCH to update")) {
           // Event is already promoted, so update instead
           await updatePromotion(eventId, requestData);
