@@ -11,8 +11,9 @@
   <a href="https://github.com/ericahan22/bug-free-octo-spork/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/ericahan22/bug-free-octo-spork/update-events-data.yml?branch=main&style=flat-square" alt="GitHub Actions Status"/>
   </a>
-  <img src="https://img.shields.io/badge/Backend-Django%204.2.7-green?style=flat-square" alt="Django Version"/>
-  <img src="https://img.shields.io/badge/Frontend-React%2019.1.0-blue?style=flat-square" alt="React Version"/>
+  <a href="https://vercel.com/ericas-projects-4f2175b1/bug-free-octo-spork-frontend">
+    <img src="https://deploy-badge.vercel.app/vercel/bug-free-octo-spork-frontend?logo=&name=vercel+frontend&style=flat-square" alt="Frontend Deployment Status"/>
+  </a>
 </p>
 
 <a href="https://wat2do.ca" target="_blank">Wat2Do.ca</a> is a web app to help you discover club events at the University of
