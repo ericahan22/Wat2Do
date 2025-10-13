@@ -12,6 +12,9 @@ import django
 from dotenv import load_dotenv
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
+
+load_dotenv()
+
 django.setup()
 
 from apps.events.models import Events
@@ -22,8 +25,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-load_dotenv()
 
 
 def get_referenced_s3_keys() -> set[str]:
