@@ -1,247 +1,217 @@
 # Instagram Event Scraper API
 
-Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+This is a full-stack web application with a Django REST API backend and a React + TypeScript frontend for scraping and displaying Instagram events from clubs at the University of Waterloo.
 
-This is a full-stack web application consisting of a Django REST API backend and a React + TypeScript frontend for scraping and displaying Instagram events from university clubs.
+---
 
-## Working Effectively
+## Environment Setup
 
-### Bootstrap Environment
-- Run these commands in sequence to set up the development environment:
-  - Backend setup:
-    ```bash
-    cd backend
-    source .venv/bin/activate
-    pip install -r requirements.txt   
-    python manage.py migrate    
-    python manage.py runserver 8000  
-    ```
-  - Frontend setup:
-    ```bash
-    cd frontend
-    npm install                
-    npm run build                 
-    npm run dev                   
-    ```
+### Backend
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export USE_SQLITE=1
+python manage.py migrate
+python manage.py runserver 8000
+```
 
-   - Testing the ai_client with mock caption and mock image url:
-   ```bash
-   cd backend
-   python test_ai_client.py
-   ```
+### Frontend
+```bash
+cd frontend
+npm install
+npm run build
+npm run dev
+```
 
-### Development Database Configuration
-- **CRITICAL**: Always set `export USE_SQLITE=1` before running Django commands for local development
-- Without this environment variable, Django will try to connect to PostgreSQL and fail
-- The production environment uses PostgreSQL via Supabase, but local development uses SQLite
+### AI Client Test
+```bash
+cd backend
+python test_ai_client.py
+```
 
-### Build and Test Commands
-- Backend:
-  - `python manage.py check` - Django configuration check (<1 second)
-  - `python manage.py test` - Run Django tests (currently no tests defined)
-  - `python manage.py migrate` - Apply database migrations (<1 second)
-- Frontend:
-  - `npm run build` - Production build (~9 seconds)
-  - `npm run lint` - ESLint check (~3 seconds, may show warnings/errors)
-  - `npm run dev` - Development server (starts immediately)
-  - `npm run preview` - Preview production build
+---
 
-### Running Applications
-- Backend API server:
-  ```bash
-  cd backend
-  export USE_SQLITE=1
-  python manage.py runserver 8000
-  ```
-  Available at http://localhost:8000/ with endpoints:
-  - `GET /` - API information
-  - `GET /health/` - Health check  
-  - `GET /events/` - Get all events
-  - `GET /clubs/` - Get all clubs
+## Local Development
 
-- Frontend development server:
-  ```bash
-  cd frontend
-  npm run dev
-  ```
-  Available at http://localhost:5173/
+- **Always set** `export USE_SQLITE=1` before running Django commands locally.
+- Production uses PostgreSQL (Supabase); local uses SQLite.
 
-## Validation
+---
 
-### Always Test These Scenarios After Making Changes
-1. **Backend API validation**:
-   - Start backend server with SQLite
-   - Test endpoints: `curl http://localhost:8000/health/` should return `{"status":"healthy","message":"Server is running"}`
-   - Test API info: `curl http://localhost:8000/` should return JSON with endpoints info
-   - Test events endpoint: `curl http://localhost:8000/events/` should return events list (may be empty)
+## Build & Test Commands
 
-2. **Frontend validation**:
-   - Build frontend successfully with `npm run build`
-   - Start development server with `npm run dev`
-   - Verify server starts on port 5173 with no errors
-   - Check that `curl -I http://localhost:5173/` returns HTTP 200
+### Backend
+- `python manage.py check` — Django config check
+- `python manage.py test` — Run Django tests
+- `python manage.py migrate` — Apply migrations
 
-3. **Full-stack integration**:
-   - Run both backend (port 8000) and frontend (port 5173) simultaneously
-   - Frontend should connect to backend API for data
+### Frontend
+- `npm run build` — Production build
+- `npm run lint` — ESLint check
+- `npm run dev` — Dev server
+- `npm run preview` — Preview production build
 
-### Linting and Code Quality
-- **Backend**: Use Django's built-in checks: `python manage.py check --deploy`
-- **Frontend**: Always run `npm run lint` before committing (may show existing warnings, focus on new ones)
-- Frontend linting currently shows some pre-existing issues - do not spend time fixing unless directly related to your changes
+---
 
-## Common Issues and Workarounds
+## Running Applications
 
-### Database Connection Issues
-- **Problem**: `django.db.utils.OperationalError: could not translate host name "your-project.supabase.co"`
-- **Solution**: Always set `export USE_SQLITE=1` environment variable for local development
+- **Backend:**  
+  http://localhost:8000/
+  - `/` — API info
+  - `/health/` — Health check
+  - `/events/` — All events
+  - `/clubs/` — All clubs
 
-### Secret Key Issues  
-- **Problem**: `ImproperlyConfigured: The SECRET_KEY setting must not be empty`
-- **Solution**: Already fixed in settings.py with a default development key
+- **Frontend:**  
+  http://localhost:5173/
 
-### Static Files Warning
-- **Problem**: `The directory '/path/to/backend/static' in the STATICFILES_DIRS setting does not exist`
-- **Solution**: Run `mkdir -p backend/static` (already resolved)
+---
 
-### Docker Build Issues
-- **Problem**: Docker build fails with SSL certificate errors in restricted environments
-- **Solution**: Do not attempt Docker builds in restricted environments. Use local Python environment instead.
+## Validation Checklist
 
-### Frontend ESLint Errors
-- **Problem**: ESLint shows errors in existing code (currently 6 errors, 1 warning)
-- **Solution**: Focus only on new errors introduced by your changes. Existing issues in EventsCalendar.tsx, button.tsx, and dateUtils.ts are pre-existing.
+1. **Backend API**
+   - Start backend with SQLite
+   - `curl http://localhost:8000/health/` → `{"status":"healthy","message":"Server is running"}`
+   - `curl http://localhost:8000/` → endpoints info
+   - `curl http://localhost:8000/events/` → events list
+
+2. **Frontend**
+   - `npm run build` succeeds
+   - `npm run dev` starts on port 5173
+   - `curl -I http://localhost:5173/` → HTTP 200
+
+3. **Full-stack**
+   - Run both servers
+   - Frontend connects to backend API
+
+4. **Linting**
+   - Backend: `python manage.py check --deploy`
+   - Frontend: `npm run lint` (focus on new errors only)
+
+---
+
+## Common Issues
+
+- **Database:**  
+  Set `export USE_SQLITE=1` for local dev to avoid PostgreSQL errors.
+
+- **Static Files:**  
+  If you see a static files warning, run:  
+  `mkdir -p backend/static`
+
+- **Docker:**  
+  Use local Python, not Docker, in restricted environments.
+
+- **ESLint:**  
+  Ignore pre-existing frontend lint errors unless you change those files.
+
+---
 
 ## Project Structure
 
 ### Backend (`/backend/`)
 ```
 backend/
-├── api/                    # Django project configuration
-│   ├── settings.py        # Main settings (database, CORS, etc.)
-│   ├── urls.py            # URL routing
-│   └── wsgi.py            # WSGI application
-├── example/               # Main Django app
-│   ├── models.py          # Database models (Clubs, Events)
-│   ├── views.py           # API endpoints
-│   └── urls.py            # App-specific URLs
-├── scraping/              # Instagram scraping scripts
-│   ├── instagram_feed.py  # Main scraping script (requires secrets)
-│   ├── ai_client.py       # OpenAI integration
-│   └── scrape.py          # Scraping utilities
-├── requirements.txt       # Python dependencies
-├── manage.py              # Django management script
-└── Dockerfile            # Docker configuration (may not work in restricted environments)
+├── api/                # Django config
+├── example/            # Main app (models, views, urls)
+├── scraping/           # Instagram scraping scripts
+├── requirements.txt
+├── manage.py
 ```
 
 ### Frontend (`/frontend/`)
 ```
 frontend/
 ├── src/
-│   ├── components/        # React components
-│   ├── hooks/             # Custom React hooks  
-│   ├── lib/               # Utility functions
-│   └── App.tsx            # Main application component
-├── package.json           # Node.js dependencies and scripts
-├── vite.config.ts         # Vite build configuration
-├── tsconfig.json          # TypeScript configuration
-└── eslint.config.js       # ESLint configuration
+│   ├── app/
+│   │   └── App.tsx
+│   └── shared/
+│       ├── components/
+│       ├── hooks/
+│       └── lib/
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
 ```
 
-## Dependencies and Versions
+---
 
-### Backend Requirements
+## Dependencies
+
+### Backend
 - Django 4.2.7
 - Django REST Framework 3.14.0
-- PostgreSQL support (psycopg2-binary)
-- Data processing: pandas, numpy
-- Scraping: instaloader (custom build), requests, beautifulsoup4
-- AI: openai
-- Production: gunicorn, whitenoise
+- psycopg2-binary (Postgres)
+- django-filter
+- django-cors-headers
+- whitenoise
+- pgvector
+- instaloader (custom)
+- requests, beautifulsoup4
+- openai
+- python-dotenv
+- python-dateutil
+- Pillow
+- boto3
+- gunicorn
 
-### Frontend Dependencies  
-- React 19.1.0 with TypeScript
-- Build tool: Vite 7.1.3
-- Styling: TailwindCSS 4.1.11
-- UI components: Radix UI components
-- State management: TanStack Query
-- Development: ESLint, TypeScript ESLint
+### Frontend
+- React 19.1.0 + TypeScript
+- Vite 7.1.3
+- TailwindCSS 4.1.11
+- Radix UI
+- TanStack Query
+- ESLint
 
-## CI/CD Integration
+---
 
-### GitHub Actions Workflow (`.github/workflows/instagram_feed.yml`)
-- Runs daily Instagram scraping job
-- Requires external secrets (Instagram credentials, OpenAI API key, database URL)
-- Uses Python 3.11 runtime
-- Caches pip dependencies for faster builds
-- Uploads scraping logs as artifacts
+## CI/CD
 
-### Important Notes
-- The scraping workflow requires external services and credentials not available in local development
-- Focus development on the API and frontend components rather than scraping functionality
-- The workflow is configured for production environment with real Instagram data
+- GitHub Actions workflow runs daily scraping job.
+- Requires secrets: Instagram credentials, OpenAI API key, database URL.
+- Uses Python 3.11, caches pip dependencies, uploads logs as artifacts.
 
-## Timing Expectations and Timeouts
+---
 
-- **pip install**: 22 seconds, set timeout to 60+ seconds, NEVER CANCEL
-- **npm install**: 12 seconds, set timeout to 30+ seconds, NEVER CANCEL  
-- **npm run build**: 9 seconds, set timeout to 30+ seconds, NEVER CANCEL
-- **Database migrations**: <1 second
-- **Server startup**: Both backend and frontend start immediately (<5 seconds)
-- **ESLint**: 3 seconds
-
-## Quick Command Reference
+## Quick Reference
 
 ```bash
-# Backend development
+# Backend
 cd backend
 export USE_SQLITE=1
 pip install -r requirements.txt
-python manage.py migrate  
+python manage.py migrate
 python manage.py runserver 8000
 
-# Frontend development  
+# Frontend
 cd frontend
 npm install
 npm run dev
 
-# Testing
-curl http://localhost:8000/health/     # Backend health check
-curl -I http://localhost:5173/         # Frontend health check
-
-# Build and validate
+# Build & Lint
 cd frontend && npm run build && npm run lint
 cd backend && export USE_SQLITE=1 && python manage.py check
-
-# Full workflow validation
-cd backend && export USE_SQLITE=1 && python manage.py check
-cd ../frontend && npm run build
-echo "All systems operational!"
 ```
 
-## Manual Validation Scenarios
+---
 
-After making any changes, always complete these validation scenarios:
+## Manual Validation
 
-1. **Complete Development Setup Test**:
-   - Start fresh terminal
-   - Follow bootstrap instructions exactly
-   - Verify both servers start without errors
-   - Test all API endpoints respond correctly
+1. **Setup Test:**  
+   - Fresh terminal, follow setup steps, verify both servers start, test endpoints.
 
-2. **Build Pipeline Test**:
+2. **Build Pipeline Test:**  
    - Clean build: `rm -rf frontend/dist backend/db.sqlite3`
-   - Full rebuild following bootstrap instructions
-   - Verify no new linting errors beyond existing 7 issues
-   - Confirm both development servers start successfully
+   - Full rebuild, verify no new lint errors, both servers start.
 
-3. **API Functionality Test**:
-   - Start backend with SQLite
-   - Test each endpoint: `/`, `/health/`, `/events/`, `/clubs/`
-   - Verify JSON responses are well-formed
-   - Check database operations work (migrations, etc.)
+3. **API Test:**  
+   - Backend with SQLite, test `/`, `/health/`, `/events/`, `/clubs/`.
 
-4. **Cross-Platform Compatibility**:
-   - Instructions tested on Linux with Python 3.12 and Node.js 20.19
-   - SQLite configuration ensures database portability
-   - No external services required for basic development
+4. **Cross-Platform:**  
+   - Works on Linux (Python 3.12, Node.js 20.19), SQLite for portability.
+
+---
+
+**Always reference these instructions first. Use search or bash commands only if you encounter unexpected issues not covered here.**
