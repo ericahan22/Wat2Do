@@ -31,35 +31,34 @@ def newsletter_subscribe(request):
         )
 
     try:
-        # Check if already subscribed
-        subscriber, created = NewsletterSubscriber.objects.get_or_create(
-            email=email.lower().strip(),
-            defaults={"is_active": True},
-        )
+        subscriber = NewsletterSubscriber.get_by_email(email)
+        created = False
 
-        if not created:
+        if subscriber:
             if subscriber.is_active:
                 return Response(
                     {"message": "You're already subscribed to our newsletter!"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                # Reactivate subscription
                 subscriber.is_active = True
                 subscriber.save()
+        else:
+            subscriber = NewsletterSubscriber.create_subscriber(email)
+            created = True
 
         # Send welcome email with mock events
         from services.email_service import email_service
 
         email_sent = email_service.send_welcome_email(
-            subscriber.email, str(subscriber.unsubscribe_token)
+            email, str(subscriber.unsubscribe_token)   
         )
 
         if email_sent:
             return Response(
                 {
                     "message": "Successfully subscribed! Check your email for upcoming events.",
-                    "email": subscriber.email,
+                    "email": email,  
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -67,7 +66,7 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Subscribed successfully, but email could not be sent. Please check back later.",
-                    "email": subscriber.email,
+                    "email": email,  
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -91,7 +90,7 @@ def newsletter_unsubscribe(request, token):
             return Response(
                 {
                     "already_unsubscribed": not subscriber.is_active,
-                    "email": subscriber.email,
+                    "email": subscriber.get_email_display(),   
                     "message": "Already unsubscribed"
                     if not subscriber.is_active
                     else "Ready to unsubscribe",
@@ -119,7 +118,7 @@ def newsletter_unsubscribe(request, token):
         return Response(
             {
                 "message": "Successfully unsubscribed from the newsletter.",
-                "email": subscriber.email,
+                "email": subscriber.get_email_display(),  
                 "unsubscribed_at": subscriber.unsubscribed_at,
             }
         )
