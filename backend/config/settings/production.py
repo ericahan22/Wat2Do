@@ -1,3 +1,5 @@
+import os
+
 from .base import *
 
 # Production settings
@@ -12,4 +14,4 @@ X_FRAME_OPTIONS = "DENY"
 ALLOWED_HOSTS = ["your-domain.com", "www.your-domain.com"]
 
 # Static files
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")

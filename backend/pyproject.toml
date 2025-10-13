@@ -12,4 +12,4 @@ ignore = ["T201", "TRY300", "TRY400", "RUF012", "ARG001", "E501", "W293", "PTH11
 "example/migrations/*.py" = ["T201", "ARG001", "RUF012", "W291", "PERF203"]
 "manage.py" = ["TRY003"]
 "test_openai_service.py" = ["T201", "E501"]
-"config/settings/*.py" = ["F403", "F401"]
+"config/settings/*.py" = ["F403", "F401", "F405"]
