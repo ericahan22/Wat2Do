@@ -1,5 +1,8 @@
 name: Deploy Backend
 
+# This workflow builds, pushes to ECR, deploys to ECS, and cleans up old images
+# It keeps the 5 most recent images to save storage costs while maintaining rollback capability
+
 on:
   push:
     branches: [ main ]
@@ -9,7 +12,7 @@ on:
 
 jobs:
   build-push-and-redeploy:
-    name: Build, Push to ECR, and Redeploy ECS Service
+    name: Build, Push to ECR, Deploy to ECS, and Cleanup Old Images
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -58,5 +61,22 @@ jobs:
             --service "${ECS_SERVICE_NAME}" \
             --force-new-deployment \
             --region "${AWS_REGION}"
+
+      - name: Clean up old ECR images
+        run: |
+          echo "🧹 Cleaning up old ECR images..."
+          
+          # Delete all images except the latest 3
+          aws ecr describe-images \
+            --repository-name "${ECR_REPOSITORY}" \
+            --region "${AWS_REGION}" \
+            --query 'sort_by(imageDetails, &imagePushedAt)[3:][].imageDigest' \
+            --output text | \
+          xargs -I {} aws ecr batch-delete-image \
+            --repository-name "${ECR_REPOSITORY}" \
+            --region "${AWS_REGION}" \
+            --image-ids imageDigest={} || echo "No old images to delete"
+          
+          echo "✅ Cleanup complete"
 
 

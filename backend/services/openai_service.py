@@ -24,16 +24,57 @@ class OpenAIService:
         load_dotenv()
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    def generate_embedding(
-        self, text: str, model: str = "text-embedding-3-small"
-    ) -> list[float]:
-        """Generate embedding vector for text using OpenAI API"""
-        text = text.replace("\n", " ").strip()
+    def generate_embedding(self, text: str) -> list[float]:
+        """
+        Generate embedding vector for text using OpenAI's text-embedding-3-small model (1536 dimensions).
+        """
         if not text:
             return None
 
-        response = self.client.embeddings.create(input=[text], model=model)
-        return response.data[0].embedding
+        # Clean up the text for better embedding quality
+        text = text.replace("\n", " ").replace("\r", " ").strip()
+
+        # Remove extra whitespace
+        import re
+
+        text = re.sub(r"\s+", " ", text)
+
+        try:
+            response = self.client.embeddings.create(
+                input=[text], model="text-embedding-3-small"
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"Failed to generate embedding: {e}")
+            return None
+
+    def generate_event_embedding(self, event) -> list[float]:
+        """
+        Generate embedding for an event using a rich text representation.
+        This combines multiple event fields to create semantic context.
+        """
+        # Define field names to include
+        field_names = [
+            "name",
+            "description",
+            "location",
+            "club_type",
+            "club_handle",
+            "date",
+            "start_time",
+            "food",
+            "price",
+            "registration",
+        ]
+
+        parts = []
+        for field_name in field_names:
+            value = getattr(event, field_name, None)
+            if value:
+                parts.append(f"{field_name}: {value}")
+
+        enhanced_text = " | ".join(parts)
+        return self.generate_embedding(enhanced_text)
 
     def extract_events_from_caption(
         self, caption_text: str, image_url: str | None = None

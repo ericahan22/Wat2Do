@@ -1,4 +1,4 @@
-import { Event } from "@/hooks/useEvents";
+import { Event } from "@/features/events/types/events";
 
 export const LAST_UPDATED = "2025-10-12T14:16:24.789556+00:00";
 

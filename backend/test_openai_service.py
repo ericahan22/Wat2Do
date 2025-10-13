@@ -203,4 +203,3 @@ image_url = "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a0e6f
 
 # Test AI client
 result = extract_event_from_caption(post["caption"], image_url)
-# print(json.dumps(result, indent=2))  # Commented out for linting
