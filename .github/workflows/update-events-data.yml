@@ -82,6 +82,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Prepare Zyte SSL certificate
+        working-directory: backend/scraping
         run: |
           python -c "from zyte_setup import setup_zyte; print(setup_zyte())"
 
