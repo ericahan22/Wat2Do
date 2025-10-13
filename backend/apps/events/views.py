@@ -36,8 +36,7 @@ def get_events(request):
             search_embedding = generate_embedding(search_term)
             start_date = request.GET.get("start_date")
             similar_events = find_similar_events(
-                embedding=search_embedding, 
-                min_date=start_date
+                embedding=search_embedding, min_date=start_date
             )
             for event in similar_events:
                 print(event["name"], event["similarity"])
