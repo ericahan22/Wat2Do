@@ -26,7 +26,7 @@ from example.models import Clubs, Events
 from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
 from zyte_setup import setup_zyte
-from backend.scraping.logging_config import logger
+from logging_config import logger
 
 
 USER_AGENTS = [

@@ -2,7 +2,7 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 from pathlib import Path
-from backend.scraping.logging_config import logger
+from logging_config import logger
 
 
 def setup_zyte():
