@@ -79,7 +79,7 @@ class OpenAIService:
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
-    - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks"). Always capitalize the first item mentioned
+    - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
     - If information is not available, use empty string "" for strings, null for price, false for registration
