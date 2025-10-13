@@ -13,7 +13,7 @@ import django
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 # Import Django modules after setup

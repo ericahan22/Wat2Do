@@ -7,7 +7,7 @@ from django.conf import settings
 
 # Setup Django if not already configured
 if not settings.configured:
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
     django.setup()
 
 from apps.events.models import Events

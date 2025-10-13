@@ -1,4 +1,3 @@
-
 # Development settings
 DEBUG = True
 
