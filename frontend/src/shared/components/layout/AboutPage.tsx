@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Button } from "@/shared/components/ui/button";
 
 const AboutPage: React.FC = () => {
@@ -220,4 +220,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage;
+export default memo(AboutPage);

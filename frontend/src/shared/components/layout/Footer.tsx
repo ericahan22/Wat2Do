@@ -119,25 +119,25 @@ function Footer() {
             </a>
             <a
               href="/events"
-              className="hover:text-gray-900 dark:hover:text-gray-200"
+              className="dark:text-gray-200"
             >
               Events
             </a>
             <a
               href="/clubs"
-              className="hover:text-gray-900 dark:hover:text-gray-200"
+              className="dark:text-gray-200"
             >
               Clubs
             </a>
             <a
               href="/about"
-              className="hover:text-gray-900 dark:hover:text-gray-200"
+              className="dark:text-gray-200"
             >
               About
             </a>
             <a
               href="/contact"
-              className="hover:text-gray-900 dark:hover:text-gray-200"
+              className="dark:text-gray-200"
             >
               Contact
             </a>

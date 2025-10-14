@@ -257,6 +257,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             description=event_data.get("description") or "",
             embedding=embedding,
             club_type=club_type,
+            status="scraped",
         )
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
         try:

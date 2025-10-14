@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
 import { AdminLogin } from "@/features/admin/components/AdminLogin";
 import { useEvents } from "@/features/events/hooks/useEvents";
@@ -21,7 +21,7 @@ import { Event } from "@/features/events/types/events";
  * Admin page for managing event promotions
  * Requires admin authentication
  */
-export default function AdminPage() {
+function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedEventName, setSelectedEventName] = useState<string>("");
@@ -404,3 +404,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+export default memo(AdminPage);

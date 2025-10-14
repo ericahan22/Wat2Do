@@ -59,7 +59,7 @@ strong, b {
 }
 
 /* Secondary text - body content and emphasis */
-p, span, article, ul, ol, li, label, em, i {
+p, span, article, ul, ol, li, label, em, i, a {
   @apply text-gray-700 dark:text-gray-300;
 }
 

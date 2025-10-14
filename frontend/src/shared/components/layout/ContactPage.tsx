@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 const ContactPage: React.FC = () => {
   return (
@@ -56,6 +56,6 @@ const ContactPage: React.FC = () => {
   );
 };
 
-export default React.memo(ContactPage);
+export default memo(ContactPage);
 
 

@@ -9,8 +9,8 @@ export const buttonVariants = cva(
         destructive: 'text-red-600 dark:text-red-400',
         outline: 'border border-gray-200 text-gray-900 hover:border-gray-300 dark:border-gray-700 dark:text-gray-100 dark:hover:border-gray-600',
         secondary: 'text-gray-900 dark:text-gray-100',
-        ghost: 'text-gray-900 dark:text-gray-100',
-        link: 'text-gray-900 underline-offset-4 hover:underline dark:text-gray-100',
+        ghost: 'hover:bg-gray-500/10 text-gray-900 dark:text-gray-100 dark:hover:bg-gray-50/10',
+        link: 'text-gray-900 underline-offset-4 hover:underline hover:bg-gray-500/10 dark:text-gray-100 dark:hover:bg-gray-50/10',
       },
       effect: {
         expandIcon: 'group gap-0 relative',
