@@ -116,7 +116,7 @@ class OpenAIService:
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
-    - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
+    - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
