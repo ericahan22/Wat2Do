@@ -31,13 +31,13 @@ export const getLastUpdatedText = (): string => {
   const dateStr = date.toLocaleDateString(undefined, {
     month: "long",
     day: "numeric",
-    year: "numeric",
   });
   const timeStr = date.toLocaleTimeString(undefined, {
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
+    hour12: true,
   });
-  return `Last updated on ${dateStr}, ${timeStr}`;
+  return `Last updated on ${dateStr} at ${timeStr}`;
 };
 
 const fetchEvents = async ({

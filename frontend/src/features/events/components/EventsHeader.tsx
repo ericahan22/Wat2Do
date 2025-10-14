@@ -9,7 +9,7 @@ const EventsHeader: React.FC = () => {
       <h1 className="text-3xl font-bold mb-2">Events</h1>
       <p>
         Events update daily at ~8:30am EST.
-        {lastUpdatedText && <span className="ml-1">{lastUpdatedText}.</span>}
+        {lastUpdatedText && <span className="ml-1">{lastUpdatedText}</span>}
       </p>
     </div>
   );
