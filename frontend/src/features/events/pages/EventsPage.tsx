@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, memo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventSelection } from "@/features/events/hooks/useEventSelection";
@@ -96,4 +96,4 @@ function EventsPage() {
   );
 }
 
-export default EventsPage;
+export default memo(EventsPage);
