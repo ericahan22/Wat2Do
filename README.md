@@ -58,7 +58,6 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export USE_SQLITE=1
 python manage.py migrate
 python manage.py runserver 8000
 ```
@@ -67,7 +66,6 @@ python manage.py runserver 8000
 ```bash
 cd frontend
 npm install
-npm run build
 npm run dev
 ```
 

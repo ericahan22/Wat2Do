@@ -11,7 +11,7 @@ interface SubscribeError {
 }
 
 const subscribeToNewsletter = async (email: string): Promise<SubscribeResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/subscribe`, {
+  const response = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

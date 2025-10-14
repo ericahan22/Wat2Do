@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "pgvector",
     # Local apps
-    "apps.core",
+    "apps.user_auth",
     "apps.events",
     "apps.clubs",
     "apps.promotions",
@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.user_auth.middleware.SimpleAuthMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -146,6 +147,7 @@ USE_TZ = True
 # Django REST Framework settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "apps.user_auth.authentication.CookieTokenAuthentication",
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],

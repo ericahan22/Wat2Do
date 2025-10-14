@@ -1,9 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
-import { EventsPage } from '@/features/events'
+import { EventsPage, PromoteEventPage } from '@/features/events'
 import { ClubsPage } from '@/features/clubs'
 import { AdminPage } from '@/features/admin'
 import { UnsubscribePage } from '@/features/newsletter'
+import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { EmailVerificationPage } from '@/features/auth/pages/EmailVerificationPage'
+import { SubmitPage } from '@/features/events/pages/SubmitPage'
+import { MySubmissionsPage } from '@/features/events/pages/MySubmissionsPage'
+import { ModerationPage } from '@/features/admin/pages/ModerationPage'
+import { AuthGuard } from '@/features/auth/components/AuthGuard'
 import { Navbar, Footer } from '@/shared'
 import AboutPage from '@/shared/components/layout/AboutPage'
 import ContactPage from '@/shared/components/layout/ContactPage'
@@ -21,8 +27,33 @@ function App() {
             <Route path="/clubs" element={<ClubsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/verify-email/:token" element={<EmailVerificationPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
+            
+            {/* Protected Routes */}
+            <Route path="/submit" element={
+              <AuthGuard>
+                <SubmitPage />
+              </AuthGuard>
+            } />
+            <Route path="/my-submissions" element={
+              <AuthGuard>
+                <MySubmissionsPage />
+              </AuthGuard>
+            } />
+            <Route path="/promote-event" element={
+              <AuthGuard>
+                <PromoteEventPage />
+              </AuthGuard>
+            } />
+            <Route path="/admin/moderation" element={
+              <AuthGuard requireAdmin={true}>
+                <ModerationPage />
+              </AuthGuard>
+            } />
+            
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

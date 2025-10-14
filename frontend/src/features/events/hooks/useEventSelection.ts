@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import { useMutation } from "@tanstack/react-query";
 import { API_BASE_URL } from "@/shared/constants/api";
 
 export function useEventSelection(view: "grid" | "calendar") {
@@ -38,42 +38,52 @@ export function useEventSelection(view: "grid" | "calendar") {
     });
   };
 
-  const exportToCalendar = async () => {
-    const eventIds = Array.from(selectedEvents).join(",");
-    const exportUrl = `${API_BASE_URL}/api/events/export.ics?ids=${eventIds}`;
+  const exportToCalendarMutation = useMutation({
+    mutationFn: async (eventIds: string[]) => {
+      const idsParam = eventIds.join(",");
+      const exportUrl = `${API_BASE_URL}/events/export.ics?ids=${idsParam}`;
 
-    // Create a hidden link and trigger download
-    // The .ics file is downloaded and can be opened once in Calendar app
-    const link = document.createElement("a");
-    link.href = exportUrl;
-    link.download = "events.ics";
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+      // Create a hidden link and trigger download
+      // The .ics file is downloaded and can be opened once in Calendar app
+      const link = document.createElement("a");
+      link.href = exportUrl;
+      link.download = "events.ics";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+  });
 
-  const exportToGoogleCalendar = async () => {
-    const eventIds = Array.from(selectedEvents).join(",");
-
-    try {
+  const exportToGoogleCalendarMutation = useMutation({
+    mutationFn: async (eventIds: string[]) => {
+      const idsParam = eventIds.join(",");
       const response = await fetch(
-        `${API_BASE_URL}/api/events/google-calendar-urls/?ids=${eventIds}`
+        `${API_BASE_URL}/events/google-calendar-urls/?ids=${idsParam}`
       );
 
       if (!response.ok) {
-        console.error("Failed to fetch Google Calendar URLs");
-        return;
+        throw new Error("Failed to fetch Google Calendar URLs");
       }
 
       const data: { urls: string[] } = await response.json();
-
+      return data;
+    },
+    onSuccess: (data) => {
       data.urls.forEach((url) => {
         window.open(url, "_blank");
       });
-    } catch (error) {
-      console.error("Error exporting to Google Calendar:", error);
-    }
+    },
+  });
+
+  const exportToCalendar = () => {
+    const eventIds = Array.from(selectedEvents);
+    exportToCalendarMutation.mutate(eventIds);
+  };
+
+  const exportToGoogleCalendar = () => {
+    const eventIds = Array.from(selectedEvents);
+    exportToGoogleCalendarMutation.mutate(eventIds);
   };
 
   return {
@@ -84,5 +94,8 @@ export function useEventSelection(view: "grid" | "calendar") {
     toggleEventSelection,
     exportToCalendar,
     exportToGoogleCalendar,
+    isExportingToCalendar: exportToCalendarMutation.isPending,
+    isExportingToGoogleCalendar: exportToGoogleCalendarMutation.isPending,
+    exportError: exportToGoogleCalendarMutation.error,
   };
 }

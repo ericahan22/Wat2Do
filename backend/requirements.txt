@@ -20,6 +20,9 @@ openai
 # Email service
 resend==0.8.0
 
+# Encryption for newsletter emails
+cryptography==41.0.7
+
 # AWS S3 for image storage
 boto3==1.34.0
 Pillow>=10.0.0

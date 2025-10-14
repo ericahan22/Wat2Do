@@ -21,7 +21,7 @@ interface UnsubscribeResponse {
 
 
 const fetchUnsubscribeInfo = async (token: string): Promise<UnsubscribeData> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`);
+  const response = await fetch(`${API_BASE_URL}/newsletter/unsubscribe/${token}`);
   
   if (!response.ok) {
     // Check if response is JSON before trying to parse
@@ -45,7 +45,7 @@ const submitUnsubscribe = async (
   token: string, 
   data: UnsubscribeRequest
 ): Promise<UnsubscribeResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`, {
+  const response = await fetch(`${API_BASE_URL}/newsletter/unsubscribe/${token}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

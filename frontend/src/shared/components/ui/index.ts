@@ -1,10 +1,13 @@
+export { Alert, AlertDescription, AlertTitle } from './alert';
 export { Badge } from './badge';
 export { Button } from './button';
-export { Card, CardContent, CardHeader, CardTitle } from './card';
+export { Calendar } from './calendar';
+export { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 export { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './form';
 export { IconButton } from './icon-button';
 export { Input } from './input';
 export { Label } from './label';
+export { Popover, PopoverContent, PopoverTrigger } from './popover';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 export { Tabs, TabsList, TabsTrigger } from './tabs';
 export { Textarea } from './textarea';

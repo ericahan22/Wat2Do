@@ -59,7 +59,7 @@ const fetchEvents = async ({
   }
 
   const queryString = params.toString() ? `?${params.toString()}` : "";
-  const response = await fetch(`${API_BASE_URL}/api/events/${queryString}`);
+  const response = await fetch(`${API_BASE_URL}/events/${queryString}`);
   if (!response.ok) {
     throw new Error("Failed to fetch events");
   }

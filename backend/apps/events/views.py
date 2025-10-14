@@ -1,14 +1,19 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.utils import timezone
+import uuid
 
 from services.openai_service import generate_embedding
+from services.storage_service import storage_service
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
 from .models import Events
+from .serializers import EventSubmissionSerializer, EventSubmissionResponseSerializer, EventModerationSerializer
 
 
 @api_view(["GET"])
@@ -20,7 +25,8 @@ def get_events(request):
         search_term = request.GET.get("search", "").strip()
 
         # Start with base queryset (ordering handled by model Meta)
-        queryset = Events.objects.all()
+        # Show approved events and scraped events to public (scraped events are auto-approved)
+        queryset = Events.objects.filter(status__in=['approved', 'scraped'])
 
         # Apply standard filters (dates, price, club_type, etc.)
         filterset = EventFilter(request.GET, queryset=queryset)
@@ -303,5 +309,149 @@ def get_google_calendar_urls(request):
     except Exception as e:
         return Response(
             {"error": f"Failed to generate Google Calendar URLs: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def submit_event(request):
+    """Submit a new event for approval"""
+    try:
+        # Check if user's email is verified
+        try:
+            profile = request.user.profile
+            if not profile.email_verified:
+                return Response(
+                    {"error": "Email verification required. Please verify your email before submitting events."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+        except:
+            return Response(
+                {"error": "User profile not found. Please contact support."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Handle image upload
+        image_file = request.FILES.get('image')
+        if not image_file:
+            return Response(
+                {"error": "Image is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        # Upload image to S3
+        file_ext = image_file.name.split('.')[-1] if '.' in image_file.name else 'jpg'
+        filename = f"events/submitted/{uuid.uuid4()}.{file_ext}"
+        
+        image_data = image_file.read()
+        image_url = storage_service.upload_image_data(image_data, filename)
+        
+        if not image_url:
+            return Response(
+                {"error": "Failed to upload image"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
+        # Prepare data for serializer
+        data = request.data.copy()
+        data['image_url'] = image_url
+        
+        # Validate and create event
+        serializer = EventSubmissionSerializer(data=data)
+        if serializer.is_valid():
+            # Generate embedding from description
+            description = serializer.validated_data.get('description', '')
+            embedding = generate_embedding(description) if description else None
+            
+            # Create event with submission fields
+            event = serializer.save(
+                status='pending',
+                submitted_by=request.user,
+                submitted_at=timezone.now(),
+                embedding=embedding
+            )
+            
+            response_serializer = EventSubmissionResponseSerializer(event)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to submit event: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_user_submissions(request):
+    """Get user's submitted events"""
+    try:
+        events = Events.objects.filter(
+            submitted_by=request.user,
+            status__in=['pending', 'approved', 'rejected']
+        ).order_by('-submitted_at')
+        
+        serializer = EventSubmissionResponseSerializer(events, many=True)
+        return Response(serializer.data)
+    
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get submissions: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def get_pending_submissions(request):
+    """Admin: Get all pending event submissions"""
+    try:
+        events = Events.objects.filter(status='pending').order_by('submitted_at')
+        serializer = EventSubmissionResponseSerializer(events, many=True)
+        return Response(serializer.data)
+    
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get pending submissions: {e!s}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAdminUser])
+def moderate_event(request, event_id):
+    """Admin: Approve or reject an event submission"""
+    try:
+        try:
+            event = Events.objects.get(id=event_id, status='pending')
+        except Events.DoesNotExist:
+            return Response(
+                {"error": "Event not found or not pending"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        serializer = EventModerationSerializer(data=request.data)
+        if serializer.is_valid():
+            # Update event with moderation decision
+            event.status = serializer.validated_data['status']
+            event.reviewed_by = request.user
+            event.reviewed_at = timezone.now()
+            
+            if serializer.validated_data['status'] == 'rejected':
+                event.rejection_reason = serializer.validated_data['rejection_reason']
+            
+            event.save()
+            
+            response_serializer = EventSubmissionResponseSerializer(event)
+            return Response(response_serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to moderate event: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )

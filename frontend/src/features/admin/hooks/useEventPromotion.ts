@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocalStorage } from "react-use";
 import { API_BASE_URL } from "@/shared/constants/api";
 import type {
   PromoteEventRequest,
@@ -11,16 +12,13 @@ import type {
   PromotionStatusResponse,
 } from "@/features/admin/types/promotion";
 
-const getAdminToken = (): string | null => {
-  return localStorage.getItem("admin_token");
-};
+// Removed getAdminToken function as it's no longer needed with useLocalStorage
 
 const promotionApi = {
-  async promoteEvent(eventId: string, data: PromoteEventRequest): Promise<PromoteEventResponse> {
-    const token = getAdminToken();
+  async promoteEvent(eventId: string, data: PromoteEventRequest, token: string): Promise<PromoteEventResponse> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/${eventId}/promote/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/${eventId}/promote/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,11 +35,10 @@ const promotionApi = {
     return response.json();
   },
 
-  async updatePromotion(eventId: string, data: UpdatePromotionRequest): Promise<UpdatePromotionResponse> {
-    const token = getAdminToken();
+  async updatePromotion(eventId: string, data: UpdatePromotionRequest, token: string): Promise<UpdatePromotionResponse> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/${eventId}/promote/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/${eventId}/promote/`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -58,11 +55,10 @@ const promotionApi = {
     return response.json();
   },
 
-  async unpromoteEvent(eventId: string): Promise<UnpromoteEventResponse> {
-    const token = getAdminToken();
+  async unpromoteEvent(eventId: string, token: string): Promise<UnpromoteEventResponse> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/${eventId}/unpromote/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/${eventId}/unpromote/`, {
       method: "POST",
       headers: {
         "Authorization": `Token ${token}`,
@@ -77,11 +73,10 @@ const promotionApi = {
     return response.json();
   },
 
-  async deletePromotion(eventId: string): Promise<void> {
-    const token = getAdminToken();
+  async deletePromotion(eventId: string, token: string): Promise<void> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/${eventId}/promote/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/${eventId}/promote/`, {
       method: "DELETE",
       headers: {
         "Authorization": `Token ${token}`,
@@ -94,11 +89,10 @@ const promotionApi = {
     }
   },
 
-  async getPromotedEvents(): Promise<PromotedEventsResponse> {
-    const token = getAdminToken();
+  async getPromotedEvents(token: string): Promise<PromotedEventsResponse> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/promoted/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/promoted/`, {
       headers: {
         "Authorization": `Token ${token}`,
       },
@@ -111,11 +105,10 @@ const promotionApi = {
     return response.json();
   },
 
-  async getPromotionStatus(eventId: string): Promise<PromotionStatusResponse> {
-    const token = getAdminToken();
+  async getPromotionStatus(eventId: string, token: string): Promise<PromotionStatusResponse> {
     if (!token) throw new Error("Admin token not found. Please log in.");
 
-    const response = await fetch(`${API_BASE_URL}/api/promotions/events/${eventId}/promotion-status/`, {
+    const response = await fetch(`${API_BASE_URL}/promotions/events/${eventId}/promotion-status/`, {
       headers: {
         "Authorization": `Token ${token}`,
       },
@@ -137,11 +130,12 @@ const promotionApi = {
  */
 export function useEventPromotion() {
   const queryClient = useQueryClient();
+  const [adminToken] = useLocalStorage<string>('admin_token');
 
   // Mutations
   const promoteMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: PromoteEventRequest }) =>
-      promotionApi.promoteEvent(eventId, data),
+      promotionApi.promoteEvent(eventId, data, adminToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["promotion-status"] });
@@ -150,7 +144,7 @@ export function useEventPromotion() {
 
   const updateMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: UpdatePromotionRequest }) =>
-      promotionApi.updatePromotion(eventId, data),
+      promotionApi.updatePromotion(eventId, data, adminToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["promotion-status"] });
@@ -158,7 +152,7 @@ export function useEventPromotion() {
   });
 
   const unpromoteMutation = useMutation({
-    mutationFn: (eventId: string) => promotionApi.unpromoteEvent(eventId),
+    mutationFn: (eventId: string) => promotionApi.unpromoteEvent(eventId, adminToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["promotion-status"] });
@@ -166,7 +160,7 @@ export function useEventPromotion() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (eventId: string) => promotionApi.deletePromotion(eventId),
+    mutationFn: (eventId: string) => promotionApi.deletePromotion(eventId, adminToken!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["promotion-status"] });
@@ -176,14 +170,14 @@ export function useEventPromotion() {
   // Queries
   const promotedEventsQuery = useQuery({
     queryKey: ["promoted-events"],
-    queryFn: promotionApi.getPromotedEvents,
-    enabled: !!getAdminToken(),
+    queryFn: () => promotionApi.getPromotedEvents(adminToken!),
+    enabled: !!adminToken,
   });
 
   const getPromotionStatusQueryOptions = (eventId: string) => ({
     queryKey: ["promotion-status", eventId],
-    queryFn: () => promotionApi.getPromotionStatus(eventId),
-    enabled: !!eventId && !!getAdminToken(),
+    queryFn: () => promotionApi.getPromotionStatus(eventId, adminToken!),
+    enabled: !!eventId && !!adminToken,
   });
 
   return {
@@ -219,10 +213,12 @@ export function useEventPromotion() {
 }
 
 export function usePromotionStatus(eventId: string) {
+  const [adminToken] = useLocalStorage<string>('admin_token');
+  
   return useQuery({
     queryKey: ["promotion-status", eventId],
-    queryFn: () => promotionApi.getPromotionStatus(eventId),
-    enabled: !!eventId && !!getAdminToken(),
+    queryFn: () => promotionApi.getPromotionStatus(eventId, adminToken!),
+    enabled: !!eventId && !!adminToken,
   });
 }
 

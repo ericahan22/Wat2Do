@@ -64,7 +64,7 @@ export default function AdminPage() {
       if (!token) return;
 
       const response = await fetch(
-        `${API_BASE_URL}/api/promotions/events/${eventId}/promotion-status/`,
+        `${API_BASE_URL}/promotions/events/${eventId}/promotion-status/`,
         {
           headers: {
             Authorization: `Token ${token}`,

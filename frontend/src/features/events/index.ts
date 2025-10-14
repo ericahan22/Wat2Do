@@ -13,3 +13,4 @@ export type { Event, EventsResponse, EventView } from './types/events';
 
 // Pages
 export { default as EventsPage } from './pages/EventsPage';
+export { default as PromoteEventPage } from './pages/PromoteEventPage';
