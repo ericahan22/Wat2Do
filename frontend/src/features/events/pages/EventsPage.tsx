@@ -17,11 +17,14 @@ function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
 
-  const handleViewChange = useCallback((newView: "grid" | "calendar") => {
-    const newParams = new URLSearchParams(searchParams);
-    newParams.set("view", newView);
-    setSearchParams(newParams);
-  }, [searchParams, setSearchParams]);
+  const handleViewChange = useCallback(
+    (newView: "grid" | "calendar") => {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("view", newView);
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
   const {
     data,
@@ -31,7 +34,6 @@ function EventsPage() {
     startDate,
     handleToggleStartDate,
   } = useEvents();
-
 
   const {
     isSelectMode,
@@ -68,9 +70,7 @@ function EventsPage() {
           isLoading={isLoading}
           searchTerm={searchTerm}
           isShowingPastEvents={isShowingPastEvents}
-          paginatedCount={data.length}
           totalCount={data.length}
-          view={view}
         />
       </div>
 

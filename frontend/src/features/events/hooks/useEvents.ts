@@ -127,8 +127,10 @@ export function useEvents() {
 
     if (searchTerm) {
       title = `${events.length} Found Events - Wat2Do`;
+    } else if (startDate) {
+      title = `${events.length} Total Events - Wat2Do`;
     } else {
-      title = `${events.length} Events - Wat2Do`;
+      title = `${events.length} Upcoming Events - Wat2Do`;
     }
 
     if (!isLoadingData) {
@@ -136,7 +138,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters]);
+  }, [events.length, isLoading, searchTerm, hasActiveFilters, startDate]);
 
   useDocumentTitle(documentTitle);
 
