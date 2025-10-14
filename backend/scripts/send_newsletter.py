@@ -49,7 +49,7 @@ def send_newsletter_to_all():
             return False, str(e)
 
     for subscriber in active_subscribers:
-        email_sent, error = send_to_subscriber(subscriber)
+        email_sent, error = send_to_subscriber(subscriber.get_email())
 
         if email_sent:
             success_count += 1

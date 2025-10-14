@@ -51,7 +51,7 @@ def newsletter_subscribe(request):
         from services.email_service import email_service
 
         email_sent = email_service.send_welcome_email(
-            email, str(subscriber.unsubscribe_token)
+            subscriber.get_email(), str(subscriber.unsubscribe_token)
         )
 
         if email_sent:

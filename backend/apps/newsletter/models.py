@@ -3,10 +3,15 @@ import uuid
 
 from django.db import models
 
+from utils.encryption_utils import email_encryption
+
 
 class NewsletterSubscriber(models.Model):
+    email_encrypted = models.TextField(help_text="Encrypted email address")
     email_hash = models.CharField(
-        max_length=128, unique=True, help_text="SHA-256 hash of the email"
+        max_length=128,
+        unique=True,
+        help_text="SHA-256 hash of the email for uniqueness checks",
     )
     subscribed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -30,7 +35,7 @@ class NewsletterSubscriber(models.Model):
 
     @staticmethod
     def hash_email(email):
-        """Create a SHA-256 hash of the email address"""
+        """Create a SHA-256 hash of the email address for uniqueness checks"""
         return hashlib.sha256(email.lower().strip().encode("utf-8")).hexdigest()
 
     @classmethod
@@ -44,10 +49,25 @@ class NewsletterSubscriber(models.Model):
 
     @classmethod
     def create_subscriber(cls, email):
-        """Create a new subscriber with hashed email"""
+        """Create a new subscriber with encrypted email"""
         email_hash = cls.hash_email(email)
-        return cls.objects.create(email_hash=email_hash, is_active=True)
+        email_encrypted = email_encryption.encrypt_email(email)
+        return cls.objects.create(
+            email_encrypted=email_encrypted, email_hash=email_hash, is_active=True
+        )
+
+    def get_email(self):
+        """Decrypt and return the actual email address"""
+        return email_encryption.decrypt_email(self.email_encrypted)
 
     def get_email_display(self):
         """Return a masked version of the email for display purposes"""
-        return f"***@{self.email_hash[:4]}..."
+        email = self.get_email()
+        if email:
+            # Show first 2 chars and domain
+            local, domain = email.split("@", 1)
+            masked_local = (
+                local[:2] + "*" * (len(local) - 2) if len(local) > 2 else local
+            )
+            return f"{masked_local}@{domain}"
+        return "***@***"
