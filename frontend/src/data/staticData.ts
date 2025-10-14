@@ -1,24 +1,8 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-13T22:21:39.789126+00:00";
+export const LAST_UPDATED = "2025-10-14T11:20:40.259425+00:00";
 
 export const staticEventsData: Event[] = [
-  {
-    id: "715",
-    club_handle: "waterloolaurierssa",
-    url: "https://www.instagram.com/p/DPpKVLgD25p/",
-    name: "Hiking with Sangat: Kelso Conservation Area",
-    date: "2025-10-13",
-    start_time: "12:00:00",
-    end_time: "13:00:00",
-    location: "5234 Kelso Rd, Milton, ON L9E 0C6",
-    price: 12.0,
-    food: "Snacks",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2575f0e4-6412-4c87-954f-7ee532856153.jpg",
-    club_type: "WUSA",
-    added_at: "2025-10-11T15:04:54.517972+00:00",
-  },
   {
     id: "703",
     club_handle: "uw_psychsoc",
@@ -148,6 +132,22 @@ export const staticEventsData: Event[] = [
     added_at: "2025-10-13T04:30:57.862150+00:00",
   },
   {
+    id: "729",
+    club_handle: "uwibtikar",
+    url: "https://www.instagram.com/p/DPq4Tw1jjaz/",
+    name: "TaqwaCon",
+    date: "2025-10-19",
+    start_time: "17:00:00",
+    end_time: "19:00:00",
+    location: "Wilfrid Laurier University",
+    price: null,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b9cdf052-af4f-4591-9c6c-ada4e972e931.jpg",
+    club_type: null,
+    added_at: "2025-10-13T11:18:58.900727+00:00",
+  },
+  {
     id: "593",
     club_handle: "uwvfp",
     url: "https://www.instagram.com/p/DPULAEeERoi/",
@@ -162,6 +162,22 @@ export const staticEventsData: Event[] = [
     image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/screenshot_22.png",
     club_type: "WUSA",
     added_at: "2025-10-03T15:56:39.319220+00:00",
+  },
+  {
+    id: "730",
+    club_handle: "watsam_uw",
+    url: "https://www.instagram.com/p/DPubeyrDp9w/",
+    name: "Virus Among Us",
+    date: "2025-10-21",
+    start_time: "17:00:00",
+    end_time: "19:00:00",
+    location: "EIT 1st Floor Atrium",
+    price: null,
+    food: "",
+    registration: true,
+    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2af758ed-f07f-450b-8a3c-dd516eb6e7b8.webp",
+    club_type: null,
+    added_at: "2025-10-13T11:20:25.920226+00:00",
   },
   {
     id: "712",
@@ -470,7 +486,6 @@ export const staticEventsData: Event[] = [
 ];
 
 export const RECOMMENDED_FILTERS: string[] = [
-  "hiking",
   "mocktail",
   "coffee",
   "trivia",
@@ -478,20 +493,21 @@ export const RECOMMENDED_FILTERS: string[] = [
   "roundtable",
   "symposium",
   "midterm review",
-  "snacks",
-  "online event",
+  "workshop",
   "networking",
   "headshots",
-  "talk",
   "open mic",
   "murder mystery",
   "bouldering",
   "dance",
-  "workshop",
+  "graduate workshop",
   "painting",
-  "pumpkin carving",
+  "carving",
   "career fair",
   "dodgeball",
-  "food",
-  "social event"
+  "snacks",
+  "drinks",
+  "student society",
+  "WUSA",
+  "large event"
 ];
