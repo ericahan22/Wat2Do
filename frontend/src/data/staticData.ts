@@ -1,24 +1,8 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-14T17:09:01.203240+00:00";
+export const LAST_UPDATED = "2025-10-15T11:16:25.402467+00:00";
 
 export const staticEventsData: Event[] = [
-  {
-    id: "735",
-    club_handle: "uwmathsoc",
-    url: "https://www.instagram.com/p/DPwWYfMEciZ/",
-    name: "CO 250 Review Session",
-    date: "2025-10-14",
-    start_time: "13:30:00",
-    end_time: "16:00:00",
-    location: "MC 2017",
-    price: null,
-    food: "",
-    registration: false,
-    image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f186a7c9-63b9-47bf-8406-ec0ec6e0478c.webp",
-    club_type: "Student Society",
-    added_at: "2025-10-14T16:47:44.829217+00:00",
-  },
   {
     id: "703",
     club_handle: "uw_psychsoc",
@@ -486,28 +470,29 @@ export const staticEventsData: Event[] = [
 ];
 
 export const RECOMMENDED_FILTERS: string[] = [
-  "student society",
-  "WUSA",
-  "networking",
-  "trivia",
-  "workshop",
-  "food",
-  "Halloween",
   "mocktail",
-  "coffee",
-  "review session",
-  "exhibit",
+  "trivia",
+  "halloween",
+  "networking",
+  "workshop",
+  "open mic",
   "bouldering",
   "dance class",
-  "open mic",
   "career fair",
+  "art exhibit",
+  "snacks",
+  "drinks",
+  "student society",
+  "midterm review",
   "roundtable",
   "pumpkin carving",
-  "art",
-  "graduate workshop",
-  "social event",
   "murder mystery",
-  "midterm review",
-  "casual meetup",
-  "online event"
+  "coffee crawl",
+  "symposium",
+  "online event",
+  "social",
+  "food",
+  "anthropology",
+  "exhibit",
+  "dodgeball"
 ];
