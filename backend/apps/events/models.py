@@ -3,6 +3,7 @@ from pgvector.django import VectorField
 
 
 class Events(models.Model):
+    id = models.BigAutoField(primary_key=True)
     club_handle = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     name = models.CharField(max_length=100)

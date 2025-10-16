@@ -7,6 +7,7 @@ import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
+from django.db import DatabaseError, OperationalError, InterfaceError, close_old_connections
 
 import csv
 import logging
@@ -14,6 +15,7 @@ import random
 import re
 import time
 import traceback
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -132,15 +134,23 @@ def is_duplicate_event(event_data):
     start_time = event_data.get("start_time")
     end_time = event_data.get("end_time")
 
-    candidates = Events.objects.filter(date=date)
-    for c in candidates:
-        if (
-            normalize_string(c.name) == name
-            and normalize_string(c.location) == location
-            and str(c.start_time) == str(start_time)
-            and (not end_time or str(c.end_time) == str(end_time))
-        ):
-            return True
+    try:
+        close_old_connections()
+        candidates = Events.objects.filter(date=date)
+        for c in candidates:
+            if (
+                normalize_string(c.name) == name
+                and normalize_string(c.location) == location
+                and str(c.start_time) == str(start_time)
+                and (not end_time or str(c.end_time) == str(end_time))
+            ):
+                return True
+        return False
+    except (InterfaceError, OperationalError, DatabaseError) as e:
+        logger.warning(
+            f"Database error when checking for duplicate event: {e!s}"
+        )
+    logger.error("DB unavailable - treating as non-duplicate")
     return False
 
 
@@ -166,6 +176,7 @@ def append_event_to_csv(
             "image_url",
             "description",
             "status",
+            "reactions",
             "embedding",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -186,6 +197,7 @@ def append_event_to_csv(
                 "image_url": event_data.get("image_url", ""),
                 "description": event_data.get("description", ""),
                 "status": status,
+                "reactions": json.dumps(event_data.get("reactions") or {}),
                 "embedding": embedding or "",
             }
         )
