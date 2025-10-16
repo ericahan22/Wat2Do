@@ -2,6 +2,8 @@
 
 This is a full-stack web application with a Django REST API backend and a React + TypeScript frontend for scraping and displaying Instagram events from clubs at the University of Waterloo.
 
+DO NOT EVER MANUALLY EDIT MIGRATION FILES EVER OR YOU WILL BE TERMINATED.
+
 ---
 
 ## Environment Setup

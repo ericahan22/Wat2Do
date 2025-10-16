@@ -109,7 +109,7 @@ else:
             "USER": os.getenv("POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
             "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
-            "PORT": os.getenv("POSTGRES_PORT", "6543"),  # Supabase often uses 6543
+            "PORT": os.getenv("POSTGRES_PORT", "6543"),   
             "OPTIONS": {"options": "-c pool_mode=session"},
         }
     }

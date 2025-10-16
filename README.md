@@ -66,8 +66,7 @@ python manage.py runserver 8000
 #### Frontend
 ```bash
 cd frontend
-npm install
-npm run build
+npm install 
 npm run dev
 ```
 

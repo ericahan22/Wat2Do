@@ -3,7 +3,7 @@ from django.db import models
 
 class Clubs(models.Model):
     club_name = models.CharField(max_length=100, unique=True)
-    categories = models.CharField(max_length=255)
+    categories = models.JSONField(default=list)
     club_page = models.URLField(blank=True, null=True)
     ig = models.URLField(blank=True, null=True)
     discord = models.URLField(blank=True, null=True)
