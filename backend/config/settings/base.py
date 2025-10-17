@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",  # Add GIS support
     # Third party apps
     "rest_framework",
     "rest_framework.authtoken",
@@ -94,17 +95,23 @@ WSGI_APPLICATION = "config.wsgi.app"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-if os.getenv("USE_SQLITE") == "1":
+if os.getenv("LOCAL") == "1":
+    # Local development database (Docker PostgreSQL with PostGIS)
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": os.getenv("LOCAL_POSTGRES_DB", "wat2do_dev"),
+            "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
+            "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
+            "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
+            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),   
         }
     }
 else:
+    # Production database (Supabase)
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql",
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
             "NAME": os.getenv("POSTGRES_DB", "postgres"),
             "USER": os.getenv("POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),

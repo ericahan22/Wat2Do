@@ -1,2 +1,52 @@
-# Docker Compose configuration
-# This file is intentionally left empty for future configuration 
+services:
+  postgres:
+    build: ./db
+    environment:
+      POSTGRES_DB: wat2do_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django backend
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - LOCAL=1
+      - LOCAL_POSTGRES_DB=wat2do_dev
+      - LOCAL_POSTGRES_USER=postgres
+      - LOCAL_POSTGRES_PASSWORD=postgres
+      - LOCAL_POSTGRES_HOST=postgres
+      - LOCAL_POSTGRES_PORT=5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # Frontend (if you want to run it in Docker too)
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  postgres_data:

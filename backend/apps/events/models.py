@@ -99,7 +99,7 @@ class Event(models.Model):
         null=True, blank=True,
         help_text="'https://university.edu/events/career-fair'"
     )
-    source_image_urls = models.TextField(
+    source_image_url = models.TextField(
         null=True, blank=True,
         help_text="'https://example.com/image1.jpg,https://example.com/image2.jpg'"
     )
@@ -133,11 +133,15 @@ class Event(models.Model):
         max_length=255, blank=True, null=True,
         help_text="'University of Waterloo'"
     )
+    club_type = models.CharField(
+        max_length=50, blank=True, null=True,
+        help_text="WUSA, Athletics, Student Society"
+    )
     
     # Social media handles
     ig_handle = models.CharField(
         max_length=100, blank=True, null=True,
-        help_text="'@uwcareercenter'"
+        help_text="'uwcareercenter'"
     )
     discord_handle = models.CharField(
         max_length=100, blank=True, null=True,
@@ -145,11 +149,15 @@ class Event(models.Model):
     )
     x_handle = models.CharField(
         max_length=100, blank=True, null=True,
-        help_text="'@UWCareerCenter'"
+        help_text="'UWCareerCenter'"
     )
     tiktok_handle = models.CharField(
         max_length=100, blank=True, null=True,
-        help_text="'@uwcareercenter'"
+        help_text="'uwcareercenter'"
+    )
+    fb_handle = models.CharField(
+        max_length=100, blank=True, null=True,
+        help_text="'uwcareercenter'"
     )
 
     class Meta:

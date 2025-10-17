@@ -31,7 +31,7 @@ echo "Starting gunicorn..."
 # --worker-class: Use sync workers (default)
 # --access-logfile and --error-logfile: Send logs to stdout/stderr for ECS CloudWatch
 exec gunicorn \
-    --bind 0.0.0.0:3000 \
+    --bind 0.0.0.0:8000 \
     --workers 4 \
     --timeout 120 \
     --graceful-timeout 30 \
