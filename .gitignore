@@ -1,17 +1,41 @@
-*env
-.env
+# Python virtual environments
+*.env
+.venv/
+env/
+venv/
 
+# Python bytecode and cache
 *.pyc
 __pycache__/
 
+# Environment and secret files
+.env
+
+# Data and test files
 *.csv
 backend/scraping/*.csv
 backend/scraping/test*.py
-backend/testing
+backend/testing/
 
+# Log files
 *.log
 
+# Node.js dependencies
 node_modules/
 
-.vscode
-chrome_profile
+# IDE/editor settings
+.vscode/
+chrome_profile/
+
+# SQLite database (for local dev only)
+db.sqlite3
+backend/db.sqlite3
+
+# Build artifacts and static files
+frontend/dist/
+backend/staticfiles/
+backend/config/static/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

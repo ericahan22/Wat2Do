@@ -13,11 +13,11 @@ import django
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 # Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 # Import Django modules after setup
-from example.models import NewsletterSubscriber  # noqa: E402
+from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
 from services.email_service import email_service  # noqa: E402
 
 
@@ -49,7 +49,7 @@ def send_newsletter_to_all():
             return False, str(e)
 
     for subscriber in active_subscribers:
-        email_sent, error = send_to_subscriber(subscriber)
+        email_sent, error = send_to_subscriber(subscriber.get_email())
 
         if email_sent:
             success_count += 1

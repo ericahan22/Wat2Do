@@ -5,29 +5,32 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
+from django.db import DatabaseError, OperationalError, InterfaceError, close_old_connections
 
 import csv
 import logging
 import random
+import re
 import time
 import traceback
 import re
 import requests
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
 from instaloader import Instaloader
 
-from example.embedding_utils import find_similar_events
-from example.models import Clubs, Events
+from apps.clubs.models import Clubs
+from apps.events.models import Events
 from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
 from zyte_setup import setup_zyte
 from logging_config import logger
-
+from utils.embedding_utils import find_similar_events
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
@@ -118,16 +121,24 @@ def is_duplicate_event(event_data):
     date = event_data.get("date")
     start_time = event_data.get("start_time")
     end_time = event_data.get("end_time")
-    
-    candidates = Events.objects.filter(date=date)
-    for c in candidates:
-        if (
-            normalize_string(c.name) == name and
-            normalize_string(c.location) == location and
-            str(c.start_time) == str(start_time) and
-            (not end_time or str(c.end_time) == str(end_time))
-        ):
-            return True
+
+    try:
+        close_old_connections()
+        candidates = Events.objects.filter(date=date)
+        for c in candidates:
+            if (
+                normalize_string(c.name) == name
+                and normalize_string(c.location) == location
+                and str(c.start_time) == str(start_time)
+                and (not end_time or str(c.end_time) == str(end_time))
+            ):
+                return True
+        return False
+    except (InterfaceError, OperationalError, DatabaseError) as e:
+        logger.warning(
+            f"Database error when checking for duplicate event: {e!s}"
+        )
+    logger.error("DB unavailable - treating as non-duplicate")
     return False
 
 
@@ -153,6 +164,7 @@ def append_event_to_csv(
             "image_url",
             "description",
             "status",
+            "reactions",
             "embedding",
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -173,6 +185,7 @@ def append_event_to_csv(
                 "image_url": event_data.get("image_url", ""),
                 "description": event_data.get("description", ""),
                 "status": status,
+                "reactions": json.dumps(event_data.get("reactions") or {}),
                 "embedding": embedding or "",
             }
         )
@@ -190,7 +203,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 f"Duplicate event detected, skipping {event_name} on {event_date} at {event_location}"
             )
             return False
-        
+
         # Get club_type based on club handle
         try:
             club = Clubs.objects.get(ig=club_ig)
@@ -219,9 +232,8 @@ def insert_event_to_db(event_data, club_ig, post_url):
                     old_img = existing.image_url
                     new_desc = event_data.get("description") or ""
                     old_desc = existing.description or ""
-                    if (
-                        (not old_img and new_img)
-                        or (len(new_desc) > len(old_desc) + 10)
+                    if (not old_img and new_img) or (
+                        len(new_desc) > len(old_desc) + 10
                     ):
                         logger.info(
                             f"Replacing older event: id={existing.id} with newer one"
@@ -245,6 +257,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             description=event_data.get("description") or "",
             embedding=embedding,
             club_type=club_type,
+            status="scraped",
         )
         logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
         try:
@@ -343,12 +356,15 @@ def process_recent_feed(
 
             # Process each event returned by the AI
             for event_data in events_data:
-                
-                event_date = datetime.strptime(event_data.get("date"), "%Y-%m-%d").date()
+                event_date = datetime.strptime(
+                    event_data.get("date"), "%Y-%m-%d"
+                ).date()
                 if event_date < today:
-                    logger.info(f"Skipping event '{event_data.get('name')}' with past date {event_date}")
+                    logger.info(
+                        f"Skipping event '{event_data.get('name')}' with past date {event_date}"
+                    )
                     continue
-                
+
                 if (
                     event_data.get("name")
                     and event_data.get("date")
