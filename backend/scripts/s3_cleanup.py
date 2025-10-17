@@ -11,10 +11,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import django
 from dotenv import load_dotenv
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
+
+load_dotenv()
+
 django.setup()
 
-from example.models import Events
+from apps.events.models import Events
 from services.storage_service import delete_images, list_all_s3_objects
 
 # Configure logging
@@ -22,8 +25,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-load_dotenv()
 
 
 def get_referenced_s3_keys() -> set[str]:

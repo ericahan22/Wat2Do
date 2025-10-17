@@ -20,10 +20,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from example.models import Events  # noqa: E402
+from apps.events.models import Events  # noqa: E402
 from services.openai_service import generate_recommended_filters  # noqa: E402
 
 # Setup logging

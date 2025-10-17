@@ -24,16 +24,57 @@ class OpenAIService:
         load_dotenv()
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    def generate_embedding(
-        self, text: str, model: str = "text-embedding-3-small"
-    ) -> list[float]:
-        """Generate embedding vector for text using OpenAI API"""
-        text = text.replace("\n", " ").strip()
+    def generate_embedding(self, text: str) -> list[float]:
+        """
+        Generate embedding vector for text using OpenAI's text-embedding-3-small model (1536 dimensions).
+        """
         if not text:
             return None
 
-        response = self.client.embeddings.create(input=[text], model=model)
-        return response.data[0].embedding
+        # Clean up the text for better embedding quality
+        text = text.replace("\n", " ").replace("\r", " ").strip()
+
+        # Remove extra whitespace
+        import re
+
+        text = re.sub(r"\s+", " ", text)
+
+        try:
+            response = self.client.embeddings.create(
+                input=[text], model="text-embedding-3-small"
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"Failed to generate embedding: {e}")
+            return None
+
+    def generate_event_embedding(self, event) -> list[float]:
+        """
+        Generate embedding for an event using a rich text representation.
+        This combines multiple event fields to create semantic context.
+        """
+        # Define field names to include
+        field_names = [
+            "name",
+            "description",
+            "location",
+            "club_type",
+            "club_handle",
+            "date",
+            "start_time",
+            "food",
+            "price",
+            "registration",
+        ]
+
+        parts = []
+        for field_name in field_names:
+            value = getattr(event, field_name, None)
+            if value:
+                parts.append(f"{field_name}: {value}")
+
+        enhanced_text = " | ".join(parts)
+        return self.generate_embedding(enhanced_text)
 
     def extract_events_from_caption(
         self, caption_text: str, image_url: str | None = None
@@ -75,11 +116,11 @@ class OpenAIService:
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dates, use YYYY-MM-DD format. If year not found, assume 2025
     - For times, use HH:MM format (24-hour)
-    - When interpreting relative terms like "tonight", "weekly", "every Friday", use the current date context above
+    - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
-    - For food: extract and list only specific food or beverage items mentioned (e.g., "pizza", "cookies", "bubble tea", "snacks", "drinks"). Always capitalize the first item mentioned
+    - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
     - If information is not available, use empty string "" for strings, null for price, false for registration
@@ -116,7 +157,7 @@ class OpenAIService:
                 model = "gpt-4o-mini"
 
             response = self.client.chat.completions.create(
-                model=model, messages=messages, temperature=0.1, max_tokens=500
+                model=model, messages=messages, temperature=0.1, max_tokens=2000
             )
 
             # Extract the JSON response

@@ -44,6 +44,8 @@ jobs:
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
       ZYTE_PROXY: ${{ secrets.ZYTE_PROXY }}
+      EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
+      EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
       
     steps:
       - uses: actions/checkout@v4
