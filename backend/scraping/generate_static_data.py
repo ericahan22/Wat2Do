@@ -1,9 +1,8 @@
 import os
 import sys
-from datetime import date, datetime, time, timezone, timedelta
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 from logging_config import logger
-from django.db import ProgrammingError, OperationalError
 
 from dotenv import load_dotenv
 
@@ -45,77 +44,99 @@ def fetch_events():
     except Exception:
         logger.exception("Failed to setup Django before importing models")
         return []
+    
+    from django.db import connection, ProgrammingError, OperationalError
 
     try:
-        from apps.events.models import Events
+        tables = connection.introspection.table_names()
     except Exception:
-        logger.exception("Failed to import Events model")
-        return []
-        
-    today = date.today()
-    
-    use_dtstart = True
-    try:
-        Events._meta.get_field("dtstart")
-    except Exception:
-        use_dtstart = False
-    
-    try:
-        if use_dtstart:
-            qs = Events.objects.filter(dtstart__date__gte=today).order_by("dtstart", "dtstart")
-        else:
-            qs = Events.objects.filter(date__gte=today).order_by("date", "start_time")
-    except Exception:
-        logger.exception("Failed to construct Events queryset")
+        tables = []
+    use_new_table = "events_event" in tables
+    legacy_table = "events" in tables or "public.events" in tables
+    if not use_new_table and not legacy_table:
+        logger.warning("No events table found in DB")
         return []
     
     events_list = []
+    if use_new_table:
+        try:
+            from apps.events.models import Event as EventsModel  # new model
+        except Exception:
+            logger.exception("Failed to import Event model")
+            return []
+        try:
+            today = date.today()
+            qs = EventsModel.objects.filter(utc_start_ts__date__gte=today).order_by("utc_start_ts")
+            for e in qs:
+                events_list.append(
+                    {
+                        "id": getattr(e, "id", None),
+                        "club_handle": getattr(e, "ig_handle", None),
+                        "url": getattr(e, "source_url", None),
+                        "name": getattr(e, "title", None),
+                        "date": getattr(e, "dtstart", None),
+                        "start_time": getattr(e, "dtstart", None),
+                        "end_time": getattr(e, "dtend", None),
+                        "location": getattr(e, "location", None),
+                        "price": getattr(e, "price", None),
+                        "food": getattr(e, "food", None),
+                        "registration": getattr(e, "registration", None),
+                        "image_url": getattr(e, "source_image_url", None),
+                        "club_type": getattr(e, "club_type", None),
+                        "added_at": getattr(e, "added_at", None),
+                        "description": getattr(e, "description", None),
+                    }
+                )
+            logger.info(f"Fetched {len(events_list)} events via ORM")
+            return events_list
+        except (ProgrammingError, OperationalError) as db_err:
+            logger.error(f"ORM query failed: {db_err}")
+            return []
+        except Exception:
+            logger.exception("Unexpected error with ORM fetch")
+            return []
+
+    # Raw SQL
     try:
-        for e in qs:
-            if use_dtstart:
-                ev_date = getattr(e, "dtstart", None)
-                ev_start = getattr(e, "dtstart", None)
-                ev_end = getattr(e, "dtend", None)
-                if ev_end is None and ev_start is not None:
-                    ev_end = ev_start + timedelta(hours=1)
-                image_url = getattr(e, "source_image_url", None) or getattr(e, "image_url", None)
-                url = getattr(e, "source_url", None) or getattr(e, "url", None)
-                name = getattr(e, "title", None) or getattr(e, "name", None)
-            else:
-                ev_date = getattr(e, "date", None)
-                ev_start = getattr(e, "start_time", None)
-                ev_end = getattr(e, "end_time", None) or (ev_date + timedelta(hours=1) if isinstance(ev_date, datetime) else None)
-                image_url = getattr(e, "image_url", None)
-                url = getattr(e, "url", None)
-                name = getattr(e, "name", None)
-        
-            item = {
-                "id": getattr(e, "id", None),
-                "club_handle": getattr(e, "club_handle", None),
-                "url": url,
-                "name": name,
-                "date": ev_date,
-                "start_time": ev_start,
-                "end_time": ev_end,
-                "location": getattr(e, "location", None),
-                "price": getattr(e, "price", None),
-                "food": getattr(e, "food", None),
-                "registration": getattr(e, "registration", None),
-                "image_url": image_url,
-                "club_type": getattr(e, "club_type", None),
-                "added_at": getattr(e, "added_at", None),
-                "description": getattr(e, "description", None)
-            }
-            events_list.append(item)
-            
-        logger.info(f"Fetched {len(events_list)} events, use_dtstart={use_dtstart}")
+        today = date.today()
+        with connection.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, club_handle, url, name, date, start_time, end_time,
+                       location, price, food, registration, image_url,
+                       description, club_type, added_at
+                FROM public.events
+                WHERE date >= %s
+                ORDER BY date, start_time
+                """,
+                [today],
+            )
+            rows = cur.fetchall()
+            for r in rows:
+                (rid, club_handle, url, name, rdate, start_time, end_time, location, price, food, registration, image_url, description, club_type, added_at) = r
+                events_list.append(
+                    {
+                        "id": rid,
+                        "club_handle": club_handle,
+                        "url": url,
+                        "name": name,
+                        "date": rdate,
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "location": location,
+                        "price": price,
+                        "food": food,
+                        "registration": registration,
+                        "image_url": image_url,
+                        "club_type": club_type,
+                        "added_at": added_at,
+                        "description": description,
+                    }
+                )
+        logger.info(f"Fetched {len(events_list)} events via raw SQL")
         return events_list
-    
-    except (ProgrammingError, OperationalError) as db_err:
-        logger.error(f"Events table missing or DB unavailable: {db_err}")
-        return []
     except Exception:
-        logger.exception("Unexpected error while fetching events")
+        logger.exception("Failed to fetch events via raw SQL")
         return []
     
 

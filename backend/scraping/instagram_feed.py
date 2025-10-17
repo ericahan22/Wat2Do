@@ -7,7 +7,7 @@ import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
-from django.db import close_old_connections, OperationalError, ProgrammingError
+from django.db import connection, close_old_connections, OperationalError, ProgrammingError
 from django.core.exceptions import FieldDoesNotExist
 from django.utils import timezone as django_timezone
 
@@ -127,30 +127,70 @@ def is_duplicate_event(event_data):
         logger.warning(f"Invalid date for duplicate check: '{date_str}'")
         return False
 
+    tables = _db_table_names()
     try:
-        close_old_connections()
-        # detect whether legacy or new date field
-        use_dtstart = True
-        try:
-            Events._meta.get_field("dtstart")
-        except FieldDoesNotExist:
-            use_dtstart = False
-        if use_dtstart:
+        if "events_event" in tables:
+            close_old_connections()
             candidates = Events.objects.filter(dtstart__date=event_date)
+            for c in candidates:
+                c_name = normalize_string(getattr(c, "title", "") or getattr(c, "name", ""))
+                c_loc = normalize_string(getattr(c, "location", "") or "")
+                if c_name == name and c_loc == location:
+                    return True
+            return False
+        elif "events" in tables:
+            with connection.cursor() as cur:
+                cur.execute(
+                    "SELECT name, location FROM public.events WHERE date = %s", [event_date]
+                )
+                for row in cur.fetchall():
+                    c_name, c_loc = row[0], row[1] or ""
+                    if normalize_string(c_name) == name and normalize_string(c_loc) == location:
+                        return True
+            return False
         else:
-            candidates = Events.objects.filter(date=event_date)
-        for c in candidates:
-            c_name = normalize_string(getattr(c, "title", "") or getattr(c, "name", ""))
-            c_loc = normalize_string(getattr(c, "location", "") or "")
-            if c_name == name and c_loc == location:
-                return True
-        return False
+            return False
     except (ProgrammingError, OperationalError) as db_err:
         logger.error(f"Database error during duplicate check (table missing or DB down): {db_err}")
         return False
     except Exception as e:
         logger.error(f"Database error during duplicate check: {e!s}")
         return False
+
+
+def _insert_legacy_event_sql(create_kwargs):
+    """Insert into legacy public.events table via raw SQL."""
+    sql = """
+    INSERT INTO public.events
+      (club_handle, url, name, date, start_time, end_time, location,
+       price, food, registration, image_url, description, embedding,
+       added_at, club_type, reactions, notes)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    RETURNING id
+    """
+    vals = [
+        create_kwargs.get("club_handle"),
+        create_kwargs.get("url"),
+        create_kwargs.get("name"),
+        create_kwargs.get("date"),
+        create_kwargs.get("start_time"),
+        create_kwargs.get("end_time"),
+        create_kwargs.get("location"),
+        create_kwargs.get("price"),
+        create_kwargs.get("food"),
+        create_kwargs.get("registration", False),
+        create_kwargs.get("image_url"),
+        create_kwargs.get("description"),
+        create_kwargs.get("embedding"),
+        create_kwargs.get("added_at"),
+        create_kwargs.get("club_type"),
+        create_kwargs.get("reactions") or {},
+        create_kwargs.get("notes"),
+    ]
+    with connection.cursor() as cur:
+        cur.execute(sql, vals)
+        row = cur.fetchone()
+        return row[0] if row else None
 
 
 def append_event_to_csv(
@@ -314,102 +354,98 @@ def insert_event_to_db(event_data, club_ig, post_url):
                         )
                         existing.delete()
         except Exception as dedup_err:
-            logger.error(f"Duplicate check via utility failed: {dedup_err}")
-
-        # build kwargs according to detected schema
-        if use_dtstart:
-            create_kwargs = {
-                "ig_handle": club_ig,
-                "source_url": post_url,
-                "title": event_name,
-                "dtstart": dtstart_obj or None,
-                "dtend": dtend_obj or None,
-                "location": location,
-                "price": price,
-                "food": food,
-                "registration": registration,
-                "source_image_url": image_url or None,
-                "description": description,
-                "embedding": embedding,
-                "club_type": club_type,
-                "status": "scraped",
-            }
-        else:
-            # legacy field mapping
-            create_kwargs = {
-                "ig_handle": club_ig,
-                "url": post_url,
-                "name": event_name,
-                "date": event_date,
-                "start_time": start_time or None,
-                "end_time": end_time or None,
-                "location": location,
-                "price": price,
-                "food": food,
-                "registration": registration,
-                "image_url": image_url or None,
-                "description": description,
-                "embedding": embedding,
-                "club_type": club_type,
-                "status": "scraped",
-            }
-        Events.objects.create(**create_kwargs)
-        logger.debug(f"Event inserted: {event_name} from {club_ig}")
-        
-        try:
-            append_event_to_csv(
-                event_data, club_ig, post_url, status="success", embedding=embedding
-            )
-            logger.info(f"Appended event to CSV: {event_data.get('name')}")
-        except Exception as csv_err:
-            logger.error(
-                f"Database insert succeeded, but failed to append to CSV: {csv_err}"
-            )
-            logger.error(f"Traceback: {traceback.format_exc()}")
-        return True
-    except (ProgrammingError, OperationalError) as db_err:
-        logger.error(f"Database error: {db_err} (table/field mismatch or DB down)")
-        try:
-            append_event_to_csv(event_data, club_ig, post_url, status="db_unavailable", embedding=embedding)
-        except Exception as csv_err:
-            logger.error(f"Failed to append event to CSV: {csv_err}")
+            logger.error(f"Duplicate check via utility failed: {dedup_err}")   
     except Exception as e:
-        logger.error(f"Database error: {e!s}")
-        logger.error(f"Event data: {event_data}")
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        try:
-            embedding = generate_embedding(event_data.get("description", ""))
-            append_event_to_csv(
-                event_data, club_ig, post_url, status="failed", embedding=embedding
+        logger.error(f"Unexpected error finding duplicates: {e}")
+        
+    create_kwargs = {
+        "club_handle": club_ig,
+        "url": post_url,
+        "name": event_name,
+        "date": event_date,  # Python date
+        "start_time": start_time or None,
+        "end_time": end_time or None,
+        "location": location,
+        "price": price,
+        "food": food,
+        "registration": registration,
+        "image_url": image_url or None,
+        "description": description,
+        "embedding": embedding,
+        "added_at": None,
+        "club_type": club_type,
+        "reactions": {},
+        "notes": None,
+    }
+
+    tables = _db_table_names()
+    try:
+        if "events_event" in tables:
+            Events.objects.create(
+                ig_handle=club_ig,
+                source_url=post_url,
+                title=event_name,
+                dtstart=dtstart_obj or None,
+                dtend=dtend_obj or None,
+                location=location,
+                price=price,
+                food=food,
+                registration=registration,
+                source_image_url=image_url or None,
+                description=description,
+                embedding=embedding,
+                club_type=club_type,
+                status="scraped",
             )
-            logger.info(f"Appended event to CSV: {event_data.get('name')}")
-        except Exception as csv_err:
-            logger.error(f"Database and CSV inserts failed: {csv_err}")
+            return True
+        elif "events" in tables:
+            new_id = _insert_legacy_event_sql(create_kwargs)
+            if new_id:
+                logger.info(f"Inserted legacy event id={new_id}")
+                append_event_to_csv(event_data, club_ig, post_url, status="success", embedding=embedding)
+                return True
+            else:
+                logger.error("Legacy SQL insert failed (no id returned)")
+                append_event_to_csv(event_data, club_ig, post_url, status="failed_sql")
+                return False
+        else:
+            logger.error("No events table available to insert")
+            append_event_to_csv(event_data, club_ig, post_url, status="no_table", embedding=embedding)
+            return False
+    except (ProgrammingError, OperationalError) as db_err:
+        logger.error(f"Database error (table/field mismatch or DB down): {db_err}")
+        append_event_to_csv(event_data, club_ig, post_url, status="db_unavailable", embedding=embedding)
+        return False
+    except Exception as e:
+        logger.exception(f"Unexpected error inserting event: {e}")
         return False
 
+
+def _db_table_names():
+    try:
+        return set(connection.introspection.table_names())
+    except Exception:
+        return set()
+    
 
 def get_seen_shortcodes():
     """Fetches all post shortcodes from events table in DB"""
     logger.info("Fetching seen shortcodes from the database...")
+    tables = _db_table_names()
     try:
-        url_field = None
-        try:
-            Events._meta.get_field("source_url")
-            url_field = "source_url"
-        except FieldDoesNotExist:
-            try:
-                Events._meta.get_field("url")
-                url_field = "url"
-            except FieldDoesNotExist:
-                url_field = None
-        
-        if not url_field:
-            logger.warning("No url field on Events model")
+        if "events_event" in tables:
+            events = Events.objects.filter(source_url__isnull=False).values_list("source_url", flat=True)
+            shortcodes = {url.split("/")[-2] for url in events if url}
+            return shortcodes
+        elif "events" in tables:
+            with connection.cursor() as cur:
+                cur.execute("SELECT url FROM public.events WHERE url IS NOT NULL")
+                rows = cur.fetchall()
+                shortcodes = {row[0].split("/")[-2] for row in rows if row and row[0]}
+                return shortcodes
+        else:
+            logger.warning("No events table found; treating all posts as unseen")
             return set()
-    
-        events = Events.objects.filter(**{f"{url_field}__isnull": False}).values_list(url_field, flat=True)
-        shortcodes = {url.split("/")[-2] for url in events if url}
-        return shortcodes
     except Exception as e:
         logger.error(f"Could not fetch shortcodes from database: {e}")
         return set()
