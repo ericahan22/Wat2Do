@@ -22,7 +22,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - LOCAL=1
       - LOCAL_POSTGRES_DB=wat2do_dev
       - LOCAL_POSTGRES_USER=postgres
       - LOCAL_POSTGRES_PASSWORD=postgres
