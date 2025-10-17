@@ -7,7 +7,9 @@ import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
-from django.db import close_old_connections
+from django.db import close_old_connections, OperationalError, ProgrammingError
+from django.core.exceptions import FieldDoesNotExist
+from django.utils import timezone as django_timezone
 
 import csv
 import random
@@ -127,13 +129,24 @@ def is_duplicate_event(event_data):
 
     try:
         close_old_connections()
-        # legacy: filter by date
-        candidates = Events.objects.filter(date=event_date)
+        # detect whether legacy or new date field
+        use_dtstart = True
+        try:
+            Events._meta.get_field("dtstart")
+        except FieldDoesNotExist:
+            use_dtstart = False
+        if use_dtstart:
+            candidates = Events.objects.filter(dtstart__date=event_date)
+        else:
+            candidates = Events.objects.filter(date=event_date)
         for c in candidates:
-            c_name = normalize_string(getattr(c, "name", "") or getattr(c, "title", ""))
+            c_name = normalize_string(getattr(c, "title", "") or getattr(c, "name", ""))
             c_loc = normalize_string(getattr(c, "location", "") or "")
             if c_name == name and c_loc == location:
                 return True
+        return False
+    except (ProgrammingError, OperationalError) as db_err:
+        logger.error(f"Database error during duplicate check (table missing or DB down): {db_err}")
         return False
     except Exception as e:
         logger.error(f"Database error during duplicate check: {e!s}")
@@ -203,11 +216,51 @@ def insert_event_to_db(event_data, club_ig, post_url):
     registration = bool(event_data.get("registration", False))
     
     # Parse event_date for dedup and ORM
+    event_date = None
+    dtstart_obj = None
+    dtend_obj = None
     try:
         event_date = datetime.strptime(date, "%Y-%m-%d").date() if date else None
     except Exception:
         event_date = None
-        
+    try:
+        tz = django_timezone.get_current_timezone() or django_timezone.utc
+    except Exception:
+        tz = django_timezone.utc
+    try:
+        if event_date:
+            # parse start_time/end_time like "HH:MM"
+            if start_time:
+                try:
+                    start_dt = datetime.fromisoformat(f"{date}T{start_time}")
+                except Exception:
+                    hh, mm = (start_time.split(":") + ["00"])[:2]
+                    start_dt = datetime(event_date.year, event_date.month, event_date.day, int(hh), int(mm))
+            else:
+                start_dt = datetime(event_date.year, event_date.month, event_date.day, 0, 0)
+
+            if end_time:
+                try:
+                    end_dt = datetime.fromisoformat(f"{date}T{end_time}")
+                except Exception:
+                    hh, mm = (end_time.split(":") + ["00"])[:2]
+                    end_dt = datetime(event_date.year, event_date.month, event_date.day, int(hh), int(mm))
+            else:
+                end_dt = start_dt + timedelta(hours=1)
+
+            if django_timezone.is_naive(start_dt):
+                dtstart_obj = django_timezone.make_aware(start_dt, timezone=tz)
+            else:
+                dtstart_obj = start_dt.astimezone(tz)
+
+            if django_timezone.is_naive(end_dt):
+                dtend_obj = django_timezone.make_aware(end_dt, timezone=tz)
+            else:
+                dtend_obj = end_dt.astimezone(tz)
+    except Exception:
+        dtstart_obj = None
+        dtend_obj = None
+ 
     try:
         # Duplicate check (legacy)
         if is_duplicate_event(event_data):
@@ -228,20 +281,29 @@ def insert_event_to_db(event_data, club_ig, post_url):
 
         embedding = generate_embedding(event_data.get("description", ""))
 
+        use_dtstart = True
+        try:
+            Events._meta.get_field("dtstart")
+        except FieldDoesNotExist:
+            use_dtstart = False
+            
         try:
             # Pass event date as min_date to filter out past events first for performance
             similar_events = find_similar_events(
                 embedding, threshold=0.90, limit=10, min_date=event_date
             )
             candidate_ids = [row["id"] for row in similar_events]
-            if candidate_ids:
-                for existing in Events.objects.filter(
-                    id__in=candidate_ids, date=event_date
-                ):
+            if candidate_ids and event_date:
+                if use_dtstart:
+                    qs = Events.objects.filter(id__in=candidate_ids, dtstart__date=event_date)
+                else:
+                    qs = Events.objects.filter(id__in=candidate_ids, date=event_date)
+                
+                for existing in qs:
                     # Only replace if new event has image but existing doesn't,
                     # or if new description is longer (more info)
                     new_img = image_url
-                    old_img = getattr(existing, "image_url", None) or getattr(existing, "source_image_url", None)
+                    old_img = getattr(existing, "source_image_url", None) or getattr(existing, "image_url", None)
                     new_desc = description or ""
                     old_desc = existing.description or ""
                     if (not old_img and new_img) or (
@@ -254,24 +316,46 @@ def insert_event_to_db(event_data, club_ig, post_url):
         except Exception as dedup_err:
             logger.error(f"Duplicate check via utility failed: {dedup_err}")
 
-        Events.objects.create(
-            ig_handle=club_ig,
-            url=post_url,
-            name=event_name,
-            date=event_date,
-            start_time=start_time or None,
-            end_time=end_time or None,
-            location=location,
-            price=price,
-            food=food,
-            registration=registration,
-            image_url=image_url or None,
-            description=description,
-            embedding=embedding,
-            club_type=club_type,
-            status="scraped",
-        )
+        # build kwargs according to detected schema
+        if use_dtstart:
+            create_kwargs = {
+                "ig_handle": club_ig,
+                "source_url": post_url,
+                "title": event_name,
+                "dtstart": dtstart_obj or None,
+                "dtend": dtend_obj or None,
+                "location": location,
+                "price": price,
+                "food": food,
+                "registration": registration,
+                "source_image_url": image_url or None,
+                "description": description,
+                "embedding": embedding,
+                "club_type": club_type,
+                "status": "scraped",
+            }
+        else:
+            # legacy field mapping
+            create_kwargs = {
+                "ig_handle": club_ig,
+                "url": post_url,
+                "name": event_name,
+                "date": event_date,
+                "start_time": start_time or None,
+                "end_time": end_time or None,
+                "location": location,
+                "price": price,
+                "food": food,
+                "registration": registration,
+                "image_url": image_url or None,
+                "description": description,
+                "embedding": embedding,
+                "club_type": club_type,
+                "status": "scraped",
+            }
+        Events.objects.create(**create_kwargs)
         logger.debug(f"Event inserted: {event_name} from {club_ig}")
+        
         try:
             append_event_to_csv(
                 event_data, club_ig, post_url, status="success", embedding=embedding
@@ -283,6 +367,12 @@ def insert_event_to_db(event_data, club_ig, post_url):
             )
             logger.error(f"Traceback: {traceback.format_exc()}")
         return True
+    except (ProgrammingError, OperationalError) as db_err:
+        logger.error(f"Database error: {db_err} (table/field mismatch or DB down)")
+        try:
+            append_event_to_csv(event_data, club_ig, post_url, status="db_unavailable", embedding=embedding)
+        except Exception as csv_err:
+            logger.error(f"Failed to append event to CSV: {csv_err}")
     except Exception as e:
         logger.error(f"Database error: {e!s}")
         logger.error(f"Event data: {event_data}")
@@ -302,7 +392,22 @@ def get_seen_shortcodes():
     """Fetches all post shortcodes from events table in DB"""
     logger.info("Fetching seen shortcodes from the database...")
     try:
-        events = Events.objects.filter(url__isnull=False).values_list("url", flat=True)
+        url_field = None
+        try:
+            Events._meta.get_field("source_url")
+            url_field = "source_url"
+        except FieldDoesNotExist:
+            try:
+                Events._meta.get_field("url")
+                url_field = "url"
+            except FieldDoesNotExist:
+                url_field = None
+        
+        if not url_field:
+            logger.warning("No url field on Events model")
+            return set()
+    
+        events = Events.objects.filter(**{f"{url_field}__isnull": False}).values_list(url_field, flat=True)
         shortcodes = {url.split("/")[-2] for url in events if url}
         return shortcodes
     except Exception as e:
