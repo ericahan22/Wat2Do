@@ -60,6 +60,12 @@ jobs:
         with:
           python-version: '3.11'
       
+      - name: Create logs and cache directories
+        working-directory: backend/scraping
+        run: |
+          mkdir -p logs
+          mkdir -p .insta_cache
+
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -71,20 +77,24 @@ jobs:
       - name: Cache Instaloader session
         uses: actions/cache@v4
         with:
-          path: .insta_cache
-          key: ${{ runner.os }}-instaloader-session-${{ secrets.USERNAME }}
+          path: backend/scraping/.insta_cache
+          key: ${{ runner.os }}-instaloader-session-${{ hashFiles('backend/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-instaloader-session-
             
+      - name: Install system GDAL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdal-bin libgdal-dev
+          if [ -f /usr/lib/x86_64-linux-gnu/libgdal.so ]; then
+            echo "GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so" >> $GITHUB_ENV
+          fi
+
       - name: Install dependencies
         working-directory: backend
         run: |
           pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
-
-      - name: Create logs directory
-        working-directory: backend/scraping
-        run: mkdir -p logs
 
       - name: Run scraper
         if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
@@ -116,7 +126,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add frontend/src/data/staticData.ts
           git commit -m "chore: update static data from DB" || echo "No changes to commit"
-          git push --force
+          git pull --rebase && git push
 
       - name: Send newsletter to subscribers
         if: github.event_name == 'schedule' || github.event.inputs.send_newsletter == 'true'
