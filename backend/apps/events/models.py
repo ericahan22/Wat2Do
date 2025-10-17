@@ -1,6 +1,5 @@
 from django.contrib.gis.db import models as gis_models
 from django.db import models
-from django.utils import timezone
 from pgvector.django import VectorField
 
 
@@ -167,3 +166,5 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"
+
+Events = Event
