@@ -184,7 +184,7 @@ def _insert_legacy_event_sql(create_kwargs):
         create_kwargs.get("embedding"),
         create_kwargs.get("added_at"),
         create_kwargs.get("club_type"),
-        create_kwargs.get("reactions") or {},
+        json.dumps(create_kwargs.get("reactions") or {}),
         create_kwargs.get("notes"),
     ]
     with connection.cursor() as cur:
@@ -267,9 +267,11 @@ def insert_event_to_db(event_data, club_ig, post_url):
         tz = django_timezone.get_current_timezone() or django_timezone.utc
     except Exception:
         tz = django_timezone.utc
+    
+    embedding = None
+    
     try:
         if event_date:
-            # parse start_time/end_time like "HH:MM"
             if start_time:
                 try:
                     start_dt = datetime.fromisoformat(f"{date}T{start_time}")
@@ -319,7 +321,11 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 f"Club with handle {club_ig} not found, inserting event with null club_type"
             )
 
-        embedding = generate_embedding(event_data.get("description", ""))
+        try:
+            embedding = generate_embedding(event_data.get("description", ""))
+        except Exception as emb_err:
+            logger.warning(f"Embedding generation failed: {emb_err!s}")
+            embedding = None
 
         use_dtstart = True
         try:
@@ -357,6 +363,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
             logger.error(f"Duplicate check via utility failed: {dedup_err}")   
     except Exception as e:
         logger.error(f"Unexpected error finding duplicates: {e}")
+        embedding = None
         
     create_kwargs = {
         "club_handle": club_ig,
