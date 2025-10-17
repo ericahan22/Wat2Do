@@ -1,6 +1,21 @@
 #!/bin/bash
 set -e
 
+# Print which database config is selected
+if [ "${PRODUCTION}" = "1" ]; then
+    echo "Environment: PRODUCTION"
+    echo "DB Engine: postgis (prod)"
+    echo "DB Host: ${POSTGRES_HOST}"
+    echo "DB Name: ${POSTGRES_DB}"
+    echo "DB User: ${POSTGRES_USER}"
+else
+    echo "Environment: LOCAL"
+    echo "DB Engine: postgis (local)"
+    echo "DB Host: ${LOCAL_POSTGRES_HOST}"
+    echo "DB Name: ${LOCAL_POSTGRES_DB}"
+    echo "DB User: ${LOCAL_POSTGRES_USER}"
+fi
+
 # Wait for database to be ready
 echo "Waiting for database..."
 max_attempts=30
