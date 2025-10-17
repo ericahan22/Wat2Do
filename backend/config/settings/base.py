@@ -105,7 +105,10 @@ if os.getenv("PRODUCTION") == "1":
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
             "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
             "PORT": os.getenv("POSTGRES_PORT", "6543"),   
-            "OPTIONS": {"options": "-c pool_mode=session"},
+            "OPTIONS": {
+                "options": "-c pool_mode=session",
+                "sslmode": "require",
+            },
         }
     }
 else:
