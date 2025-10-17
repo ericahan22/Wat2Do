@@ -127,9 +127,10 @@ def is_duplicate_event(event_data):
 
     try:
         close_old_connections()
-        candidates = Events.objects.filter(dtstart__date=event_date)
+        # legacy: filter by date
+        candidates = Events.objects.filter(date=event_date)
         for c in candidates:
-            c_name = normalize_string(getattr(c, "title", "") or "")
+            c_name = normalize_string(getattr(c, "name", "") or getattr(c, "title", ""))
             c_loc = normalize_string(getattr(c, "location", "") or "")
             if c_name == name and c_loc == location:
                 return True
@@ -201,24 +202,14 @@ def insert_event_to_db(event_data, club_ig, post_url):
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
     
-    # Parse dtstart/dtend datetimes for model fields
+    # Parse event_date for dedup and ORM
     try:
-        if date and start_time:
-            dtstart = datetime.fromisoformat(f"{date}T{start_time}")
-        elif date:
-            dtstart = datetime.fromisoformat(f"{date}T00:00:00")
-        else:
-            dtstart = None
-        if date and end_time:
-            dtend = datetime.fromisoformat(f"{date}T{end_time}")
-        else:
-            dtend = None
+        event_date = datetime.strptime(date, "%Y-%m-%d").date() if date else None
     except Exception:
-        dtstart = None
-        dtend = None
+        event_date = None
         
     try:
-        # Duplicate check
+        # Duplicate check (legacy)
         if is_duplicate_event(event_data):
             logger.info(
                 f"Duplicate event detected, skipping {event_name} on {date} at {location}"
@@ -235,23 +226,23 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 f"Club with handle {club_ig} not found, inserting event with null club_type"
             )
 
-        embedding = generate_embedding(event_data["description"])
+        embedding = generate_embedding(event_data.get("description", ""))
 
         try:
             # Pass event date as min_date to filter out past events first for performance
             similar_events = find_similar_events(
-                embedding, threshold=0.90, limit=10, min_date=date
+                embedding, threshold=0.90, limit=10, min_date=event_date
             )
             candidate_ids = [row["id"] for row in similar_events]
             if candidate_ids:
                 for existing in Events.objects.filter(
-                    id__in=candidate_ids, dtstart__date=date
+                    id__in=candidate_ids, date=event_date
                 ):
                     # Only replace if new event has image but existing doesn't,
                     # or if new description is longer (more info)
-                    new_img = event_data.get("image_url")
-                    old_img = getattr(existing, "source_image_url", getattr(existing, "image_url", None))
-                    new_desc = event_data.get("description") or ""
+                    new_img = image_url
+                    old_img = getattr(existing, "image_url", None) or getattr(existing, "source_image_url", None)
+                    new_desc = description or ""
                     old_desc = existing.description or ""
                     if (not old_img and new_img) or (
                         len(new_desc) > len(old_desc) + 10
@@ -265,21 +256,22 @@ def insert_event_to_db(event_data, club_ig, post_url):
 
         Events.objects.create(
             ig_handle=club_ig,
-            source_url=post_url,
-            title=event_name,
-            dtstart=dtstart,
-            dtend=dtend,
+            url=post_url,
+            name=event_name,
+            date=event_date,
+            start_time=start_time or None,
+            end_time=end_time or None,
             location=location,
             price=price,
             food=food,
             registration=registration,
-            source_image_url=image_url or None,
+            image_url=image_url or None,
             description=description,
             embedding=embedding,
             club_type=club_type,
             status="scraped",
         )
-        logger.debug(f"Event inserted: {event_data.get('name')} from {club_ig}")
+        logger.debug(f"Event inserted: {event_name} from {club_ig}")
         try:
             append_event_to_csv(
                 event_data, club_ig, post_url, status="success", embedding=embedding
@@ -296,7 +288,7 @@ def insert_event_to_db(event_data, club_ig, post_url):
         logger.error(f"Event data: {event_data}")
         logger.error(f"Traceback: {traceback.format_exc()}")
         try:
-            embedding = generate_embedding(event_data["description"])
+            embedding = generate_embedding(event_data.get("description", ""))
             append_event_to_csv(
                 event_data, club_ig, post_url, status="failed", embedding=embedding
             )
@@ -310,7 +302,7 @@ def get_seen_shortcodes():
     """Fetches all post shortcodes from events table in DB"""
     logger.info("Fetching seen shortcodes from the database...")
     try:
-        events = Events.objects.filter(source_url__isnull=False).values_list("source_url", flat=True)
+        events = Events.objects.filter(url__isnull=False).values_list("url", flat=True)
         shortcodes = {url.split("/")[-2] for url in events if url}
         return shortcodes
     except Exception as e:
@@ -452,7 +444,18 @@ def test_zyte_proxy(country="CA"):
     """
     zyte_cert_path = setup_zyte()
     zyte_proxy = os.getenv("ZYTE_PROXY")
-    os.environ['https_proxy'] = zyte_proxy
+    logger.debug(f"Zyte proxy config: proxy={zyte_proxy!r}, cert={zyte_cert_path!s}")
+    
+    if not zyte_proxy:
+        logger.warning("ZYTE_PROXY not set - skipping proxied geolocation test and trying direct request")
+        try:
+            resp = requests.get("https://ipapi.co/json/", timeout=15)
+            resp.raise_for_status()
+            logger.info("Direct geolocation test succeeded")
+            return True
+        except Exception as e:
+            logger.warning(f"Direct geolocation test failed: {e!s}")
+            return False
     
     old_request = requests.Session.request
 
@@ -460,9 +463,10 @@ def test_zyte_proxy(country="CA"):
         headers = kwargs.get("headers", {})
         headers["Zyte-Geolocation"] = country
         kwargs["headers"] = headers
-        kwargs["verify"] = zyte_cert_path
         kwargs["proxies"] = {"http": zyte_proxy, "https": zyte_proxy}
-        kwargs["timeout"] = kwargs.get("timeout", 60)
+        if zyte_cert_path:
+            kwargs["verify"] = str(zyte_cert_path)
+        kwargs["timeout"] = kwargs.get("timeout", 30)
         return old_request(self, method, url, **kwargs)
 
     requests.Session.request = zyte_request
@@ -471,8 +475,10 @@ def test_zyte_proxy(country="CA"):
     try:
         resp = requests.get(
             "https://ipapi.co/json/",
-            timeout=15,
-            verify=zyte_cert_path)
+            timeout=30,
+            verify=str(zyte_cert_path) if zyte_cert_path else True,
+            proxies={"http": zyte_proxy, "https": zyte_proxy}
+        )
         resp.raise_for_status()
         data = resp.json()
         logger.debug(f"Connected via Zyte proxy")
@@ -480,16 +486,21 @@ def test_zyte_proxy(country="CA"):
         logger.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
         logger.debug(f"City: {data.get('city')}")
     except Exception as e:
-        print(f"Proxy geolocation test failed: {e}")
-        
-        
+        logger.warning(f"Proxied geolocation failed: {e!s}")
+    return True
+
+
 @handle_instagram_errors
 def session():
     L = Instaloader(user_agent=random.choice(USER_AGENTS))
     try:
         SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
         SESSION_CACHE_DIR.mkdir(exist_ok=True)
-        session_file = SESSION_CACHE_DIR / f"session-{USERNAME}"
+        files = [p for p in SESSION_CACHE_DIR.iterdir() if p.is_file()]
+        if files:
+            session_file = files[0]
+        else:
+            session_file = SESSION_CACHE_DIR / f"session-{USERNAME}"
     except Exception as e:
         session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
     try:
