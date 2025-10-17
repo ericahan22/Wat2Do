@@ -11,6 +11,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 load_dotenv()
 
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE",
+    os.getenv("DJANGO_SETTINGS_MODULE", "config.settings.development")
+)
+
 
 def format_value(value):
     """Format values for TypeScript file"""
@@ -33,25 +38,25 @@ def format_value(value):
 
 def fetch_events():
     """Fetch all upcoming events from the database for static data generation"""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
     try:
         import django
         django.setup()
     except Exception as e:
         logger.error(f"Failed to setup Django: {e}")
+        return []
         
     try:
         from apps.events.models import Events
-        from django.core.exceptions import FieldDoesNotExist
     except Exception as e:
         logger.error(f"Failed to import Events model: {e}")
+        return []
         
     today = date.today()
     
     use_dtstart = True
     try:
         Events._meta.get_field("dtstart")
-    except (FieldDoesNotExist, Exception):
+    except Exception:
         use_dtstart = False
     
     events_list = []

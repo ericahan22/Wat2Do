@@ -25,6 +25,9 @@ jobs:
       contents: write
     env:
       MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '100' }}
+      PRODUCTION: '1'
+      DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
