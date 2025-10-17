@@ -1,32 +1,161 @@
+from django.contrib.gis.db import models as gis_models
 from django.db import models
+from django.utils import timezone
 from pgvector.django import VectorField
 
 
-class Events(models.Model):
+class Event(models.Model):
+    # Human-readable event information
     id = models.BigAutoField(primary_key=True)
-    club_handle = models.CharField(max_length=100, blank=True, null=True)
-    url = models.URLField(blank=True, null=True)
-    name = models.CharField(max_length=100)
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField(null=True)
-    location = models.CharField(max_length=256)
-    price = models.FloatField(blank=True, null=True)
-    food = models.CharField(max_length=255, blank=True, null=True)
-    registration = models.BooleanField(default=False)
-    image_url = models.URLField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    embedding = VectorField(dimensions=1536, blank=True, null=True)
-    added_at = models.DateTimeField(auto_now_add=True, null=True)
-    club_type = models.CharField(max_length=50, blank=True, null=True)
-    reactions = models.JSONField(default=dict, blank=True)
-    notes = models.TextField(
-        blank=True, null=True, help_text="Internal notes for this event"
+    title = models.TextField(
+        null=True, blank=True,
+        help_text="'Spring Career Fair 2024'"
+    )
+    description = models.TextField(
+        null=True, blank=True,
+        help_text="'Join us for our annual career fair featuring 50+ companies...'"
+    )
+    location = models.TextField(
+        null=True, blank=True,
+        help_text="'Student Center Ballroom, 123 University Ave'"
+    )
+
+    # iCalendar datetime fields (RFC 5545 standard)
+    dtstamp = models.DateTimeField(
+        help_text="'2024-03-15T10:30:00Z'"
+    )
+    dtstart = models.DateTimeField(
+        help_text="'2024-03-20T09:00:00'"
+    )
+    dtend = models.DateTimeField(
+        blank=True, null=True,
+        help_text="'2024-03-20T17:00:00'"
+    )
+    dtstart_utc = models.DateTimeField(
+        help_text="'2024-03-20T14:00:00Z'"
+    )
+    dtend_utc = models.DateTimeField(
+        blank=True, null=True,
+        help_text="'2024-03-20T22:00:00Z'"
+    )
+    all_day = models.BooleanField(
+        default=False,
+        help_text="True"
+    )
+    duration = models.DurationField(
+        blank=True, null=True,
+        help_text="'8:00:00'"
+    )
+
+    # Event categorization
+    categories = models.CharField(
+        max_length=255, null=True, blank=True,
+        help_text="'Career, Networking, Professional Development'"
+    )
+
+    # Timezone information
+    tz = models.CharField(
+        max_length=64, null=True, blank=True,
+        help_text="'America/New_York'"
+    )
+
+    # Canonical UTC timestamps for consistent querying
+    utc_start_ts = models.DateTimeField(
+        null=True, blank=True,
+        help_text="'2024-03-20T14:00:00Z'"
+    )
+    utc_end_ts = models.DateTimeField(
+        null=True, blank=True,
+        help_text="'2024-03-20T22:00:00Z'"
+    )
+
+    # Recurrence rules (iCalendar RFC 5545)
+    rrule = models.TextField(
+        null=True, blank=True,
+        help_text="'FREQ=WEEKLY;BYDAY=MO'"
+    )
+    rdate = models.JSONField(
+        null=True, blank=True,
+        help_text="['2024-03-25', '2024-04-01']"
+    )
+
+    # Event status
+    status = models.CharField(
+        max_length=32, null=True, blank=True,
+        help_text="Event status (e.g., 'CONFIRMED', 'TENTATIVE', 'CANCELLED')"
+    )
+
+    # Geographic location (PostGIS)
+    geo = gis_models.PointField(
+        null=True, blank=True, srid=4326,
+        help_text="'POINT(-74.0059 40.7128)'"
+    )
+
+    # Data provenance and raw extraction
+    raw_json = models.JSONField(
+        help_text="{'title': 'Career Fair', 'location': 'Student Center'}"
+    )
+    source_url = models.TextField(
+        null=True, blank=True,
+        help_text="'https://university.edu/events/career-fair'"
+    )
+    source_image_urls = models.TextField(
+        null=True, blank=True,
+        help_text="'https://example.com/image1.jpg,https://example.com/image2.jpg'"
+    )
+
+    # Additional event metadata
+    reactions = models.JSONField(
+        default=dict, blank=True,
+        help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}"
+    )
+    embedding = VectorField(
+        dimensions=1536, blank=True, null=True,
+        help_text="[0.1, -0.2, 0.3, ...]"
+    )
+    food = models.CharField(
+        max_length=255, blank=True, null=True,
+        help_text="'Free pizza and drinks'"
+    )
+    registration = models.BooleanField(
+        default=False,
+        help_text="True"
+    )
+    added_at = models.DateTimeField(
+        auto_now_add=True, null=True,
+        help_text="'2024-03-15T10:30:00Z'"
+    )
+    price = models.FloatField(
+        blank=True, null=True,
+        help_text="15.99"
+    )
+    school = models.CharField(
+        max_length=255, blank=True, null=True,
+        help_text="'University of Waterloo'"
+    )
+    
+    # Social media handles
+    ig_handle = models.CharField(
+        max_length=100, blank=True, null=True,
+        help_text="'@uwcareercenter'"
+    )
+    discord_handle = models.CharField(
+        max_length=100, blank=True, null=True,
+        help_text="'careercenter#1234'"
+    )
+    x_handle = models.CharField(
+        max_length=100, blank=True, null=True,
+        help_text="'@UWCareerCenter'"
+    )
+    tiktok_handle = models.CharField(
+        max_length=100, blank=True, null=True,
+        help_text="'@uwcareercenter'"
     )
 
     class Meta:
-        db_table = "events"
-        ordering = ["date", "start_time"]
+        indexes = [
+            models.Index(fields=['utc_start_ts']),
+        ]
 
     def __str__(self):
-        return self.name
+        return f"{self.title[:50] if self.title else 'untitled'}"
