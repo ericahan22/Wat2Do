@@ -12,7 +12,6 @@ from django.db import DatabaseError, OperationalError, InterfaceError, close_old
 import csv
 import logging
 import random
-import re
 import time
 import traceback
 import re
@@ -40,7 +39,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
 ]
 
-MAX_POSTS = 100
+MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = 2
 
