@@ -95,19 +95,7 @@ WSGI_APPLICATION = "config.wsgi.app"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-if os.getenv("LOCAL") == "1":
-    # Local development database (Docker PostgreSQL with PostGIS)
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "NAME": os.getenv("LOCAL_POSTGRES_DB", "wat2do_dev"),
-            "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
-            "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),   
-        }
-    }
-else:
+if os.getenv("PRODUCTION") == "1":
     # Production database (Supabase)
     DATABASES = {
         "default": {
@@ -118,6 +106,18 @@ else:
             "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
             "PORT": os.getenv("POSTGRES_PORT", "6543"),   
             "OPTIONS": {"options": "-c pool_mode=session"},
+        }
+    }
+else:
+    # Local development database (Docker PostgreSQL with PostGIS)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "NAME": os.getenv("LOCAL_POSTGRES_DB", "wat2do_dev"),
+            "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
+            "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
+            "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
+            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),   
         }
     }
 
