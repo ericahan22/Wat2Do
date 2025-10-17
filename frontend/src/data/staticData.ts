@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-17T11:15:47.690797+00:00";
+export const LAST_UPDATED = "2025-10-17T12:43:29.626609+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -1065,26 +1065,25 @@ export const RECOMMENDED_FILTERS: string[] = [
   "networking",
   "free food",
   "workshop",
-  "social",
+  "social event",
+  "student society",
   "athletics",
   "seminar",
-  "study night",
   "retreat",
-  "trivia",
-  "exhibit",
-  "tutorial",
-  "roundtable",
-  "career fair",
-  "art",
+  "trivia night",
   "Halloween",
-  "craft",
-  "dodgeball",
+  "art exhibit",
+  "study night",
+  "tutorial",
+  "career fair",
+  "craft event",
   "open mic",
-  "dogs",
-  "painting",
-  "midterm review",
-  "physio",
-  "Qur'an symposium",
   "bouldering",
-  "pumpkin carving"
+  "pumpkin carving",
+  "therapy dogs",
+  "midterm review",
+  "Qur'an symposium",
+  "dodgeball tournament",
+  "co-op simulation",
+  "graduate workshop"
 ];
