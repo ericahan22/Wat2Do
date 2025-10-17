@@ -12,9 +12,10 @@ from django.db import DatabaseError, OperationalError, InterfaceError, close_old
 import csv
 import logging
 import random
-import re
 import time
 import traceback
+import re
+import requests
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -26,6 +27,8 @@ from apps.clubs.models import Clubs
 from apps.events.models import Events
 from services.openai_service import extract_events_from_caption, generate_embedding
 from services.storage_service import upload_image_from_url
+from zyte_setup import setup_zyte
+from logging_config import logger
 from utils.embedding_utils import find_similar_events
 
 USER_AGENTS = [
@@ -36,23 +39,7 @@ USER_AGENTS = [
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
 ]
 
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
-LOG_FILE = LOG_DIR / "scraping.log"
-
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
-    ],
-)
-logger = logging.getLogger(__name__)
-
-MAX_POSTS = 50
+MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = 2
 
@@ -429,10 +416,53 @@ def process_recent_feed(
     logger.info(f"Added {events_added} event(s) to Supabase")
 
 
+def test_zyte_proxy(country="CA"):
+    """
+    Patch requests.Session to route through Zyte with geolocation,
+    test Zyte proxy routing and geolocation
+    """
+    zyte_cert_path = setup_zyte()
+    zyte_proxy = os.getenv("ZYTE_PROXY")
+    os.environ['https_proxy'] = zyte_proxy
+    
+    old_request = requests.Session.request
+
+    def zyte_request(self, method, url, **kwargs):
+        headers = kwargs.get("headers", {})
+        headers["Zyte-Geolocation"] = country
+        kwargs["headers"] = headers
+        kwargs["verify"] = zyte_cert_path
+        kwargs["proxies"] = {"http": zyte_proxy, "https": zyte_proxy}
+        kwargs["timeout"] = kwargs.get("timeout", 60)
+        return old_request(self, method, url, **kwargs)
+
+    requests.Session.request = zyte_request
+    
+    logging.debug(f"Testing Zyte proxy geolocation: {country}")
+    try:
+        resp = requests.get(
+            "https://ipapi.co/json/",
+            timeout=15,
+            verify=zyte_cert_path)
+        resp.raise_for_status()
+        data = resp.json()
+        logging.debug(f"Connected via Zyte proxy")
+        logging.debug(f"Public IP: {data.get('ip')}")
+        logging.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
+        logging.debug(f"City: {data.get('city')}")
+    except Exception as e:
+        print(f"Proxy geolocation test failed: {e}")
+        
+        
 @handle_instagram_errors
 def session():
     L = Instaloader(user_agent=random.choice(USER_AGENTS))
-    session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
+    try:
+        SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
+        SESSION_CACHE_DIR.mkdir(exist_ok=True)
+        session_file = SESSION_CACHE_DIR / f"session-{USERNAME}"
+    except Exception as e:
+        session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
     try:
         if session_file.exists():
             L.load_session_from_file(USERNAME, filename=str(session_file))
@@ -457,6 +487,7 @@ def session():
 
 
 if __name__ == "__main__":
+    test_zyte_proxy("CA")  
     logger.info("Attemping to load Instagram session...")
     L = session()
     if L:

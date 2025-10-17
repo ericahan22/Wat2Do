@@ -13,6 +13,10 @@ on:
         required: true
         type: boolean
         default: false
+      MAX_POSTS:
+        required: false
+        type: number
+        default: 100
 
 jobs:
   instagram_feed:
@@ -20,6 +24,7 @@ jobs:
     permissions:
       contents: write
     env:
+      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '100' }}
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
       POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -43,6 +48,7 @@ jobs:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+      ZYTE_PROXY: ${{ secrets.ZYTE_PROXY }}
       EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
       
@@ -68,6 +74,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
+      - name: Cache Instaloader session
+        uses: actions/cache@v3
+        with:
+          path: .insta_cache
+          key: insta-session-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            insta-session-
+            
       - name: Install dependencies
         working-directory: backend
         run: |
