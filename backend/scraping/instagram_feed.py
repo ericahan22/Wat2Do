@@ -7,10 +7,9 @@ import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
-from django.db import DatabaseError, OperationalError, InterfaceError, close_old_connections
+from django.db import close_old_connections
 
 import csv
-import logging
 import random
 import time
 import traceback
@@ -115,30 +114,29 @@ def normalize_string(s):
 
 def is_duplicate_event(event_data):
     """Check for duplicate events (same name, date, location, time)"""
-    name = normalize_string(event_data.get("name"))
+    name = normalize_string(event_data.get("name") or event_data.get("title"))
     location = normalize_string(event_data.get("location"))
-    date = event_data.get("date")
-    start_time = event_data.get("start_time")
-    end_time = event_data.get("end_time")
+    date_str = (event_data.get("date") or "").strip()
+    if not date_str:
+        return False
+    try:
+        event_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        logger.warning(f"Invalid date for duplicate check: '{date_str}'")
+        return False
 
     try:
         close_old_connections()
-        candidates = Events.objects.filter(date=date)
+        candidates = Events.objects.filter(dtstart__date=event_date)
         for c in candidates:
-            if (
-                normalize_string(c.name) == name
-                and normalize_string(c.location) == location
-                and str(c.start_time) == str(start_time)
-                and (not end_time or str(c.end_time) == str(end_time))
-            ):
+            c_name = normalize_string(getattr(c, "title", "") or "")
+            c_loc = normalize_string(getattr(c, "location", "") or "")
+            if c_name == name and c_loc == location:
                 return True
         return False
-    except (InterfaceError, OperationalError, DatabaseError) as e:
-        logger.warning(
-            f"Database error when checking for duplicate event: {e!s}"
-        )
-    logger.error("DB unavailable - treating as non-duplicate")
-    return False
+    except Exception as e:
+        logger.error(f"Database error during duplicate check: {e!s}")
+        return False
 
 
 def append_event_to_csv(
@@ -191,19 +189,43 @@ def append_event_to_csv(
 
 
 def insert_event_to_db(event_data, club_ig, post_url):
-    # Check if an event already exists in db and insert it if not
-    event_name = event_data.get("name")  # .title()
-    event_date = event_data.get("date")
-    event_location = event_data.get("location")  # .title()
+    """Map scraped event data to Event model fields, insert to DB"""
+    event_name = event_data.get("name") or event_data.get("title") or ""
+    date = event_data.get("date") or ""
+    start_time = event_data.get("start_time") or ""
+    end_time = event_data.get("end_time") or ""
+    image_url = event_data.get("image_url") or event_data.get("source_image_url") or ""
+    description = event_data.get("description") or ""
+    location = event_data.get("location") or ""
+    price = event_data.get("price", None)
+    food = event_data.get("food", None)
+    registration = bool(event_data.get("registration", False))
+    
+    # Parse dtstart/dtend datetimes for model fields
+    try:
+        if date and start_time:
+            dtstart = datetime.fromisoformat(f"{date}T{start_time}")
+        elif date:
+            dtstart = datetime.fromisoformat(f"{date}T00:00:00")
+        else:
+            dtstart = None
+        if date and end_time:
+            dtend = datetime.fromisoformat(f"{date}T{end_time}")
+        else:
+            dtend = None
+    except Exception:
+        dtstart = None
+        dtend = None
+        
     try:
         # Duplicate check
         if is_duplicate_event(event_data):
             logger.info(
-                f"Duplicate event detected, skipping {event_name} on {event_date} at {event_location}"
+                f"Duplicate event detected, skipping {event_name} on {date} at {location}"
             )
             return False
 
-        # Get club_type based on club handle
+        # Get club_type based on club handle from Clubs model
         try:
             club = Clubs.objects.get(ig=club_ig)
             club_type = club.club_type
@@ -218,17 +240,17 @@ def insert_event_to_db(event_data, club_ig, post_url):
         try:
             # Pass event date as min_date to filter out past events first for performance
             similar_events = find_similar_events(
-                embedding, threshold=0.90, limit=10, min_date=event_date
+                embedding, threshold=0.90, limit=10, min_date=date
             )
             candidate_ids = [row["id"] for row in similar_events]
             if candidate_ids:
                 for existing in Events.objects.filter(
-                    id__in=candidate_ids, date=event_date
+                    id__in=candidate_ids, dtstart__date=date
                 ):
                     # Only replace if new event has image but existing doesn't,
                     # or if new description is longer (more info)
                     new_img = event_data.get("image_url")
-                    old_img = existing.image_url
+                    old_img = getattr(existing, "source_image_url", getattr(existing, "image_url", None))
                     new_desc = event_data.get("description") or ""
                     old_desc = existing.description or ""
                     if (not old_img and new_img) or (
@@ -242,18 +264,17 @@ def insert_event_to_db(event_data, club_ig, post_url):
             logger.error(f"Duplicate check via utility failed: {dedup_err}")
 
         Events.objects.create(
-            club_handle=club_ig,
-            url=post_url,
-            name=event_name,
-            date=event_date,
-            start_time=event_data["start_time"],
-            end_time=event_data["end_time"] or None,
-            location=event_location,
-            price=event_data.get("price", None),
-            food=event_data.get("food") or "",
-            registration=bool(event_data.get("registration", False)),
-            image_url=event_data.get("image_url"),
-            description=event_data.get("description") or "",
+            ig_handle=club_ig,
+            source_url=post_url,
+            title=event_name,
+            dtstart=dtstart,
+            dtend=dtend,
+            location=location,
+            price=price,
+            food=food,
+            registration=registration,
+            source_image_url=image_url or None,
+            description=description,
             embedding=embedding,
             club_type=club_type,
             status="scraped",
@@ -269,7 +290,6 @@ def insert_event_to_db(event_data, club_ig, post_url):
                 f"Database insert succeeded, but failed to append to CSV: {csv_err}"
             )
             logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
         return True
     except Exception as e:
         logger.error(f"Database error: {e!s}")
@@ -283,7 +303,6 @@ def insert_event_to_db(event_data, club_ig, post_url):
             logger.info(f"Appended event to CSV: {event_data.get('name')}")
         except Exception as csv_err:
             logger.error(f"Database and CSV inserts failed: {csv_err}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
         return False
 
 
@@ -291,7 +310,7 @@ def get_seen_shortcodes():
     """Fetches all post shortcodes from events table in DB"""
     logger.info("Fetching seen shortcodes from the database...")
     try:
-        events = Events.objects.filter(url__isnull=False).values_list("url", flat=True)
+        events = Events.objects.filter(source_url__isnull=False).values_list("source_url", flat=True)
         shortcodes = {url.split("/")[-2] for url in events if url}
         return shortcodes
     except Exception as e:
@@ -355,9 +374,19 @@ def process_recent_feed(
 
             # Process each event returned by the AI
             for event_data in events_data:
-                event_date = datetime.strptime(
-                    event_data.get("date"), "%Y-%m-%d"
-                ).date()
+                date_str = (event_data.get("date") or "").strip()
+                if not date_str:
+                    logger.warning(
+                        f"Skipping event '{event_data.get('name', 'Unknown')}' from post {post.shortcode}: missing date"
+                    )
+                    continue
+                try:
+                    event_date = datetime.strptime(event_data.get("date"), "%Y-%m-%d").date()
+                except ValueError:
+                    logger.warning(
+                        f"Skipping event '{event_data.get('name', 'Unkown')}' from post {post.shortcode}: invalid date '{date_str}'"
+                    )
+                    continue
                 if event_date < today:
                     logger.info(
                         f"Skipping event '{event_data.get('name')}' with past date {event_date}"
@@ -438,7 +467,7 @@ def test_zyte_proxy(country="CA"):
 
     requests.Session.request = zyte_request
     
-    logging.debug(f"Testing Zyte proxy geolocation: {country}")
+    logger.debug(f"Testing Zyte proxy geolocation: {country}")
     try:
         resp = requests.get(
             "https://ipapi.co/json/",
@@ -446,10 +475,10 @@ def test_zyte_proxy(country="CA"):
             verify=zyte_cert_path)
         resp.raise_for_status()
         data = resp.json()
-        logging.debug(f"Connected via Zyte proxy")
-        logging.debug(f"Public IP: {data.get('ip')}")
-        logging.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
-        logging.debug(f"City: {data.get('city')}")
+        logger.debug(f"Connected via Zyte proxy")
+        logger.debug(f"Public IP: {data.get('ip')}")
+        logger.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
+        logger.debug(f"City: {data.get('city')}")
     except Exception as e:
         print(f"Proxy geolocation test failed: {e}")
         

@@ -109,7 +109,8 @@ class OpenAIService:
     ]
     
     Guidelines:
-    - PRIORITIZE CAPTION TEXT: Always extract information from the caption text first and use it as the primary source of truth
+    - PRIORITIZE CAPTION TEXT for extracting fields (date, time, location, price, food, registration, description, etc.).
+    - EXCEPTION: For the event "name" field ONLY, prefer an explicit title found in the image (e.g., poster text) if the caption does not contain a clear, explicit event title. If both caption and image provide a name, prefer the image-derived title for the "name" field; otherwise use the caption.
     - Return an array of events - if multiple events are mentioned, create separate objects for each
     - Title-case event names (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
@@ -121,6 +122,7 @@ class OpenAIService:
     - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
     - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
+    - If the exact food items are not mentioned, e.g., the literal word "food" would be returned, output "Yes!" (exactly) for the food field to indicate that food is present. Do not output the literal word "food" by itself.
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
     - If information is not available, use empty string "" for strings, null for price, false for registration

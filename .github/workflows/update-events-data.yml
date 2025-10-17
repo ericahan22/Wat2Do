@@ -64,7 +64,7 @@ jobs:
         working-directory: backend/scraping
         run: |
           mkdir -p logs
-          mkdir -p .insta_cache
+          mkdir -p $GITHUB_WORKSPACE/.insta_cache
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -77,7 +77,7 @@ jobs:
       - name: Cache Instaloader session
         uses: actions/cache@v4
         with:
-          path: backend/scraping/.insta_cache
+          path: ${{ github.workspace }}/.insta_cache
           key: ${{ runner.os }}-instaloader-session-${{ hashFiles('backend/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-instaloader-session-

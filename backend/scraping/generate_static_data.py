@@ -1,10 +1,9 @@
-import logging
 import os
 import sys
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timezone, timedelta
 from pathlib import Path
+from logging_config import logger
 
-import psycopg2
 from dotenv import load_dotenv
 
 # Add parent directory to path for imports
@@ -17,7 +16,7 @@ def format_value(value):
     """Format values for TypeScript file"""
     if value is None:
         return "null"
-    if isinstance(value, date | time | datetime):
+    if isinstance(value, (date, time, datetime)):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
         escaped_value = (
@@ -32,44 +31,74 @@ def format_value(value):
     return value
 
 
-def fetch_events_for_static_data():
+def fetch_events():
     """Fetch all upcoming events from the database for static data generation"""
-    conn_string = os.environ.get("SUPABASE_DB_URL")
-    logging.info("Connecting to the database...")
-
-    with psycopg2.connect(conn_string) as conn, conn.cursor() as cur:
-        logging.info("Executing query...")
-        query = """
-            SELECT
-                e.id,
-                e.club_handle,
-                e.url,
-                e.name,
-                e.date,
-                e.start_time,
-                CASE
-                    WHEN e.end_time IS NULL THEN e.start_time + interval '1 hour'
-                    ELSE e.end_time
-                END as end_time,
-                e.location,
-                e.price,
-                e.food,
-                e.registration,
-                e.image_url,
-                e.club_type,
-                e.added_at,
-                e.description
-            FROM
-                events e
-            WHERE
-                e.date >= CURRENT_DATE
-            ORDER BY e.date ASC, e.start_time ASC;
-            """
-        cur.execute(query)
-        columns = [desc[0] for desc in cur.description]
-        events = [dict(zip(columns, row, strict=False)) for row in cur.fetchall()]
-        logging.info(f"Fetched {len(events)} events.")
-        return events
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api.settings")
+    try:
+        import django
+        django.setup()
+    except Exception as e:
+        logger.error(f"Failed to setup Django: {e}")
+        
+    try:
+        from apps.events.models import Events
+        from django.core.exceptions import FieldDoesNotExist
+    except Exception as e:
+        logger.error(f"Failed to import Events model: {e}")
+        
+    today = date.today()
+    
+    use_dtstart = True
+    try:
+        Events._meta.get_field("dtstart")
+    except (FieldDoesNotExist, Exception):
+        use_dtstart = False
+    
+    events_list = []
+    if use_dtstart:
+        qs = Events.objects.filter(dtstart__date__gte=today).order_by("dtstart", "dtstart")
+    else:
+        qs = Events.objects.filter(date__gte=today).order_by("date", "start_time")
+        
+    for e in qs:
+        if use_dtstart:
+            ev_date = getattr(e, "dtstart", None)
+            ev_start = getattr(e, "dtstart", None)
+            ev_end = getattr(e, "dtend", None)
+            if ev_end is None and ev_start is not None:
+                ev_end = ev_start + timedelta(hours=1)
+            image_url = getattr(e, "source_image_url", None) or getattr(e, "image_url", None)
+            url = getattr(e, "source_url", None) or getattr(e, "url", None)
+            name = getattr(e, "title", None) or getattr(e, "name", None)
+        else:
+            ev_date = getattr(e, "date", None)
+            ev_start = getattr(e, "start_time", None)
+            ev_end = getattr(e, "end_time", None) or (ev_date + timedelta(hours=1) if isinstance(ev_date, datetime) else None)
+            image_url = getattr(e, "image_url", None)
+            url = getattr(e, "url", None)
+            name = getattr(e, "name", None)
+    
+        item = {
+            "id": getattr(e, "id", None),
+            "club_handle": getattr(e, "club_handle", None),
+            "url": url,
+            "name": name,
+            "date": ev_date,
+            "start_time": ev_start,
+            "end_time": ev_end,
+            "location": getattr(e, "location", None),
+            "price": getattr(e, "price", None),
+            "food": getattr(e, "food", None),
+            "registration": getattr(e, "registration", None),
+            "image_url": image_url,
+            "club_type": getattr(e, "club_type", None),
+            "added_at": getattr(e, "added_at", None),
+            "description": getattr(e, "description", None)
+        }
+        events_list.append(item)
+        
+    logger.info(f"Fetched {len(events_list)} events, use_dtstart={use_dtstart}")
+    return events_list
 
 
 def generate_recommended_filters(events_data):
@@ -77,30 +106,27 @@ def generate_recommended_filters(events_data):
     try:
         from services.openai_service import generate_recommended_filters
 
-        logging.info("Generating recommended filters using OpenAI...")
+        logger.info("Generating recommended filters using OpenAI...")
         recommended_filters = generate_recommended_filters(events_data)
 
         if not recommended_filters:
-            logging.warning("Failed to generate recommended filters")
+            logger.warning("Failed to generate recommended filters")
             return []
 
-        logging.info(
+        logger.info(
             f"Generated {len(recommended_filters)} filters: {recommended_filters}"
         )
         return recommended_filters
     except Exception as e:
-        logging.error(f"Error generating recommended filters: {e}")
+        logger.error(f"Error generating recommended filters: {e}")
         return []
 
 
 def main():
     """Fetches events, generates filters, and writes to staticData.ts"""
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
     try:
         # Fetch upcoming events
-        events = fetch_events_for_static_data()
+        events = fetch_events()
 
         # Generate recommended filters
         recommended_filters = generate_recommended_filters(events)
@@ -113,7 +139,7 @@ def main():
             / "data"
             / "staticData.ts"
         )
-        logging.info(f"Writing to {output_path}...")
+        logger.info(f"Writing to {output_path}...")
         with output_path.open("w", encoding="utf-8") as f:
             # Write the last updated timestamp in UTC
             current_time = datetime.now(timezone.utc).isoformat()
@@ -158,11 +184,11 @@ def main():
             else:
                 f.write("export const RECOMMENDED_FILTERS: string[] = [];\n")
 
-        logging.info(
+        logger.info(
             "Successfully updated staticData.ts with events and recommended filters"
         )
     except Exception:
-        logging.exception("An error occurred")
+        logger.exception("An error occurred")
         sys.exit(1)
 
 
