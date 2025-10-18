@@ -66,7 +66,7 @@ class EventPromotion(models.Model):
         ordering = ["-priority", "-promoted_at"]
 
     def __str__(self):
-        return f"Promotion for {self.event.name}"
+        return f"Promotion for {self.event.title}"
 
     @property
     def is_expired(self):

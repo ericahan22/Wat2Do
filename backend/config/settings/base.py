@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",  # Add GIS support
     # Third party apps
     "rest_framework",
     "rest_framework.authtoken",
@@ -99,7 +98,7 @@ if os.getenv("PRODUCTION") == "1":
     # Production database (Supabase)
     DATABASES = {
         "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": os.getenv("POSTGRES_DB", "postgres"),
             "USER": os.getenv("POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
@@ -112,11 +111,10 @@ if os.getenv("PRODUCTION") == "1":
         }
     }
 else:
-    # Local development database (Docker PostgreSQL with PostGIS)
     DATABASES = {
         "default": {
-            "ENGINE": "django.contrib.gis.db.backends.postgis",
-            "NAME": os.getenv("LOCAL_POSTGRES_DB", "wat2do_dev"),
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("LOCAL_POSTGRES_DB", "postgres"),
             "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
             "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),

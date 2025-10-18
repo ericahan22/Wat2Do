@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         related_name="promotion",
                         serialize=False,
-                        to="events.events",
+                        to="events.Events",
                     ),
                 ),
                 (

@@ -46,19 +46,18 @@ def get_events(request):
         # Return selected event fields (excluding description and embedding)
         fields = [
             "id",
-            "club_handle",
-            "url",
-            "name",
-            "date",
-            "start_time",
-            "end_time",
+            "title",
+            "description",
             "location",
+            "dtstart",
+            "dtend",
             "price",
             "food",
             "registration",
-            "image_url",
+            "source_image_url",
             "club_type",
             "added_at",
+            "school",
         ]
         results = list(filtered_queryset.values(*fields))
         return Response(results)
@@ -189,15 +188,15 @@ def _generate_ics_content(events):
     dtstamp = now.strftime("%Y%m%dT%H%M%SZ")
 
     for event in events:
-        start_date = event.date.strftime("%Y%m%d")
-        start_time = event.start_time.strftime("%H%M%S")
-        end_time = event.end_time.strftime("%H%M%S") if event.end_time else start_time
+        start_date = event.dtstart.strftime("%Y%m%d")
+        start_time = event.dtstart.strftime("%H%M%S")
+        end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
 
         lines.append("BEGIN:VEVENT")
         lines.append(f"DTSTART:{start_date}T{start_time}")
         lines.append(f"DTEND:{start_date}T{end_time}")
         lines.append(f"DTSTAMP:{dtstamp}")
-        lines.append(f"SUMMARY:{escape_text(event.name)}")
+        lines.append(f"SUMMARY:{escape_text(event.title)}")
 
         if event.description:
             lines.append(f"DESCRIPTION:{escape_text(event.description)}")
@@ -205,8 +204,8 @@ def _generate_ics_content(events):
         if event.location:
             lines.append(f"LOCATION:{escape_text(event.location)}")
 
-        if event.url:
-            lines.append(f"URL:{event.url}")
+        if event.source_url:
+            lines.append(f"URL:{event.source_url}")
 
         lines.append(f"UID:{event.id}@wat2do.com")
         lines.append("END:VEVENT")
@@ -267,10 +266,10 @@ def get_google_calendar_urls(request):
 
         for event in events:
             # Format dates for Google Calendar (YYYYMMDDTHHMMSS)
-            start_date = event.date.strftime("%Y%m%d")
-            start_time = event.start_time.strftime("%H%M%S")
+            start_date = event.dtstart.strftime("%Y%m%d")
+            start_time = event.dtstart.strftime("%H%M%S")
             end_time = (
-                event.end_time.strftime("%H%M%S") if event.end_time else start_time
+                event.dtend.strftime("%H%M%S") if event.dtend else start_time
             )
 
             start_datetime = f"{start_date}T{start_time}"
@@ -280,14 +279,14 @@ def get_google_calendar_urls(request):
             details_parts = []
             if event.description:
                 details_parts.append(event.description)
-            if event.url:
-                details_parts.append(event.url)
+            if event.source_url:
+                details_parts.append(event.source_url)
             details = "\n\n".join(details_parts)
 
             # Build Google Calendar URL
             params = {
                 "action": "TEMPLATE",
-                "text": event.name,
+                "text": event.title,
                 "dates": f"{start_datetime}/{end_datetime}",
                 "details": details,
                 "location": event.location or "",

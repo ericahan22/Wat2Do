@@ -1,4 +1,2 @@
--- Initialize required extensions
-CREATE EXTENSION IF NOT EXISTS postgis;
-
+-- Initialize required extensions (pgvector only)
 CREATE EXTENSION IF NOT EXISTS vector;

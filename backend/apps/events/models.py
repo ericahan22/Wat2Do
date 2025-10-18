@@ -1,9 +1,8 @@
-from django.contrib.gis.db import models as gis_models
 from django.db import models
 from pgvector.django import VectorField
 
 
-class Event(models.Model):
+class Events(models.Model):
     # Human-readable event information
     id = models.BigAutoField(primary_key=True)
     title = models.TextField(
@@ -21,9 +20,11 @@ class Event(models.Model):
 
     # iCalendar datetime fields (RFC 5545 standard)
     dtstamp = models.DateTimeField(
+        default=timezone.now,
         help_text="'2024-03-15T10:30:00Z'"
     )
     dtstart = models.DateTimeField(
+        default=timezone.now,
         help_text="'2024-03-20T09:00:00'"
     )
     dtend = models.DateTimeField(
@@ -31,6 +32,7 @@ class Event(models.Model):
         help_text="'2024-03-20T17:00:00'"
     )
     dtstart_utc = models.DateTimeField(
+        default=timezone.now,
         help_text="'2024-03-20T14:00:00Z'"
     )
     dtend_utc = models.DateTimeField(
@@ -84,14 +86,19 @@ class Event(models.Model):
         help_text="Event status (e.g., 'CONFIRMED', 'TENTATIVE', 'CANCELLED')"
     )
 
-    # Geographic location (PostGIS)
-    geo = gis_models.PointField(
-        null=True, blank=True, srid=4326,
-        help_text="'POINT(-74.0059 40.7128)'"
+    # Geographic location (regular numeric fields)
+    latitude = models.FloatField(
+        null=True, blank=True,
+        help_text="40.7128"
+    )
+    longitude = models.FloatField(
+        null=True, blank=True,
+        help_text="-74.0059"
     )
 
     # Data provenance and raw extraction
     raw_json = models.JSONField(
+        default=dict,
         help_text="{'title': 'Career Fair', 'location': 'Student Center'}"
     )
     source_url = models.TextField(
@@ -160,6 +167,7 @@ class Event(models.Model):
     )
 
     class Meta:
+        db_table = 'events'
         indexes = [
             models.Index(fields=['utc_start_ts']),
         ]

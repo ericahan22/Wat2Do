@@ -1,4 +1,4 @@
-FROM postgis/postgis:15-3.3
+FROM pgvector/pgvector:pg15
 
 # Install pgvector extension package from PGDG
 RUN apt-get update \

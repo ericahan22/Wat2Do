@@ -52,13 +52,18 @@ Events are automatically collected from club Instagram posts, using the OpenAI A
 
 ### Environment Setup
 
-#### Backend
+#### Database
+```bash
+docker compose up --build
+```
+
+#### Backend (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db)
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export USE_SQLITE=1
+python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver 8000
 ```

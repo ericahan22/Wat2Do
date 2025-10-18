@@ -2,9 +2,10 @@ services:
   postgres:
     build: ./db
     environment:
-      POSTGRES_DB: wat2do_dev
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5432:5432"
     volumes:
@@ -16,36 +17,29 @@ services:
       timeout: 5s
       retries: 5
 
-  # Django backend
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    environment:
-      - LOCAL_POSTGRES_DB=wat2do_dev
-      - LOCAL_POSTGRES_USER=postgres
-      - LOCAL_POSTGRES_PASSWORD=postgres
-      - LOCAL_POSTGRES_HOST=postgres
-      - LOCAL_POSTGRES_PORT=5432
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+  # # Django backend
+  # backend:
+  #   build: ./backend
+  #   ports:
+  #     - "8000:8000"
+  #   env_file:
+  #     - ./backend/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend:/app
 
-  # Frontend (if you want to run it in Docker too)
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:8000
+  # # Frontend (if you want to run it in Docker too)
+  # frontend:
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - VITE_API_URL=http://localhost:8000
 
 volumes:
   postgres_data:
