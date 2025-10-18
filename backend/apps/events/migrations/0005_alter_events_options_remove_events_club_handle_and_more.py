@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import django.utils.timezone
 import pgvector.django.vector
+import json
 
 
 class Migration(migrations.Migration):
@@ -138,7 +139,7 @@ class Migration(migrations.Migration):
             model_name="events",
             name="raw_json",
             field=models.JSONField(
-                default=dict,
+                default=json.dumps({}),
                 help_text="{'title': 'Career Fair', 'location': 'Student Center'}",
             ),
         ),
@@ -306,7 +307,7 @@ class Migration(migrations.Migration):
             name="reactions",
             field=models.JSONField(
                 blank=True,
-                default=dict,
+                default=json.dumps({}),
                 help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}",
             ),
         ),

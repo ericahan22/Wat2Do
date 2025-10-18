@@ -1,7 +1,6 @@
 from django.db import models
 from pgvector.django import VectorField
 
-
 class Events(models.Model):
     # Human-readable event information
     id = models.BigAutoField(primary_key=True)
