@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T07:15:47.791992+00:00";
+export const LAST_UPDATED = "2025-10-19T11:20:57.153571+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -1810,19 +1810,19 @@ export const staticEventsData: Event[] = [
 ];
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["Smileys", "Grinning%20Face", "networking"],
   ["Food%20and%20Drink", "Pizza", "free food"],
+  ["Food%20and%20Drink", "Doughnut", "donut sale"],
+  ["Activity", "Ticket", "large event"],
+  ["People", "Handshake", "networking"],
   ["Objects", "Graduation%20Cap", "career fair"],
-  ["Objects", "Musical%20Note", "live music"],
-  ["Objects", "Books", "workshop"],
-  ["Activity", "Ticket", "large events"],
-  ["Food%20and%20Drink", "Doughnut", "snacks"],
-  ["Food%20and%20Drink", "Bubble%20Tea", "boba truck"],
-  ["Activity", "Trophy", "competitions"],
-  ["People", "Clapping%20Hands", "seminars"],
-  ["Food%20and%20Drink", "Cupcake", "desserts"],
-  ["Activity", "Confetti%20Ball", "celebrations"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "social event"],
+  ["Activity", "Trophy", "competition"],
+  ["Food%20and%20Drink", "Cupcake", "snacks"],
   ["Objects", "Microphone", "open mic"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "community"],
-  ["Activity", "Basketball", "sports"]
+  ["Food%20and%20Drink", "Beverage%20Box", "drinks"],
+  ["Activity", "Confetti%20Ball", "celebration"],
+  ["Objects", "Books", "workshop"],
+  ["Activity", "Magic%20Wand", "creative event"],
+  ["Food%20and%20Drink", "Bubble%20Tea", "boba truck"],
+  ["Objects", "Pencil", "study session"]
 ];

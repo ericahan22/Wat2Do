@@ -10,7 +10,6 @@ interface ClubsGridProps {
 }
 
 const ClubsGrid = memo(({ data }: ClubsGridProps) => {
-  console.log(data);
   return (
     <div className="space-y-8">
       {/* Clubs Grid */}
