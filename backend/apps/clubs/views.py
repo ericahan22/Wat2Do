@@ -38,12 +38,8 @@ def get_clubs(request):
         # Convert to list of dictionaries
         clubs_data = []
         for club in filtered_queryset:
-            # Handle categories - parse JSON if it's a string, otherwise use as-is
-            categories = club.categories
-            if isinstance(categories, str):
-                categories = json.loads(categories)
-            else:
-                categories = []
+            # Ensure categories is always a list
+            categories = club.categories if isinstance(club.categories, list) else json.loads(club.categories)
             
             clubs_data.append({
                 "id": club.id,
