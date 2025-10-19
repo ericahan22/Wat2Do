@@ -55,7 +55,7 @@ def fetch_events():
     
     try:
         today = date.today()
-        qs = EventsModel.objects.filter(dtstart__date=today).order_by("dtstart")
+        qs = EventsModel.objects.filter(dtstart__date__gte=today).order_by("dtstart")
         for e in qs:
             events_list.append(
                 {
