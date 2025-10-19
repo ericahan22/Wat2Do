@@ -90,14 +90,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-instaloader-session-
             
-      - name: Install system GDAL
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gdal-bin libgdal-dev
-          if [ -f /usr/lib/x86_64-linux-gnu/libgdal.so ]; then
-            echo "GDAL_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/libgdal.so" >> $GITHUB_ENV
-          fi
-
       - name: Install dependencies
         working-directory: backend
         run: |
