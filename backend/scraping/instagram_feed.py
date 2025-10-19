@@ -42,7 +42,7 @@ USER_AGENTS = [
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10
-CUTOFF_DAYS = 2
+CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
 # Load environment variables from .env file
 load_dotenv()
@@ -460,12 +460,17 @@ def get_seen_shortcodes():
 
 def process_recent_feed(
     loader,
-    cutoff=datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS),
+    cutoff=None,
     max_posts=MAX_POSTS,
     max_consec_old_posts=MAX_CONSEC_OLD_POSTS,
 ):
-    # Process Instagram feed posts and extract event info. Stops
-    #   scraping once posts become older than cutoff.
+    """
+    Process Instagram feed posts and extract event info.
+    Stops scraping once posts become older than cutoff.
+    """
+    if not cutoff:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS)
+        
     events_added = 0
     posts_processed = 0
     consec_old_posts = 0
