@@ -8,11 +8,13 @@ import { Navbar, Footer } from '@/shared'
 import AboutPage from '@/shared/components/layout/AboutPage'
 import ContactPage from '@/shared/components/layout/ContactPage'
 import NotFoundPage from '@/shared/components/layout/NotFoundPage'
+import TopBanner from '@/shared/components/layout/TopBanner'
 
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+        <TopBanner />
         <Navbar />
         <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 min-w-0">
           <Routes>

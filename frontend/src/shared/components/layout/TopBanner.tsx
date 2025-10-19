@@ -13,7 +13,7 @@ function TopBanner() {
     <div className="w-full bg-blue-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 relative flex items-center justify-center">
         <span className="text-sm font-small text-center !text-white">
-          {formatPrettyDate("2025-10-14")} - Now view past events in Wat2Do!
+          {formatPrettyDate("2025-10-14")} - App is no longer broken!
         </span>
         <IconButton
           aria-label="Close banner"
