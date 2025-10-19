@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T04:01:16.661121+00:00";
+export const LAST_UPDATED = "2025-10-19T04:34:12.993642+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -117,27 +117,27 @@ export const staticEventsData: Event[] = [
 
 export const RECOMMENDED_FILTERS: string[] = [
   "Qur'an Symposium",
-  "Athletics",
+  "Athletics Tournament",
   "Midterm Review",
   "Study Night",
   "CASPer Course",
   "WUSA Events",
   "Networking",
-  "Food",
+  "Free Food",
   "Pizza",
   "Snacks",
   "Drinks",
   "Student Society",
   "Professional Development",
-  "Tournament",
   "Academic Support",
   "Social Event",
-  "Lazaridis Hall",
-  "Sheridan College",
-  "Study Group",
-  "Exam Prep",
+  "Large Gathering",
   "Community Building",
   "Peer Learning",
-  "Event Networking",
-  "Student Clubs"
+  "Exam Preparation",
+  "Club Activities",
+  "Food and Drinks",
+  "Student Engagement",
+  "Interactive Workshop",
+  "Team Competition"
 ];
