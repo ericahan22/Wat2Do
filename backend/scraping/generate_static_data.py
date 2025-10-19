@@ -46,99 +46,42 @@ def fetch_events():
         return []
     
     from django.db import connection, ProgrammingError, OperationalError
-
-    try:
-        tables = connection.introspection.table_names()
-    except Exception:
-        tables = []
-    use_new_table = "events_event" in tables
-    legacy_table = "events" in tables or "public.events" in tables
-    if not use_new_table and not legacy_table:
-        logger.warning("No events table found in DB")
-        return []
     
     events_list = []
-    if use_new_table:
-        try:
-            from apps.events.models import Event as EventsModel  # new model
-        except Exception:
-            logger.exception("Failed to import Event model")
-            return []
-        try:
-            today = date.today()
-            qs = EventsModel.objects.filter(utc_start_ts__date__gte=today).order_by("utc_start_ts")
-            for e in qs:
-                events_list.append(
-                    {
-                        "id": getattr(e, "id", None),
-                        "club_handle": getattr(e, "ig_handle", None),
-                        "url": getattr(e, "source_url", None),
-                        "name": getattr(e, "title", None),
-                        "date": getattr(e, "dtstart", None),
-                        "start_time": getattr(e, "dtstart", None),
-                        "end_time": getattr(e, "dtend", None),
-                        "location": getattr(e, "location", None),
-                        "price": getattr(e, "price", None),
-                        "food": getattr(e, "food", None),
-                        "registration": getattr(e, "registration", None),
-                        "image_url": getattr(e, "source_image_url", None),
-                        "club_type": getattr(e, "club_type", None),
-                        "added_at": getattr(e, "added_at", None),
-                        "description": getattr(e, "description", None),
-                    }
-                )
-            logger.info(f"Fetched {len(events_list)} events via ORM")
-            return events_list
-        except (ProgrammingError, OperationalError) as db_err:
-            logger.error(f"ORM query failed: {db_err}")
-            return []
-        except Exception:
-            logger.exception("Unexpected error with ORM fetch")
-            return []
-
-    # Raw SQL
     try:
-        today = date.today()
-        with connection.cursor() as cur:
-            cur.execute(
-                """
-                SELECT id, club_handle, url, name, date, start_time, end_time,
-                       location, price, food, registration, image_url,
-                       description, club_type, added_at
-                FROM public.events
-                WHERE date >= %s
-                ORDER BY date, start_time
-                """,
-                [today],
-            )
-            rows = cur.fetchall()
-            for r in rows:
-                (rid, club_handle, url, name, rdate, start_time, end_time, location, price, food, registration, image_url, description, club_type, added_at) = r
-                events_list.append(
-                    {
-                        "id": rid,
-                        "club_handle": club_handle,
-                        "url": url,
-                        "name": name,
-                        "date": rdate,
-                        "start_time": start_time,
-                        "end_time": end_time,
-                        "location": location,
-                        "price": price,
-                        "food": food,
-                        "registration": registration,
-                        "image_url": image_url,
-                        "club_type": club_type,
-                        "added_at": added_at,
-                        "description": description,
-                    }
-                )
-        logger.info(f"Fetched {len(events_list)} events via raw SQL")
-        return events_list
+        from apps.events.models import Events as EventsModel
     except Exception:
-        logger.exception("Failed to fetch events via raw SQL")
+        logger.exception("Failed to import Event model")
         return []
     
+    try:
+        today = date.today()
+        qs = EventsModel.objects.filter(dtstart__date=today).order_by("dtstart")
+        for e in qs:
+            events_list.append(
+                {
+                    "id": getattr(e, "id", None),
+                    "ig_handle": getattr(e, "ig_handle", None),
+                    "source_url": getattr(e, "source_url", None),
+                    "title": getattr(e, "title", None),
+                    "dtstart": getattr(e, "dtstart", None),
+                    "dtend": getattr(e, "dtend", None),
+                    "location": getattr(e, "location", None),
+                    "price": getattr(e, "price", None),
+                    "food": getattr(e, "food", None),
+                    "registration": getattr(e, "registration", None),
+                    "source_image_url": getattr(e, "source_image_url", None),
+                    "club_type": getattr(e, "club_type", None),
+                    "added_at": getattr(e, "added_at", None),
+                    "description": getattr(e, "description", None),
+                }
+            )
+        logger.info(f"Fetched {len(events_list)} events via ORM")
+        return events_list
+    except Exception as e:
+        logger.exception(f"Unexpected error when fetching all events: {e}")
+        return []
+
 
 def generate_recommended_filters(events_data):
     """Generate recommended filters using OpenAI service"""
@@ -191,17 +134,16 @@ def main():
                 event_id = str(event["id"])
                 f.write("  {\n")
                 f.write(f"    id: {format_value(event_id)},\n")
-                f.write(f'    club_handle: {format_value(event["club_handle"])},\n')
-                f.write(f'    url: {format_value(event["url"])},\n')
-                f.write(f'    name: {format_value(event["name"])},\n')
-                f.write(f'    date: {format_value(event["date"])},\n')
-                f.write(f'    start_time: {format_value(event["start_time"])},\n')
-                f.write(f'    end_time: {format_value(event["end_time"])},\n')
+                f.write(f'    ig_handle: {format_value(event["ig_handle"])},\n')
+                f.write(f'    source_url: {format_value(event["source_url"])},\n')
+                f.write(f'    title: {format_value(event["title"])},\n')
+                f.write(f'    dtstart: {format_value(event["dtstart"])},\n')
+                f.write(f'    dtend: {format_value(event["dtend"])},\n')
                 f.write(f'    location: {format_value(event["location"])},\n')
                 f.write(f'    price: {format_value(event["price"])},\n')
                 f.write(f'    food: {format_value(event["food"])},\n')
                 f.write(f'    registration: {format_value(event["registration"])},\n')
-                f.write(f'    image_url: {format_value(event["image_url"])},\n')
+                f.write(f'    source_image_url: {format_value(event["source_image_url"])},\n')
                 f.write(f'    club_type: {format_value(event["club_type"])},\n')
                 f.write(f'    added_at: {format_value(event["added_at"])},\n')
                 f.write("  }")
@@ -226,8 +168,8 @@ def main():
         logger.info(
             "Successfully updated staticData.ts with events and recommended filters"
         )
-    except Exception:
-        logger.exception("An error occurred")
+    except Exception as e:
+        logger.exception(f"An error occurred: {e}")
         sys.exit(1)
 
 
