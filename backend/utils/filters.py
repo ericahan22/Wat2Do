@@ -1,4 +1,4 @@
-from django_filters import CharFilter, DateFilter, FilterSet, NumberFilter
+from django_filters import CharFilter, DateFilter, DateTimeFilter, FilterSet, NumberFilter
 
 from apps.events.models import Events
 
@@ -6,8 +6,8 @@ from apps.events.models import Events
 class EventFilter(FilterSet):
     """Filter for Event queryset"""
 
-    dtstart = DateFilter(field_name="dtstart", lookup_expr="gte")
-    dtend = DateFilter(field_name="dtstart", lookup_expr="lte")
+    dtstart = DateTimeFilter(field_name="dtstart", lookup_expr="gte")
+    dtend = DateTimeFilter(field_name="dtstart", lookup_expr="lte")
     min_price = NumberFilter(field_name="price", lookup_expr="gte")
     max_price = NumberFilter(field_name="price", lookup_expr="lte")
     club_type = CharFilter(field_name="club_type")

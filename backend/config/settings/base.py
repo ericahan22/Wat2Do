@@ -91,6 +91,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.app"
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SECURE_REDIRECT_EXEMPT = [
+    r'^health/$',
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
