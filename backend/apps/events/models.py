@@ -60,16 +60,6 @@ class Events(models.Model):
         help_text="'America/New_York'"
     )
 
-    # Canonical UTC timestamps for consistent querying
-    utc_start_ts = models.DateTimeField(
-        null=True, blank=True,
-        help_text="'2024-03-20T14:00:00Z'"
-    )
-    utc_end_ts = models.DateTimeField(
-        null=True, blank=True,
-        help_text="'2024-03-20T22:00:00Z'"
-    )
-
     # Recurrence rules (iCalendar RFC 5545)
     rrule = models.TextField(
         null=True, blank=True,
@@ -169,7 +159,7 @@ class Events(models.Model):
     class Meta:
         db_table = 'events'
         indexes = [
-            models.Index(fields=['utc_start_ts']),
+            models.Index(fields=['dtstart_utc']),
         ]
 
     def __str__(self):

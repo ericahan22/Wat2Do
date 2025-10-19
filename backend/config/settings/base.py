@@ -67,6 +67,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+SECURE_SSL_REDIRECT = True 
+
+# A list of regular expressions that URLs must match to be exempt from SSL redirection
+SECURE_REDIRECT_EXEMPT = [
+    r'^health/?$',  # This will match /health or /health/
+]
+
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 CORS_ALLOW_CREDENTIALS = True
