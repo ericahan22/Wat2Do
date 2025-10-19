@@ -15,6 +15,8 @@ import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from PIL import Image
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 logger = logging.getLogger(__name__)
 
@@ -108,19 +110,27 @@ class StorageService:
                 ACL="public-read",
             )
 
-            public_url = self.s3_client.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": self.bucket_name, "Key": filename},
-                ExpiresIn=3600
+            public_url = (
+                f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{filename}"
             )
-            logger.info(f"Successfully uploaded image: {filename}")
-
+            logger.info(f"Successfully uploaded image: {filename} -> {public_url}")
             return public_url
 
         except ClientError:
-            logger.exception("AWS S3 error uploading image")
-            return None
-        except Exception:
+            logger.exception(f"AWS S3 error uploading image: {e}")
+            # Fallback: presigned URL
+            try:
+                presigned = self.s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={"Bucket": self.bucket_name, "Key": filename},
+                    ExpiresIn=3600,
+                )
+                logger.info(f"Falling back to presigned URL for {filename}")
+                return presigned
+            except Exception:
+                logger.exception("Failed to generate presigned URL fallback")
+                return None
+        except Exception as e:
             logger.exception("Unexpected error uploading image")
             return None
 

@@ -12,6 +12,8 @@ import logging
 import os
 import traceback
 from datetime import datetime
+from copy import deepcopy
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -96,8 +98,8 @@ class OpenAIService:
     [
         {{
             "title": string,  // name of the event
-            "dtstart": string,  // start date in YYYY-MM-DD HH:MM:SS±HH format if found, empty string if not
-            "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS±HH format if found, empty string if not
+            "dtstart": string,  // start date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
+            "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
             "location": string,  // location of the event
             "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
             "food": string,  // food information if mentioned, empty string if not
@@ -114,7 +116,7 @@ class OpenAIService:
     - Title-case event titles (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
-    - For dtstart and dtend, if year not found, assume 2025
+    - For dtstart and dtend, if year not found, assume {now.year}
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
@@ -127,7 +129,7 @@ class OpenAIService:
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text
     - If no events are found, return an empty array []
-        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if source_image_url else ""}
+        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text over visual cues from the image." if source_image_url else ""}
         """
 
         try:
@@ -155,10 +157,34 @@ class OpenAIService:
                 model = "gpt-4o-mini"  # Use vision-capable model
             else:
                 model = "gpt-4o-mini"
-
-            response = self.client.chat.completions.create(
-                model=model, messages=messages, temperature=0.1, max_tokens=2000
-            )
+                
+            # If image download by OpenAI errors out, retry without image content by using URL in text
+            try:
+                response = self.client.chat.completions.create(
+                    model=model, messages=messages, temperature=0.1, max_tokens=2000
+                )
+            except Exception as e:
+                err_text = str(e)
+                if "invalid_image_url" in err_text or "Timeout while downloading" in err_text:
+                    logger.warning(f"OpenAI failed to fetch the image ({err_text}); retrying without image")
+                    fallback = deepcopy(messages)
+                    if isinstance(fallback[1].get("content"), list):
+                        fallback[1]["content"] = [
+                            c for c in fallback[1]["content"] if not (isinstance(c, dict) and c.get("type") == "image_url")
+                        ]
+                        if source_image_url:
+                            if isinstance(fallback[1]["content"][0], dict) and "text" in fallback[1]["content"][0]:
+                                fallback[1]["content"][0]["text"] += f"\n\nImage URL: {source_image_url}"
+                            else:
+                                fallback[1]["content"].insert(0, {"type": "text", "text": f"Image URL: {source_image_url}"})
+                    time.sleep(1)
+                    try:
+                        response = self.client.chat.completions.create(
+                            model="gpt-4o-mini", messages=fallback, temperature=0.1, max_tokens=2000
+                        )
+                    except Exception as e:
+                        logger.exception(f"Retry without image also failed, returning default structure: {e}")
+                        return [_get_default_event_structure(source_image_url)]
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
@@ -323,7 +349,7 @@ def _get_default_event_structure(
         "price": None,
         "food": "",
         "registration": False,
-        "source_image_url": source_image_url if source_image_url else "",
+        "source_image_url": source_image_url or "",
         "description": "",
     }
 
