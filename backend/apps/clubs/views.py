@@ -2,6 +2,7 @@
 Views for the clubs app.
 """
 
+import json
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
@@ -35,18 +36,24 @@ def get_clubs(request):
             )
 
         # Convert to list of dictionaries
-        clubs_data = [
-            {
+        clubs_data = []
+        for club in filtered_queryset:
+            # Handle categories - parse JSON if it's a string, otherwise use as-is
+            categories = club.categories
+            if isinstance(categories, str):
+                categories = json.loads(categories)
+            else:
+                categories = []
+            
+            clubs_data.append({
                 "id": club.id,
                 "club_name": club.club_name,
-                "categories": club.categories,
+                "categories": categories,
                 "club_page": club.club_page,
                 "ig": club.ig,
                 "discord": club.discord,
                 "club_type": club.club_type,
-            }
-            for club in filtered_queryset
-        ]
+            })
 
         return Response({"clubs": clubs_data})
     except Exception as e:
