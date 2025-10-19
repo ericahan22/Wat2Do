@@ -95,7 +95,7 @@ def test_similarity(request):
         search_embedding = generate_embedding(search_query)
 
         # Test semantic search
-        threshold = float(request.GET.get("threshold", 0.25))
+        threshold = float(request.GET.get("threshold", 0.3))
         limit = int(request.GET.get("limit")) if request.GET.get("limit") else None
         similar_events = find_similar_events(
             search_embedding, threshold=threshold, limit=limit

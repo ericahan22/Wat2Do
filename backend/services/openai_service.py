@@ -299,7 +299,7 @@ NO explanations, NO additional text, JUST the JSON array.
             ]
 
             logger.info(f"Generated {len(cleaned_filters)} recommended filters")
-            return cleaned_filters[:25]  # Cap at 25
+            return list(set(cleaned_filters))[:25]
 
         except json.JSONDecodeError:
             logger.exception("Error parsing JSON response for filters")

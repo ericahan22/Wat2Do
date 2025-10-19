@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def find_similar_events(
     embedding: list[float],
-    threshold: float = 0.25,
+    threshold: float = 0.30,
     limit: int = None,
     min_date: str = date.today().isoformat(),
 ) -> list[dict]:
