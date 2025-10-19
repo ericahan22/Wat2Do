@@ -1,9 +1,11 @@
 import { Event } from "@/features/events/types/events";
+import { removeTimezoneInfo } from "./dateUtils";
 
 export const getEventStatus = (event: Event): "live" | "soon" | "none" => {
   const now = new Date();
-  const startDateTime = new Date(event.dtstart);
-  const endDateTime = event.dtend ? new Date(event.dtend) : null;
+  // Remove timezone info to treat as local time (not UTC)
+  const startDateTime = new Date(removeTimezoneInfo(event.dtstart));
+  const endDateTime = event.dtend ? new Date(removeTimezoneInfo(event.dtend)) : null;
 
   const nowTime = now.getTime();
   const startTime = startDateTime.getTime();
@@ -32,8 +34,9 @@ export const isEventNew = (event: Event): boolean => {
  */
 export const isEventOngoing = (event: Event): boolean => {
   const now = new Date();
-  const startDateTime = new Date(event.dtstart);
-  const endDateTime = event.dtend ? new Date(event.dtend) : new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour if no end time
+  // Remove timezone info to treat as local time (not UTC)
+  const startDateTime = new Date(removeTimezoneInfo(event.dtstart));
+  const endDateTime = event.dtend ? new Date(removeTimezoneInfo(event.dtend)) : new Date(startDateTime.getTime() + 60 * 60 * 1000); // Default 1 hour if no end time
   
   return now < endDateTime;
 };

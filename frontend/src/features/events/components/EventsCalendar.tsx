@@ -20,7 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import "@/shared/styles/calendar.css";
-import { formatEventDate, formatEventTimeRange } from "@/shared/lib/dateUtils";
+import { formatEventDate, formatEventTimeRange, removeTimezoneInfo } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
 import { Event } from "@/features/events/types/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -236,9 +236,10 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   }, [currentView, currentDate]); 
 
   const calendarEvents = events.map((event) => {
-    const start = new Date(event.dtstart);
+    // Remove timezone info to treat as local time (not UTC)
+    const start = new Date(removeTimezoneInfo(event.dtstart));
     const end = event.dtend
-      ? new Date(event.dtend)
+      ? new Date(removeTimezoneInfo(event.dtend))
       : new Date(start.getTime() + 60 * 60 * 1000); // Default end time = 1 hour after start
     return {
       ...event,

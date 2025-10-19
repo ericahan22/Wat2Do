@@ -5,6 +5,13 @@
 
 import { toZonedTime, format } from "date-fns-tz";
 
+/**
+ * Remove timezone info from ISO datetime string to treat as local time
+ */
+export const removeTimezoneInfo = (dateTimeString: string): string => {
+  return dateTimeString.replace(/[+-]\d{2}:\d{2}$/, '');
+};
+
 
 /**
  * Format a date string to a prettier format (e.g., "August 10, 2025")
@@ -25,11 +32,12 @@ export const formatPrettyDate = (dateString: string): string => {
  */
 export const formatPrettyTime = (timeString: string): string => {
   try {
-    // Handle both ISO time format (HH:MM:SS) and time-only format
     let date: Date
     if (timeString.includes('T')) {
-      // ISO datetime string
-      date = new Date(timeString)
+      // For UTC timestamps that are already in local time, remove timezone info
+      // and create date as if it's local time
+      const localTimeString = removeTimezoneInfo(timeString);
+      date = new Date(localTimeString);
     } else {
       // Time-only string (HH:MM:SS or HH:MM)
       date = new Date(`1970-01-01T${timeString}`)
