@@ -25,15 +25,14 @@ export interface EventPromotion {
  * Event with embedded promotion data
  */
 export interface PromotedEvent {
-  id: string;
-  name: string;
-  date: string;
-  start_time: string;
-  end_time: string;
+  id: number;
+  title: string;
+  dtstart: string;
+  dtend: string | null;
   location: string;
   description: string | null;
-  image_url: string | null;
-  club_handle: string | null;
+  source_image_url: string | null;
+  display_handle: string;
   promotion: EventPromotion;
 }
 
