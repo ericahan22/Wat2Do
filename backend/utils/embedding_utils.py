@@ -26,11 +26,11 @@ def find_similar_events(
         base_query = """
             SELECT 
                 id, 
-                name,
+                title,
                 description,
                 location,
-                date,
-                start_time,
+                dtstart,
+                dtend,
                 club_type,
                 1 - (embedding <=> %s::vector) as similarity
             FROM events 
@@ -41,7 +41,7 @@ def find_similar_events(
 
         # Add date filter if provided
         if min_date:
-            base_query += " AND date >= %s"
+            base_query += " AND dtstart >= %s"
             params.append(min_date)
 
         # Add similarity threshold
@@ -59,11 +59,11 @@ def find_similar_events(
         return [
             {
                 "id": row[0],
-                "name": row[1],
+                "title": row[1],
                 "description": row[2],
                 "location": row[3],
-                "date": row[4],
-                "start_time": row[5],
+                "dtstart": row[4],
+                "dtend": row[5],
                 "club_type": row[6],
                 "similarity": float(row[7]),
             }

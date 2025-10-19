@@ -556,11 +556,11 @@ def process_recent_feed(
                 else:
                     missing_fields = [
                         key
-                        for key in ["name", "date", "location", "start_time"]
+                        for key in ["title", "dtstart", "location"]
                         if not event_data.get(key)
                     ]
                     logger.warning(
-                        f"Missing required fields for event '{event_data.get('name', 'Unknown')}': {missing_fields}, skipping event"
+                        f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
                     )
                     embedding = generate_embedding(event_data["description"])
                     append_event_to_csv(

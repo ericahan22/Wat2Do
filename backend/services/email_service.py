@@ -27,34 +27,34 @@ class EmailService:
         events = (
             Events.objects.filter(added_at__date=today)
             .select_related()
-            .order_by("date", "start_time")
+            .order_by("dtstart", "dtend")
         )
 
         events_data = []
         for event in events:
             # Format the event data for email template
-            event_date = event.date.strftime("%B %d, %Y")
+            event_date = event.dtstart.strftime("%B %d, %Y")
 
             # Format time range
-            start_time = event.start_time.strftime("%I:%M %p").lstrip("0")
-            if event.end_time:
-                end_time = event.end_time.strftime("%I:%M %p").lstrip("0")
+            start_time = event.dtstart.strftime("%I:%M %p").lstrip("0")
+            if event.dtend:
+                end_time = event.dtend.strftime("%I:%M %p").lstrip("0")
                 time_range = f"{start_time} - {end_time}"
             else:
                 time_range = f"Starting at {start_time}"
 
-            # Get club name from club_handle or use club_type as fallback
-            club_name = event.club_handle or event.club_type or "Unknown Club"
+            # Get club name from social handles or use school as fallback
+            club_name = event.ig_handle or event.discord_handle or event.x_handle or event.tiktok_handle or event.fb_handle or event.school
 
             events_data.append(
                 {
-                    "name": event.name,
+                    "name": event.title,
                     "date": event_date,
                     "time": time_range,
                     "location": event.location,
                     "description": event.description or "No description available.",
                     "club": club_name,
-                    "image_url": event.image_url,
+                    "image_url": event.source_image_url,
                 }
             )
 

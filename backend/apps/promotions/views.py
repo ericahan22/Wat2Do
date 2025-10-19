@@ -189,14 +189,13 @@ def get_promoted_events(request):
             events_data.append(
                 {
                     "id": event.id,
-                    "name": event.name,
-                    "date": event.date.isoformat(),
-                    "start_time": event.start_time.isoformat(),
-                    "end_time": event.end_time.isoformat(),
+                    "title": event.title,
+                    "dtstart": event.dtstart.isoformat(),
+                    "dtend": event.dtend.isoformat() if event.dtend else None,
                     "location": event.location,
                     "description": event.description,
-                    "image_url": event.image_url,
-                    "club_handle": event.club_handle,
+                    "source_image_url": event.source_image_url,
+                    "club_handle": event.ig_handle or event.discord_handle or event.x_handle or event.tiktok_handle or event.fb_handle or event.school,
                     "promotion": {
                         "is_active": promotion.is_active,
                         "promoted_at": promotion.promoted_at.isoformat(),

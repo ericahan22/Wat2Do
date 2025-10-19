@@ -8,6 +8,7 @@ import { toZonedTime, format } from "date-fns-tz";
 
 /**
  * Format a date string to a prettier format (e.g., "August 10, 2025")
+ * Can handle both date strings (YYYY-MM-DD) and ISO datetime strings
  */
 export const formatPrettyDate = (dateString: string): string => {
   try {
@@ -65,5 +66,36 @@ export const getTodayString = (): string => {
     "-" +
     String(now.getDate()).padStart(2, "0")
   );
+};
+
+/**
+ * Format an ISO datetime string to a prettier date format (e.g., "August 10, 2025")
+ */
+export const formatEventDate = (isoDateTime: string): string => {
+  return formatPrettyDate(isoDateTime);
+};
+
+/**
+ * Format an ISO datetime string to a prettier time format (e.g., "3pm" or "3:30pm")
+ */
+export const formatEventTime = (isoDateTime: string): string => {
+  return formatPrettyTime(isoDateTime);
+};
+
+/**
+ * Format a time range from ISO datetime strings (e.g., "3pm - 8pm")
+ */
+export const formatEventTimeRange = (startDateTime: string, endDateTime: string | null): string => {
+  const start = formatEventTime(startDateTime);
+  const end = endDateTime ? formatEventTime(endDateTime) : null;
+  return end ? `${start} - ${end}` : start;
+};
+
+/**
+ * Format dtstart to YYYY-MM-DDT00:00:00 format
+ */
+export const formatDtstartToMidnight = (dtstart: string): string => {
+  const date = dtstart.split('T')[0];
+  return `${date}T00:00:00`;
 };
 

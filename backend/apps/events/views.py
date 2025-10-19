@@ -34,12 +34,12 @@ def get_events(request):
         # Apply vector similarity search if search term provided
         if search_term:
             search_embedding = generate_embedding(search_term)
-            start_date = request.GET.get("start_date")
+            dtstart = request.GET.get("dtstart")
             similar_events = find_similar_events(
-                embedding=search_embedding, min_date=start_date
+                embedding=search_embedding, min_date=dtstart
             )
             for event in similar_events:
-                print(event["name"], event["similarity"])
+                print(event["title"], event["similarity"])
             similar_event_ids = [event["id"] for event in similar_events]
             filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
 
@@ -58,8 +58,32 @@ def get_events(request):
             "club_type",
             "added_at",
             "school",
+            "source_url",
+            "ig_handle",
+            "discord_handle",
+            "x_handle",
+            "tiktok_handle",
+            "fb_handle",
         ]
         results = list(filtered_queryset.values(*fields))
+        
+        # Add display_handle field to each event
+        for event in results:
+            # Check for social media handles in order of preference
+            social_handles = [
+                event.get("ig_handle"),
+                event.get("discord_handle"),
+                event.get("x_handle"),
+                event.get("tiktok_handle"),
+                event.get("fb_handle"),
+            ]
+            social_handles = [handle for handle in social_handles if handle]
+            
+            if social_handles:
+                event["display_handle"] = f"@{social_handles[0]}"
+            else:
+                event["display_handle"] = event.get("school") or "Wat2Do Event"
+        
         return Response(results)
 
     except Exception as e:

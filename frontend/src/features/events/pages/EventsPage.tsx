@@ -31,7 +31,7 @@ function EventsPage() {
     isLoading,
     error,
     searchTerm,
-    startDate,
+    dtstart,
     handleToggleStartDate,
   } = useEvents();
 
@@ -45,7 +45,7 @@ function EventsPage() {
   } = useEventSelection(view);
 
   const todayString = getTodayString();
-  const isShowingPastEvents = Boolean(startDate && startDate !== todayString);
+  const isShowingPastEvents = Boolean(dtstart && dtstart !== todayString);
 
   return (
     <div className="flex flex-col gap-4">

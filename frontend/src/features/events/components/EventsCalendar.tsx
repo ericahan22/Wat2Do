@@ -20,7 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import "@/shared/styles/calendar.css";
-import { formatPrettyDate, formatTimeRange } from "@/shared/lib/dateUtils";
+import { formatEventDate, formatEventTimeRange } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
 import { Event } from "@/features/events/types/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -81,11 +81,11 @@ const EventPopup: React.FC<{
       ✕
     </button>
 
-    {event.image_url && (
+    {event.source_image_url && (
       <div className="mb-3 -mx-4 -mt-4">
         <img
-          src={event.image_url}
-          alt={event.name}
+          src={event.source_image_url}
+          alt={event.title}
           className="w-full h-40 object-cover rounded-t-lg"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
@@ -96,24 +96,22 @@ const EventPopup: React.FC<{
     )}
 
     <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1 pr-8">
-      {event.name}
+      {event.title}
     </h2>
     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-      @{event.club_handle}
+      {event.display_handle}
     </p>
 
     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
       <div className="flex items-center gap-2">
         <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-        <span>{formatPrettyDate(event.date)}</span>
+        <span>{formatEventDate(event.dtstart)}</span>
       </div>
       
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 flex-shrink-0" />
         <span>
-          {event.end_time
-            ? formatTimeRange(event.start_time, event.end_time)
-            : formatTimeRange(event.start_time, null)}
+          {formatEventTimeRange(event.dtstart, event.dtend)}
         </span>
       </div>
       
@@ -147,13 +145,13 @@ const EventPopup: React.FC<{
         <div className="italic">Registration required</div>
       )}
 
-      {event.url && (
+      {event.source_url && (
         <a
-          href={event.url}
+          href={event.source_url}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 text-blue-500 hover:underline"
-          title={event.url}
+          title={event.source_url}
         >
           <ExternalLink className="h-4 w-4 flex-shrink-0" />
           Event Link
@@ -238,13 +236,13 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   }, [currentView, currentDate]); 
 
   const calendarEvents = events.map((event) => {
-    const start = new Date(`${event.date}T${event.start_time}`);
-    const end = event.end_time
-      ? new Date(`${event.date}T${event.end_time}`)
+    const start = new Date(event.dtstart);
+    const end = event.dtend
+      ? new Date(event.dtend)
       : new Date(start.getTime() + 60 * 60 * 1000); // Default end time = 1 hour after start
     return {
       ...event,
-      title: event.name,
+      title: event.title,
       start,
       end,
     };

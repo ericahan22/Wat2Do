@@ -4,26 +4,9 @@ import { useSearchParams } from "react-router-dom";
 import { staticEventsData, LAST_UPDATED } from "@/data/staticData";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { API_BASE_URL } from "@/shared/constants/api";
-import { getTodayString } from "@/shared/lib/dateUtils";
+import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
 import { isEventOngoing } from "@/shared/lib/eventUtils";
-
-export interface Event {
-  id: string;
-  club_handle: string;
-  url: string;
-  name: string;
-  date: string;
-  start_time: string;
-  end_time: string | null;
-  location: string;
-  image_url: string | null;
-  categories?: string[];
-  price: number | null;
-  food: string | null;
-  registration: boolean;
-  club_type?: "WUSA" | "Athletics" | "Student Society" | null;
-  added_at: string;
-}
+import { Event } from "@/features/events/types/events";
 
 // Format the last updated timestamp into a human-readable format (in local time)
 export const getLastUpdatedText = (): string => {
@@ -46,7 +29,7 @@ const fetchEvents = async ({
   queryKey: string[];
 }): Promise<Event[]> => {
   const searchTerm = queryKey[1] || "";
-  const startDate = queryKey[2] || "";
+  const dtstart = queryKey[2] || "";
 
   const params = new URLSearchParams();
 
@@ -54,8 +37,8 @@ const fetchEvents = async ({
     params.append("search", searchTerm);
   }
 
-  if (startDate) {
-    params.append("start_date", startDate);
+  if (dtstart) {
+    params.append("dtstart", formatDtstartToMidnight(dtstart));
   }
 
   const queryString = params.toString() ? `?${params.toString()}` : "";
@@ -70,53 +53,36 @@ const fetchEvents = async ({
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
-  const startDate = searchParams.get("start_date") || "";
+  const dtstart = searchParams.get("dtstart") || "";
 
-  const hasActiveFilters = searchTerm !== "" || startDate !== "";
+  const hasActiveFilters = searchTerm !== "" || dtstart !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, startDate],
+    queryKey: ["events", searchTerm, dtstart],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
   });
 
   const events = useMemo(() => {
-    // When we have active filters but no data yet (loading), keep showing the previous results
-    // This prevents the flickering from old results → empty → new results
-    if (hasActiveFilters && !data && isLoading) {
-      // Return static data filtered by current filters to show something while loading
-      const rawEvents = staticEventsData;
-      
-      if (startDate) {
-        return rawEvents.filter((event: Event) => event.date >= startDate);
-      }
-
-      const todayStr = getTodayString();
-      return rawEvents.filter((event: Event) => {
-        if (event.date > todayStr) return true;
-        if (event.date === todayStr) {
-          return isEventOngoing(event);
-        }
-        return false;
+    const rawEvents = hasActiveFilters && data ? data : staticEventsData;
+    
+    if (dtstart) {
+      return rawEvents.filter((event) => {
+        return event.dtstart.split('T')[0] >= dtstart;
       });
     }
 
-    const rawEvents = hasActiveFilters && data ? data : staticEventsData;
-
-    if (startDate) {
-      return rawEvents.filter((event: Event) => event.date >= startDate);
-    }
-
     const todayStr = getTodayString();
-    return rawEvents.filter((event: Event) => {
-      if (event.date > todayStr) return true;
-      if (event.date === todayStr) {
+    return rawEvents.filter((event) => {
+      const eventDate = event.dtstart.split('T')[0];
+      if (eventDate > todayStr) return true;
+      if (eventDate === todayStr) {
         return isEventOngoing(event);
       }
       return false;
     });
-  }, [hasActiveFilters, data, startDate, isLoading]);
+  }, [hasActiveFilters, data, dtstart, isLoading]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -127,7 +93,7 @@ export function useEvents() {
 
     if (searchTerm) {
       title = `${events.length} Found Events - Wat2Do`;
-    } else if (startDate) {
+    } else if (dtstart) {
       title = `${events.length} Total Events - Wat2Do`;
     } else {
       title = `${events.length} Upcoming Events - Wat2Do`;
@@ -138,7 +104,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters, startDate]);
+  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart]);
 
   useDocumentTitle(documentTitle);
 
@@ -156,12 +122,12 @@ export function useEvents() {
 
       const todayStr = getTodayString();
 
-      if (startDate && startDate !== todayStr) {
-        // Remove start_date to show upcoming events
-        nextParams.delete("start_date");
+      if (dtstart && dtstart !== todayStr) {
+        // Remove dtstart to show upcoming events
+        nextParams.delete("dtstart");
       } else {
-        // Set start_date to 2025-01-01 to show past events
-        nextParams.set("start_date", "2025-01-01");
+        // Set dtstart to 2025-01-01 to show past events
+        nextParams.set("dtstart", formatDtstartToMidnight("2025-01-01"));
       }
       return nextParams;
     });
@@ -172,7 +138,7 @@ export function useEvents() {
     isLoading,
     error,
     searchTerm,
-    startDate,
+    dtstart,
     handleViewChange,
     handleToggleStartDate,
   };
