@@ -111,23 +111,9 @@ class StorageService:
             )
             logger.info(f"Successfully uploaded image: {filename} -> {public_url}")
             return public_url
-
-        except ClientError:
-            logger.exception(f"AWS S3 error uploading image: {e}")
-            # Fallback: presigned URL
-            try:
-                presigned = self.s3_client.generate_presigned_url(
-                    "get_object",
-                    Params={"Bucket": self.bucket_name, "Key": filename},
-                    ExpiresIn=3600,
-                )
-                logger.info(f"Falling back to presigned URL for {filename}")
-                return presigned
-            except Exception:
-                logger.exception("Failed to generate presigned URL fallback")
-                return None
+        
         except Exception as e:
-            logger.exception("Unexpected error uploading image")
+            logger.exception(f"Error uploading image: {e}")
             return None
 
     def upload_image_data(self, image_data: bytes, filename: str) -> str | None:
