@@ -174,5 +174,3 @@ class Events(models.Model):
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"
-
-Events = Event
