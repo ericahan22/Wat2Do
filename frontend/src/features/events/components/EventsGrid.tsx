@@ -48,7 +48,7 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
         <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
         <Badge
           variant="live"
-          className="font-extrabold tracking-[0.043em] absolute top-0 right-0 z-10"
+          className="font-extrabold tracking-[0.0em] absolute top-0 right-0 z-10"
         >
           LIVE
         </Badge>
