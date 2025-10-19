@@ -276,7 +276,7 @@ def process_recent_feed(
 
             consec_old_posts = 0
             posts_processed += 1
-            logger.info("-" * 50)
+            logger.info("-" * 100)
             logger.info(f"Processing post: {post.shortcode} by {post.owner_username}")
 
             # Safely get image URL and upload to S3
@@ -305,14 +305,14 @@ def process_recent_feed(
             for event_data in events_data:
                 # If missing fields
                 if not (event_data.get("title") and event_data.get("dtstart")  and event_data.get("location")):
-                    logger.warning(
-                        f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
-                    )
                     missing_fields = [
                         key
                         for key in ["title", "dtstart", "location"]
                         if not event_data.get(key)
                     ]
+                    logger.warning(
+                        f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
+                    )
                     embedding = generate_embedding(event_data.get("description", ""))
                     append_event_to_csv(
                         event_data,
