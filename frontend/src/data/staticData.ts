@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T03:33:58.079734+00:00";
+export const LAST_UPDATED = "2025-10-19T03:45:34.559297+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -16,7 +16,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c2fca6e4-e401-4d8f-b993-decda6dc9d64.jpg",
     club_type: "WUSA",
-    added_at: "2025-10-17T16:54:56.092233+00:00",
+    added_at: "2025-10-05T11:27:04.102068+00:00",
     description: "Full-day Qur’anic Tafseer symposium with research papers and panels.",
     school: null,
     discord_handle: null,
@@ -38,7 +38,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0c536960-b618-4ce6-8de8-f3cd7af70d47.jpg",
     club_type: "Athletics",
-    added_at: "2025-10-17T16:54:56.163861+00:00",
+    added_at: "2025-10-16T21:14:41+00:00",
     description: "Mark your calendars Warriors—we’re back this weekend for our second qualifier tournament! Come support the Waterloo Women’s Football team in Oakville! 🏈💛🖤\n\n🗓️ Sunday, October 19th\n📍 Sheridan College - Oakville, ON\n\n#WomensFootball #GoBlackGoGold #GoWarriorsGo",
     school: null,
     discord_handle: null,
@@ -60,7 +60,7 @@ export const staticEventsData: Event[] = [
     registration: false,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0c4f3791-eeb5-415e-8951-3a1ae1517db2.jpg",
     club_type: "Student Society",
-    added_at: "2025-10-17T16:54:56.235128+00:00",
+    added_at: "2025-10-11T15:01:34.126565+00:00",
     description: "Join us for our MATH 147 Midterm Review session!\nSunday, October 19th, 12:00 PM - 4:00 PM\nMC 2034 and MC 2035",
     school: null,
     discord_handle: null,
@@ -82,7 +82,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/16fbcdb2-124d-4bd0-8fc1-b685aa728eb3.jpg",
     club_type: "WUSA",
-    added_at: "2025-10-17T16:54:56.311648+00:00",
+    added_at: "2025-10-15T17:32:31.363610+00:00",
     description: "#uwaterloo #uwaterloolife #uw #uwlife #inclusivecommunity #empowermentforall #wusa2025 #neurodivergent #neurodivers #neurodiversity #mentalhealth #studymotivation #studying\nPanicking about midterms? Recovering from an over-energetic reading week? Join us for a group study session and some pizza!\nIf you want pizza, please fill out this form (also linked in bio) so we know what to order.\nThis form is completely anonymous. No personal information is collected.",
     school: null,
     discord_handle: null,
@@ -104,7 +104,7 @@ export const staticEventsData: Event[] = [
     registration: true,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/9e6ac031-8c38-440a-9a3a-1e6a37e22aa4.jpg",
     club_type: "WUSA",
-    added_at: "2025-10-17T16:54:56.384650+00:00",
+    added_at: "2025-10-13T04:30:57.862150+00:00",
     description: "Curious about the CASPer test? 🤔 Join our CASPer Crash Course Q&A hosted by Munira, a Waterloo PharmD student! 🩺\n\n📅 October 19 | 4 PM\n⏱ 30–45 min\n📍TBD\n\nEnjoy Sweet Lou’s, + snacks & drinks while you learn and get your CASPer questions answered! 🍪🥤\n\nRegister through our bio and submit the questions you’d like answered — don’t miss out! 🌟",
     school: null,
     discord_handle: null,
@@ -116,29 +116,28 @@ export const staticEventsData: Event[] = [
 ];
 
 export const RECOMMENDED_FILTERS: string[] = [
-  "WUSA events",
+  "WUSA",
   "Athletics",
   "student society",
   "networking",
-  "free food",
+  "social event",
+  "professional development",
   "pizza",
   "snacks",
   "drinks",
-  "social gathering",
-  "professional development",
-  "large events",
   "meet people",
-  "student clubs",
-  "community building",
-  "informal meet-up",
-  "food and drinks",
+  "large event",
+  "club meeting",
+  "food event",
+  "community gathering",
   "team building",
   "student engagement",
+  "informal meetup",
   "workshop",
-  "seminar",
-  "discussion panel",
-  "career networking",
-  "event series",
-  "peer connection",
-  "interactive activities"
+  "recreational",
+  "fitness",
+  "academic support",
+  "cultural event",
+  "mentorship",
+  "volunteering"
 ];
