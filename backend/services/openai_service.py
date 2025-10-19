@@ -118,7 +118,7 @@ class OpenAIService:
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
-    - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
+    - For price: this represents REGISTRATION COST ONLY. Extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
     - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
     - If the exact food items are not mentioned, e.g., the literal word "food" would be returned, output "Yes!" (exactly) for the food field to indicate that food is present. Do not output the literal word "food" by itself.
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
