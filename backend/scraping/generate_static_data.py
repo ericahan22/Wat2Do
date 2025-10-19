@@ -164,18 +164,22 @@ def main():
                 f.write("\n")
             f.write("];\n\n")
 
-            # Write recommended filters
+            # Write recommended filters (now 3D array format)
             if recommended_filters:
-                f.write("export const RECOMMENDED_FILTERS: string[] = [\n")
-                for i, filter_keyword in enumerate(recommended_filters):
-                    escaped = filter_keyword.replace('"', '\\"')
-                    f.write(f'  "{escaped}"')
-                    if i < len(recommended_filters) - 1:
-                        f.write(",")
-                    f.write("\n")
+                f.write("export const RECOMMENDED_FILTERS: [string, string, string][] = [\n")
+                for i, filter_item in enumerate(recommended_filters):
+                    if len(filter_item) == 3:
+                        category, emoji_string, filter_name = filter_item
+                        category_escaped = category.replace('"', '\\"')
+                        emoji_escaped = emoji_string.replace('"', '\\"')
+                        filter_escaped = filter_name.replace('"', '\\"')
+                        f.write(f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]')
+                        if i < len(recommended_filters) - 1:
+                            f.write(",")
+                        f.write("\n")
                 f.write("];\n")
             else:
-                f.write("export const RECOMMENDED_FILTERS: string[] = [];\n")
+                f.write("export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n")
 
         logger.info(
             "Successfully updated staticData.ts with events and recommended filters"

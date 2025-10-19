@@ -16,6 +16,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from shared.constants.emojis import EMOJI_CATEGORIES
+
 logger = logging.getLogger(__name__)
 
 
@@ -224,8 +226,11 @@ class OpenAIService:
             # Return default structure if API call fails
             return [_get_default_event_structure(source_image_url)]
 
-    def generate_recommended_filters(self, events_data: list[dict]) -> list[str]:
-        """Generate recommended filter keywords from upcoming events data using GPT"""
+    def generate_recommended_filters(self, events_data: list[dict]) -> list[list[str]]:
+        """Generate recommended filter keywords with emojis from upcoming events data using GPT
+        
+        Returns a list of 3-element arrays: [category, emoji_string, filter_name]
+        """
         if not events_data:
             logger.warning("No events data provided for filter generation")
             return []
@@ -240,11 +245,21 @@ class OpenAIService:
                 summary += f" [type: {event.get('club_type')}]"
             event_summaries.append(summary)
 
+        # Get the categorized emoji list for the prompt
+        emoji_categories = EMOJI_CATEGORIES
+        emoji_list_str = ""
+        for category, emojis in emoji_categories.items():
+            emoji_list_str += f"\n{category}:\n"
+            emoji_list_str += ", ".join(emojis) + "\n"
+
         prompt = f"""
-Analyze the following list of {len(event_summaries)} upcoming student events and generate 20-25 search filter keywords.
+Analyze the following list of {len(event_summaries)} upcoming student events and generate 20-25 search filter keywords with matching emojis.
 
 Events:
 {chr(10).join(event_summaries)}
+
+Available emojis organized by category (select the most fitting one for each filter):
+{emoji_list_str}
 
 Generate filter keywords that:
 1. Capture the most common themes students care about (networking, meeting people, large events, food, professional development, etc.)
@@ -253,8 +268,21 @@ Generate filter keywords that:
 4. Focus on: event types, activities, professional topics, food/drinks, social aspects, clubs/organizations
 5. Are diverse enough to cover different student interests
 
-Return ONLY a JSON array of 20-25 keyword strings, like:
-["networking", "free food", "career fair", "live music", "workshop", ...]
+For each filter, select the MOST FITTING emoji from the available list above.
+
+Return ONLY a JSON array of arrays, where each inner array has exactly 3 elements:
+- Index 0: The category name (exactly as it appears in the categories above)
+- Index 1: The emoji name (exactly as it appears in the available list above)
+- Index 2: The filter name (string)
+
+Example format:
+[
+  ["Smileys", "Grinning%20Face", "networking"],
+  ["Food%20and%20Drink", "Pizza", "free food"],
+  ["Objects", "Graduation%20Cap", "career fair"],
+  ["Objects", "Musical%20Note", "live music"],
+  ["Objects", "Books", "workshop"]
+]
 
 NO explanations, NO additional text, JUST the JSON array.
 """
@@ -269,12 +297,12 @@ NO explanations, NO additional text, JUST the JSON array.
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a helpful assistant that generates search keywords. Always return valid JSON arrays.",
+                        "content": "You are a helpful assistant that generates search keywords with emojis. Always return valid JSON arrays with the exact structure requested.",
                     },
                     {"role": "user", "content": prompt},
                 ],
                 temperature=0.3,
-                max_tokens=300,
+                max_tokens=15000,
             )
 
             response_text = response.choices[0].message.content.strip()
@@ -292,14 +320,24 @@ NO explanations, NO additional text, JUST the JSON array.
                 return []
 
             # Clean and validate filters
-            cleaned_filters = [
-                str(f).strip()
-                for f in filters
-                if f and isinstance(f, str) and len(str(f).strip()) > 0
-            ]
+            cleaned_filters = []
+            for filter_item in filters:
+                if (isinstance(filter_item, list) and 
+                    len(filter_item) == 3 and 
+                    isinstance(filter_item[0], str) and 
+                    isinstance(filter_item[1], str) and
+                    isinstance(filter_item[2], str) and
+                    filter_item[0].strip() and 
+                    filter_item[1].strip() and
+                    filter_item[2].strip()):
+                    cleaned_filters.append([
+                        filter_item[0].strip(),  # category
+                        filter_item[1].strip(),  # emoji_string
+                        filter_item[2].strip()   # filter_name
+                    ])
 
-            logger.info(f"Generated {len(cleaned_filters)} recommended filters")
-            return list(set(cleaned_filters))[:25]
+            logger.info(f"Generated {len(cleaned_filters)} recommended filters with emojis")
+            return cleaned_filters[:15]
 
         except json.JSONDecodeError:
             logger.exception("Error parsing JSON response for filters")
