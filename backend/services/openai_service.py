@@ -150,7 +150,7 @@ class OpenAIService:
             if source_image_url:
                 logger.debug(f"Including image analysis from: {source_image_url}")
                 messages[1]["content"].append(
-                    {"type": "source_image_url", "source_image_url": {"url": source_image_url}}
+                    {"type": "image_url", "image_url": {"url": source_image_url}}
                 )
                 model = "gpt-4o-mini"  # Use vision-capable model
             else:
