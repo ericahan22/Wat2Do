@@ -17,6 +17,10 @@ on:
         required: false
         type: number
         default: 100
+      CUTOFF_DAYS:
+        required: false
+        type: number
+        default: 2
 
 jobs:
   instagram_feed:
