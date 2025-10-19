@@ -94,7 +94,7 @@ jobs:
         working-directory: backend
         run: |
           pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
+          pip install --prefer-binary -r requirements.txt
 
       - name: Run scraper
         if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'

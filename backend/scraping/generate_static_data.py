@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import events_utils
 
 load_dotenv()
 
@@ -44,9 +45,7 @@ def fetch_events():
     except Exception:
         logger.exception("Failed to setup Django before importing models")
         return []
-    
-    from django.db import connection, ProgrammingError, OperationalError
-    
+        
     events_list = []
     try:
         from apps.events.models import Events as EventsModel
@@ -61,19 +60,25 @@ def fetch_events():
             events_list.append(
                 {
                     "id": getattr(e, "id", None),
-                    "ig_handle": getattr(e, "ig_handle", None),
-                    "source_url": getattr(e, "source_url", None),
                     "title": getattr(e, "title", None),
+                    "description": getattr(e, "description", None),
+                    "location": getattr(e, "location", None),
                     "dtstart": getattr(e, "dtstart", None),
                     "dtend": getattr(e, "dtend", None),
-                    "location": getattr(e, "location", None),
-                    "price": getattr(e, "price", None),
+                    "source_url": getattr(e, "source_url", None),
+                    "source_image_url": getattr(e, "source_image_url", None),
                     "food": getattr(e, "food", None),
                     "registration": getattr(e, "registration", None),
-                    "source_image_url": getattr(e, "source_image_url", None),
-                    "club_type": getattr(e, "club_type", None),
                     "added_at": getattr(e, "added_at", None),
-                    "description": getattr(e, "description", None),
+                    "price": getattr(e, "price", None),
+                    "school": getattr(e, "school", None),
+                    "club_type": getattr(e, "club_type", None),
+                    "ig_handle": getattr(e, "ig_handle", None),
+                    "discord_handle": getattr(e, "discord_handle", None),
+                    "x_handle": getattr(e, "x_handle", None),
+                    "tiktok_handle": getattr(e, "tiktok_handle", None),
+                    "fb_handle": getattr(e, "fb_handle", None),
+                    "display_handle": events_utils.determine_display_handle(e)
                 }
             )
         logger.info(f"Fetched {len(events_list)} events via ORM")
@@ -131,7 +136,7 @@ def main():
             # Write static events data as an array of Event objects
             f.write("export const staticEventsData: Event[] = [\n")
             for i, event in enumerate(events):
-                event_id = str(event["id"])
+                event_id = event["id"]
                 f.write("  {\n")
                 f.write(f"    id: {format_value(event_id)},\n")
                 f.write(f'    ig_handle: {format_value(event["ig_handle"])},\n')
@@ -146,6 +151,13 @@ def main():
                 f.write(f'    source_image_url: {format_value(event["source_image_url"])},\n')
                 f.write(f'    club_type: {format_value(event["club_type"])},\n')
                 f.write(f'    added_at: {format_value(event["added_at"])},\n')
+                f.write(f'    description: {format_value(event["description"])},\n')
+                f.write(f'    school: {format_value(event["school"])},\n')
+                f.write(f'    discord_handle: {format_value(event["discord_handle"])},\n')
+                f.write(f'    x_handle: {format_value(event["x_handle"])},\n')
+                f.write(f'    tiktok_handle: {format_value(event["tiktok_handle"])},\n')
+                f.write(f'    fb_handle: {format_value(event["fb_handle"])},\n')
+                f.write(f'    display_handle: {format_value(event["display_handle"])},\n')
                 f.write("  }")
                 if i < len(events) - 1:
                     f.write(",")

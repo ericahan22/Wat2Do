@@ -1,8 +1,77 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T01:32:55.384901+00:00";
+export const LAST_UPDATED = "2025-10-19T03:26:06.148036+00:00";
 
 export const staticEventsData: Event[] = [
+  {
+    id: 415,
+    ig_handle: "kc_waterloo",
+    source_url: "https://www.instagram.com/p/DPz6q9DEUys/",
+    title: "Fall Retreat",
+    dtstart: "2025-10-18T09:30:00+00:00",
+    dtend: "2025-10-18T19:30:00+00:00",
+    location: "Forward Church, Cambridge",
+    price: null,
+    food: "Brunch, Dinner",
+    registration: true,
+    source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/19145701-6959-4b3c-9c0d-ac0310fada68.jpg",
+    club_type: "WUSA",
+    added_at: "2025-10-17T16:54:55.941038+00:00",
+    description: "WW FAMILY WE ARE SO BACK 🎉🙌 The countdown is on… 2 days till our retreat! 🏕️ If you’ve got any questions (or last-minute FOMO 👀), your Servant Team’s got you covered!! We’re here to serve YOU and our beautiful campus’, just DM us 💛 Retreat Details: 📧 Check your inbox! An important email was sent to the address you indicated in registration. 📍 Make sure your GPS says Forward Church CAMBRIDGE- NOT the Kitchener site 😆 We’re so hyped for this retreat and can’t wait to see you all there!! Lots of luv- your STs 💕",
+    school: null,
+    discord_handle: null,
+    x_handle: null,
+    tiktok_handle: null,
+    fb_handle: null,
+    display_handle: "@kc_waterloo",
+  },
+  {
+    id: 416,
+    ig_handle: "waterloolaurierssa",
+    source_url: "https://www.instagram.com/p/DPgyTBEiFkj/",
+    title: "WSO X OSSA Roundtable",
+    dtstart: "2025-10-18T13:00:00+00:00",
+    dtend: "2025-10-18T16:00:00+00:00",
+    location: "Brampton, ON",
+    price: null,
+    food: null,
+    registration: true,
+    source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c5b81251-da36-4f44-991b-a8e29d6482d1.jpg",
+    club_type: "WUSA",
+    added_at: "2025-10-17T16:54:56.011290+00:00",
+    description: "Calling all Sikh Students in Ontario!\n\nWe’re excited to host our third WSO roundtable in collaboration with OSSA, and we want to hear from YOU! This is your chance to connect with WSO and fellow Sikh students from across Ontario to chat about issues that matter, from human rights to community advocacy. Also use this opportunity to apply for our WSO grant, available for all SSAs!\n\nCome share your thoughts, make new connections, and be part of the conversation. Email parmindersingh@worldsikh.org to register!",
+    school: null,
+    discord_handle: null,
+    x_handle: null,
+    tiktok_handle: null,
+    fb_handle: null,
+    display_handle: "@waterloolaurierssa",
+  }
 ];
 
-export const RECOMMENDED_FILTERS: string[] = [];
+export const RECOMMENDED_FILTERS: string[] = [
+  "networking",
+  "brunch",
+  "dinner",
+  "social event",
+  "student meetup",
+  "WUSA",
+  "professional development",
+  "food event",
+  "community gathering",
+  "large event",
+  "meet new people",
+  "club activities",
+  "student organizations",
+  "cultural event",
+  "informal networking",
+  "career networking",
+  "food and drinks",
+  "student engagement",
+  "local events",
+  "peer connection",
+  "event series",
+  "interactive activities",
+  "fun activities",
+  "student life"
+];

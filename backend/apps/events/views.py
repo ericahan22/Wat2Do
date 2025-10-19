@@ -9,6 +9,7 @@ from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
 from .models import Events
+from utils import events_utils
 
 
 @api_view(["GET"])
@@ -69,21 +70,8 @@ def get_events(request):
         
         # Add display_handle field to each event
         for event in results:
-            # Check for social media handles in order of preference
-            social_handles = [
-                event.get("ig_handle"),
-                event.get("discord_handle"),
-                event.get("x_handle"),
-                event.get("tiktok_handle"),
-                event.get("fb_handle"),
-            ]
-            social_handles = [handle for handle in social_handles if handle]
-            
-            if social_handles:
-                event["display_handle"] = f"@{social_handles[0]}"
-            else:
-                event["display_handle"] = event.get("school") or "Wat2Do Event"
-        
+            event["display_handle"] = events_utils.determine_display_handle(event)
+                    
         return Response(results)
 
     except Exception as e:

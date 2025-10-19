@@ -108,8 +108,10 @@ class StorageService:
                 ACL="public-read",
             )
 
-            public_url = (
-                f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{filename}"
+            public_url = self.s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket_name, "Key": filename},
+                ExpiresIn=3600
             )
             logger.info(f"Successfully uploaded image: {filename}")
 
