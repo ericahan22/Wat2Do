@@ -116,7 +116,7 @@ def append_event_to_csv(event_data, ig_handle, source_url, added_to_db="success"
     
     dtstart = event_data.get("dtstart", "")
     dtend = event_data.get("dtend", "")
-    dtstart_utc, dtend_utc, duration_val, all_day = tz_compute(event_data, dtstart, dtend)
+    dtstart_utc, dtend_utc, duration, all_day = tz_compute(event_data, dtstart, dtend)
 
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
@@ -127,7 +127,7 @@ def append_event_to_csv(event_data, ig_handle, source_url, added_to_db="success"
             "dtstart_utc",
             "dtend",
             "dtend_utc",
-            "duration_val",
+            "duration",
             "location",
             "food",
             "price",
@@ -152,7 +152,7 @@ def append_event_to_csv(event_data, ig_handle, source_url, added_to_db="success"
             "dtstart_utc": dtstart_utc,
             "dtend": dtend,
             "dtend_utc": dtend_utc,
-            "duration_val": duration_val,
+            "duration": duration,
             "location": event_data.get("location"),
             "food": event_data.get("food", ""),
             "price": event_data.get("price", ""),
@@ -181,7 +181,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     registration = bool(event_data.get("registration", False))
     embedding = event_data.get("embedding") or ""
     date = datetime.fromisoformat(dtstart).date()
-    dtstart_utc, dtend_utc, duration_val, all_day = tz_compute(event_data, dtstart, dtend)
+    dtstart_utc, dtend_utc, duration, all_day = tz_compute(event_data, dtstart, dtend)
 
     if is_duplicate_event(event_data):
         logger.info(f"Duplicate event detected, skipping {title} on {date} at {location}")
@@ -230,7 +230,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "dtstart_utc": dtstart_utc,
         "dtend": dtend or None,
         "dtend_utc": dtend_utc,
-        "duration": duration_val,
+        "duration": duration,
         "club_type": club_type,
         "location": location,
         "food": food or None,

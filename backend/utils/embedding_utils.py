@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 from datetime import date
@@ -7,8 +6,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from django.db import connection
 
 from services.openai_service import generate_embedding
-
-logger = logging.getLogger(__name__)
 
 
 def find_similar_events(

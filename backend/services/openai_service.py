@@ -8,7 +8,6 @@ This module provides methods for interacting with OpenAI's API, including:
 """
 
 import json
-import logging
 import os
 import traceback
 from datetime import datetime
@@ -19,8 +18,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from shared.constants.emojis import EMOJI_CATEGORIES
-
-logger = logging.getLogger(__name__)
+from scraping.logging_config import logger
 
 
 class OpenAIService:

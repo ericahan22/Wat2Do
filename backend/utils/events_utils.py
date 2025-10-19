@@ -1,5 +1,6 @@
 from datetime import timezone
 from scraping.logging_config import logger
+from dateutil import parser as dateutil_parser
 
 
 def determine_display_handle(event):
@@ -33,9 +34,9 @@ def determine_display_handle(event):
     return school or "Wat2Do Event"
 
 
-def tz_compute(event_data, dtstart, dtend):
+def tz_compute(dtstart, dtend):
     """Compute dtstart_utc, dtend_utc, duration, all_day fields"""
-    duration_val = None
+    duration = None
     dtend_utc = None
     dtstart_utc = None
     all_day = False
@@ -47,13 +48,28 @@ def tz_compute(event_data, dtstart, dtend):
             return dt.astimezone(timezone.utc)
         return dt.replace(tzinfo=timezone.utc)
     
+    def _ensure_dt(obj):
+        """Accept datetime or ISO string, return datetime or None."""
+        if not obj:
+            return None
+        if isinstance(obj, str):
+            try:
+                return dateutil_parser.parse(obj)
+            except Exception as e:
+                logger.warning(f"Failed to parse datetime string {obj!r}: {e!s}")
+                return None
+        return obj
+    
     try:
-        if dtstart:
-            dtstart_utc = _to_utc(dtstart)
-        if dtstart and dtend:
-            duration_val = dtend - dtstart
-            dtend_utc = _to_utc(dtend)
+        dtstart_dt = _ensure_dt(dtstart)
+        dtend_dt = _ensure_dt(dtend)
+
+        if dtstart_dt:
+            dtstart_utc = _to_utc(dtstart_dt)
+        if dtstart_dt and dtend_dt:
+            duration = dtend_dt - dtstart_dt
+            dtend_utc = _to_utc(dtend_dt)
     except Exception as e:
         logger.warning(f"Failed to compute duration/dtstart_utc/dtend_utc: {e!s}")
 
-    return dtstart_utc, dtend_utc, duration_val, all_day
+    return dtstart_utc, dtend_utc, duration, all_day

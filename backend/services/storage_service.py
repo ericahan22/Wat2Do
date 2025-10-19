@@ -5,7 +5,6 @@ This module provides methods for uploading and managing files in cloud storage,
 specifically AWS S3. It handles image validation, optimization, and upload.
 """
 
-import logging
 import os
 import uuid
 from io import BytesIO
@@ -15,10 +14,7 @@ import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from PIL import Image
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-
-logger = logging.getLogger(__name__)
+from scraping.logging_config import logger
 
 
 class StorageService:
