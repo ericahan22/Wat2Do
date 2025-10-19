@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TODO (tonyqiu): issues with this script where it fails when NOT PRODUCTION=1 in .env.
 """
 Usage:
     python backend/scripts/populate-local-db-with-prod-data.py
