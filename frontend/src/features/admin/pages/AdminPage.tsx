@@ -83,10 +83,10 @@ function AdminPage() {
   };
 
   const handleEventSelect = (eventId: string) => {
-    const event = events.find((e: Event) => e.id === eventId);
+    const event = events.find((e: Event) => e.id.toString() === eventId);
     if (event) {
       setSelectedEventId(eventId);
-      setSelectedEventName(event.name);
+      setSelectedEventName(event.title);
     }
   };
 
@@ -203,8 +203,8 @@ function AdminPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {events.map((event: Event) => (
-                        <SelectItem key={event.id} value={event.id}>
-                          {event.name} (ID: {event.id})
+                        <SelectItem key={event.id} value={event.id.toString()}>
+                          {event.title} (ID: {event.id})
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -321,16 +321,16 @@ function AdminPage() {
                       <Card
                         key={event.id}
                         className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        onClick={() => handleEventSelect(event.id)}
+                        onClick={() => handleEventSelect(event.id.toString())}
                       >
                         <CardContent className="pt-6">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <h3 className="font-medium ">
-                                {event.name}
+                                {event.title}
                               </h3>
                               <p className="text-sm ">
-                                {new Date(event.date).toLocaleDateString()} at{" "}
+                                {new Date(event.dtstart).toLocaleDateString()} at{" "}
                                 {event.location}
                               </p>
                             </div>

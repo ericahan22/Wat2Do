@@ -17,14 +17,26 @@ const EventsStatusBar: React.FC<EventsStatusBarProps> = ({
     if (isLoading) return "Loading..."; 
 
     if (searchTerm) {
-      return `${totalCount} found events`;
+      return (
+        <>
+          <span className="font-bold">{totalCount}</span> found events
+        </>
+      );
     }
 
     if (isShowingPastEvents) {
-      return `${totalCount} total events`;
+      return (
+        <>
+          <span className="font-bold">{totalCount}</span> total events
+        </>
+      );
     }
 
-    return `${totalCount} upcoming events`;
+    return (
+      <>
+        <span className="font-bold">{totalCount}</span> upcoming events
+      </>
+    );
   };
 
   return <p className="text-sm">{getStatusText()}</p>;
