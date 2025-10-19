@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from pgvector.django import VectorField
 
 class Events(models.Model):
