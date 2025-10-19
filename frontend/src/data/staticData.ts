@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T03:26:06.148036+00:00";
+export const LAST_UPDATED = "2025-10-19T03:31:39.115412+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -53,25 +53,26 @@ export const RECOMMENDED_FILTERS: string[] = [
   "networking",
   "brunch",
   "dinner",
+  "WUSA",
   "social event",
   "student meetup",
-  "WUSA",
-  "professional development",
   "food event",
+  "professional development",
   "community gathering",
   "large event",
-  "meet new people",
-  "club activities",
+  "Brampton",
+  "Cambridge",
   "student organizations",
-  "cultural event",
-  "informal networking",
+  "meet new people",
   "career networking",
   "food and drinks",
-  "student engagement",
+  "event planning",
+  "student activities",
   "local events",
-  "peer connection",
-  "event series",
-  "interactive activities",
-  "fun activities",
-  "student life"
+  "club events",
+  "peer connections",
+  "informal gathering",
+  "student engagement",
+  "cultural exchange",
+  "team building"
 ];
