@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-19T18:28:18.795351+00:00";
+export const LAST_UPDATED = "2025-10-19T18:33:53.464335+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -1258,6 +1258,28 @@ export const staticEventsData: Event[] = [
     display_handle: "@uwanthsoc",
   },
   {
+    id: 514,
+    ig_handle: "uwvfp",
+    source_url: "https://www.instagram.com/p/DQACKYDkTg2/",
+    title: "Divest Now",
+    dtstart: "2025-10-27T12:00:00+00:00",
+    dtend: null,
+    location: "Arts Quad, outside Dana Porter Library, UWaterloo Campus",
+    price: null,
+    food: null,
+    registration: false,
+    source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/07bae5b7-d0cb-406f-9897-08a72d57499c.jpg",
+    club_type: "WUSA",
+    added_at: "2025-10-19T18:32:08.878267+00:00",
+    description: "UW DISCLOSED, AND IT’S EVEN WORSE THAN WE THOUGHT\n\nAt more than $200 million invested, the University of Waterloo ranks among the worst university offenders of complicity in the genocide.\n\nThe students forced UW to drop Technion, and we will force the Board of Butchers to divest.\n\n🚨 TAKE ACTION NOW 🚨\nALL OUT OCTOBER 27th: DIVEST OR WE’LL DISMANTLE\n\nJoin us on Monday, October 27th to demand divestment and a complete end to UWaterloo’s complicity in genocide and occupation.\n\nThe students demand divestment now, and we will not rest until UW divests every last dollar they have in companies aiding the Zionist entity, until UW ceases all support for genocide and occupation and until total liberation and return.",
+    school: null,
+    discord_handle: null,
+    x_handle: null,
+    tiktok_handle: null,
+    fb_handle: null,
+    display_handle: "@uwvfp",
+  },
+  {
     id: 464,
     ig_handle: "uw_psychsoc",
     source_url: "https://www.instagram.com/p/DP5FV1ZEYZw/",
@@ -1412,28 +1434,6 @@ export const staticEventsData: Event[] = [
     display_handle: "@uwmathsoc",
   },
   {
-    id: 469,
-    ig_handle: "uwicsn",
-    source_url: "https://www.instagram.com/p/DPg0ElajYss/",
-    title: "Pumpkin Carving",
-    dtstart: "2025-10-30T18:00:00+00:00",
-    dtend: "2025-10-30T20:00:00+00:00",
-    location: "SLC Lower Flex Hall",
-    price: null,
-    food: "Snacks",
-    registration: false,
-    source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dc034d04-d7a8-47ed-94db-8d5b1976fa75.jpg",
-    club_type: "WUSA",
-    added_at: "2025-10-07T15:17:23.037541+00:00",
-    description: "🎃 Pumpkinn & Thrill: A Spooky Carving Night! 👻\n\nGet ready for a night of creativity and chills as we carve our way into Halloween! ✨ Join us on October 30th from 6–8 PM for a pumpkin carving event with a thrilling twist. 🎨🕸️\n\nCome dressed in your Halloweenest costume 🧛‍♀️🧙‍♂️ and show off your carving skills (or just your spooky vibes)! Whether you’re a pro with the carving knife or a first-time pumpkin artist, this event is open to all! 🙌\n\n🕕 Date & Time: October 30th @ 6–8 PM\n📍 Location: SLC Lower Flex Hall\n\n🎃 Disclaimer: Pumpkins and carving tools are available while supplies last, so make sure to arrive early! ⏰\n\n🔗 Click the link in our bio to learn more — and get ready for a night full of pumpkins, costumes, and thrills! 💀✨",
-    school: null,
-    discord_handle: null,
-    x_handle: null,
-    tiktok_handle: null,
-    fb_handle: null,
-    display_handle: "@uwicsn",
-  },
-  {
     id: 470,
     ig_handle: "uwchemclub",
     source_url: "https://www.instagram.com/p/DP2eXbzDF1B/",
@@ -1454,6 +1454,28 @@ export const staticEventsData: Event[] = [
     tiktok_handle: null,
     fb_handle: null,
     display_handle: "@uwchemclub",
+  },
+  {
+    id: 469,
+    ig_handle: "uwicsn",
+    source_url: "https://www.instagram.com/p/DPg0ElajYss/",
+    title: "Pumpkin Carving",
+    dtstart: "2025-10-30T18:00:00+00:00",
+    dtend: "2025-10-30T20:00:00+00:00",
+    location: "SLC Lower Flex Hall",
+    price: null,
+    food: "Snacks",
+    registration: false,
+    source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dc034d04-d7a8-47ed-94db-8d5b1976fa75.jpg",
+    club_type: "WUSA",
+    added_at: "2025-10-07T15:17:23.037541+00:00",
+    description: "🎃 Pumpkinn & Thrill: A Spooky Carving Night! 👻\n\nGet ready for a night of creativity and chills as we carve our way into Halloween! ✨ Join us on October 30th from 6–8 PM for a pumpkin carving event with a thrilling twist. 🎨🕸️\n\nCome dressed in your Halloweenest costume 🧛‍♀️🧙‍♂️ and show off your carving skills (or just your spooky vibes)! Whether you’re a pro with the carving knife or a first-time pumpkin artist, this event is open to all! 🙌\n\n🕕 Date & Time: October 30th @ 6–8 PM\n📍 Location: SLC Lower Flex Hall\n\n🎃 Disclaimer: Pumpkins and carving tools are available while supplies last, so make sure to arrive early! ⏰\n\n🔗 Click the link in our bio to learn more — and get ready for a night full of pumpkins, costumes, and thrills! 💀✨",
+    school: null,
+    discord_handle: null,
+    x_handle: null,
+    tiktok_handle: null,
+    fb_handle: null,
+    display_handle: "@uwicsn",
   },
   {
     id: 471,
@@ -1899,18 +1921,8 @@ export const staticEventsData: Event[] = [
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Food%20and%20Drink", "Pizza", "free food"],
-  ["Food%20and%20Drink", "Doughnut", "donut sale"],
-  ["Food%20and%20Drink", "Beverage%20Box", "snacks"],
-  ["Activity", "Ticket", "large events"],
-  ["People", "Handshake", "networking"],
   ["Objects", "Graduation%20Cap", "career fair"],
-  ["Activity", "Trophy", "competitions"],
-  ["Smileys", "Grinning%20Face", "fun activities"],
-  ["Objects", "Microphone", "open mic"],
-  ["Activity", "Basketball", "sports events"],
-  ["Objects", "Books", "study sessions"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "community"],
-  ["Food%20and%20Drink", "Cupcake", "treats"],
-  ["Activity", "Magic%20Wand", "workshops"],
-  ["Food%20and%20Drink", "Cup%20With%20Straw", "beverages"]
+  ["Activity", "Ticket", "large event"],
+  ["People", "Handshake", "networking"],
+  ["Objects", "Microphone", "open mic"]
 ];
