@@ -1824,5 +1824,5 @@ export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Activity", "Confetti%20Ball", "festivities"],
   ["Food%20and%20Drink", "Cupcake", "bake sale"],
   ["Objects", "Books", "study session"],
-  ["Smileys", "Grinning%20Face%20With%20Big%20Eyes", "fun activities"]
+  ["Smileys", "Grinning%20Face%20With%20Big%20Eyes", "fun activities"],
 ];

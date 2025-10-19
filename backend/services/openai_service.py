@@ -330,11 +330,17 @@ NO explanations, NO additional text, JUST the JSON array.
                     filter_item[0].strip() and 
                     filter_item[1].strip() and
                     filter_item[2].strip()):
-                    cleaned_filters.append([
-                        filter_item[0].strip(),  # category
-                        filter_item[1].strip(),  # emoji_string
-                        filter_item[2].strip()   # filter_name
-                    ])
+                    
+                    category = filter_item[0].strip()
+                    emoji_string = filter_item[1].strip()
+                    filter_name = filter_item[2].strip()
+                    
+                    # Validate that the category exists and emoji exists in that category
+                    if (category in EMOJI_CATEGORIES and 
+                        emoji_string in EMOJI_CATEGORIES[category]):
+                        cleaned_filters.append([category, emoji_string, filter_name])
+                    else:
+                        logger.warning(f"Invalid filter emoji combination: category='{category}', emoji='{emoji_string}'")
 
             logger.info(f"Generated {len(cleaned_filters)} recommended filters with emojis")
             return cleaned_filters[:15]
