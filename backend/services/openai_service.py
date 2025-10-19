@@ -55,13 +55,13 @@ class OpenAIService:
         """
         # Define field names to include
         field_names = [
-            "name",
+            "title",
             "description",
             "location",
             "club_type",
-            "club_handle",
-            "date",
-            "start_time",
+            "ig_handle",
+            "dtstart",
+            "dtend",
             "food",
             "price",
             "registration",
@@ -77,7 +77,7 @@ class OpenAIService:
         return self.generate_embedding(enhanced_text)
 
     def extract_events_from_caption(
-        self, caption_text: str, image_url: str | None = None
+        self, caption_text: str, source_image_url: str | None = None
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract event information from Instagram caption text and optional image"""
         # Get current date and day of week for context
@@ -95,31 +95,29 @@ class OpenAIService:
     Return a JSON array of event objects. Each event should have the following structure (all fields must be present):
     [
         {{
-            "name": string,  // name of the event
-            "date": string,  // date in YYYY-MM-DD format if found, empty string if not
-            "start_time": string,  // start time in HH:MM format if found, empty string if not
-            "end_time": string,  // end time in HH:MM format if found, empty string if not
+            "title": string,  // name of the event
+            "dtstart": string,  // start date in YYYY-MM-DD HH:MM:SS±HH format if found, empty string if not
+            "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS±HH format if found, empty string if not
             "location": string,  // location of the event
             "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
             "food": string,  // food information if mentioned, empty string if not
             "registration": boolean,  // true if registration is required/mentioned, false otherwise
-            "image_url": string,  // URL of the event image if provided, empty string if not
+            "source_image_url": string,  // URL of the event image if provided, empty string if not
             "description": string  // the caption text word-for-word, followed by any additional insights from the image not in the caption
         }}
     ]
     
     Guidelines:
-    - PRIORITIZE CAPTION TEXT for extracting fields (date, time, location, price, food, registration, description, etc.).
-    - EXCEPTION: For the event "name" field ONLY, prefer an explicit title found in the image (e.g., poster text) if the caption does not contain a clear, explicit event title. If both caption and image provide a name, prefer the image-derived title for the "name" field; otherwise use the caption.
+    - PRIORITIZE CAPTION TEXT for extracting fields (dtstart, dtend, location, price, food, registration, description, etc.).
+    - EXCEPTION: For the event "title" field ONLY, prefer an explicit title found in the image (e.g., poster text) if the caption does not contain a clear, explicit event title. If both caption and image provide a name, prefer the image-derived title for the "title" field; otherwise use the caption.
     - Return an array of events - if multiple events are mentioned, create separate objects for each
-    - Title-case event names (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
+    - Title-case event titles (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
-    - For dates, use YYYY-MM-DD format. If year not found, assume 2025
-    - For times, use HH:MM format (24-hour)
+    - For dtstart and dtend, if year not found, assume 2025
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
-    - For addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
+    - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
     - For price: extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
     - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
     - If the exact food items are not mentioned, e.g., the literal word "food" would be returned, output "Yes!" (exactly) for the food field to indicate that food is present. Do not output the literal word "food" by itself.
@@ -129,7 +127,7 @@ class OpenAIService:
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text
     - If no events are found, return an empty array []
-        {f"- An image is provided at: {image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if image_url else ""}
+        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, ALWAYS prioritize the caption text over visual cues from the image." if source_image_url else ""}
         """
 
         try:
@@ -149,10 +147,10 @@ class OpenAIService:
             ]
 
             # Add image to the message if provided
-            if image_url:
-                logger.debug(f"Including image analysis from: {image_url}")
+            if source_image_url:
+                logger.debug(f"Including image analysis from: {source_image_url}")
                 messages[1]["content"].append(
-                    {"type": "image_url", "image_url": {"url": image_url}}
+                    {"type": "source_image_url", "source_image_url": {"url": source_image_url}}
                 )
                 model = "gpt-4o-mini"  # Use vision-capable model
             else:
@@ -185,16 +183,16 @@ class OpenAIService:
                 for event_data in events_data:
                     # Ensure all required fields are present
                     required_fields = [
-                        "name",
-                        "date",
-                        "start_time",
-                        "end_time",
-                        "location",
-                        "price",
-                        "food",
-                        "registration",
-                        "image_url",
+                        "title",
                         "description",
+                        "location",
+                        "club_type",
+                        "ig_handle",
+                        "dtstart",
+                        "dtend",
+                        "food",
+                        "price",
+                        "registration",
                     ]
                     for field in required_fields:
                         if field not in event_data:
@@ -205,9 +203,9 @@ class OpenAIService:
                             else:
                                 event_data[field] = ""
 
-                    # Set image_url if provided
-                    if image_url and not event_data.get("image_url"):
-                        event_data["image_url"] = image_url
+                    # Set source_image_url if provided
+                    if source_image_url and not event_data.get("source_image_url"):
+                        event_data["source_image_url"] = source_image_url
 
                     processed_events.append(event_data)
 
@@ -217,14 +215,14 @@ class OpenAIService:
                 logger.exception("Error parsing JSON response")
                 logger.error(f"Response text: {response_text}")
                 # Return default structure if JSON parsing fails
-                return [_get_default_event_structure(image_url)]
+                return [_get_default_event_structure(source_image_url)]
 
         except Exception:
             logger.exception("Error parsing caption")
             logger.error(f"Caption text: {caption_text}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             # Return default structure if API call fails
-            return [_get_default_event_structure(image_url)]
+            return [_get_default_event_structure(source_image_url)]
 
     def generate_recommended_filters(self, events_data: list[dict]) -> list[str]:
         """Generate recommended filter keywords from upcoming events data using GPT"""
@@ -235,7 +233,7 @@ class OpenAIService:
         # Prepare event summaries for the prompt
         event_summaries = []
         for event in events_data[:200]:  # Limit to 200 events to avoid token limits
-            summary = f"- {event.get('name', 'Unnamed')} at {event.get('location', 'TBD')} on {event.get('date', 'TBD')}"
+            summary = f"- {event.get('title', 'Unnamed')} at {event.get('location', 'TBD')}"
             if event.get("food"):
                 summary += f" (food: {event.get('food')})"
             if event.get("club_type"):
@@ -314,19 +312,18 @@ NO explanations, NO additional text, JUST the JSON array.
 
 
 def _get_default_event_structure(
-    image_url: str | None = None,
+    source_image_url: str | None = None,
 ) -> dict[str, str | bool | float | None]:
     """Helper function to create default event structure"""
     return {
-        "name": "",
-        "date": "",
-        "start_time": "",
-        "end_time": "",
+        "title": "",
+        "dtstart": "",
+        "dtend": "",
         "location": "",
         "price": None,
         "food": "",
         "registration": False,
-        "image_url": image_url if image_url else "",
+        "source_image_url": source_image_url if source_image_url else "",
         "description": "",
     }
 
