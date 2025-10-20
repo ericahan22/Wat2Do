@@ -248,6 +248,14 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     
     try:
         Events.objects.create(**create_kwargs)
+        append_event_to_csv(
+            event_data,
+            ig_handle,
+            source_url,
+            added_to_db="success",
+            embedding=embedding,
+            club_type=club_type,
+        )
         return True
     except Exception as e:
         logger.error(f"Error inserting event to db: {e}")
