@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-20T19:45:28.552955+00:00";
+export const LAST_UPDATED = "2025-10-20T19:52:43.287566+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -621,13 +621,13 @@ export const staticEventsData: Event[] = [
   },
   {
     id: 543,
-    ig_handle: "uwmsa",
-    source_url: "https://www.instagram.com/p/DQCFCj_jgA9/",
-    title: "OSP Trivia Night",
+    ig_handle: "uw_osp",
+    source_url: "https://www.instagram.com/p/DQAMp-tiX0H/",
+    title: "Trivia Night",
     dtstart: "2025-10-21T19:00:00+00:00",
-    dtend: "2025-10-21T21:30:00+00:00",
+    dtend: "2025-10-21T22:00:00+00:00",
     location: "EIT 1015",
-    price: null,
+    price: 5.0,
     food: null,
     registration: false,
     source_image_url: "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/22c513e6-2c57-40ae-976b-017fc86d0fcf.jpg",
@@ -639,7 +639,7 @@ export const staticEventsData: Event[] = [
     x_handle: null,
     tiktok_handle: null,
     fb_handle: null,
-    display_handle: "@uwmsa",
+    display_handle: "@uw_osp",
   },
   {
     id: 439,
@@ -2736,17 +2736,17 @@ export const staticEventsData: Event[] = [
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Food%20and%20Drink", "Pizza", "free food"],
   ["Food%20and%20Drink", "Bubble%20Tea", "bubble tea"],
-  ["Food%20and%20Drink", "Doughnut", "donut sale"],
-  ["Food%20and%20Drink", "Cookie", "bake sale"],
-  ["Activity", "Ticket", "event tickets"],
-  ["Activity", "Party%20Popper", "social events"],
+  ["Food%20and%20Drink", "Doughnut", "bake sale"],
+  ["Activity", "Ticket", "large events"],
   ["People", "Handshake", "networking"],
-  ["People", "Clapping%20Hands", "celebration"],
-  ["Objects", "Graduation%20Cap", "career fair"],
-  ["Objects", "Microphone", "open mic"],
-  ["Objects", "Books", "workshop"],
-  ["Activity", "Fireworks", "large events"],
-  ["Food%20and%20Drink", "Cupcake", "treats"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "community"],
-  ["Smileys", "Grinning%20Face", "fun activities"]
+  ["Activity", "Trophy", "competitions"],
+  ["Activity", "Confetti%20Ball", "celebrations"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "social events"],
+  ["Objects", "Laptop", "workshops"],
+  ["Food%20and%20Drink", "Cupcake", "sweet treats"],
+  ["People", "Clapping%20Hands", "appreciation"],
+  ["Activity", "Fireworks", "festivals"],
+  ["Food%20and%20Drink", "Hot%20Beverage", "hot drinks"],
+  ["Food%20and%20Drink", "Cocktail%20Glass", "drinks"],
+  ["Activity", "Magic%20Wand", "performances"]
 ];
