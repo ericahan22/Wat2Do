@@ -7,7 +7,7 @@ import { useLocalStorage } from "react-use";
 function TopBanner() {
   const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", true);
 
-  if (isVisible) return null;
+  if (!isVisible) return null;
 
   return (
     <div className="w-full bg-blue-500">
