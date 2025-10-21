@@ -4,6 +4,9 @@ from datetime import date, datetime, timedelta
 import django
 import requests
 from django.conf import settings
+import dotenv
+
+dotenv.load_dotenv()
 
 # Setup Django if not already configured
 if not settings.configured:

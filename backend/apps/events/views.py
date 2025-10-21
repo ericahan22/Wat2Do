@@ -20,8 +20,8 @@ def get_events(request):
     try:
         search_term = request.GET.get("search", "").strip()
 
-        # Start with base queryset (ordering handled by model Meta)
-        queryset = Events.objects.all()
+        # Start with base queryset, ordered by dtstart
+        queryset = Events.objects.all().order_by('dtstart')
 
         # Apply standard filters (dates, price, club_type, etc.)
         filterset = EventFilter(request.GET, queryset=queryset)

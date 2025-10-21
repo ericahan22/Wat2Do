@@ -20,7 +20,6 @@ django.setup()
 from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
 from services.email_service import email_service  # noqa: E402
 
-
 def send_newsletter_to_all():
     """Send newsletter to all active subscribers"""
 
