@@ -22,7 +22,7 @@ const EventsControls: React.FC<EventsControlsProps> = ({
 }) => {
 
   return (
-    <div className="flex justify-end ml-auto gap-2">
+    <div className="flex flex-wrap justify-end ml-auto gap-2">
       {view === "grid" && (
         <Button
           variant="outline"

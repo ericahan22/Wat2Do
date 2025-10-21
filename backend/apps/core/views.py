@@ -2,10 +2,11 @@
 Views for the core app.
 """
 
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -28,24 +29,22 @@ def home(_request):
                 "GET /api/events/test-similarity/?text=search_text": (
                     "Test vector similarity search"
                 ),
-                "POST /api/auth/register/": "Register a new user account",
-                "POST /api/auth/token/": (
-                    "Get authentication token with username/password"
-                ),
+                "POST /api/auth/signup/": "Register a new user account with email",
+                "POST /api/auth/login/": "Login with email and password (creates session)",
+                "GET /api/auth/me/": "Get current user info (requires login)",
+                "POST /api/auth/logout/": "Logout (destroys session)",
             },
             "auth": {
-                "info": "POST routes (except auth endpoints) require admin privileges",
-                "header": "Authorization: Token <admin-token>",
+                "info": "Uses session-based authentication. Login to access protected endpoints.",
                 "admin_note": (
                     "Only admin users can access POST endpoints like /api/events/mock-event/"
                 ),
-                "register_example": {
-                    "username": "your_username",
+                "signup_example": {
+                    "email": "user@example.com",
                     "password": "your_password",
-                    "email": "optional@email.com",
                 },
-                "token_example": {
-                    "username": "your_username",
+                "login_example": {
+                    "email": "user@example.com",
                     "password": "your_password",
                 },
                 "make_admin": (
@@ -63,87 +62,64 @@ def health(_request):
     return Response({"status": "healthy", "message": "Server is running"})
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def create_auth_token(request):
-    """Create or retrieve an authentication token for a user"""
+@csrf_exempt
+def signup_view(request):
+    """Register a new user account with email"""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+    
+    email = request.POST.get("email", "").strip().lower()
+    password = request.POST.get("password", "")
+    
+    if not email or not password:
+        return JsonResponse({"error": "email+password required"}, status=400)
+    
+    # Check for duplicate email
+    if User.objects.filter(email=email).exists():
+        return JsonResponse({"error": "email already registered"}, status=400)
+    
     try:
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        if not username or not password:
-            return Response(
-                {"error": "Username and password are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Authenticate user
-        user = authenticate(username=username, password=password)
-        if user:
-            # Get or create token for the user
-            token, created = Token.objects.get_or_create(user=user)
-            return Response(
-                {
-                    "token": token.key,
-                    "message": "Token created successfully"
-                    if created
-                    else "Token retrieved successfully",
-                    "username": user.username,
-                },
-                status=status.HTTP_200_OK,
-            )
-        else:
-            return Response(
-                {"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
-            )
-
+        # Create user (username = email)
+        user = User.objects.create_user(username=email, email=email, password=password)
+        return JsonResponse({"ok": True, "id": user.id, "email": user.email})
     except Exception as e:
-        return Response(
-            {"error": f"Failed to create token: {e!s}"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+        return JsonResponse({"error": f"Failed to create user: {e!s}"}, status=500)
 
 
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def create_user(request):
-    """Create a new user account (for development/testing purposes)"""
-    try:
-        username = request.data.get("username")
-        password = request.data.get("password")
-        email = request.data.get("email", "")
+@csrf_exempt
+def login_email_view(request):
+    """Login with email and password"""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+    
+    email = request.POST.get("email", "").strip().lower()
+    password = request.POST.get("password", "")
+    
+    if not email or not password:
+        return JsonResponse({"error": "email+password required"}, status=400)
+    
+    # Authenticate using username=email since that's what we set on signup
+    user = authenticate(request, username=email, password=password)
+    if not user:
+        return JsonResponse({"error": "invalid credentials"}, status=401)
+    
+    login(request, user)
+    return JsonResponse({"ok": True, "user": {"id": user.id, "email": user.email}})
 
-        if not username or not password:
-            return Response(
-                {"error": "Username and password are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
-        # Check if user already exists
-        if User.objects.filter(username=username).exists():
-            return Response(
-                {"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST
-            )
+def me_view(request):
+    """Get current user info"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "not authenticated"}, status=401)
+    
+    u = request.user
+    return JsonResponse({"id": u.id, "email": u.email})
 
-        # Create user
-        user = User.objects.create_user(
-            username=username, password=password, email=email
-        )
 
-        # Create token for the new user
-        token = Token.objects.create(user=user)
-
-        return Response(
-            {
-                "message": "User created successfully",
-                "username": user.username,
-                "token": token.key,
-            },
-            status=status.HTTP_201_CREATED,
-        )
-
-    except Exception as e:
-        return Response(
-            {"error": f"Failed to create user: {e!s}"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+def logout_view(request):
+    """Logout current user"""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "not authenticated"}, status=401)
+    
+    logout(request)
+    return JsonResponse({"ok": True})

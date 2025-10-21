@@ -635,6 +635,10 @@ class EmailService:
             print("Warning: RESEND_API_KEY not set. Email not sent.")
             return False
 
+        if not to_email:
+            print("Error: No email address provided.")
+            return False
+
         events = self._get_events_added_today()
         html_content = self.generate_email_html(events, unsubscribe_token)
 
@@ -662,6 +666,10 @@ class EmailService:
         """Send newsletter email with events added today to subscriber"""
         if not self.api_key:
             print("Warning: RESEND_API_KEY not set. Email not sent.")
+            return False
+
+        if not to_email:
+            print("Error: No email address provided.")
             return False
 
         events = self._get_events_added_today()

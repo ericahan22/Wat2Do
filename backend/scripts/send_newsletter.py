@@ -40,8 +40,13 @@ def send_newsletter_to_all():
     def send_to_subscriber(subscriber):
         """Send email to a single subscriber, return success status"""
         try:
+            # Get the email address, handle decryption failures
+            email_address = subscriber.get_email()
+            if not email_address:
+                return False, "Failed to decrypt email address"
+            
             email_sent = email_service.send_newsletter_email(
-                subscriber.get_email(), str(subscriber.unsubscribe_token)
+                email_address, str(subscriber.unsubscribe_token)
             )
             return email_sent, None
         except Exception as e:

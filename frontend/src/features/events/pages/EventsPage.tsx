@@ -52,7 +52,7 @@ function EventsPage() {
       <EventsHeader />
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4">
           <SearchInput placeholder="Filter events by..." className="flex-1" />
           <EventsControls
             view={view}
