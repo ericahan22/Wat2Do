@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-21T19:07:52.544391+00:00";
+export const LAST_UPDATED = "2025-10-21T20:45:34.715674+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -2518,15 +2518,15 @@ export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Food%20and%20Drink", "Bubble%20Tea", "boba"],
   ["Food%20and%20Drink", "Doughnut", "donut sale"],
   ["Food%20and%20Drink", "Hot%20Beverage", "hot chocolate"],
-  ["Food%20and%20Drink", "Cocktail%20Glass", "drinks"],
-  ["Activity", "Ticket", "events"],
-  ["Activity", "Party%20Popper", "social"],
-  ["People", "Handshake", "networking"],
-  ["People", "Clapping%20Hands", "meet people"],
-  ["Objects", "Laptop", "workshop"],
-  ["Objects", "Graduation%20Cap", "career fair"],
+  ["Activity", "Ticket", "trivia night"],
+  ["Activity", "Magic%20Wand", "games night"],
+  ["Activity", "Fireworks", "large events"],
   ["Activity", "Trophy", "competitions"],
-  ["Smileys", "Grinning%20Face", "fun"],
-  ["Smileys", "Ghost", "Halloween"],
-  ["Animals%20and%20Nature", "Blossom", "nature walk"]
+  ["People", "Handshake", "networking"],
+  ["People", "Clapping%20Hands", "social events"],
+  ["Objects", "Laptop", "workshop"],
+  ["Objects", "Graduation%20Cap", "career development"],
+  ["Food%20and%20Drink", "Cupcake", "snacks"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "socializing"],
+  ["Smileys", "Ghost", "Halloween events"]
 ];
