@@ -42,21 +42,21 @@ def send_newsletter_to_all():
         """Send email to a single subscriber, return success status"""
         try:
             email_sent = email_service.send_newsletter_email(
-                subscriber.email, str(subscriber.unsubscribe_token)
+                subscriber.get_email(), str(subscriber.unsubscribe_token)
             )
             return email_sent, None
         except Exception as e:
             return False, str(e)
 
     for subscriber in active_subscribers:
-        email_sent, error = send_to_subscriber(subscriber.get_email())
+        email_sent, error = send_to_subscriber(subscriber)
 
         if email_sent:
             success_count += 1
             print("✅ Email sent successfully")
         else:
             failed_count += 1
-            failed_emails.append(subscriber.email)
+            failed_emails.append(subscriber.get_email())
             if error:
                 print(f"❌ Error sending email: {error}")
             else:
