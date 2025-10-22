@@ -195,13 +195,13 @@ def main():
             last_build_dt = datetime.now(timezone.utc)
             rss_items = []
             for ev in events:
-                pub_dt = last_build_dt
+                pub_dt = ev.get("dtstart") or ev.get("added_at") or last_build_dt
                 try:
                     pub_str = pub_dt.astimezone(timezone.utc).strftime(
                         "%a, %d %b %Y %H:%M:%S GMT"
                     )
                 except Exception:
-                    pub_str = pub_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                    pub_str = last_build_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
                 title = ev.get("title").replace("&", "&amp;")
                 link = ev.get("source_url").replace("&", "&amp;")
