@@ -439,3 +439,4 @@ openai_service = OpenAIService()
 generate_embedding = openai_service.generate_embedding
 extract_events_from_caption = openai_service.extract_events_from_caption
 generate_recommended_filters = openai_service.generate_recommended_filters
+generate_event_embedding = openai_service.generate_event_embedding

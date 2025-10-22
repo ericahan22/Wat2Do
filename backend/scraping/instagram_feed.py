@@ -25,7 +25,7 @@ from zyte_setup import setup_zyte
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
-from services.openai_service import extract_events_from_caption, generate_embedding
+from services.openai_service import extract_events_from_caption, generate_event_embedding
 from services.storage_service import upload_image_from_url
 from utils.embedding_utils import find_similar_events
 from utils.events_utils import tz_compute
@@ -208,7 +208,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
 
     if not embedding:
         try:
-            embedding = generate_embedding(event_data.get("description", ""))
+            embedding = generate_event_embedding(event_data)
         except Exception as e:
             logger.warning(f"Embedding generation failed: {e!s}")
 
@@ -386,9 +386,7 @@ def process_recent_feed(
                         logger.warning(
                             f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
                         )
-                        embedding = generate_embedding(
-                            event_data.get("description", "")
-                        )
+                        embedding = generate_event_embedding(event_data)
                         append_event_to_csv(
                             event_data,
                             post.owner_username,
