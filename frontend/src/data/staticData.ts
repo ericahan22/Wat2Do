@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-22T21:10:44.713911+00:00";
+export const LAST_UPDATED = "2025-10-22T21:21:40.338267+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -2363,16 +2363,16 @@ export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Food%20and%20Drink", "Pizza", "free food"],
   ["Food%20and%20Drink", "Bubble%20Tea", "boba"],
   ["Food%20and%20Drink", "Doughnut", "donut sale"],
-  ["Activity", "Ticket", "large events"],
-  ["Activity", "Party%20Popper", "social events"],
+  ["Food%20and%20Drink", "Hot%20Dog", "bbq"],
+  ["Activity", "Ticket", "trivia night"],
+  ["Activity", "Magic%20Wand", "murder mystery"],
+  ["Activity", "Fireworks", "large events"],
   ["People", "Handshake", "networking"],
+  ["People", "Raising%20Hands", "meet people"],
   ["Objects", "Graduation%20Cap", "career fair"],
-  ["Activity", "Trophy", "competitions"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "community"],
-  ["Food%20and%20Drink", "Cupcake", "snacks"],
-  ["Activity", "Magic%20Wand", "workshops"],
-  ["Smileys", "Ghost", "Halloween"],
-  ["Food%20and%20Drink", "Hot%20Dog", "barbecue"],
-  ["Activity", "Confetti%20Ball", "celebration"],
-  ["Objects", "Microphone", "open mic"]
+  ["Objects", "Books", "workshop"],
+  ["Activity", "Soccer%20Ball", "sports"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "social"],
+  ["Smileys", "Ghost", "halloween"],
+  ["Food%20and%20Drink", "Cupcake", "snacks"]
 ];
