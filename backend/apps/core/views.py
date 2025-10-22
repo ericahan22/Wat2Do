@@ -99,10 +99,10 @@ def health(_request):
     return Response({"status": "healthy", "message": "Server is running"})
 
 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @ratelimit(key='ip', rate='5/hr', block=True)
-@csrf_exempt
 def signup(request):
     """Register a new user account with email"""
     
@@ -153,9 +153,9 @@ def signup(request):
         return Response({"error": f"Failed to create user: {e!s}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@csrf_exempt
 def login_email(request):
     """Login with email and password"""
     email = request.data.get("email", "").strip().lower()
@@ -187,6 +187,7 @@ def user_info(request):
     return Response({"id": u.id, "email": decrypted_email}, status=status.HTTP_200_OK)
 
 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout(request):
@@ -229,22 +230,18 @@ def confirm_email(request, token):
         # Automatically log them in
         login(request, user)
         
-        return Response(create_success_response(
-            "Email confirmed successfully! You are now logged in.",
-            {
-                "id": user.id,
-                "email": user.email
-            }
-        ), status=status.HTTP_200_OK)
+        # Redirect to frontend login page
+        from django.http import HttpResponseRedirect
+        return HttpResponseRedirect("http://localhost:5173/auth")
     except User.DoesNotExist:
         return Response({"error": "Invalid confirmation token"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({"error": f"Confirmation failed: {e!s}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@csrf_exempt
 @api_view(["POST"])
 @ratelimit(key='ip', rate='5/hr', block=True)
-@csrf_exempt
 def resend_confirmation(request):
     """Resend confirmation email to user"""
     
@@ -292,10 +289,10 @@ def resend_confirmation(request):
         return Response({"error": f"Failed to resend confirmation: {e!s}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @ratelimit(key='ip', rate='5/hr', block=True)
-@csrf_exempt
 def forgot_password(request):
     """Send password reset email to user"""
     
@@ -337,9 +334,9 @@ def forgot_password(request):
         return Response({"error": f"Failed to process password reset: {e!s}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@csrf_exempt
 def reset_password(request, token):
     """Reset user password with token"""
     
