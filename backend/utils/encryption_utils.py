@@ -44,6 +44,7 @@ class EmailEncryption:
     def decrypt_email(self, encrypted_email):
         """Decrypt an email address."""
         if not encrypted_email:
+            print("Warning: No encrypted email provided for decryption")
             return None
 
         try:
@@ -55,8 +56,13 @@ class EmailEncryption:
 
             # Return as string
             return decrypted_bytes.decode("utf-8")
+        except base64.binascii.Error as e:
+            print(f"Error: Invalid base64 encoding in encrypted email: {e}")
+            print(f"Encrypted email (first 50 chars): {encrypted_email[:50]}...")
+            return None
         except Exception as e:
             print(f"Error decrypting email: {e}")
+            print(f"Encrypted email (first 50 chars): {encrypted_email[:50]}...")
             return None
 
     def create_email_hash(self, email):
@@ -66,7 +72,6 @@ class EmailEncryption:
 
     def create_hmac_email_hash(self, email):
         """Create HMAC hash of the email (for newsletter uniqueness)."""
-        """Create a hash of the email for username field (SHA-256)."""
         normalized_email = email.lower().strip()
         return hashlib.sha256(normalized_email.encode("utf-8")).hexdigest()
 
@@ -121,6 +126,17 @@ class EmailEncryption:
         user.username = self.create_email_hash(new_email)
         user.save()
         return user
+
+    def test_encryption(self):
+        """Test if encryption/decryption is working properly."""
+        test_email = "test@example.com"
+        try:
+            encrypted = self.encrypt_email(test_email)
+            decrypted = self.decrypt_email(encrypted)
+            return decrypted == test_email
+        except Exception as e:
+            print(f"Encryption test failed: {e}")
+            return False
 
 
 # Global instance

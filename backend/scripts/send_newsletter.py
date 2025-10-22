@@ -23,6 +23,12 @@ from services.email_service import email_service  # noqa: E402
 
 def send_newsletter_to_all():
     """Send newsletter to all active subscribers"""
+    
+    # Test encryption first
+    from utils.encryption_utils import email_encryption
+    if not email_encryption.test_encryption():
+        print("❌ Encryption test failed! Cannot proceed with newsletter send.")
+        return
 
     # Get all active subscribers
     active_subscribers = NewsletterSubscriber.objects.filter(is_active=True)
@@ -44,13 +50,16 @@ def send_newsletter_to_all():
             # Get the email address, handle decryption failures
             email_address = subscriber.get_email()
             if not email_address:
+                print(f"❌ Failed to decrypt email for subscriber {subscriber.id}")
                 return False, "Failed to decrypt email address"
 
+            print(f"📧 Sending to: {email_address}")
             email_sent = email_service.send_newsletter_email(
                 email_address, str(subscriber.unsubscribe_token)
             )
             return email_sent, None
         except Exception as e:
+            print(f"❌ Exception sending to subscriber {subscriber.id}: {e}")
             return False, str(e)
 
     for subscriber in active_subscribers:
