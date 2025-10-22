@@ -129,7 +129,7 @@ const EventsGrid = memo(
           variants={{
             visible: {
               transition: {
-                staggerChildren: 0.0175,
+                staggerChildren: 0.015,
               },
             },
           }}

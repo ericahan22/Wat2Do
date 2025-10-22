@@ -197,5 +197,5 @@ RATELIMIT_ENABLE = True
 # Global rate limits (applied to all routes)
 RATELIMIT_GLOBAL = "200/h"  # 1000 requests per hour per IP globally
 RATELIMIT_GROUP = {
-    "api": "60/h",  # 100 requests per hour for API endpoints
+    "api": "100/h",  # 100 requests per hour for API endpoints
 }

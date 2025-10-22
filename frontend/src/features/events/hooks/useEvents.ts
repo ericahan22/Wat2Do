@@ -16,6 +16,7 @@ const fetchEvents = async ({
 }): Promise<Event[]> => {
   const searchTerm = queryKey[1] || "";
   const dtstart = queryKey[2] || "";
+  const addedAt = queryKey[3] || "";
 
   const params = new URLSearchParams();
 
@@ -25,6 +26,10 @@ const fetchEvents = async ({
 
   if (dtstart) {
     params.append("dtstart", formatDtstartToMidnight(dtstart));
+  }
+
+  if (addedAt) {
+    params.append("added_at", addedAt);
   }
 
   const queryString = params.toString() ? `?${params.toString()}` : "";
@@ -40,11 +45,12 @@ export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
   const dtstart = searchParams.get("dtstart") || "";
+  const addedAt = searchParams.get("added_at") || "";
 
-  const hasActiveFilters = searchTerm !== "" || dtstart !== "";
+  const hasActiveFilters = searchTerm !== "" || dtstart !== "" || addedAt !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, dtstart],
+    queryKey: ["events", searchTerm, dtstart, addedAt],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
@@ -81,6 +87,8 @@ export function useEvents() {
       title = `${events.length} Found Events - Wat2Do`;
     } else if (dtstart) {
       title = `${events.length} Total Events - Wat2Do`;
+    } else if (addedAt) {
+      title = `${events.length} New Events - Wat2Do`;
     } else {
       title = `${events.length} Upcoming Events - Wat2Do`;
     }
@@ -90,7 +98,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart]);
+  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart, addedAt]);
 
   useDocumentTitle(documentTitle);
 
@@ -119,13 +127,36 @@ export function useEvents() {
     });
   };
 
+  const handleToggleNewEvents = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+
+      if (addedAt) {
+        // Remove added_at to show all events
+        nextParams.delete("added_at");
+      } else {
+        // Set added_at to today at 8am or yesterday at 8am, depending on current time
+        const now = new Date();
+        const todayAt8am = new Date();
+        todayAt8am.setHours(8, 0, 0, 0);
+        
+        const cutoffDate = now >= todayAt8am ? todayAt8am : new Date(todayAt8am.getTime() - 24 * 60 * 60 * 1000);
+        const isoString = cutoffDate.toISOString();
+        nextParams.set("added_at", isoString);
+      }
+      return nextParams;
+    });
+  };
+
   return {
     data: events,
     isLoading,
     error,
     searchTerm,
     dtstart,
+    addedAt,
     handleViewChange,
     handleToggleStartDate,
+    handleToggleNewEvents,
   };
 }

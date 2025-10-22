@@ -12,6 +12,7 @@ class EventFilter(FilterSet):
     max_price = NumberFilter(field_name="price", lookup_expr="lte")
     club_type = CharFilter(field_name="club_type")
     school = CharFilter(field_name="school", lookup_expr="icontains")
+    added_at = DateTimeFilter(field_name="added_at", lookup_expr="gte")
 
     class Meta:
         model = Events
@@ -22,4 +23,5 @@ class EventFilter(FilterSet):
             "max_price",
             "club_type",
             "school",
+            "added_at",
         ]

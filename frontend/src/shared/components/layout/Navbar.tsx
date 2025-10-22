@@ -107,7 +107,7 @@ function Navbar() {
                     className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                     onMouseDown={() => navigate("/dashboard")}
                   >
-                    <User className="h-4 w-4 mr-1" />
+                    <User className="h-4 w-4" />
                     {user?.email}
                   </Button>
                   <Button
@@ -126,7 +126,7 @@ function Navbar() {
                   className="text-sm font-medium"
                   onMouseDown={() => navigate("/auth")}
                 >
-                  <User className="h-4 w-4 mr-1" />
+                  <User className="h-4 w-4" />
                   Sign In
                 </Button>
               )}
@@ -205,7 +205,7 @@ function Navbar() {
                       navigate("/dashboard");
                     }}
                   >
-                    <User className="h-4 w-4 mr-2" />
+                    <User className="h-4 w-4" />
                     {user?.email}
                   </Button>
                   <Button
@@ -214,7 +214,7 @@ function Navbar() {
                     onMouseDown={() => logout()}
                     disabled={isLoggingOut}
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
+                    <LogOut className="h-4 w-4" />
                     Logout
                   </Button>
                 </div>
@@ -226,7 +226,7 @@ function Navbar() {
                     navigate("/auth");
                   }}
                 >
-                  <User className="h-4 w-4 mr-2" />
+                  <User className="h-4 w-4" />
                   Sign In
                 </Button>
               )}

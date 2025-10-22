@@ -13,6 +13,7 @@ if not settings.configured:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
     django.setup()
 
+# Import after Django setup
 from apps.events.models import Events
 
 

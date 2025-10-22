@@ -6,7 +6,7 @@ import { getTodayString } from "@/shared/lib/dateUtils";
 import { SEOHead } from "@/shared/components/SEOHead";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { Calendar, X, History, LayoutGrid } from "lucide-react";
+import { Calendar, X, History, LayoutGrid, Sparkles } from "lucide-react";
 
 // Components
 import EventsHeader from "@/features/events/components/EventsHeader";
@@ -35,7 +35,9 @@ function EventsPage() {
     error,
     searchTerm,
     dtstart,
+    addedAt,
     handleToggleStartDate,
+    handleToggleNewEvents,
   } = useEvents();
 
   const {
@@ -49,6 +51,7 @@ function EventsPage() {
 
   const todayString = getTodayString();
   const isShowingPastEvents = Boolean(dtstart && dtstart !== todayString);
+  const isShowingNewEvents = Boolean(addedAt);
 
   return (
     <div className="flex flex-col gap-4">
@@ -100,10 +103,14 @@ function EventsPage() {
             isShowingPastEvents={isShowingPastEvents}
             totalCount={data.length}
           />
-          <div className="flex items-center gap-2">
+          <div className="flex">
+            <Button variant="ghost" onMouseDown={handleToggleNewEvents}>
+              <Sparkles className="h-4 w-4" />
+              {isShowingNewEvents ? "All" : "New"}
+            </Button>
             <Button variant="ghost" onMouseDown={handleToggleStartDate}>
               <History className="h-4 w-4" />
-              {isShowingPastEvents ? "Show Upcoming" : "Show Past Events"}
+              {isShowingPastEvents ? "Upcoming" : "Past"}
             </Button>
             {view === "grid" && (
               <Button variant="ghost" onMouseDown={toggleSelectMode}>

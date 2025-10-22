@@ -21,7 +21,6 @@ class EmailEncryption:
     """Handles encryption and decryption of email addresses and user data."""
 
     def __init__(self):
-        encryption_key = EMAIL_ENCRYPTION_KEY
         if not EMAIL_ENCRYPTION_KEY:
             raise ValueError("EMAIL_ENCRYPTION_KEY is not set")
         self.cipher = Fernet(EMAIL_ENCRYPTION_KEY)
@@ -100,7 +99,7 @@ class EmailEncryption:
                 decrypted_email = self.decrypt_email(user.email)
                 if decrypted_email == email_lower:
                     return user
-            except:
+            except Exception:
                 continue
 
         return None
