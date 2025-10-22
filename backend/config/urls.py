@@ -2,11 +2,13 @@ from django.contrib import admin
 from django.urls import include, path
 
 from apps.core import views
+from apps.events import views as events_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", views.health, name="health"),
     path("", views.home, name="root"),
+    path("rss.xml", events_views.rss_feed, name="rss"),
     path("api/events/", include("apps.events.urls")),
     path("api/clubs/", include("apps.clubs.urls")),
     path("api/newsletter/", include("apps.newsletter.urls")),

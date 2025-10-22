@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Mail, Check, X } from "lucide-react";
+import { Mail, Check, X, Rss } from "lucide-react";
 import { useNewsletterSubscribe } from "@/features/newsletter/hooks/useNewsletterSubscribe";
 
 function Footer() {
@@ -140,6 +140,13 @@ function Footer() {
               className="dark:text-gray-200"
             >
               Contact
+            </a>
+            <a
+              href="/rss.xml"
+              className="dark:text-gray-200 flex items-center gap-2"
+            >
+              <Rss className="h-4 w-4" />
+              <span className="text-sm">RSS</span>
             </a>
           </div>
         </div>
