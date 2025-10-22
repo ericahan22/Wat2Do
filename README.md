@@ -33,7 +33,7 @@ docker compose up --build
 ```
 
 #### Backend 
-# (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db)
+<!-- (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db) -->
 ```bash
 cd backend
 python -m venv .venv

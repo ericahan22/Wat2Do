@@ -5,8 +5,9 @@ Views for the newsletter app.
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from utils.encryption_utils import email_encryption
 
 from .models import NewsletterSubscriber
 
@@ -52,6 +53,7 @@ def newsletter_subscribe(request):
                 {
                     "message": "Successfully subscribed! Check your email for upcoming events.",
                     "email": subscriber.get_email_display(),
+                    "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -59,6 +61,7 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Subscribed successfully, but email could not be sent. Please check back later.",
+                    "email": subscriber.get_email_display(),
                     "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,

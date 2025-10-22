@@ -64,9 +64,14 @@ def home(_request):
                     "Test vector similarity search"
                 ),
                 "POST /api/auth/signup/": "Register a new user account with email (sends confirmation email)",
+                "POST /api/auth/signup/": "Register a new user account with email (sends confirmation email)",
                 "POST /api/auth/login/": "Login with email and password (creates session)",
                 "GET /api/auth/me/": "Get current user info (requires login)",
                 "POST /api/auth/logout/": "Logout (destroys session)",
+                "GET /api/auth/confirm/<token>/": "Confirm email address with token",
+                "POST /api/auth/resend-confirmation/": "Resend confirmation email",
+                "POST /api/auth/forgot-password/": "Request password reset email",
+                "POST /api/auth/reset-password/<token>/": "Reset password with token",
                 "GET /api/auth/confirm/<token>/": "Confirm email address with token",
                 "POST /api/auth/resend-confirmation/": "Resend confirmation email",
                 "POST /api/auth/forgot-password/": "Request password reset email",
@@ -216,6 +221,8 @@ def login_email(request):
 def user_info(request):
     """Get current user info"""
     u = request.user
+    decrypted_email = email_encryption.decrypt_email(u.email)
+    return Response({"id": u.id, "email": decrypted_email}, status=status.HTTP_200_OK)
     decrypted_email = email_encryption.decrypt_email(u.email)
     return Response({"id": u.id, "email": decrypted_email}, status=status.HTTP_200_OK)
 

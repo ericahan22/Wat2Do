@@ -24,6 +24,7 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return f"NewsletterSubscriber({self.get_email_display()})"
+        return f"NewsletterSubscriber({self.get_email_display()})"
 
     @classmethod
     def get_by_email(cls, email):
@@ -32,6 +33,7 @@ class NewsletterSubscriber(models.Model):
 
         encrypted_email = email_encryption.encrypt_email(email)
         try:
+            return cls.objects.get(email_encrypted=encrypted_email)
             return cls.objects.get(email_encrypted=encrypted_email)
         except cls.DoesNotExist:
             return None

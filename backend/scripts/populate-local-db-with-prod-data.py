@@ -26,7 +26,6 @@ def get_all_models():
     from django.contrib.auth.models import Group, Permission, User
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.sessions.models import Session
-    from rest_framework.authtoken.models import Token
 
     # Define import order to handle dependencies correctly
     system_models = [
@@ -35,7 +34,6 @@ def get_all_models():
         Group,  # Can reference permissions
         User,  # Can reference groups and permissions
         Session,  # Independent
-        Token,  # Depends on User
     ]
 
     # Get all other models (excluding system models)
@@ -166,19 +164,39 @@ def sync_data():
                 table_name = model._meta.db_table
                 columns = list(data[0].keys())
 
-                # Use a new cursor for each model
+                # Use a new cursor for each model to avoid transaction issues
                 with local_conn.cursor() as cursor:
+                    successful_inserts = 0
                     for record_data in data:
                         try:
                             # Build INSERT statement
                             placeholders = ", ".join(["%s"] * len(columns))
                             column_names = ", ".join(columns)
-                            values = [record_data[col] for col in columns]
+                            
+                            # Convert data types properly for PostgreSQL
+                            values = []
+                            for col in columns:
+                                value = record_data[col]
+                                
+                                # Handle different data types
+                                if value is None:
+                                    values.append(None)
+                                elif isinstance(value, dict):
+                                    # Convert dict to JSON string for JSONB columns
+                                    import json
+                                    values.append(json.dumps(value))
+                                elif isinstance(value, list):
+                                    # Convert list to JSON string for JSONB columns
+                                    import json
+                                    values.append(json.dumps(value))
+                                else:
+                                    values.append(value)
 
                             cursor.execute(
                                 f"INSERT INTO {table_name} ({column_names}) VALUES ({placeholders})",
                                 values,
                             )
+                            successful_inserts += 1
                         except Exception as e:
                             # Only show foreign key constraint errors for debugging
                             if "foreign key constraint" in str(e).lower():
@@ -186,11 +204,15 @@ def sync_data():
                             else:
                                 # For other errors, show more detail
                                 print(f"   ⚠️  Skipping record: {e}")
+                    
+                    # Commit after each model to prevent transaction abort cascades
+                    local_conn.commit()
+                    print(f"   ✅ Successfully imported {successful_inserts}/{len(data)} {model_name.lower()}")
 
             except Exception as e:
                 print(f"   ⚠️  Could not import {model_name}: {e}")
-
-        local_conn.commit()
+                # Rollback and continue with next model
+                local_conn.rollback()
 
     finally:
         local_conn.close()

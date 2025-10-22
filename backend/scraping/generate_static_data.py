@@ -1,6 +1,7 @@
 import os
 import sys
-from datetime import date, datetime, time, timezone
+from dateutil import parser as date_parser
+from datetime import datetime, timezone, date, time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -197,6 +198,65 @@ def main():
         logger.info(
             "Successfully updated staticData.ts with events and recommended filters"
         )
+
+        # --- Static RSS file ---
+        try:
+            public_dir = output_path.parents[2] / "public"
+            public_dir.mkdir(parents=True, exist_ok=True)
+            rss_path = public_dir / "rss.xml"
+
+            site_url = "https://wat2do.ca"
+            last_build_dt = datetime.now(timezone.utc)
+
+            def parse_dt_to_utc(val):
+                dt = val
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.astimezone(timezone.utc)
+
+            rss_items = []
+            for ev in events:
+                pub_dt = ev.get("dtstart") or ev.get("added_at") or last_build_dt
+                pub_dt_parsed = parse_dt_to_utc(pub_dt) or last_build_dt
+                pub_str = pub_dt_parsed.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+                title = ev.get("title").replace("&", "&amp;")
+                link = ev.get("source_url").replace("&", "&amp;")
+                description = ev.get("description") or ""
+                guid = f"{ev.get('id')}@wat2do"
+                image_tag = ""
+                if ev.get("source_image_url"):
+                    image_tag = f'<media:content url="{ev.get("source_image_url")}" medium="image" />'
+
+                item_xml = f"""  <item>
+    <title>{title}</title>
+    <link>{link}</link>
+    <description><![CDATA[{description}]]></description>
+    <guid isPermaLink="false">{guid}</guid>
+    <pubDate>{pub_str}</pubDate>
+    {image_tag}
+  </item>
+"""
+                rss_items.append(item_xml)
+
+            last_build_http = last_build_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            rss_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Wat2Do — Upcoming events</title>
+    <link>{site_url}</link>
+    <atom:link href="{site_url}/rss.xml" rel="self" type="application/rss+xml" />
+    <description>Upcoming events at the University of Waterloo</description>
+    <lastBuildDate>{last_build_http}</lastBuildDate>
+    <ttl>10</ttl>
+{''.join(rss_items)}
+  </channel>
+</rss>
+"""
+            rss_path.write_text(rss_content, encoding="utf-8")
+            logger.info(f"Wrote static RSS feed to {rss_path}")
+        except Exception:
+            logger.exception("Failed to write static rss.xml")
     except Exception as e:
         logger.exception(f"An error occurred: {e}")
         sys.exit(1)

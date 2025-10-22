@@ -138,7 +138,7 @@ export function useEvents() {
         // Set added_at to today at 8am or yesterday at 8am, depending on current time
         const now = new Date();
         const todayAt8am = new Date();
-        todayAt8am.setHours(8, 0, 0, 0);
+        todayAt8am.setHours(7, 0, 0, 0);
         
         const cutoffDate = now >= todayAt8am ? todayAt8am : new Date(todayAt8am.getTime() - 24 * 60 * 60 * 1000);
         const isoString = cutoffDate.toISOString();

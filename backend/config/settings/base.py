@@ -65,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
+    "ratelimit.middleware.RatelimitMiddleware",
 ]
 
 # CORS settings

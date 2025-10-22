@@ -1,5 +1,6 @@
 """
 Encryption utilities for sensitive data like email addresses and user data.
+Encryption utilities for sensitive data like email addresses and user data.
 Uses Fernet (symmetric encryption) for encrypting/decrypting emails.
 """
 
@@ -10,6 +11,7 @@ import os
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
+from django.conf import settings
 
 load_dotenv()
 
@@ -18,6 +20,7 @@ EMAIL_HASH_KEY = os.getenv("EMAIL_HASH_KEY").encode("utf-8")
 
 
 class EmailEncryption:
+    """Handles encryption and decryption of email addresses and user data."""
     """Handles encryption and decryption of email addresses and user data."""
 
     def __init__(self):
@@ -58,6 +61,12 @@ class EmailEncryption:
             return None
 
     def create_email_hash(self, email):
+        """Create a hash of the email for username field (SHA-256)."""
+        normalized_email = email.lower().strip()
+        return hashlib.sha256(normalized_email.encode("utf-8")).hexdigest()
+
+    def create_hmac_email_hash(self, email):
+        """Create HMAC hash of the email (for newsletter uniqueness)."""
         """Create a hash of the email for username field (SHA-256)."""
         normalized_email = email.lower().strip()
         return hashlib.sha256(normalized_email.encode("utf-8")).hexdigest()
