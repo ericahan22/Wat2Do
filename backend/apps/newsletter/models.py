@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from utils.encryption_utils import email_encryption
 
 
 class NewsletterSubscriber(models.Model):
@@ -24,31 +25,21 @@ class NewsletterSubscriber(models.Model):
 
     def __str__(self):
         return f"NewsletterSubscriber({self.get_email_display()})"
-        return f"NewsletterSubscriber({self.get_email_display()})"
 
     @classmethod
     def get_by_email(cls, email):
         """Get subscriber by email"""
-        from utils.encryption_utils import email_encryption
-
         encrypted_email = email_encryption.encrypt_email(email)
-        try:
-            return cls.objects.get(email_encrypted=encrypted_email)
-            return cls.objects.get(email_encrypted=encrypted_email)
-        except cls.DoesNotExist:
-            return None
+        return cls.objects.get(email_encrypted=encrypted_email)
 
     @classmethod
     def create_subscriber(cls, email):
         """Create a new subscriber for an email"""
-        from utils.encryption_utils import email_encryption
-
         encrypted_email = email_encryption.encrypt_email(email)
         return cls.objects.create(email_encrypted=encrypted_email, is_active=True)
 
     def get_email(self):
         """Get the email (decrypted)"""
-        from utils.encryption_utils import email_encryption
 
         return email_encryption.decrypt_email(self.email_encrypted)
 
