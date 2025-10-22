@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import { authApi, type SignupRequest } from '../api/auth'
 
@@ -9,12 +10,23 @@ export const useAuth = () => {
   const queryClient = useQueryClient()
 
   // Get current user query
-  const { data: currentUser, isLoading: isLoadingUser } = useQuery({
+  const { data: currentUser, isLoading: isLoadingUser, error: currentUserError } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: authApi.getCurrentUser,
     enabled: isAuthenticated,
     retry: false,
   })
+
+  // Handle authentication errors
+  useEffect(() => {
+    if (currentUserError) {
+      const error = currentUserError 
+      if (error) {
+        logoutStore()
+        queryClient.clear()
+      }
+    }
+  }, [currentUserError, logoutStore, queryClient])
 
   // Update store when user data changes
   if (currentUser && currentUser.id !== user?.id) {

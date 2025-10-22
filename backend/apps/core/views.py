@@ -203,6 +203,13 @@ def login_email(request):
             {"error": "invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED
         )
 
+    # Check if user has confirmed their email
+    if user.first_name and "|" in user.first_name:
+        return Response(
+            {"error": "Please confirm your email before logging in. Check your inbox for a confirmation email."}, 
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
     login(request, user)
     decrypted_email = email_encryption.decrypt_email(user.email)
     return Response(
