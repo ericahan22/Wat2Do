@@ -1,6 +1,7 @@
 import os
 import sys
-from datetime import date, datetime, time, timezone
+from dateutil import parser as date_parser
+from datetime import datetime, timezone, date, time
 from pathlib import Path
 from logging_config import logger
 
@@ -193,15 +194,21 @@ def main():
 
             site_url = "https://wat2do.ca"
             last_build_dt = datetime.now(timezone.utc)
+
+            def dt_to_utc(val):
+                if isinstance(val, datetime):
+                    dt = val
+                else:
+                    dt = date_parser.parse(str(val))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt.astimezone(timezone.utc)
+
             rss_items = []
             for ev in events:
                 pub_dt = ev.get("dtstart") or ev.get("added_at") or last_build_dt
-                try:
-                    pub_str = pub_dt.astimezone(timezone.utc).strftime(
-                        "%a, %d %b %Y %H:%M:%S GMT"
-                    )
-                except Exception:
-                    pub_str = last_build_dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+                pub_dt_parsed = dt_to_utc(pub_dt) or last_build_dt
+                pub_str = pub_dt_parsed.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
                 title = ev.get("title").replace("&", "&amp;")
                 link = ev.get("source_url").replace("&", "&amp;")
