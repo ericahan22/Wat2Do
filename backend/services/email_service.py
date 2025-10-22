@@ -2,9 +2,9 @@ import os
 from datetime import date, datetime, timedelta
 
 import django
+import dotenv
 import requests
 from django.conf import settings
-import dotenv
 
 dotenv.load_dotenv()
 
@@ -47,7 +47,14 @@ class EmailService:
                 time_range = f"Starting at {start_time}"
 
             # Get club name from social handles or use school as fallback
-            club_name = event.ig_handle or event.discord_handle or event.x_handle or event.tiktok_handle or event.fb_handle or event.school
+            club_name = (
+                event.ig_handle
+                or event.discord_handle
+                or event.x_handle
+                or event.tiktok_handle
+                or event.fb_handle
+                or event.school
+            )
 
             events_data.append(
                 {

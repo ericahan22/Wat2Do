@@ -13,6 +13,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from "@/shared/components/ui/pagination";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 import {
@@ -30,6 +31,7 @@ import { formatEventDate, formatEventTimeRange } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import { EVENTS_PER_PAGE } from "@/features/events/constants/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
+import { motion } from "framer-motion";
 
 interface EventsGridProps {
   data: Event[];
@@ -119,130 +121,156 @@ const EventsGrid = memo(
     return (
       <div className="space-y-8">
         {/* Events Grid */}
-        <div className="grid sm:grid-cols-[repeat(auto-fit,_minmax(175px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5">
+        <motion.div
+          key={`events-grid-${data.length}-${currentPage}`}
+          className="grid sm:grid-cols-[repeat(auto-fit,_minmax(175px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: {
+                staggerChildren: 0.0175,
+              },
+            },
+          }}
+        >
           {paginatedData.map((event: Event) => {
             const isSelected = selectedEvents.has(event.id.toString());
             return (
-              <Card
+              <motion.div
                 key={event.id}
-                className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg gap-0 h-full ${
-                  isSelectMode ? "cursor-pointer" : ""
-                } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
-                onMouseDown={() =>
-                  isSelectMode && onToggleEvent?.(event.id.toString())
-                }
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.5,
+                      ease: [0.18, 0.39, 0.14, 0.9],
+                    },
+                  },
+                }}
               >
-                {/* Selection Circle */}
-                {isSelectMode && (
-                  <div
-                    className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full border-2 border-white bg-gray-800/70 dark:bg-gray-200/70 flex items-center justify-center cursor-pointer"
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      onToggleEvent?.(event.id.toString());
-                    }}
-                  >
-                    {isSelected && (
-                      <Check className="h-4 w-4 text-white dark:text-gray-800" />
-                    )}
-                  </div>
-                )}
-
-                <div className="relative">
-                  {/* Event Image */}
-                  {event.source_image_url && (
-                    <img
-                      src={event.source_image_url}
-                      alt={event.title}
-                      loading="lazy"
-                      className="w-full h-40 object-cover rounded-t-xl"
-                    />
-                  )}
-                  <EventStatusBadge event={event} />
-                  <NewEventBadge event={event} />
-                  <OrganizationBadge event={event} />
-                </div>
-                <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
-                  <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
-                    {event.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-0">
-                  <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                    <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {formatEventDate(event.dtstart)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                    <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {formatEventTimeRange(event.dtstart, event.dtend)}
-                    </span>
-                  </div>
-
-                  {event.location && (
-                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                      <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="line-clamp-1" title={event.location}>
-                        {event.location}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                    <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">
-                      {event.price === null || event.price === 0
-                        ? "Free"
-                        : `$${event.price}`}
-                    </span>
-                  </div>
-
-                  {event.food && (
-                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                      <Utensils className="h-3.5 w-3.5 flex-shrink-0" />
-                      <span className="line-clamp-1" title={event.food}>
-                        {event.food}
-                      </span>
-                    </div>
-                  )}
-
-                  {event.registration && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
-                      Registration required
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  {!isSelectMode && (
-                    <div className="flex space-x-3 pt-2 w-full mt-auto">
-                      {event.source_url ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 w-full"
-                          onMouseDown={() =>
-                            window.open(event.source_url || "", "_blank")
-                          }
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          View Details
-                        </Button>
-                      ) : (
-                        <div className="text-center py-2 w-full">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            No event link available
-                          </p>
-                        </div>
+                <Card
+                  className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg gap-0 h-full ${
+                    isSelectMode ? "cursor-pointer" : ""
+                  } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
+                  onMouseDown={() =>
+                    isSelectMode && onToggleEvent?.(event.id.toString())
+                  }
+                >
+                  {/* Selection Circle */}
+                  {isSelectMode && (
+                    <div
+                      className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full border-2 border-white bg-gray-800/70 dark:bg-gray-200/70 flex items-center justify-center cursor-pointer"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        onToggleEvent?.(event.id.toString());
+                      }}
+                    >
+                      {isSelected && (
+                        <Check className="h-4 w-4 text-white dark:text-gray-800" />
                       )}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+
+                  <div className="relative min-h-40">
+                    {/* Event Image */}
+                    {event.source_image_url && (
+                      <img
+                        src={event.source_image_url}
+                        alt={event.title}
+                        loading="lazy"
+                        className="w-full h-40 object-cover rounded-t-xl"
+                      />
+                    )}
+                    <EventStatusBadge event={event} />
+                    <NewEventBadge event={event} />
+                    <OrganizationBadge event={event} />
+                  </div>
+                  <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
+                    <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
+                      {event.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-0">
+                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                      <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">
+                        {formatEventDate(event.dtstart)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                      <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">
+                        {formatEventTimeRange(event.dtstart, event.dtend)}
+                      </span>
+                    </div>
+
+                    {event.location && (
+                      <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                        <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="line-clamp-1" title={event.location}>
+                          {event.location}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                      <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span className="truncate">
+                        {event.price === null || event.price === 0
+                          ? "Free"
+                          : `$${event.price}`}
+                      </span>
+                    </div>
+
+                    {event.food && (
+                      <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                        <Utensils className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="line-clamp-1" title={event.food}>
+                          {event.food}
+                        </span>
+                      </div>
+                    )}
+
+                    {event.registration && (
+                      <div className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
+                        Registration required
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    {!isSelectMode && (
+                      <div className="flex space-x-3 pt-2 w-full mt-auto">
+                        {event.source_url ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 w-full"
+                            onMouseDown={() =>
+                              window.open(event.source_url || "", "_blank")
+                            }
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                            View Source
+                          </Button>
+                        ) : (
+                          <div className="text-center py-2 w-full">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              No event link available
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* No results message */}
         {data.length === 0 && !isLoading && (
@@ -265,7 +293,9 @@ const EventsGrid = memo(
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onMouseDown={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  onMouseDown={() =>
+                    handlePageChange(Math.max(1, currentPage - 1))
+                  }
                   className={
                     currentPage === 1
                       ? "pointer-events-none opacity-50"
@@ -274,19 +304,97 @@ const EventsGrid = memo(
                 />
               </PaginationItem>
 
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onMouseDown={() => handlePageChange(page)}
-                      isActive={currentPage === page}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
+              {(() => {
+                const pages = [];
+                const showEllipsis = totalPages > 7;
+                
+                if (showEllipsis) {
+                  // Show first 3 pages
+                  for (let i = 1; i <= 3; i++) {
+                    pages.push(
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          onMouseDown={() => handlePageChange(i)}
+                          isActive={currentPage === i}
+                          className="cursor-pointer"
+                        >
+                          {i}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  
+                  // Show ellipsis if current page is far from start
+                  if (currentPage > 5) {
+                    pages.push(
+                      <PaginationItem key="ellipsis-start">
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    );
+                  }
+                  
+                  // Show current page and surrounding pages
+                  const start = Math.max(4, currentPage - 1);
+                  const end = Math.min(totalPages - 2, currentPage + 1);
+                  
+                  for (let i = start; i <= end; i++) {
+                    if (i > 3 && i < totalPages - 2) {
+                      pages.push(
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            onMouseDown={() => handlePageChange(i)}
+                            isActive={currentPage === i}
+                            className="cursor-pointer"
+                          >
+                            {i}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                  }
+                  
+                  // Show ellipsis if current page is far from end
+                  if (currentPage < totalPages - 4) {
+                    pages.push(
+                      <PaginationItem key="ellipsis-end">
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    );
+                  }
+                  
+                  // Show last 3 pages
+                  for (let i = totalPages - 2; i <= totalPages; i++) {
+                    pages.push(
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          onMouseDown={() => handlePageChange(i)}
+                          isActive={currentPage === i}
+                          className="cursor-pointer"
+                        >
+                          {i}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                } else {
+                  // Show all pages if 7 or fewer
+                  for (let i = 1; i <= totalPages; i++) {
+                    pages.push(
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          onMouseDown={() => handlePageChange(i)}
+                          isActive={currentPage === i}
+                          className="cursor-pointer"
+                        >
+                          {i}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                }
+                
+                return pages;
+              })()}
 
               <PaginationItem>
                 <PaginationNext

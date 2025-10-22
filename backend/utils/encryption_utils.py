@@ -10,7 +10,6 @@ import os
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
-from django.conf import settings
 
 load_dotenv()
 
@@ -75,28 +74,26 @@ class EmailEncryption:
     def create_user_with_encryption(self, email, password):
         """Create a new user with encrypted email and hashed username."""
         from django.contrib.auth.models import User
-        
+
         # Hash email for username
         username = self.create_email_hash(email)
-        
+
         # Encrypt email for storage
         encrypted_email = self.encrypt_email(email)
-        
+
         # Create user
         user = User.objects.create_user(
-            username=username,
-            email=encrypted_email,
-            password=password
+            username=username, email=encrypted_email, password=password
         )
-        
+
         return user
-    
+
     def get_user_by_email(self, email):
         """Find user by original email (decrypts and compares)."""
         from django.contrib.auth.models import User
-        
+
         email_lower = email.lower()
-        
+
         # Search through all users to find matching email
         for user in User.objects.all():
             try:
@@ -105,19 +102,19 @@ class EmailEncryption:
                     return user
             except:
                 continue
-        
+
         return None
-    
+
     def get_user_by_username_hash(self, email):
         """Find user by username hash (faster lookup)."""
         from django.contrib.auth.models import User
-        
+
         username_hash = self.create_email_hash(email)
         try:
             return User.objects.get(username=username_hash)
         except User.DoesNotExist:
             return None
-    
+
     def update_user_email(self, user, new_email):
         """Update user's email with encryption."""
         user.email = self.encrypt_email(new_email)

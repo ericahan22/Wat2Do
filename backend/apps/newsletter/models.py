@@ -29,6 +29,7 @@ class NewsletterSubscriber(models.Model):
     def get_by_email(cls, email):
         """Get subscriber by email"""
         from utils.encryption_utils import email_encryption
+
         encrypted_email = email_encryption.encrypt_email(email)
         try:
             return cls.objects.get(email_encrypted=encrypted_email)
@@ -39,12 +40,14 @@ class NewsletterSubscriber(models.Model):
     def create_subscriber(cls, email):
         """Create a new subscriber for an email"""
         from utils.encryption_utils import email_encryption
+
         encrypted_email = email_encryption.encrypt_email(email)
         return cls.objects.create(email_encrypted=encrypted_email, is_active=True)
 
     def get_email(self):
         """Get the email (decrypted)"""
         from utils.encryption_utils import email_encryption
+
         return email_encryption.decrypt_email(self.email_encrypted)
 
     def get_email_display(self):

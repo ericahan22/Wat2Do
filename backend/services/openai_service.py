@@ -9,16 +9,16 @@ This module provides methods for interacting with OpenAI's API, including:
 
 import json
 import os
-import traceback
-from datetime import datetime
-from copy import deepcopy
 import time
+import traceback
+from copy import deepcopy
+from datetime import datetime
 
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from shared.constants.emojis import EMOJI_CATEGORIES
 from scraping.logging_config import logger
+from shared.constants.emojis import EMOJI_CATEGORIES
 
 
 class OpenAIService:
@@ -157,7 +157,7 @@ class OpenAIService:
                 model = "gpt-4o-mini"  # Use vision-capable model
             else:
                 model = "gpt-4o-mini"
-                
+
             # If image download by OpenAI errors out, retry without image content by using URL in text
             try:
                 response = self.client.chat.completions.create(
@@ -165,25 +165,50 @@ class OpenAIService:
                 )
             except Exception as e:
                 err_text = str(e)
-                if "invalid_image_url" in err_text or "Timeout while downloading" in err_text:
-                    logger.warning(f"OpenAI failed to fetch the image ({err_text}); retrying without image")
+                if (
+                    "invalid_image_url" in err_text
+                    or "Timeout while downloading" in err_text
+                ):
+                    logger.warning(
+                        f"OpenAI failed to fetch the image ({err_text}); retrying without image"
+                    )
                     fallback = deepcopy(messages)
                     if isinstance(fallback[1].get("content"), list):
                         fallback[1]["content"] = [
-                            c for c in fallback[1]["content"] if not (isinstance(c, dict) and c.get("type") == "image_url")
+                            c
+                            for c in fallback[1]["content"]
+                            if not (
+                                isinstance(c, dict) and c.get("type") == "image_url"
+                            )
                         ]
                         if source_image_url:
-                            if isinstance(fallback[1]["content"][0], dict) and "text" in fallback[1]["content"][0]:
-                                fallback[1]["content"][0]["text"] += f"\n\nImage URL: {source_image_url}"
+                            if (
+                                isinstance(fallback[1]["content"][0], dict)
+                                and "text" in fallback[1]["content"][0]
+                            ):
+                                fallback[1]["content"][0]["text"] += (
+                                    f"\n\nImage URL: {source_image_url}"
+                                )
                             else:
-                                fallback[1]["content"].insert(0, {"type": "text", "text": f"Image URL: {source_image_url}"})
+                                fallback[1]["content"].insert(
+                                    0,
+                                    {
+                                        "type": "text",
+                                        "text": f"Image URL: {source_image_url}",
+                                    },
+                                )
                     time.sleep(1)
                     try:
                         response = self.client.chat.completions.create(
-                            model="gpt-4o-mini", messages=fallback, temperature=0.1, max_tokens=2000
+                            model="gpt-4o-mini",
+                            messages=fallback,
+                            temperature=0.1,
+                            max_tokens=2000,
                         )
                     except Exception as e:
-                        logger.exception(f"Retry without image also failed, returning default structure: {e}")
+                        logger.exception(
+                            f"Retry without image also failed, returning default structure: {e}"
+                        )
                         return [_get_default_event_structure(source_image_url)]
 
             # Extract the JSON response
@@ -252,7 +277,7 @@ class OpenAIService:
 
     def generate_recommended_filters(self, events_data: list[dict]) -> list[list[str]]:
         """Generate recommended filter keywords with emojis from upcoming events data using GPT
-        
+
         Returns a list of 3-element arrays: [category, emoji_string, filter_name]
         """
         if not events_data:
@@ -262,7 +287,9 @@ class OpenAIService:
         # Prepare event summaries for the prompt
         event_summaries = []
         for event in events_data[:200]:  # Limit to 200 events to avoid token limits
-            summary = f"- {event.get('title', 'Unnamed')} at {event.get('location', 'TBD')}"
+            summary = (
+                f"- {event.get('title', 'Unnamed')} at {event.get('location', 'TBD')}"
+            )
             if event.get("food"):
                 summary += f" (food: {event.get('food')})"
             if event.get("club_type"):
@@ -348,27 +375,34 @@ NO explanations, NO additional text, JUST the JSON array.
             # Clean and validate filters
             cleaned_filters = []
             for filter_item in filters:
-                if (isinstance(filter_item, list) and 
-                    len(filter_item) == 3 and 
-                    isinstance(filter_item[0], str) and 
-                    isinstance(filter_item[1], str) and
-                    isinstance(filter_item[2], str) and
-                    filter_item[0].strip() and 
-                    filter_item[1].strip() and
-                    filter_item[2].strip()):
-                    
+                if (
+                    isinstance(filter_item, list)
+                    and len(filter_item) == 3
+                    and isinstance(filter_item[0], str)
+                    and isinstance(filter_item[1], str)
+                    and isinstance(filter_item[2], str)
+                    and filter_item[0].strip()
+                    and filter_item[1].strip()
+                    and filter_item[2].strip()
+                ):
                     category = filter_item[0].strip()
                     emoji_string = filter_item[1].strip()
                     filter_name = filter_item[2].strip()
-                    
+
                     # Validate that the category exists and emoji exists in that category
-                    if (category in EMOJI_CATEGORIES and 
-                        emoji_string in EMOJI_CATEGORIES[category]):
+                    if (
+                        category in EMOJI_CATEGORIES
+                        and emoji_string in EMOJI_CATEGORIES[category]
+                    ):
                         cleaned_filters.append([category, emoji_string, filter_name])
                     else:
-                        logger.warning(f"Invalid filter emoji combination: category='{category}', emoji='{emoji_string}'")
+                        logger.warning(
+                            f"Invalid filter emoji combination: category='{category}', emoji='{emoji_string}'"
+                        )
 
-            logger.info(f"Generated {len(cleaned_filters)} recommended filters with emojis")
+            logger.info(
+                f"Generated {len(cleaned_filters)} recommended filters with emojis"
+            )
             return cleaned_filters[:15]
 
         except json.JSONDecodeError:

@@ -1,16 +1,9 @@
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Loading } from '@/shared/components/ui/loading'
 import { useAuth } from '@/shared/hooks/useAuth'
-import { useAuthRedirect } from '@/shared/hooks/useAuthRedirect'
 
 export const Dashboard = () => {
-  const { user, logout, isLoggingOut, isLoadingUser } = useAuth()
-  useAuthRedirect() // Redirect to home if not authenticated
-
-  if (isLoadingUser) {
-    return <Loading message="Loading dashboard..." />
-  }
+  const { user, logout, isLoggingOut } = useAuth()
 
   const handleLogout = () => {
     logout()

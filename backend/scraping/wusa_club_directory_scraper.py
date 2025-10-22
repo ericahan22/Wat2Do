@@ -133,7 +133,7 @@ def scrape_all():
         res.append(
             {
                 "club_name": club_info["club_name"],
-                "categories": club_info["categories"],  
+                "categories": club_info["categories"],
                 "club_page": club_info["club_page"],
                 "ig": club_info["ig"],
                 "discord": club_info["discord"],

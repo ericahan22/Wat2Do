@@ -1,4 +1,13 @@
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api`
+import { API_BASE_URL } from '@/shared/constants/api'
+
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+export interface User {
+  id: number
+  email: string
+}
 
 export interface LoginRequest {
   email: string
@@ -8,11 +17,6 @@ export interface LoginRequest {
 export interface SignupRequest {
   email: string
   password: string
-}
-
-export interface User {
-  id: number
-  email: string
 }
 
 export interface AuthResponse {
@@ -27,7 +31,60 @@ export interface ApiError {
   detail?: string
 }
 
-// Helper function to handle API responses
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function getCsrfToken(): string | null {
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'csrftoken') {
+      return value
+    }
+  }
+  return null
+}
+
+async function fetchCsrfToken(): Promise<string | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/csrf-token/`, {
+      method: 'GET',
+      credentials: 'include',
+    })
+    if (response.ok) {
+      const data = await response.json()
+      return data.csrfToken
+    }
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error)
+  }
+  return null
+}
+
+async function getOrFetchCsrfToken(): Promise<string | null> {
+  let csrfToken = getCsrfToken()
+  if (!csrfToken) {
+    csrfToken = await fetchCsrfToken()
+  }
+  return csrfToken
+}
+
+async function createAuthenticatedHeaders(contentType: string = 'application/json'): Promise<Record<string, string>> {
+  const csrfToken = await getOrFetchCsrfToken()
+  const headers: Record<string, string> = {}
+  
+  if (contentType) {
+    headers['Content-Type'] = contentType
+  }
+  
+  if (csrfToken) {
+    headers['X-CSRFToken'] = csrfToken
+  }
+  
+  return headers
+}
+
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData: ApiError = await response.json()
@@ -36,53 +93,64 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
   return response.json()
 }
 
-// Auth API functions
+// ============================================================================
+// API FUNCTIONS
+// ============================================================================
+
 export const authApi = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+    const headers = await createAuthenticatedHeaders()
+    
+    const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Important for session cookies
+      headers,
+      credentials: 'include',
       body: JSON.stringify(credentials),
     })
+    
     return handleApiResponse<AuthResponse>(response)
   },
 
   async signup(userData: SignupRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/signup/`, {
+    const headers = await createAuthenticatedHeaders()
+    
+    const response = await fetch(`${API_BASE_URL}/api/auth/signup/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       credentials: 'include',
       body: JSON.stringify(userData),
     })
+    
     return handleApiResponse<AuthResponse>(response)
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/auth/me/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/me/`, {
       method: 'GET',
       credentials: 'include',
     })
+    
     return handleApiResponse<User>(response)
   },
 
   async logout(): Promise<{ ok: boolean }> {
-    const response = await fetch(`${API_BASE_URL}/auth/logout/`, {
+    const headers = await createAuthenticatedHeaders('')
+    
+    const response = await fetch(`${API_BASE_URL}/api/auth/logout/`, {
       method: 'POST',
+      headers,
       credentials: 'include',
     })
+    
     return handleApiResponse<{ ok: boolean }>(response)
   },
 
   async confirmEmail(token: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/confirm/${token}/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/confirm/${token}/`, {
       method: 'GET',
       credentials: 'include',
     })
+    
     return handleApiResponse<AuthResponse>(response)
   },
 }

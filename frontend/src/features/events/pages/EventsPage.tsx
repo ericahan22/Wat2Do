@@ -4,10 +4,12 @@ import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventSelection } from "@/features/events/hooks/useEventSelection";
 import { getTodayString } from "@/shared/lib/dateUtils";
 import { SEOHead } from "@/shared/components/SEOHead";
+import { Button } from "@/shared/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { Calendar, X, History, LayoutGrid } from "lucide-react";
 
 // Components
 import EventsHeader from "@/features/events/components/EventsHeader";
-import EventsControls from "@/features/events/components/EventsControls";
 import EventsStatusBar from "@/features/events/components/EventsStatusBar";
 import EventsContent from "@/features/events/components/EventsContent";
 import SearchInput from "@/features/search/components/SearchInput";
@@ -50,44 +52,76 @@ function EventsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SEOHead 
+      <SEOHead
         title="Events - Discover University of Waterloo Club Events"
         description="Browse and discover exciting club events at the University of Waterloo. Find upcoming events, filter by date, and stay connected with campus activities."
         url="/events"
         keywords={[
-          'University of Waterloo events',
-          'UW club events',
-          'campus events',
-          'student events',
-          'Waterloo university events',
-          'upcoming events',
-          'event calendar',
-          'campus activities'
+          "University of Waterloo events",
+          "UW club events",
+          "campus events",
+          "student events",
+          "Waterloo university events",
+          "upcoming events",
+          "event calendar",
+          "campus activities",
         ]}
       />
       <EventsHeader />
 
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex items-center gap-4">
           <SearchInput placeholder="Filter events by..." className="flex-1" />
-          <EventsControls
-            view={view}
-            isSelectMode={isSelectMode}
-            isShowingPastEvents={isShowingPastEvents}
-            onViewChange={handleViewChange}
-            onToggleSelectMode={toggleSelectMode}
-            onToggleStartDate={handleToggleStartDate}
-          />
+          <Tabs
+            value={view}
+            onValueChange={(value) =>
+              handleViewChange(value as "grid" | "calendar")
+            }
+          >
+            <TabsList>
+              <TabsTrigger value="grid" className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Grid
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Calendar
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <QuickFilters />
 
-        <EventsStatusBar
-          isLoading={isLoading}
-          searchTerm={searchTerm}
-          isShowingPastEvents={isShowingPastEvents}
-          totalCount={data.length}
-        />
+        <div className="flex items-center justify-between">
+          <EventsStatusBar
+            isLoading={isLoading}
+            searchTerm={searchTerm}
+            isShowingPastEvents={isShowingPastEvents}
+            totalCount={data.length}
+          />
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onMouseDown={handleToggleStartDate}>
+              <History className="h-4 w-4" />
+              {isShowingPastEvents ? "Show Upcoming" : "Show Past Events"}
+            </Button>
+            {view === "grid" && (
+              <Button variant="ghost" onMouseDown={toggleSelectMode}>
+                {isSelectMode ? (
+                  <>
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="h-4 w-4" />
+                    Export
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       <EventsContent

@@ -1,4 +1,4 @@
-from django_filters import CharFilter, DateFilter, DateTimeFilter, FilterSet, NumberFilter
+from django_filters import CharFilter, DateTimeFilter, FilterSet, NumberFilter
 
 from apps.events.models import Events
 

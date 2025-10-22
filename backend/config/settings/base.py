@@ -60,6 +60,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -74,6 +75,12 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
 ]
+
+# CSRF settings for SPA frontend
+CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1"  # True in production (HTTPS)
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie for SPA
+CSRF_COOKIE_SAMESITE = "Lax"  # Allow cross-site requests
+CSRF_USE_SESSIONS = True  # Use sessions for CSRF tokens
 
 ROOT_URLCONF = "config.urls"
 
@@ -106,7 +113,7 @@ if os.getenv("PRODUCTION") == "1":
             "USER": os.getenv("POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
             "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
-            "PORT": os.getenv("POSTGRES_PORT", "6543"),   
+            "PORT": os.getenv("POSTGRES_PORT", "6543"),
             "OPTIONS": {
                 "options": "-c pool_mode=session",
                 "sslmode": "require",
@@ -121,7 +128,7 @@ else:
             "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
             "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),   
+            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),
         }
     }
 

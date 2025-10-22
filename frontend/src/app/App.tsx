@@ -6,7 +6,9 @@ import { EventsPage } from '@/features/events'
 import { ClubsPage } from '@/features/clubs'
 import { AdminPage } from '@/features/admin'
 import { UnsubscribePage } from '@/features/newsletter'
-import { AuthPage, VerifyEmailPage, Dashboard } from '@/features/auth'
+import { VerifyEmailPage, Dashboard } from '@/features/auth'
+import { AuthPage } from '@/features/auth/pages/AuthPage'
+import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { Navbar, Footer } from '@/shared'
 import AboutPage from '@/shared/components/layout/AboutPage'
 import ContactPage from '@/shared/components/layout/ContactPage'
@@ -44,7 +46,11 @@ function App() {
                 <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </main>

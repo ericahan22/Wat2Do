@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './useAuth'
 
-export const useAuthRedirect = (redirectTo: string = '/') => {
+export const useAuthRedirect = (redirectTo: string = '/auth') => {
   const { isAuthenticated, isLoadingUser } = useAuth()
   const navigate = useNavigate()
 

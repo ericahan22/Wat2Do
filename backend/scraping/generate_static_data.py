@@ -2,9 +2,9 @@ import os
 import sys
 from datetime import date, datetime, time, timezone
 from pathlib import Path
-from logging_config import logger
 
 from dotenv import load_dotenv
+from logging_config import logger
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,7 +14,7 @@ load_dotenv()
 
 os.environ.setdefault(
     "DJANGO_SETTINGS_MODULE",
-    os.getenv("DJANGO_SETTINGS_MODULE", "config.settings.development")
+    os.getenv("DJANGO_SETTINGS_MODULE", "config.settings.development"),
 )
 
 
@@ -41,18 +41,19 @@ def fetch_events():
     """Fetch all upcoming events from the database for static data generation"""
     try:
         import django
+
         django.setup()
     except Exception:
         logger.exception("Failed to setup Django before importing models")
         return []
-        
+
     events_list = []
     try:
         from apps.events.models import Events as EventsModel
     except Exception:
         logger.exception("Failed to import Event model")
         return []
-    
+
     try:
         today = date.today()
         qs = EventsModel.objects.filter(dtstart__date__gte=today).order_by("dtstart")
@@ -78,7 +79,7 @@ def fetch_events():
                     "x_handle": getattr(e, "x_handle", None),
                     "tiktok_handle": getattr(e, "tiktok_handle", None),
                     "fb_handle": getattr(e, "fb_handle", None),
-                    "display_handle": events_utils.determine_display_handle(e)
+                    "display_handle": events_utils.determine_display_handle(e),
                 }
             )
         logger.info(f"Fetched {len(events_list)} events via ORM")
@@ -148,16 +149,22 @@ def main():
                 f.write(f'    price: {format_value(event["price"])},\n')
                 f.write(f'    food: {format_value(event["food"])},\n')
                 f.write(f'    registration: {format_value(event["registration"])},\n')
-                f.write(f'    source_image_url: {format_value(event["source_image_url"])},\n')
+                f.write(
+                    f'    source_image_url: {format_value(event["source_image_url"])},\n'
+                )
                 f.write(f'    club_type: {format_value(event["club_type"])},\n')
                 f.write(f'    added_at: {format_value(event["added_at"])},\n')
                 f.write(f'    description: {format_value(event["description"])},\n')
                 f.write(f'    school: {format_value(event["school"])},\n')
-                f.write(f'    discord_handle: {format_value(event["discord_handle"])},\n')
+                f.write(
+                    f'    discord_handle: {format_value(event["discord_handle"])},\n'
+                )
                 f.write(f'    x_handle: {format_value(event["x_handle"])},\n')
                 f.write(f'    tiktok_handle: {format_value(event["tiktok_handle"])},\n')
                 f.write(f'    fb_handle: {format_value(event["fb_handle"])},\n')
-                f.write(f'    display_handle: {format_value(event["display_handle"])},\n')
+                f.write(
+                    f'    display_handle: {format_value(event["display_handle"])},\n'
+                )
                 f.write("  }")
                 if i < len(events) - 1:
                     f.write(",")
@@ -166,20 +173,26 @@ def main():
 
             # Write recommended filters (now 3D array format)
             if recommended_filters:
-                f.write("export const RECOMMENDED_FILTERS: [string, string, string][] = [\n")
+                f.write(
+                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [\n"
+                )
                 for i, filter_item in enumerate(recommended_filters):
                     if len(filter_item) == 3:
                         category, emoji_string, filter_name = filter_item
                         category_escaped = category.replace('"', '\\"')
                         emoji_escaped = emoji_string.replace('"', '\\"')
                         filter_escaped = filter_name.replace('"', '\\"')
-                        f.write(f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]')
+                        f.write(
+                            f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]'
+                        )
                         if i < len(recommended_filters) - 1:
                             f.write(",")
                         f.write("\n")
                 f.write("];\n")
             else:
-                f.write("export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n")
+                f.write(
+                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n"
+                )
 
         logger.info(
             "Successfully updated staticData.ts with events and recommended filters"

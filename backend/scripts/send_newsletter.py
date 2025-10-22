@@ -20,6 +20,7 @@ django.setup()
 from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
 from services.email_service import email_service  # noqa: E402
 
+
 def send_newsletter_to_all():
     """Send newsletter to all active subscribers"""
 
@@ -44,7 +45,7 @@ def send_newsletter_to_all():
             email_address = subscriber.get_email()
             if not email_address:
                 return False, "Failed to decrypt email address"
-            
+
             email_sent = email_service.send_newsletter_email(
                 email_address, str(subscriber.unsubscribe_token)
             )

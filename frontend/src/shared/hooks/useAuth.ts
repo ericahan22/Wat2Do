@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/authStore'
-import { authApi, type LoginRequest, type SignupRequest } from '../api/auth'
+import { authApi, type SignupRequest } from '../api/auth'
 
 export const useAuth = () => {
   const { user, isAuthenticated, setUser, logout: logoutStore } = useAuthStore()
@@ -83,7 +83,7 @@ export const useAuth = () => {
     },
   })
 
-  const confirmEmail = (token: string, options?: { onSuccess?: () => void; onError?: () => void }) => {
+  const _confirmEmail = (token: string, options?: { onSuccess?: () => void; onError?: () => void }) => {
     confirmEmailMutation.mutate(token, {
       onSuccess: (data) => {
         if (data.user) {
@@ -106,7 +106,7 @@ export const useAuth = () => {
     login: loginMutation.mutate,
     signup,
     logout: logoutMutation.mutate,
-    confirmEmail: confirmEmailMutation.mutate,
+    confirmEmail: _confirmEmail,
     isLoggingIn: loginMutation.isPending,
     isSigningUp: signupMutation.isPending,
     isLoggingOut: logoutMutation.isPending,

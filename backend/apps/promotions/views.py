@@ -195,7 +195,12 @@ def get_promoted_events(request):
                     "location": event.location,
                     "description": event.description,
                     "source_image_url": event.source_image_url,
-                    "club_handle": event.ig_handle or event.discord_handle or event.x_handle or event.tiktok_handle or event.fb_handle or event.school,
+                    "club_handle": event.ig_handle
+                    or event.discord_handle
+                    or event.x_handle
+                    or event.tiktok_handle
+                    or event.fb_handle
+                    or event.school,
                     "promotion": {
                         "is_active": promotion.is_active,
                         "promoted_at": promotion.promoted_at.isoformat(),

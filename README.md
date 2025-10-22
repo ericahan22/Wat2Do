@@ -52,31 +52,6 @@ npm install
 npm run dev
 ```
 
-## 🏗️ Build & Test
-
-### Backend
-- `python manage.py check` — Django config check
-- `python manage.py test` — Run Django tests
-- `python manage.py migrate` — Apply migrations
-
-### Frontend
-- `npm run build` — Production build
-- `npm run lint` — ESLint check
-- `npm run dev` — Dev server
-- `npm run preview` — Preview production build
-
-## 🌐 API Endpoints
-
-| Description         | URL/Command                                               |
-|---------------------|----------------------------------------------------------|
-| API info            | `curl http://localhost:8000/`                            |
-| Health check        | `curl http://localhost:8000/health/`                     |
-| Get all events      | `curl http://localhost:8000/events/`                     |
-| Get all clubs       | `curl http://localhost:8000/clubs/`                      |
-| Find similar events | `curl "http://localhost:8000/test-similarity/?text=..."` |
-
----
-
 ## 🤝 Support
 
 If you have questions or feedback, please reach out at <a href="https://wat2do.ca/contact" target="_blank">wat2do.ca/contact</a> or add a <a href="https://github.com/ericahan22/bug-free-octo-spork/issues" target="_blank">GitHub issue</a>.

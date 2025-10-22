@@ -1,31 +1,31 @@
+from django.conf import settings
+from django.http import HttpResponse
+from django.utils import timezone
+from django.utils.html import escape
+from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from ratelimit.decorators import ratelimit
-from django.http import HttpResponse
-from django.utils import timezone
-from django.utils.html import escape
-from django.conf import settings
 
 from services.openai_service import generate_embedding
+from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
 from .models import Events
-from utils import events_utils
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@ratelimit(key='ip', rate='60/hr', block=True)
+@ratelimit(key="ip", rate="60/hr", block=True)
 def get_events(request):
     """Get all events from database with optional filtering"""
     try:
         search_term = request.GET.get("search", "").strip()
 
         # Start with base queryset, ordered by dtstart
-        queryset = Events.objects.all().order_by('dtstart')
+        queryset = Events.objects.all().order_by("dtstart")
 
         # Apply standard filters (dates, price, club_type, etc.)
         filterset = EventFilter(request.GET, queryset=queryset)
@@ -71,11 +71,11 @@ def get_events(request):
             "fb_handle",
         ]
         results = list(filtered_queryset.values(*fields))
-        
+
         # Add display_handle field to each event
         for event in results:
             event["display_handle"] = events_utils.determine_display_handle(event)
-                    
+
         return Response(results)
 
     except Exception as e:
@@ -281,9 +281,7 @@ def get_google_calendar_urls(request):
             # Format dates for Google Calendar (YYYYMMDDTHHMMSS)
             start_date = event.dtstart.strftime("%Y%m%d")
             start_time = event.dtstart.strftime("%H%M%S")
-            end_time = (
-                event.dtend.strftime("%H%M%S") if event.dtend else start_time
-            )
+            end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
 
             start_datetime = f"{start_date}T{start_time}"
             end_datetime = f"{start_date}T{end_time}"
@@ -332,11 +330,15 @@ def rss_feed(request):
         title = escape(ev.title or "Untitled event")
         link = ev.source_url or f"{site_url}/events/{ev.id}"
         description = escape(ev.description or "")
-        pub_date = ev.dtstamp.astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        pub_date = ev.dtstamp.astimezone(timezone.utc).strftime(
+            "%a, %d %b %Y %H:%M:%S GMT"
+        )
         guid = f"{ev.id}@wat2do"
         enclosure = ""
         if ev.source_image_url:
-            enclosure = f'<media:content url="{escape(ev.source_image_url)}" medium="image" />'
+            enclosure = (
+                f'<media:content url="{escape(ev.source_image_url)}" medium="image" />'
+            )
 
         item_xml = f"""
       <item>

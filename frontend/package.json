@@ -26,6 +26,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "framer-motion": "^12.23.24",
     "lucide-react": "^0.536.0",
     "react": "^19.1.0",
     "react-big-calendar": "^1.19.4",
