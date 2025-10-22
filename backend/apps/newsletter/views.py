@@ -5,8 +5,9 @@ Views for the newsletter app.
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from utils.encryption_utils import email_encryption
 
 from .models import NewsletterSubscriber
 
@@ -14,19 +15,12 @@ from .models import NewsletterSubscriber
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def newsletter_subscribe(request):
-    """Subscribe to the newsletter"""
-    email = request.data.get("email")
-
+    """Subscribe to the newsletter (no authentication required)"""
+    email = request.data.get("email", "").strip().lower()
+    
     if not email:
         return Response(
             {"error": "Email is required"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    # Validate email format
-    if "@" not in email or "." not in email:
-        return Response(
-            {"error": "Please provide a valid email address"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -58,7 +52,7 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Successfully subscribed! Check your email for upcoming events.",
-                    "email": email,
+                    "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -66,7 +60,7 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Subscribed successfully, but email could not be sent. Please check back later.",
-                    "email": email,
+                    "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )

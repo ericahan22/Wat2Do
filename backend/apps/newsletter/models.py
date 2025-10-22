@@ -1,18 +1,10 @@
-import hashlib
 import uuid
 
 from django.db import models
 
-from utils.encryption_utils import email_encryption
-
 
 class NewsletterSubscriber(models.Model):
     email_encrypted = models.TextField(help_text="Encrypted email address")
-    email_hash = models.CharField(
-        max_length=128,
-        unique=True,
-        help_text="SHA-256 hash of the email for uniqueness checks",
-    )
     subscribed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     unsubscribe_token = models.UUIDField(
@@ -31,33 +23,28 @@ class NewsletterSubscriber(models.Model):
         ordering = ["-subscribed_at"]
 
     def __str__(self):
-        return f"NewsletterSubscriber({self.email_hash[:8]}...)"
-
-    @staticmethod
-    def hash_email(email):
-        """Create a SHA-256 hash of the email address for uniqueness checks"""
-        return hashlib.sha256(email.lower().strip().encode("utf-8")).hexdigest()
+        return f"NewsletterSubscriber({self.get_email_display()})"
 
     @classmethod
     def get_by_email(cls, email):
-        """Get subscriber by email address (using hash lookup)"""
-        email_hash = cls.hash_email(email)
+        """Get subscriber by email"""
+        from utils.encryption_utils import email_encryption
+        encrypted_email = email_encryption.encrypt_email(email)
         try:
-            return cls.objects.get(email_hash=email_hash)
+            return cls.objects.get(email_encrypted=encrypted_email)
         except cls.DoesNotExist:
             return None
 
     @classmethod
     def create_subscriber(cls, email):
-        """Create a new subscriber with encrypted email"""
-        email_hash = cls.hash_email(email)
-        email_encrypted = email_encryption.encrypt_email(email)
-        return cls.objects.create(
-            email_encrypted=email_encrypted, email_hash=email_hash, is_active=True
-        )
+        """Create a new subscriber for an email"""
+        from utils.encryption_utils import email_encryption
+        encrypted_email = email_encryption.encrypt_email(email)
+        return cls.objects.create(email_encrypted=encrypted_email, is_active=True)
 
     def get_email(self):
-        """Decrypt and return the actual email address"""
+        """Get the email (decrypted)"""
+        from utils.encryption_utils import email_encryption
         return email_encryption.decrypt_email(self.email_encrypted)
 
     def get_email_display(self):

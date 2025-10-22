@@ -25,31 +25,6 @@ Waterloo, scraped directly from Instagram.
 - **Club directory:** Explore all clubs with links to their website/Instagram
 - **Email newsletter:** Subscribe to get the latest events in your inbox, once daily
 
-**How It Works:**  
-Events are automatically collected from club Instagram posts, using the OpenAI API to extract details from captions and images. Data is refreshed daily.
-
-## 🛠️ Project Structure
-
-```
-.
-├── backend/
-│   ├── manage.py
-│   ├── requirements.txt
-│   ├── apps/               # Django apps (events, clubs, newsletter, etc.)
-│   ├── scraping/           # Instagram scraping scripts
-│   └── config/             # Settings and URLs
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   └── App.tsx
-│   │   ├── features/
-│   │   └── shared/
-│   │       ├── components/
-│   │       └── hooks/
-│   ├── package.json
-│   └── public/
-```
-
 ### Environment Setup
 
 #### Database
@@ -57,7 +32,8 @@ Events are automatically collected from club Instagram posts, using the OpenAI A
 docker compose up --build
 ```
 
-#### Backend (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db)
+#### Backend 
+# (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db)
 ```bash
 cd backend
 python -m venv .venv

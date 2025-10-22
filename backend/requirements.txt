@@ -6,6 +6,7 @@ psycopg2-binary==2.9.10
 django-cors-headers==4.3.1
 whitenoise==6.6.0
 pgvector==0.4.1 
+django-ratelimit==3.0.1
 
 # Scraping and web utilities
 --find-links=./wheels

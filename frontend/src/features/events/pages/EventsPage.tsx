@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventSelection } from "@/features/events/hooks/useEventSelection";
 import { getTodayString } from "@/shared/lib/dateUtils";
+import { SEOHead } from "@/shared/components/SEOHead";
 
 // Components
 import EventsHeader from "@/features/events/components/EventsHeader";
@@ -49,6 +50,21 @@ function EventsPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <SEOHead 
+        title="Events - Discover University of Waterloo Club Events"
+        description="Browse and discover exciting club events at the University of Waterloo. Find upcoming events, filter by date, and stay connected with campus activities."
+        url="/events"
+        keywords={[
+          'University of Waterloo events',
+          'UW club events',
+          'campus events',
+          'student events',
+          'Waterloo university events',
+          'upcoming events',
+          'event calendar',
+          'campus activities'
+        ]}
+      />
       <EventsHeader />
 
       <div className="flex flex-col gap-4">

@@ -1,8 +1,8 @@
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle
+from ratelimit.decorators import ratelimit
 
 from services.openai_service import generate_embedding
 from utils.embedding_utils import find_similar_events
@@ -14,7 +14,7 @@ from utils import events_utils
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@throttle_classes([AnonRateThrottle])
+@ratelimit(key='ip', rate='60/hr', block=True)
 def get_events(request):
     """Get all events from database with optional filtering"""
     try:
@@ -80,7 +80,6 @@ def get_events(request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@throttle_classes([AnonRateThrottle])
 def test_similarity(request):
     """Test semantic similarity search using a search query"""
     try:
@@ -119,7 +118,6 @@ def test_similarity(request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@throttle_classes([AnonRateThrottle])
 def export_events_ics(request):
     """Export events as .ics file for calendar import.
 
@@ -228,7 +226,6 @@ def _generate_ics_content(events):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@throttle_classes([AnonRateThrottle])
 def get_google_calendar_urls(request):
     """Generate Google Calendar URLs for given event IDs.
 

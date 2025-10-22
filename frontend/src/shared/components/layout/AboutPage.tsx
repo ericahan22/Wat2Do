@@ -1,9 +1,24 @@
 import React, { memo } from "react";
 import { Button } from "@/shared/components/ui/button";
+import { SEOHead } from "@/shared/components/SEOHead";
 
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+      <SEOHead 
+        title="About Wat2Do - Discover University of Waterloo Events"
+        description="Learn about Wat2Do, the platform helping University of Waterloo students discover exciting club events and campus activities. Built by students, for students."
+        url="/about"
+        keywords={[
+          'about Wat2Do',
+          'University of Waterloo events platform',
+          'campus event discovery',
+          'student event platform',
+          'UW event aggregator',
+          'campus activities',
+          'student life'
+        ]}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-8">
           About Wat2Do
