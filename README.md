@@ -25,7 +25,7 @@ Waterloo, scraped directly from Instagram.
 - **Club directory:** Explore all clubs with links to their website/Instagram
 - **Email newsletter:** Subscribe to get the latest events in your inbox, once daily
 
-### Environment Setup
+## 🏗️ Environment Setup
 
 #### Database
 ```bash
@@ -33,7 +33,7 @@ docker compose up --build
 ```
 
 #### Backend 
-# (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db)
+<!-- (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db) -->
 ```bash
 cd backend
 python -m venv .venv
@@ -51,19 +51,6 @@ cd frontend
 npm install 
 npm run dev
 ```
-
-## 🏗️ Build & Test
-
-### Backend
-- `python manage.py check` — Django config check
-- `python manage.py test` — Run Django tests
-- `python manage.py migrate` — Apply migrations
-
-### Frontend
-- `npm run build` — Production build
-- `npm run lint` — ESLint check
-- `npm run dev` — Dev server
-- `npm run preview` — Preview production build
 
 ## 🌐 API Endpoints
 

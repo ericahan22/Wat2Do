@@ -3,10 +3,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from ratelimit.decorators import ratelimit
-from django.http import HttpResponse
-from django.utils import timezone
-from django.utils.html import escape
-from django.conf import settings
 
 from services.openai_service import generate_embedding
 from utils.embedding_utils import find_similar_events
@@ -317,48 +313,3 @@ def get_google_calendar_urls(request):
             {"error": f"Failed to generate Google Calendar URLs: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-
-def rss_feed(request):
-    """
-    Simple RSS feed of upcoming events (returns application/rss+xml).
-    """
-    now = timezone.now()
-    items = Events.objects.filter(dtstart__gte=now).order_by("dtstart")[:50]
-
-    site_url = getattr(settings, "SITE_URL", "https://wat2do.ca")
-    rss_items = []
-    for ev in items:
-        title = escape(ev.title or "Untitled event")
-        link = ev.source_url or f"{site_url}/events/{ev.id}"
-        description = escape(ev.description or "")
-        pub_date = ev.dtstamp.astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
-        guid = f"{ev.id}@wat2do"
-        enclosure = ""
-        if ev.source_image_url:
-            enclosure = f'<media:content url="{escape(ev.source_image_url)}" medium="image" />'
-
-        item_xml = f"""
-      <item>
-        <title>{title}</title>
-        <link>{escape(link)}</link>
-        <description><![CDATA[{description}]]></description>
-        <guid isPermaLink="false">{guid}</guid>
-        <pubDate>{pub_date}</pubDate>
-        {enclosure}
-      </item>
-"""
-        rss_items.append(item_xml)
-
-    rss = f"""<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Wat2Do — Upcoming events</title>
-    <link>{site_url}</link>
-    <atom:link href="{site_url}/rss.xml" rel="self" type="application/rss+xml" />
-    <description>Upcoming events at the University of Waterloo</description>
-    <lastBuildDate>{timezone.now().astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")}</lastBuildDate>
-    {''.join(rss_items)}
-  </channel>
-</rss>"""
-    return HttpResponse(rss, content_type="application/rss+xml")
