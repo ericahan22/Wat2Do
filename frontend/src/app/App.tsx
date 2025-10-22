@@ -5,7 +5,7 @@ import { EventsPage } from "@/features/events";
 import { ClubsPage } from "@/features/clubs";
 import { AdminPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
-import { VerifyEmailPage, Dashboard } from "@/features/auth";
+import { VerifyEmailPage, DashboardPage } from "@/features/auth";
 import { AuthPage } from "@/features/auth/pages/AuthPage";
 import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
 import { Navbar, Footer } from "@/shared";
@@ -48,7 +48,7 @@ function App() {
                 path="/dashboard"
                 element={
                   <ProtectedRoute>
-                    <Dashboard />
+                    <DashboardPage />
                   </ProtectedRoute>
                 }
               />

@@ -2,7 +2,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { useAuth } from '@/shared/hooks/useAuth'
 
-export const Dashboard = () => {
+export const DashboardPage = () => {
   const { user, logout, isLoggingOut } = useAuth()
 
   const handleLogout = () => {
@@ -10,11 +10,11 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Welcome to your Dashboard</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome to your Dashboard</CardTitle>
             <CardDescription>
               You are successfully authenticated!
             </CardDescription>
@@ -22,7 +22,7 @@ export const Dashboard = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">User Information:</h3>
-              <div className="bg-gray-100 p-4 rounded-lg">
+              <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
                 <p><strong>ID:</strong> {user?.id}</p>
                 <p><strong>Email:</strong> {user?.email}</p>
               </div>
