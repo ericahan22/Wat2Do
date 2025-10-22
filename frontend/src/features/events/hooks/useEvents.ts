@@ -143,6 +143,8 @@ export function useEvents() {
         const cutoffDate = now >= todayAt8am ? todayAt8am : new Date(todayAt8am.getTime() - 24 * 60 * 60 * 1000);
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
+        // Remove dtstart when activating New filter to avoid conflicts
+        nextParams.delete("dtstart");
       }
       return nextParams;
     });

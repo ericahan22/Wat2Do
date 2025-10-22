@@ -108,10 +108,12 @@ function EventsPage() {
               <Sparkles className="h-4 w-4" />
               {isShowingNewEvents ? "All" : "New"}
             </Button>
-            <Button variant="ghost" onMouseDown={handleToggleStartDate}>
-              <History className="h-4 w-4" />
-              {isShowingPastEvents ? "Upcoming" : "Past"}
-            </Button>
+            {!isShowingNewEvents && (
+              <Button variant="ghost" onMouseDown={handleToggleStartDate}>
+                <History className="h-4 w-4" />
+                {isShowingPastEvents ? "Upcoming" : "Past"}
+              </Button>
+            )}
             {view === "grid" && (
               <Button variant="ghost" onMouseDown={toggleSelectMode}>
                 {isSelectMode ? (
