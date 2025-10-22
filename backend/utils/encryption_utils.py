@@ -6,7 +6,6 @@ Uses Fernet (symmetric encryption) for encrypting/decrypting emails.
 
 import base64
 import hashlib
-import hmac
 import os
 
 from cryptography.fernet import Fernet

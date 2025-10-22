@@ -274,7 +274,7 @@ def confirm_email(request, token):
         # Redirect to frontend login page
         from django.http import HttpResponseRedirect
 
-        return HttpResponseRedirect("http://localhost:5173/auth")
+        return HttpResponseRedirect(settings.FRONTEND_URL + "/auth")
     except User.DoesNotExist:
         return Response(
             {"error": "Invalid confirmation token"}, status=status.HTTP_400_BAD_REQUEST

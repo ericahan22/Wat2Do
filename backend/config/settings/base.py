@@ -75,6 +75,8 @@ CORS_ALLOW_CREDENTIALS = True
 # CSRF settings for development
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "https://wat2do.ca",
+    "https://www.wat2do.ca",
 ]
 
 # CSRF settings for SPA frontend
@@ -188,7 +190,8 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email confirmation settings
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+BASE_URL = "https://wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:8000"
+FRONTEND_URL = "https://wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:5173"
 
 # Global rate limiting settings
 RATELIMIT_VIEW = "ratelimit.views.ratelimited"

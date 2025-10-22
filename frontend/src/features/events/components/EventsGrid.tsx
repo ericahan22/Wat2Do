@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { Event } from "@/features/events/types/events";
 import { memo, useState, useMemo, useEffect } from "react";
-import { formatEventDate, formatEventTimeRange } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, formatPrettyDate } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import { EVENTS_PER_PAGE } from "@/features/events/constants/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
@@ -198,7 +198,7 @@ const EventsGrid = memo(
                     <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                       <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                       <span className="truncate">
-                        {formatEventDate(event.dtstart)}
+                        {formatPrettyDate(event.dtstart)}
                       </span>
                     </div>
 

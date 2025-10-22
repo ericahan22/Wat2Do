@@ -3,7 +3,7 @@
  */
 
 
-import { toZonedTime, format } from "date-fns-tz";
+import { format } from "date-fns-tz";
 
 /**
  * Remove timezone info from ISO datetime string to treat as local time
@@ -19,8 +19,7 @@ export const removeTimezoneInfo = (dateTimeString: string): string => {
  */
 export const formatPrettyDate = (dateString: string): string => {
   try {
-    const tz = "America/New_York";
-    const date = toZonedTime(dateString, tz);
+    const date = new Date(removeTimezoneInfo(dateString));
     return format(date, "MMMM d, yyyy");
   } catch {
     return dateString // Return original string if parsing fails
@@ -77,25 +76,11 @@ export const getTodayString = (): string => {
 };
 
 /**
- * Format an ISO datetime string to a prettier date format (e.g., "August 10, 2025")
- */
-export const formatEventDate = (isoDateTime: string): string => {
-  return formatPrettyDate(isoDateTime);
-};
-
-/**
- * Format an ISO datetime string to a prettier time format (e.g., "3pm" or "3:30pm")
- */
-export const formatEventTime = (isoDateTime: string): string => {
-  return formatPrettyTime(isoDateTime);
-};
-
-/**
  * Format a time range from ISO datetime strings (e.g., "3pm - 8pm")
  */
 export const formatEventTimeRange = (startDateTime: string, endDateTime: string | null): string => {
-  const start = formatEventTime(startDateTime);
-  const end = endDateTime ? formatEventTime(endDateTime) : null;
+  const start = formatPrettyTime(startDateTime);
+  const end = endDateTime ? formatPrettyTime(endDateTime) : null;
   return end ? `${start} - ${end}` : start;
 };
 

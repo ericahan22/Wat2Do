@@ -20,7 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import "@/shared/styles/calendar.css";
-import { formatEventDate, formatEventTimeRange, removeTimezoneInfo } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, removeTimezoneInfo, formatPrettyDate } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
 import { Event } from "@/features/events/types/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -105,7 +105,7 @@ const EventPopup: React.FC<{
     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
       <div className="flex items-center gap-2">
         <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-        <span>{formatEventDate(event.dtstart)}</span>
+        <span>{formatPrettyDate(event.dtstart)}</span>
       </div>
       
       <div className="flex items-center gap-2">
