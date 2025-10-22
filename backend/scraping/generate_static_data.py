@@ -195,11 +195,8 @@ def main():
             site_url = "https://wat2do.ca"
             last_build_dt = datetime.now(timezone.utc)
 
-            def dt_to_utc(val):
-                if isinstance(val, datetime):
-                    dt = val
-                else:
-                    dt = date_parser.parse(str(val))
+            def parse_dt_to_utc(val):
+                dt = val
                 if dt.tzinfo is None:
                     dt = dt.replace(tzinfo=timezone.utc)
                 return dt.astimezone(timezone.utc)
@@ -207,7 +204,7 @@ def main():
             rss_items = []
             for ev in events:
                 pub_dt = ev.get("dtstart") or ev.get("added_at") or last_build_dt
-                pub_dt_parsed = dt_to_utc(pub_dt) or last_build_dt
+                pub_dt_parsed = parse_dt_to_utc(pub_dt) or last_build_dt
                 pub_str = pub_dt_parsed.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
                 title = ev.get("title").replace("&", "&amp;")
