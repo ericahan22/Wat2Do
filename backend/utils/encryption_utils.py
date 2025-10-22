@@ -11,7 +11,6 @@ import os
 
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
-from django.conf import settings
 
 load_dotenv()
 
@@ -21,6 +20,7 @@ EMAIL_HASH_KEY = os.getenv("EMAIL_HASH_KEY").encode("utf-8")
 
 class EmailEncryption:
     """Handles encryption and decryption of email addresses and user data."""
+
     """Handles encryption and decryption of email addresses and user data."""
 
     def __init__(self):

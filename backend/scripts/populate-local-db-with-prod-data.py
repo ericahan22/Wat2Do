@@ -172,22 +172,24 @@ def sync_data():
                             # Build INSERT statement
                             placeholders = ", ".join(["%s"] * len(columns))
                             column_names = ", ".join(columns)
-                            
+
                             # Convert data types properly for PostgreSQL
                             values = []
                             for col in columns:
                                 value = record_data[col]
-                                
+
                                 # Handle different data types
                                 if value is None:
                                     values.append(None)
                                 elif isinstance(value, dict):
                                     # Convert dict to JSON string for JSONB columns
                                     import json
+
                                     values.append(json.dumps(value))
                                 elif isinstance(value, list):
                                     # Convert list to JSON string for JSONB columns
                                     import json
+
                                     values.append(json.dumps(value))
                                 else:
                                     values.append(value)
@@ -204,10 +206,12 @@ def sync_data():
                             else:
                                 # For other errors, show more detail
                                 print(f"   ⚠️  Skipping record: {e}")
-                    
+
                     # Commit after each model to prevent transaction abort cascades
                     local_conn.commit()
-                    print(f"   ✅ Successfully imported {successful_inserts}/{len(data)} {model_name.lower()}")
+                    print(
+                        f"   ✅ Successfully imported {successful_inserts}/{len(data)} {model_name.lower()}"
+                    )
 
             except Exception as e:
                 print(f"   ⚠️  Could not import {model_name}: {e}")

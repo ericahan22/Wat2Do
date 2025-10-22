@@ -1,7 +1,6 @@
 import os
 import sys
-from dateutil import parser as date_parser
-from datetime import datetime, timezone, date, time
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
