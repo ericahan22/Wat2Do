@@ -22,7 +22,7 @@ def format_value(value):
     """Format values for TypeScript file"""
     if value is None:
         return "null"
-    if isinstance(value, (date, time, datetime)):
+    if isinstance(value, date | time | datetime):
         return f'"{value.isoformat()}"'
     if isinstance(value, str):
         escaped_value = (

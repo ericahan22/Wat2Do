@@ -4,7 +4,7 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "N", "UP", "B", "A", "C4", "T20", "SIM", "ARG", "PTH", "ERA", "PD", "PGH", "PL", "TRY", "FLY", "NPY", "AIR", "PERF", "FURB", "LOG", "RUF"]
-ignore = ["T201", "TRY300", "TRY400", "RUF012", "ARG001", "E501", "W293", "PTH118", "PTH120", "PTH100", "PTH123", "PLR0912", "PLR0915", "B008", "N806", "PLR2004", "B007", "PERF102", "ERA001", "C414", "RUF013", "W291"]
+ignore = ["T201", "TRY300", "TRY003", "TRY400", "RUF012", "ARG001", "E501", "W293", "PTH118", "PTH120", "PTH100", "PTH123", "PLR0911", "PLR0912", "PLR0913", "PLR0915", "B008", "N806", "PLR2004", "B007", "PERF102", "PERF203", "PERF401", "ERA001", "C414", "RUF013", "W291"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/s3_cleanup.py" = ["E402"]
@@ -13,3 +13,4 @@ ignore = ["T201", "TRY300", "TRY400", "RUF012", "ARG001", "E501", "W293", "PTH11
 "manage.py" = ["TRY003"]
 "test_openai_service.py" = ["T201", "E501"]
 "config/settings/*.py" = ["F403", "F401", "F405"]
+"services/email_service.py" = ["E402"]

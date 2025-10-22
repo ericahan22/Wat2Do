@@ -510,10 +510,7 @@ def session():
         SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
         SESSION_CACHE_DIR.mkdir(exist_ok=True)
         files = [p for p in SESSION_CACHE_DIR.iterdir() if p.is_file()]
-        if files:
-            session_file = files[0]
-        else:
-            session_file = SESSION_CACHE_DIR / f"session-{USERNAME}"
+        session_file = files[0] if files else SESSION_CACHE_DIR / f"session-{USERNAME}"
     except Exception:
         session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
     try:
