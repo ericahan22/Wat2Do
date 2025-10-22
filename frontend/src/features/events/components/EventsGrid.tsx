@@ -1,4 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -21,15 +26,10 @@ import {
 } from "lucide-react";
 import { Event } from "@/features/events/types/events";
 import { memo, useState, useMemo, useEffect } from "react";
-import {
-  formatEventDate,
-  formatEventTimeRange,
-} from "@/shared/lib/dateUtils";
+import { formatEventDate, formatEventTimeRange } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
-import EventBadgeMaskRight from "@/assets/event-badge-mask-right.svg?react";
-import EventBadgeMaskLeft from "@/assets/event-badge-mask-left.svg?react";
-import EventBadgeMaskRightLong from "@/assets/event-badge-mask-right-long.svg?react";
 import { EVENTS_PER_PAGE } from "@/features/events/constants/events";
+import BadgeMask from "@/shared/components/ui/badge-mask";
 
 interface EventsGridProps {
   data: Event[];
@@ -44,29 +44,21 @@ const EventStatusBadge = ({ event }: { event: Event }) => {
 
   if (status === "live") {
     return (
-      <>
-        <EventBadgeMaskRight className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-        <Badge
-          variant="live"
-          className="font-extrabold tracking-[-0.02em] absolute top-0 right-0 z-10"
-        >
+      <BadgeMask variant="top-right">
+        <Badge variant="live" className="font-extrabold">
           LIVE
         </Badge>
-      </>
+      </BadgeMask>
     );
   }
 
   if (status === "soon") {
     return (
-      <>
-        <EventBadgeMaskRightLong className="absolute top-0 right-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-        <Badge
-          variant="soon"
-          className="font-extrabold tracking-[0.03em] absolute top-0 right-0 z-10"
-        >
+      <BadgeMask variant="top-right">
+        <Badge variant="soon" className="font-extrabold">
           Starting soon
         </Badge>
-      </>
+      </BadgeMask>
     );
   }
 
@@ -77,15 +69,23 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   if (!isEventNew(event)) return null;
 
   return (
-    <>
-      <EventBadgeMaskLeft className="absolute top-0 left-0 z-10 h-8 w-auto text-white dark:text-gray-900" />
-      <Badge
-        variant="new"
-        className="font-extrabold absolute top-0 left-0 z-10"
-      >
+    <BadgeMask variant="top-left">
+      <Badge variant="new" className="font-extrabold">
         NEW
       </Badge>
-    </>
+    </BadgeMask>
+  );
+};
+
+const OrganizationBadge = ({ event }: { event: Event }) => {
+  if (!event.display_handle) return null;
+
+  return (
+    <BadgeMask variant="bottom-left">
+      <Badge variant="outline" className="font-extrabold">
+        {event.display_handle}
+      </Badge>
+    </BadgeMask>
   );
 };
 
@@ -119,7 +119,7 @@ const EventsGrid = memo(
     return (
       <div className="space-y-8">
         {/* Events Grid */}
-        <div className="grid sm:grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5">
+        <div className="grid sm:grid-cols-[repeat(auto-fit,_minmax(175px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5">
           {paginatedData.map((event: Event) => {
             const isSelected = selectedEvents.has(event.id.toString());
             return (
@@ -128,11 +128,10 @@ const EventsGrid = memo(
                 className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg gap-0 h-full ${
                   isSelectMode ? "cursor-pointer" : ""
                 } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
-                onMouseDown={() => isSelectMode && onToggleEvent?.(event.id.toString())}
+                onMouseDown={() =>
+                  isSelectMode && onToggleEvent?.(event.id.toString())
+                }
               >
-                <EventStatusBadge event={event} />
-                <NewEventBadge event={event} />
-
                 {/* Selection Circle */}
                 {isSelectMode && (
                   <div
@@ -148,24 +147,26 @@ const EventsGrid = memo(
                   </div>
                 )}
 
-                {/* Event Image */}
-                {event.source_image_url && (
-                  <img
-                    src={event.source_image_url}
-                    alt={event.title}
-                    loading="lazy"
-                    className="w-full h-40 object-cover rounded-t-xl"
-                  />
-                )}
+                <div className="relative">
+                  {/* Event Image */}
+                  {event.source_image_url && (
+                    <img
+                      src={event.source_image_url}
+                      alt={event.title}
+                      loading="lazy"
+                      className="w-full h-40 object-cover rounded-t-xl"
+                    />
+                  )}
+                  <EventStatusBadge event={event} />
+                  <NewEventBadge event={event} />
+                  <OrganizationBadge event={event} />
+                </div>
                 <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
                   <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
                     {event.title}
                   </CardTitle>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {event.display_handle}
-                  </p>
                 </CardHeader>
-                <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-2.5">
+                <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-0">
                   <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                     <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                     <span className="truncate">
@@ -221,10 +222,12 @@ const EventsGrid = memo(
                           variant="outline"
                           size="sm"
                           className="flex-1 w-full"
-                          onMouseDown={() => window.open(event.source_url || "", "_blank")}
+                          onMouseDown={() =>
+                            window.open(event.source_url || "", "_blank")
+                          }
                         >
                           <ExternalLink className="h-3.5 w-3.5" />
-                          Open Event
+                          View Details
                         </Button>
                       ) : (
                         <div className="text-center py-2 w-full">
@@ -262,27 +265,39 @@ const EventsGrid = memo(
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onMouseDown={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => handlePageChange(page)}
-                    isActive={currentPage === page}
-                    className="cursor-pointer"
-                  >
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <PaginationItem key={page}>
+                    <PaginationLink
+                      onMouseDown={() => handlePageChange(page)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
+
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  onMouseDown={() =>
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
                 />
               </PaginationItem>
             </PaginationContent>

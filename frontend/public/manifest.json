@@ -1,0 +1,22 @@
+{
+  "name": "Wat2Do - University of Waterloo Events",
+  "short_name": "Wat2Do",
+  "description": "Discover exciting club events at the University of Waterloo. Browse upcoming events, explore campus clubs, and stay connected with the UW community.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/wat2do-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "lifestyle", "social"],
+  "lang": "en-CA",
+  "scope": "/",
+  "id": "wat2do-app"
+}

@@ -9,20 +9,6 @@ import { isEventOngoing } from "@/shared/lib/eventUtils";
 import { Event } from "@/features/events/types/events";
 
 // Format the last updated timestamp into a human-readable format (in local time)
-export const getLastUpdatedText = (): string => {
-  const date = new Date(LAST_UPDATED);
-  const dateStr = date.toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-  });
-  const timeStr = date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-  return `Last updated on ${dateStr} at ${timeStr}`;
-};
-
 const fetchEvents = async ({
   queryKey,
 }: {

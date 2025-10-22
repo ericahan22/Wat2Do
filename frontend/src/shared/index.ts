@@ -5,6 +5,7 @@ export { default as Footer } from './components/layout/Footer';
 export { default as GitHubLink } from './components/layout/GitHubLink';
 export { default as TopBanner } from './components/layout/TopBanner';
 export { default as FloatingEventExportBar } from './components/common/FloatingEventExportBar';
+export { SEOHead } from './components/SEOHead';
 
 // Hooks
 export { useDocumentTitle } from './hooks/useDocumentTitle';
