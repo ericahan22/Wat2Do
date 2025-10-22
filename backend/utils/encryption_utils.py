@@ -71,13 +71,6 @@ class EmailEncryption:
         normalized_email = email.lower().strip()
         return hashlib.sha256(normalized_email.encode("utf-8")).hexdigest()
 
-    def create_hmac_email_hash(self, email):
-        """Create HMAC hash of the email (for newsletter uniqueness)."""
-        normalized_email = email.lower().strip()
-        return hmac.new(
-            EMAIL_HASH_KEY, normalized_email.encode("utf-8"), hashlib.sha256
-        ).hexdigest()
-
     # User-specific methods
     def create_user_with_encryption(self, email, password):
         """Create a new user with encrypted email and hashed username."""

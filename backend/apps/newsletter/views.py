@@ -52,7 +52,6 @@ def newsletter_subscribe(request):
                 {
                     "message": "Successfully subscribed! Check your email for upcoming events.",
                     "email": subscriber.get_email_display(),
-                    "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
             )
@@ -60,7 +59,6 @@ def newsletter_subscribe(request):
             return Response(
                 {
                     "message": "Subscribed successfully, but email could not be sent. Please check back later.",
-                    "email": subscriber.get_email_display(),
                     "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
