@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { staticEventsData, LAST_UPDATED } from "@/data/staticData";
+import { staticEventsData } from "@/data/staticData";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { API_BASE_URL } from "@/shared/constants/api";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
