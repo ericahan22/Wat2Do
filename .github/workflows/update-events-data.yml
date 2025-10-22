@@ -124,7 +124,7 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add frontend/src/data/staticData.ts
+          git add frontend/src/data/staticData.ts frontend/public/rss.xml
           git commit -m "chore: update static data from DB" || echo "No changes to commit"
           git pull --rebase && git push
 

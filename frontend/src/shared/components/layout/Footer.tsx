@@ -143,6 +143,8 @@ function Footer() {
             </a>
             <a
               href="/rss.xml"
+              download="rss.xml"
+              rel="noopener noreferrer"
               className="dark:text-gray-200 flex items-center gap-2"
             >
               <Rss className="h-4 w-4" />

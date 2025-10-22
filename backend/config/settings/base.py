@@ -64,6 +64,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "ratelimit.middleware.RatelimitMiddleware",
 ]
 
 # CORS settings
@@ -157,8 +158,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
-    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
-    "DEFAULT_THROTTLE_RATES": {"anon": "150/hour"},
 }
 
 
@@ -175,3 +174,17 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Email confirmation settings
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+
+# Global rate limiting settings
+RATELIMIT_VIEW = "ratelimit.views.ratelimited"
+RATELIMIT_USE_CACHE = "default"
+RATELIMIT_ENABLE = True
+
+# Global rate limits (applied to all routes)
+RATELIMIT_GLOBAL = "200/h"  # 1000 requests per hour per IP globally
+RATELIMIT_GROUP = {
+    "api": "60/h",  # 100 requests per hour for API endpoints
+}

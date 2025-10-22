@@ -695,6 +695,456 @@ class EmailService:
             print(f"Error sending email: {e}")
             return False
 
+    def generate_confirmation_email_html(self, confirmation_url):
+        """Generate HTML email for account confirmation"""
+        return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+  </head>
+  <body style="background-color:#f3f3f5">
+    <table
+      border="0"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      align="center">
+      <tbody>
+        <tr>
+          <td
+            style="background-color:#f3f3f5;font-family:HelveticaNeue,Helvetica,Arial,sans-serif">
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="display:flex;background:#f3f3f5;padding:20px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h1 style="font-size:28px;font-weight:bold;color:#0c0d0e;margin:0">
+                              Wat2Do 🎉
+                            </h1>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="border-radius:5px 5px 0 0;display:flex;flex-direciont:column;background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td
+                                    data-id="__react-email-column"
+                                    style="padding:40px 30px">
+                                    <h1
+                                      style="color:#fff;font-size:32px;font-weight:bold;line-height:38px;margin:0 0 12px 0">
+                                      Confirm Your Account! 🎓
+                                    </h1>
+                                    <p
+                                      style="font-size:18px;line-height:26px;color:#fff;margin:0">
+                                      Please confirm your email to complete your Wat2Do registration
+                                    </p>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="padding:30px 30px 40px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h2
+                              style="margin:0 0 20px;font-weight:bold;font-size:24px;line-height:28px;color:#0c0d0e">
+                              Welcome to Wat2Do! 🎉
+                            </h2>
+                            <p
+                              style="font-size:15px;line-height:22px;color:#3c3f44;margin:0 0 24px 0">
+                              Thanks for signing up! Please click the button below to confirm your email address and complete your registration.
+                            </p>
+                            
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation"
+                              style="margin-top:24px;display:block">
+                              <tbody>
+                                <tr>
+                                  <td style="text-align:center">
+                                    <a
+                                      href="{confirmation_url}"
+                                      style="color:#fff;text-decoration-line:none;background-color:#667eea;border:1px solid #5568d3;font-size:16px;line-height:16px;padding:14px 24px;border-radius:6px;display:inline-block;font-weight:600"
+                                      target="_blank"
+                                      >Confirm Email Address</a
+                                    >
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <p
+                              style="font-size:14px;line-height:20px;color:#6a737c;margin:24px 0 0 0">
+                              If the button doesn't work, you can also copy and paste this link into your browser:
+                            </p>
+                            <p
+                              style="font-size:12px;line-height:18px;color:#667eea;margin:8px 0 0 0;word-break:break-all">
+                              {confirmation_url}
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="width:600px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="font-size:12px;line-height:18px;color:#9199a1;margin:0;margin-bottom:16px">
+                      This email was sent because you signed up for a Wat2Do account.
+                    </p>
+                    <a
+                      href="https://wat2do.ca"
+                      style="color:#9199a1;text-decoration-line:none;display:inline-block;text-decoration:underline;font-size:12px;margin-right:16px"
+                      target="_blank"
+                      >Visit Wat2Do</a
+                    >
+                    <hr
+                      style="width:100%;border:none;border-top:1px solid #eaeaea;margin:24px 0;border-color:#d6d8db" />
+                    <p
+                      style="font-size:12px;line-height:18px;margin:4px 0;color:#9199a1">
+                      <strong>Wat2Do</strong> - Your guide to UWaterloo events
+                    </p>
+                    <p
+                      style="font-size:11px;line-height:14px;border-radius:3px;border:1px solid #d6d9dc;padding:8px 10px;font-family:Consolas,monospace;color:#667eea;max-width:min-content;margin:16px 0 32px 0">
+                      Made with 💜 for UWaterloo
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>"""
+
+    def send_confirmation_email(self, to_email, confirmation_url):
+        """Send email confirmation to new user"""
+        if not self.api_key:
+            print("Warning: RESEND_API_KEY not set. Email not sent.")
+            return False
+
+        if not to_email:
+            print("Error: No email address provided.")
+            return False
+
+        html_content = self.generate_confirmation_email_html(confirmation_url)
+
+        payload = {
+            "from": f"Wat2Do <{self.from_email}>",
+            "to": [to_email],
+            "subject": "Confirm Your Wat2Do Account 🎉",
+            "html": html_content,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            response.raise_for_status()
+            print(f"Confirmation email sent to {to_email}")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending confirmation email: {e}")
+            return False
+
+    def generate_password_reset_email_html(self, reset_url):
+        """Generate HTML email for password reset"""
+        return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+  </head>
+  <body style="background-color:#f3f3f5">
+    <table
+      border="0"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      align="center">
+      <tbody>
+        <tr>
+          <td
+            style="background-color:#f3f3f5;font-family:HelveticaNeue,Helvetica,Arial,sans-serif">
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="display:flex;background:#f3f3f5;padding:20px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h1 style="font-size:28px;font-weight:bold;color:#0c0d0e;margin:0">
+                              Wat2Do 🔐
+                            </h1>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="border-radius:5px 5px 0 0;display:flex;flex-direciont:column;background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td
+                                    data-id="__react-email-column"
+                                    style="padding:40px 30px">
+                                    <h1
+                                      style="color:#fff;font-size:32px;font-weight:bold;line-height:38px;margin:0 0 12px 0">
+                                      Reset Your Password 🔑
+                                    </h1>
+                                    <p
+                                      style="font-size:18px;line-height:26px;color:#fff;margin:0">
+                                      Click the button below to reset your password
+                                    </p>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="padding:30px 30px 40px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h2
+                              style="margin:0 0 20px;font-weight:bold;font-size:24px;line-height:28px;color:#0c0d0e">
+                              Password Reset Request 🔐
+                            </h2>
+                            <p
+                              style="font-size:15px;line-height:22px;color:#3c3f44;margin:0 0 24px 0">
+                              We received a request to reset your password. Click the button below to create a new password. This link will expire in 1 hour.
+                            </p>
+                            
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation"
+                              style="margin-top:24px;display:block">
+                              <tbody>
+                                <tr>
+                                  <td style="text-align:center">
+                                    <a
+                                      href="{reset_url}"
+                                      style="color:#fff;text-decoration-line:none;background-color:#667eea;border:1px solid #5568d3;font-size:16px;line-height:16px;padding:14px 24px;border-radius:6px;display:inline-block;font-weight:600"
+                                      target="_blank"
+                                      >Reset Password</a
+                                    >
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <p
+                              style="font-size:14px;line-height:20px;color:#6a737c;margin:24px 0 0 0">
+                              If the button doesn't work, you can also copy and paste this link into your browser:
+                            </p>
+                            <p
+                              style="font-size:12px;line-height:18px;color:#667eea;margin:8px 0 0 0;word-break:break-all">
+                              {reset_url}
+                            </p>
+                            
+                            <hr
+                              style="width:100%;border:none;border-top:1px solid #eaeaea;margin:30px 0" />
+                            
+                            <p
+                              style="font-size:13px;line-height:18px;color:#9199a1;margin:0">
+                              If you didn't request this password reset, you can safely ignore this email. Your password will not be changed.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="width:600px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="font-size:12px;line-height:18px;color:#9199a1;margin:0;margin-bottom:16px">
+                      This email was sent because you requested a password reset for your Wat2Do account.
+                    </p>
+                    <a
+                      href="https://wat2do.ca"
+                      style="color:#9199a1;text-decoration-line:none;display:inline-block;text-decoration:underline;font-size:12px;margin-right:16px"
+                      target="_blank"
+                      >Visit Wat2Do</a
+                    >
+                    <hr
+                      style="width:100%;border:none;border-top:1px solid #eaeaea;margin:24px 0;border-color:#d6d8db" />
+                    <p
+                      style="font-size:12px;line-height:18px;margin:4px 0;color:#9199a1">
+                      <strong>Wat2Do</strong> - Your guide to UWaterloo events
+                    </p>
+                    <p
+                      style="font-size:11px;line-height:14px;border-radius:3px;border:1px solid #d6d9dc;padding:8px 10px;font-family:Consolas,monospace;color:#667eea;max-width:min-content;margin:16px 0 32px 0">
+                      Made with 💜 for UWaterloo
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>"""
+
+    def send_password_reset_email(self, to_email, reset_url):
+        """Send password reset email to user"""
+        if not self.api_key:
+            print("Warning: RESEND_API_KEY not set. Email not sent.")
+            return False
+
+        if not to_email:
+            print("Error: No email address provided.")
+            return False
+
+        html_content = self.generate_password_reset_email_html(reset_url)
+
+        payload = {
+            "from": f"Wat2Do <{self.from_email}>",
+            "to": [to_email],
+            "subject": "Reset Your Wat2Do Password 🔐",
+            "html": html_content,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            response.raise_for_status()
+            print(f"Password reset email sent to {to_email}")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending password reset email: {e}")
+            return False
+
 
 # Singleton instance
 email_service = EmailService()

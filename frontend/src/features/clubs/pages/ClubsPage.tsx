@@ -11,6 +11,7 @@ import { useCategoryParam } from "@/shared/hooks/useCategoryParam";
 import { useClubs } from "@/features/clubs/hooks/useClubs";
 import SearchInput from "@/features/search/components/SearchInput";
 import ClubsGrid from "@/features/clubs/components/ClubsGrid";
+import { SEOHead } from "@/shared/components/SEOHead";
 
 function ClubsPage() {
   const {
@@ -38,6 +39,21 @@ function ClubsPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <SEOHead 
+        title="Clubs - University of Waterloo Student Organizations"
+        description="Explore student clubs and organizations at the University of Waterloo. Discover campus clubs, find your interests, and connect with like-minded students."
+        url="/clubs"
+        keywords={[
+          'University of Waterloo clubs',
+          'UW student organizations',
+          'campus clubs',
+          'student clubs',
+          'Waterloo university clubs',
+          'club directory',
+          'student organizations',
+          'campus groups'
+        ]}
+      />
       {/* Header */}
       <div className="sm:text-left">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
