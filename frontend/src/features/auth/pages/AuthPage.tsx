@@ -53,7 +53,7 @@ export const AuthPage = () => {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100">Welcome</CardTitle>
           <CardDescription className="text-center">
-            Sign in to your account or create a new one 
+            Sign in to your account or create a new one. Emails are encrypted.
           </CardDescription>
         </CardHeader>
         <CardContent>
