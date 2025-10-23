@@ -133,10 +133,10 @@ export function useEvents() {
         nextParams.delete("added_at");
       } else {
         const now = new Date();
-        const todayAt8am = new Date();
-        todayAt8am.setHours(7, 0, 0, 0);
+        const todayAt7am = new Date();
+        todayAt7am.setHours(7, 0, 0, 0);
         
-        const cutoffDate = now >= todayAt8am ? todayAt8am : new Date(todayAt8am.getTime() - 24 * 60 * 60 * 1000);
+        const cutoffDate = now >= todayAt7am ? todayAt7am : new Date(todayAt7am.getTime() - 24 * 60 * 60 * 1000);
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
         nextParams.delete("dtstart");
