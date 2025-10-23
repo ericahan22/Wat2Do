@@ -38,19 +38,27 @@ def get_events(request):
         if search_term:
             event_ids = set()
             
-            keyword_events = filtered_queryset.filter(
-                Q(title__icontains=search_term) |
-                Q(location__icontains=search_term) |
-                Q(description__icontains=search_term) |
-                Q(food__icontains=search_term) |
-                Q(club_type__icontains=search_term) |
-                Q(school__icontains=search_term) |
-                Q(ig_handle__icontains=search_term) |
-                Q(discord_handle__icontains=search_term)  |
-                Q(x_handle__icontains=search_term)|
-                Q(tiktok_handle__icontains=search_term) |
-                Q(fb_handle__icontains=search_term)
-            )
+            # Special handling for "free food" search
+            if search_term.lower() == "free food":
+                keyword_events = filtered_queryset.filter(
+                    Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"),
+                    Q(food__isnull=False) & ~Q(food="")
+                )
+            else:
+                keyword_events = filtered_queryset.filter(
+                    Q(title__icontains=search_term) |
+                    Q(location__icontains=search_term) |
+                    Q(description__icontains=search_term) |
+                    Q(food__icontains=search_term) |
+                    Q(club_type__icontains=search_term) |
+                    Q(school__icontains=search_term) |
+                    Q(ig_handle__icontains=search_term) |
+                    Q(discord_handle__icontains=search_term)  |
+                    Q(x_handle__icontains=search_term)|
+                    Q(tiktok_handle__icontains=search_term) |
+                    Q(fb_handle__icontains=search_term)
+                )
+            
             event_ids.update(keyword_events.values_list('id', flat=True))
 
             # search_embedding = generate_embedding(search_term)
