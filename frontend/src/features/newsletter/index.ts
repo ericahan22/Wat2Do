@@ -1,4 +1,3 @@
-// Components
 export { default as UnsubscribeForm } from './components/UnsubscribeForm';
 
 // Hooks

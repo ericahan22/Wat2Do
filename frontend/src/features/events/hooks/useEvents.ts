@@ -6,7 +6,7 @@ import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { API_BASE_URL } from "@/shared/constants/api";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
 import { isEventOngoing } from "@/shared/lib/eventUtils";
-import { Event } from "@/features/events/types/events";
+import { Event } from "@/features/events";
 
 // Format the last updated timestamp into a human-readable format (in local time)
 const fetchEvents = async ({
@@ -117,10 +117,8 @@ export function useEvents() {
       const todayStr = getTodayString();
 
       if (dtstart && dtstart !== todayStr) {
-        // Remove dtstart to show upcoming events
         nextParams.delete("dtstart");
       } else {
-        // Set dtstart to 2025-01-01 to show past events
         nextParams.set("dtstart", formatDtstartToMidnight("2025-01-01"));
       }
       return nextParams;
@@ -132,10 +130,8 @@ export function useEvents() {
       const nextParams = new URLSearchParams(prev);
 
       if (addedAt) {
-        // Remove added_at to show all events
         nextParams.delete("added_at");
       } else {
-        // Set added_at to today at 8am or yesterday at 8am, depending on current time
         const now = new Date();
         const todayAt8am = new Date();
         todayAt8am.setHours(7, 0, 0, 0);
@@ -143,7 +139,6 @@ export function useEvents() {
         const cutoffDate = now >= todayAt8am ? todayAt8am : new Date(todayAt8am.getTime() - 24 * 60 * 60 * 1000);
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
-        // Remove dtstart when activating New filter to avoid conflicts
         nextParams.delete("dtstart");
       }
       return nextParams;

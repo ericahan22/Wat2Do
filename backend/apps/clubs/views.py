@@ -19,13 +19,10 @@ from .models import Clubs
 def get_clubs(request):
     """Get all clubs from database (no pagination)"""
     try:
-        search_term = request.GET.get("search", "").strip()  # Get search term
-        category_filter = request.GET.get("category", "").strip()  # Get category filter
+        search_term = request.GET.get("search", "").strip()
+        category_filter = request.GET.get("category", "").strip()
 
-        # Build base queryset
         base_queryset = Clubs.objects.all()
-
-        # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
         if search_term:
             filtered_queryset = filtered_queryset.filter(

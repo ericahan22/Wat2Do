@@ -27,7 +27,6 @@ class EmailService:
         """Fetch events that were added to the database today"""
         today = date.today()
 
-        # Get events added today, ordered by date and start time
         events = (
             Events.objects.filter(added_at__date=today)
             .select_related()
@@ -47,7 +46,6 @@ class EmailService:
             else:
                 time_range = f"Starting at {start_time}"
 
-            # Get club name from social handles or use school as fallback
             club_name = (
                 event.ig_handle
                 or event.discord_handle

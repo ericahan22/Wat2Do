@@ -1,4 +1,3 @@
-// Components
 export { default as SearchInput } from './components/SearchInput';
 
 // Hooks

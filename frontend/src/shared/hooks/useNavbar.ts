@@ -33,7 +33,6 @@ export const useNavbar = () => {
     isMobileMenuOpen,
     theme,
     
-    // Functions
     isActive,
     toggleMobileMenu,
     closeMobileMenu,

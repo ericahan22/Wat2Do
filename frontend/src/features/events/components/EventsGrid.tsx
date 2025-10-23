@@ -25,11 +25,10 @@ import {
   Utensils,
   Check,
 } from "lucide-react";
-import { Event } from "@/features/events/types/events";
+import { Event, EVENTS_PER_PAGE } from "@/features/events";
 import { memo, useState, useMemo, useEffect } from "react";
 import { formatEventTimeRange, formatPrettyDate } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
-import { EVENTS_PER_PAGE } from "@/features/events/constants/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 import { motion } from "framer-motion";
 
@@ -113,7 +112,6 @@ const EventsGrid = memo(
       setCurrentPage(page);
     };
 
-    // Reset to first page when data changes
     useEffect(() => {
       setCurrentPage(1);
     }, [data]);

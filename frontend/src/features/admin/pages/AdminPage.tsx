@@ -29,14 +29,12 @@ function AdminPage() {
   const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Use the existing events hook
   const {
     data: events,
     isLoading: eventsLoading,
     error: eventsError,
   } = useEvents();
 
-  // Check authentication on component mount
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (token) {

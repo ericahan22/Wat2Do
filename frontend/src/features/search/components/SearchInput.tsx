@@ -2,7 +2,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Search, X } from "lucide-react";
 import { useRef, useEffect, memo } from "react";
-import { useSearchState } from "@/features/search/hooks/useSearchState";
+import { useSearchState } from "@/features/search";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -14,7 +14,6 @@ const SearchInput = memo(
     const inputRef = useRef<HTMLInputElement>(null);
     const { inputValue, handleSearch, handleClear, handleChange } = useSearchState();
 
-    // Auto-focus on search input when component mounts
     useEffect(() => {
       inputRef.current?.focus();
     }, []);

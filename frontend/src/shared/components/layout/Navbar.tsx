@@ -1,6 +1,5 @@
 import { Moon, Sun, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import GitHubLink from "./GitHubLink";
 import { useNavbar } from "@/shared/hooks";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -75,7 +74,7 @@ function Navbar() {
           <div className="flex items-center gap-2">
             {/* Desktop Right Side */}
             <div className="hidden md:flex items-center gap-2">
-              <Button
+              {/* <Button
                 variant="link"
                 asChild
                 className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -87,8 +86,8 @@ function Navbar() {
                 >
                   Feedback
                 </a>
-              </Button>
-              <GitHubLink />
+              </Button> */}
+              {/* <GitHubLink /> */}
 
               {/* Auth Section */}
               {isAuthenticated ? (
@@ -224,7 +223,7 @@ function Navbar() {
 
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
               <div className="flex gap-2">
-                <Button
+                {/* <Button
                   variant="ghost"
                   className="flex-1 justify-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   asChild
@@ -236,10 +235,10 @@ function Navbar() {
                   >
                     Feedback
                   </a>
-                </Button>
-                <div className="flex items-center">
+                </Button> */}
+                {/* <div className="flex items-center">
                   <GitHubLink />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

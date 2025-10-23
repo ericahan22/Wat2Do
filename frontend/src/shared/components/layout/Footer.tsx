@@ -3,9 +3,11 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Mail, Check, X, Rss } from "lucide-react";
 import { useNewsletterSubscribe } from "@/features/newsletter/hooks/useNewsletterSubscribe";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
   const {
     subscribe,
     reset,
@@ -102,7 +104,7 @@ function Footer() {
               reserved.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center">
             <a
               href="https://wat2do.instatus.com/"
               target="_blank"
@@ -117,30 +119,34 @@ function Footer() {
                 All systems operational
               </Button>
             </a>
-            <a
-              href="/events"
-              className="dark:text-gray-200"
+            <Button
+              variant="link"
+              onMouseDown={() => navigate("/events")}
+              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Events
-            </a>
-            <a
-              href="/clubs"
-              className="dark:text-gray-200"
+            </Button>
+            <Button
+              variant="link"
+              onMouseDown={() => navigate("/clubs")}
+              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Clubs
-            </a>
-            <a
-              href="/about"
-              className="dark:text-gray-200"
+            </Button>
+            <Button
+              variant="link"
+              onMouseDown={() => navigate("/about")}
+              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               About
-            </a>
-            <a
-              href="/contact"
-              className="dark:text-gray-200"
+            </Button>
+            <Button
+              variant="link"
+              onMouseDown={() => navigate("/contact")}
+              className="mr-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Contact
-            </a>
+            </Button>
             <a
               href="/rss.xml"
               download="rss.xml"

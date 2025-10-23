@@ -15,7 +15,7 @@ export function useSearchState() {
   useEffect(() => {
     const urlSearchParam = searchParams.get("search") || "";
     setInputValue(urlSearchParam);
-  }, [searchParam]); // Sync when URL search param changes
+  }, [searchParams]); // Sync when URL search param changes
 
   // Handle initial mount - restore last search if no URL param
   useEffect(() => {
@@ -29,7 +29,7 @@ export function useSearchState() {
         return nextParams;
       });
     }
-  }, []); // Only run on mount
+  }, []); 
 
   const handleSearch = useCallback(() => {
     const trimmedValue = inputValue.trim();

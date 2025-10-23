@@ -1,20 +1,9 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useEvents } from "@/features/events/hooks/useEvents";
-import { useEventSelection } from "@/features/events/hooks/useEventSelection";
-import { getTodayString } from "@/shared/lib/dateUtils";
-import { SEOHead } from "@/shared/components/SEOHead";
-import { Button } from "@/shared/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { useEvents, useEventSelection, EventsHeader, EventsStatusBar, EventsContent, QuickFilters } from "@/features/events";
+import { getTodayString, SEOHead, Button, Tabs, TabsList, TabsTrigger, FloatingEventExportBar } from "@/shared";
 import { Calendar, X, History, LayoutGrid, Sparkles } from "lucide-react";
-
-// Components
-import EventsHeader from "@/features/events/components/EventsHeader";
-import EventsStatusBar from "@/features/events/components/EventsStatusBar";
-import EventsContent from "@/features/events/components/EventsContent";
 import SearchInput from "@/features/search/components/SearchInput";
-import QuickFilters from "@/features/events/components/QuickFilters";
-import FloatingEventExportBar from "@/shared/components/common/FloatingEventExportBar";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();

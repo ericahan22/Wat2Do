@@ -26,10 +26,7 @@ def get_events(request):
     try:
         search_term = request.GET.get("search", "").strip()
 
-        # Start with base queryset, ordered by dtstart
         queryset = Events.objects.all().order_by("dtstart")
-
-        # Apply standard filters (dates, price, club_type, etc.)
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(
@@ -38,7 +35,6 @@ def get_events(request):
             )
         filtered_queryset = filterset.qs
 
-        # Apply both keyword and semantic search if search term provided
         if search_term:
             event_ids = set()
             
@@ -57,7 +53,6 @@ def get_events(request):
             )
             event_ids.update(keyword_events.values_list('id', flat=True))
 
-            # Apply vector similarity search
             # search_embedding = generate_embedding(search_term)
             # dtstart = request.GET.get("dtstart")
             # similar_events = find_similar_events(
@@ -68,11 +63,11 @@ def get_events(request):
             # similar_event_ids = [event["id"] for event in similar_events]
             # event_ids.update(similar_event_ids)
 
-            # Filter by combined results
             if event_ids:
                 filtered_queryset = filtered_queryset.filter(id__in=event_ids)
+            else:
+                filtered_queryset = filtered_queryset.none()
 
-        # Return selected event fields
         fields = [
             "id",
             "title",
@@ -96,7 +91,6 @@ def get_events(request):
         ]
         results = list(filtered_queryset.values(*fields))
 
-        # Add display_handle field to each event
         for event in results:
             event["display_handle"] = events_utils.determine_display_handle(event)
 
@@ -114,7 +108,6 @@ def get_event(request, event_id):
     try:
         event = get_object_or_404(Events, id=event_id)
         
-        # Return selected event fields (same as get_events)
         fields = [
             "id",
             "title",

@@ -9,7 +9,6 @@ export const useAuth = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  // Get current user query
   const { data: currentUser, isLoading: isLoadingUser, error: currentUserError } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: authApi.getCurrentUser,
@@ -28,7 +27,6 @@ export const useAuth = () => {
     }
   }, [currentUserError, logoutStore, queryClient])
 
-  // Update store when user data changes
   if (currentUser && currentUser.id !== user?.id) {
     setUser(currentUser)
   }

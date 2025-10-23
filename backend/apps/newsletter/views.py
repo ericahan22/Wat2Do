@@ -97,12 +97,10 @@ def newsletter_unsubscribe(request, token):
                 {"error": "Already unsubscribed"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get reason and feedback
         reason = request.data.get("reason", "").strip()
         feedback = request.data.get("feedback", "").strip()
         full_reason = f"{reason} - {feedback}" if feedback else reason
 
-        # Update subscriber
         subscriber.is_active = False
         subscriber.unsubscribe_reason = full_reason[:255]
         subscriber.unsubscribed_at = timezone.now()

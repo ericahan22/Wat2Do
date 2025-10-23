@@ -190,7 +190,6 @@ def login_email(request):
             {"error": "email+password required"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Find user by email using encryption system
     user = email_encryption.get_user_by_username_hash(email)
     if not user:
         return Response(
@@ -261,7 +260,6 @@ def protected_view(request):
 def confirm_email(request, token):
     """Confirm user's email address with token"""
     try:
-        # Find user with this confirmation token
         user = User.objects.get(first_name__startswith=token + "|")
 
         # Validate token expiration
@@ -311,7 +309,6 @@ def resend_confirmation(request):
         )
 
     try:
-        # Find user by email
         user = User.objects.get(email=email)
 
         # Check if user is already confirmed (no token in first_name)
@@ -376,7 +373,6 @@ def forgot_password(request):
         )
 
     try:
-        # Find user by email using encryption system
         user = email_encryption.get_user_by_username_hash(email)
         if not user:
             # Don't reveal if email exists or not for security
@@ -433,7 +429,6 @@ def reset_password(request, token):
         )
 
     try:
-        # Find user with this reset token
         user = User.objects.get(last_name__startswith=token + "|")
 
         # Validate token expiration

@@ -17,20 +17,17 @@ def promote_event(request, event_id):
 
     POST /api/promotions/events/<event_id>/promote/
     """
-    # Check if event exists
     try:
         event = Events.objects.get(id=event_id)
     except Events.DoesNotExist:
         return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check if already promoted
     if hasattr(event, "promotion"):
         return Response(
             {"error": "Event is already promoted. Use PATCH to update."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Get request data
     priority = request.data.get("priority", 1)
     expires_at = request.data.get("expires_at")
     promoted_by = request.data.get("promoted_by", request.user.username)
@@ -49,7 +46,6 @@ def promote_event(request, event_id):
         if isinstance(expires_at_dt, Response):  # Error response
             return expires_at_dt
 
-    # Create promotion
     promotion = EventPromotion.objects.create(
         event=event,
         is_active=True,

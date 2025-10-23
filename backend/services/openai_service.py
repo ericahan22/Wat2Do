@@ -36,7 +36,6 @@ class OpenAIService:
         # Clean up the text for better embedding quality
         text = text.replace("\n", " ").replace("\r", " ").strip()
 
-        # Remove extra whitespace
         import re
 
         text = re.sub(r"\s+", " ", text)
