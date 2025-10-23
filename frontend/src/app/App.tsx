@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { EventsPage } from "@/features/events";
+import EventDetailPage from "@/features/events/pages/EventDetailPage";
 import { ClubsPage } from "@/features/clubs";
 import { AdminPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
@@ -37,6 +38,7 @@ function App() {
             <Routes>
               <Route path="/" element={<EventsPage />} />
               <Route path="/events" element={<EventsPage />} />
+              <Route path="/events/:eventId" element={<EventDetailPage />} />
               <Route path="/clubs" element={<ClubsPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />

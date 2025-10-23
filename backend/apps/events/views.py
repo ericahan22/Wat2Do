@@ -2,6 +2,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.html import escape
+from django.shortcuts import get_object_or_404
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -77,6 +78,46 @@ def get_events(request):
             event["display_handle"] = events_utils.determine_display_handle(event)
 
         return Response(results)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="60/hr", block=True)
+def get_event(request, event_id):
+    """Get a single event by ID"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        
+        # Return selected event fields (same as get_events)
+        fields = [
+            "id",
+            "title",
+            "description",
+            "location",
+            "dtstart",
+            "dtend",
+            "price",
+            "food",
+            "registration",
+            "source_image_url",
+            "club_type",
+            "added_at",
+            "school",
+            "source_url",
+            "ig_handle",
+            "discord_handle",
+            "x_handle",
+            "tiktok_handle",
+            "fb_handle",
+        ]
+        
+        event_data = {field: getattr(event, field) for field in fields}
+        event_data["display_handle"] = events_utils.determine_display_handle(event_data)
+        
+        return Response(event_data)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
