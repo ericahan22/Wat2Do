@@ -4,8 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import {
-  Button } from "@/shared/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import {
   Pagination,
@@ -153,7 +152,7 @@ const EventsGrid = memo(
                 }}
               >
                 <Card
-                  className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg gap-0 h-full ${
+                  className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full ${
                     isSelectMode ? "cursor-pointer" : ""
                   } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
                   onMouseDown={() =>
@@ -308,7 +307,7 @@ const EventsGrid = memo(
               {(() => {
                 const pages = [];
                 const showEllipsis = totalPages > 7;
-                
+
                 if (showEllipsis) {
                   // Show first 3 pages
                   for (let i = 1; i <= 3; i++) {
@@ -317,14 +316,13 @@ const EventsGrid = memo(
                         <PaginationLink
                           onMouseDown={() => handlePageChange(i)}
                           isActive={currentPage === i}
-                          className="cursor-pointer"
                         >
                           {i}
                         </PaginationLink>
                       </PaginationItem>
                     );
                   }
-                  
+
                   // Show ellipsis if current page is far from start
                   if (currentPage > 5) {
                     pages.push(
@@ -333,11 +331,11 @@ const EventsGrid = memo(
                       </PaginationItem>
                     );
                   }
-                  
+
                   // Show current page and surrounding pages
                   const start = Math.max(4, currentPage - 1);
                   const end = Math.min(totalPages - 2, currentPage + 1);
-                  
+
                   for (let i = start; i <= end; i++) {
                     if (i > 3 && i < totalPages - 2) {
                       pages.push(
@@ -345,7 +343,6 @@ const EventsGrid = memo(
                           <PaginationLink
                             onMouseDown={() => handlePageChange(i)}
                             isActive={currentPage === i}
-                            className="cursor-pointer"
                           >
                             {i}
                           </PaginationLink>
@@ -353,7 +350,7 @@ const EventsGrid = memo(
                       );
                     }
                   }
-                  
+
                   // Show ellipsis if current page is far from end
                   if (currentPage < totalPages - 4) {
                     pages.push(
@@ -362,7 +359,7 @@ const EventsGrid = memo(
                       </PaginationItem>
                     );
                   }
-                  
+
                   // Show last 3 pages
                   for (let i = totalPages - 2; i <= totalPages; i++) {
                     pages.push(
@@ -370,7 +367,6 @@ const EventsGrid = memo(
                         <PaginationLink
                           onMouseDown={() => handlePageChange(i)}
                           isActive={currentPage === i}
-                          className="cursor-pointer"
                         >
                           {i}
                         </PaginationLink>
@@ -385,7 +381,6 @@ const EventsGrid = memo(
                         <PaginationLink
                           onMouseDown={() => handlePageChange(i)}
                           isActive={currentPage === i}
-                          className="cursor-pointer"
                         >
                           {i}
                         </PaginationLink>
@@ -393,7 +388,7 @@ const EventsGrid = memo(
                     );
                   }
                 }
-                
+
                 return pages;
               })()}
 
@@ -401,11 +396,6 @@ const EventsGrid = memo(
                 <PaginationNext
                   onMouseDown={() =>
                     handlePageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
                   }
                 />
               </PaginationItem>
