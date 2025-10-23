@@ -1,4 +1,4 @@
-import { useMemo, useRef, memo } from "react";
+import { useMemo, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -116,4 +116,4 @@ function ClubsPage() {
   );
 }
 
-export default memo(ClubsPage);
+export default ClubsPage;

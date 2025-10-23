@@ -6,7 +6,7 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "text-gray-900 dark:text-gray-100 bg-[#0056D6] hover:bg-[#0056D6]/80 text-white",
+          "text-gray-900 dark:text-gray-100 bg-[#0056D6] hover:!bg-[#0056D6]/80 text-white",
         destructive: "text-red-600 dark:text-red-400",
         outline:
           "border border-gray-200 text-gray-900 hover:border-gray-300 dark:border-gray-700 dark:text-gray-100 dark:hover:border-gray-600",
@@ -35,9 +35,9 @@ export const buttonVariants = cva(
           "bg-[size:400%] bg-[linear-gradient(-45deg,var(--gradient-lime),var(--gradient-ocean),var(--gradient-wine),var(--gradient-rust))] animate-gradient-flow",
       },
       size: {
-        sm: "h-8 rounded-md px-2",
-        default: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        sm: "h-8 rounded-xl px-2",
+        default: "h-9 rounded-xl px-3",
+        lg: "h-11 rounded-xl px-8",
         icon: "h-10 w-10",
       },
     },

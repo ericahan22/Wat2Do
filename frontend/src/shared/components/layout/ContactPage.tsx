@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { SEOHead } from "@/shared/components/SEOHead";
 
 const ContactPage: React.FC = () => {
@@ -70,6 +70,6 @@ const ContactPage: React.FC = () => {
   );
 };
 
-export default memo(ContactPage);
+export default ContactPage;
 
 

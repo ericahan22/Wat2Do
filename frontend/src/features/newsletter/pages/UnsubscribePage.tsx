@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
@@ -178,4 +178,4 @@ const UnsubscribePage: React.FC = () => {
   );
 };
 
-export default memo(UnsubscribePage);
+export default UnsubscribePage;

@@ -36,7 +36,7 @@ const SearchInput = memo(
 
     return (
       <div
-        className={`relative ${className} border border-gray-300 h-9 dark:border-gray-700 overflow-hidden rounded-md`}
+        className={`relative ${className} border border-gray-300 h-9 shadow-s dark:border-gray-700 overflow-hidden rounded-xl`}
       >
         <Input
           ref={inputRef}
@@ -44,7 +44,7 @@ const SearchInput = memo(
           value={inputValue}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          className={`shadow-none border-none h-8 ${
+          className={`shadow-none text-sm border-none ${
             inputValue ? "pr-20" : "pr-12"
           }`}
         />

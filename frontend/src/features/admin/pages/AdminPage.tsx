@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect } from "react";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
 import { AdminLogin } from "@/features/admin/components/AdminLogin";
 import { useEvents } from "@/features/events/hooks/useEvents";
@@ -405,4 +405,4 @@ function AdminPage() {
   );
 }
 
-export default memo(AdminPage);
+export default AdminPage;

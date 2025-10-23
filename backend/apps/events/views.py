@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.html import escape
@@ -37,8 +38,18 @@ def get_events(request):
             )
         filtered_queryset = filterset.qs
 
-        # Apply vector similarity search if search term provided
+        # Apply both keyword and semantic search if search term provided
         if search_term:
+            event_ids = set()
+            
+            keyword_events = filtered_queryset.filter(
+                Q(title__icontains=search_term) |
+                Q(description__icontains=search_term) |
+                Q(location__icontains=search_term)
+            )
+            event_ids.update(keyword_events.values_list('id', flat=True))
+
+            # Apply vector similarity search
             search_embedding = generate_embedding(search_term)
             dtstart = request.GET.get("dtstart")
             similar_events = find_similar_events(
@@ -47,7 +58,11 @@ def get_events(request):
             for event in similar_events:
                 print(event["title"], event["similarity"])
             similar_event_ids = [event["id"] for event in similar_events]
-            filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
+            event_ids.update(similar_event_ids)
+
+            # Filter by combined results
+            if event_ids:
+                filtered_queryset = filtered_queryset.filter(id__in=event_ids)
 
         # Return selected event fields (excluding description and embedding)
         fields = [

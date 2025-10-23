@@ -5,15 +5,15 @@
 
 /* Satoshi Font */
 @font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/WEB/fonts/Satoshi-Variable.woff2') format('woff2');
+  font-family: "Satoshi";
+  src: url("/fonts/WEB/fonts/Satoshi-Variable.woff2") format("woff2");
   font-display: swap;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/WEB/fonts/Satoshi-VariableItalic.woff2') format('woff2');
+  font-family: "Satoshi";
+  src: url("/fonts/WEB/fonts/Satoshi-VariableItalic.woff2") format("woff2");
   font-display: swap;
   font-style: italic;
 }
@@ -26,7 +26,7 @@
 body {
   @apply bg-white dark:bg-gray-900;
   overflow-x: hidden;
-  font-family: 'Satoshi', system-ui, sans-serif;
+  font-family: "Satoshi", system-ui, sans-serif;
   font-weight: 450;
 }
 
@@ -39,7 +39,8 @@ html {
   0% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.89);
   }
-  35%, 100% {
+  35%,
+  100% {
     box-shadow: 0 0 0 5px rgba(239, 68, 68, 0);
   }
 }
@@ -48,32 +49,69 @@ html {
   animation: pulse-live 4s ease-in-out infinite;
 }
 
-h1, h2, h3, h4, h5, h6, strong, b {
-  font-family: 'Satoshi', system-ui, sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  font-family: "Satoshi", system-ui, sans-serif;
   font-weight: 800;
   @apply text-gray-900 dark:text-white;
 }
 
-strong, b {
+strong,
+b {
   font-weight: 600;
 }
 
 /* Secondary text - body content and emphasis */
-p, span, article, ul, ol, li, label, em, i, a {
+p,
+span,
+article,
+ul,
+ol,
+li,
+label,
+em,
+i,
+a {
   @apply text-gray-700 dark:text-gray-300;
 }
 
 /* Form inputs */
-input, textarea, select {
+input,
+textarea,
+select {
   @apply text-gray-900 dark:text-white;
 }
 
 /* Code elements */
-code, pre {
+code,
+pre {
   @apply text-gray-800 dark:text-gray-200;
 }
 
 /* Muted text */
-blockquote, small {
+blockquote,
+small {
   @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Shadow utility classes - Light mode */
+.shadow-s {
+  box-shadow: inset 0 1px 2px #ffffff30, 0 1px 2px #00000030,
+    0 2px 4px #00000015;
+}
+
+.shadow-m {
+  box-shadow: inset 0 1px 2px #ffffff50, 0 2px 4px #00000030,
+    0 4px 8px #00000015;
+}
+
+.shadow-l {
+  box-shadow: inset 0 1px 2px #ffffff70, 0 4px 6px #00000030,
+    0 6px 10px #00000015;
 }

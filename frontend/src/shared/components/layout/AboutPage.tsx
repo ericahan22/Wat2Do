@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { SEOHead } from "@/shared/components/SEOHead";
 
@@ -247,4 +247,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default memo(AboutPage);
+export default AboutPage;

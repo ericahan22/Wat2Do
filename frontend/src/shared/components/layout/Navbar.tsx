@@ -1,4 +1,3 @@
-import React from "react";
 import { Moon, Sun, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import GitHubLink from "./GitHubLink";
@@ -23,15 +22,7 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex gap-6 items-center">
-            <div className="text-base font-bold">
-              <a href="/" onMouseDown={() => navigate("/")}>
-                <img
-                  src="/wat2do-logo.svg"
-                  alt="Wat2Do"
-                  className="h-14 w-14"
-                />
-              </a>
-            </div>
+            <img onMouseDown={() => navigate("/")} src="/wat2do-logo.svg" alt="Wat2Do" className="cursor-pointer h-14 w-14" />
             {/* Desktop Navigation */}
             <div className="hidden md:flex gap-2">
               <Button
@@ -150,7 +141,7 @@ function Navbar() {
               variant="ghost"
               size="sm"
               onMouseDown={toggleTheme}
-              className="p-2"
+              className="p-2 h-9 w-9"
             >
               {theme === "dark" ? (
                 <Sun className="h-4 w-4" />
@@ -258,4 +249,4 @@ function Navbar() {
   );
 }
 
-export default React.memo(Navbar);
+export default Navbar;

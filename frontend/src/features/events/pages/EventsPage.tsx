@@ -1,4 +1,4 @@
-import { useCallback, memo } from "react";
+import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventSelection } from "@/features/events/hooks/useEventSelection";
@@ -19,6 +19,7 @@ import FloatingEventExportBar from "@/shared/components/common/FloatingEventExpo
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
+  const placeholder = searchParams.get("placeholder") || "Free food";
 
   const handleViewChange = useCallback(
     (newView: "grid" | "calendar") => {
@@ -74,7 +75,7 @@ function EventsPage() {
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
-          <SearchInput placeholder="Filter events by..." className="flex-1" />
+          <SearchInput placeholder={placeholder} className="flex-1" />
           <Tabs
             value={view}
             onValueChange={(value) =>
@@ -155,4 +156,4 @@ function EventsPage() {
   );
 }
 
-export default memo(EventsPage);
+export default EventsPage;
