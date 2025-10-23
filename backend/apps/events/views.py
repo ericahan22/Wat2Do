@@ -58,15 +58,15 @@ def get_events(request):
             event_ids.update(keyword_events.values_list('id', flat=True))
 
             # Apply vector similarity search
-            search_embedding = generate_embedding(search_term)
-            dtstart = request.GET.get("dtstart")
-            similar_events = find_similar_events(
-                embedding=search_embedding, min_date=dtstart
-            )
-            for event in similar_events:
-                print(event["title"], event["similarity"])
-            similar_event_ids = [event["id"] for event in similar_events]
-            event_ids.update(similar_event_ids)
+            # search_embedding = generate_embedding(search_term)
+            # dtstart = request.GET.get("dtstart")
+            # similar_events = find_similar_events(
+            #     embedding=search_embedding, min_date=dtstart
+            # )
+            # for event in similar_events:
+            #     print(event["title"], event["similarity"])
+            # similar_event_ids = [event["id"] for event in similar_events]
+            # event_ids.update(similar_event_ids)
 
             # Filter by combined results
             if event_ids:
