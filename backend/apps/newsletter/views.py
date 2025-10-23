@@ -24,10 +24,10 @@ def newsletter_subscribe(request):
         )
 
     try:
-        subscriber = NewsletterSubscriber.get_by_email(email)
-        created = False
+        try:
+            subscriber = NewsletterSubscriber.get_by_email(email)
+            created = False
 
-        if subscriber:
             if subscriber.is_active:
                 return Response(
                     {"message": "You're already subscribed to our newsletter!"},
@@ -36,7 +36,7 @@ def newsletter_subscribe(request):
             else:
                 subscriber.is_active = True
                 subscriber.save()
-        else:
+        except NewsletterSubscriber.DoesNotExist:
             subscriber = NewsletterSubscriber.create_subscriber(email)
             created = True
 
