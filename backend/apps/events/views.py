@@ -44,7 +44,6 @@ def get_events(request):
             
             keyword_events = filtered_queryset.filter(
                 Q(title__icontains=search_term) |
-                Q(description__icontains=search_term) |
                 Q(location__icontains=search_term)
             )
             event_ids.update(keyword_events.values_list('id', flat=True))
@@ -64,7 +63,7 @@ def get_events(request):
             if event_ids:
                 filtered_queryset = filtered_queryset.filter(id__in=event_ids)
 
-        # Return selected event fields (excluding description and embedding)
+        # Return selected event fields
         fields = [
             "id",
             "title",
