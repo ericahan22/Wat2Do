@@ -10,7 +10,7 @@ from services.openai_service import generate_embedding
 
 def find_similar_events(
     embedding: list[float],
-    threshold: float = 0.30,
+    threshold: float = 0.50,
     limit: int = None,
     min_date: str = date.today().isoformat(),
 ) -> list[dict]:
