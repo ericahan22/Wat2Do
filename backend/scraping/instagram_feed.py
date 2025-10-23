@@ -25,7 +25,10 @@ from zyte_setup import setup_zyte
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
-from services.openai_service import extract_events_from_caption, generate_event_embedding
+from services.openai_service import (
+    extract_events_from_caption,
+    generate_event_embedding,
+)
 from services.storage_service import upload_image_from_url
 from utils.embedding_utils import find_similar_events
 from utils.events_utils import tz_compute

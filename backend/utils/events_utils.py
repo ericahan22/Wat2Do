@@ -32,7 +32,7 @@ def determine_display_handle(event):
     if social_handles:
         handle = social_handles[0]
         handle_str = str(handle)
-        return handle_str if handle_str.startswith("@") else f"@{handle_str}"
+        return handle_str
     school = _get("school")
     return school or "Wat2Do Event"
 

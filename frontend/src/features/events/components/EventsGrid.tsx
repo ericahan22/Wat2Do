@@ -83,8 +83,17 @@ const OrganizationBadge = ({ event }: { event: Event }) => {
 
   return (
     <BadgeMask variant="bottom-left">
-      <Badge variant="outline" className="font-extrabold">
-        {event.display_handle}
+      <Badge
+        onMouseDown={() =>
+          window.open(
+            `https://www.instagram.com/${event.display_handle}/`,
+            "_blank"
+          )
+        }
+        variant="outline"
+        className="font-extrabold cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        @{event.display_handle}
       </Badge>
     </BadgeMask>
   );

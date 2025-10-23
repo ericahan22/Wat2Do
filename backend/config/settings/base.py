@@ -191,7 +191,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email confirmation settings
 BASE_URL = (
-    "https://api.wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:8000"
+    "https://api.wat2do.ca"
+    if os.getenv("PRODUCTION") == "1"
+    else "http://localhost:8000"
 )
 FRONTEND_URL = (
     "https://wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:5173"

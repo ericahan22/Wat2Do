@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.html import escape
-from django.shortcuts import get_object_or_404
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -37,29 +37,29 @@ def get_events(request):
 
         if search_term:
             event_ids = set()
-            
+
             # Special handling for "free food" search
             if search_term.lower() == "free food":
                 keyword_events = filtered_queryset.filter(
                     Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"),
-                    Q(food__isnull=False) & ~Q(food="")
+                    Q(food__isnull=False) & ~Q(food=""),
                 )
             else:
                 keyword_events = filtered_queryset.filter(
-                    Q(title__icontains=search_term) |
-                    Q(location__icontains=search_term) |
-                    Q(description__icontains=search_term) |
-                    Q(food__icontains=search_term) |
-                    Q(club_type__icontains=search_term) |
-                    Q(school__icontains=search_term) |
-                    Q(ig_handle__icontains=search_term) |
-                    Q(discord_handle__icontains=search_term)  |
-                    Q(x_handle__icontains=search_term)|
-                    Q(tiktok_handle__icontains=search_term) |
-                    Q(fb_handle__icontains=search_term)
+                    Q(title__icontains=search_term)
+                    | Q(location__icontains=search_term)
+                    | Q(description__icontains=search_term)
+                    | Q(food__icontains=search_term)
+                    | Q(club_type__icontains=search_term)
+                    | Q(school__icontains=search_term)
+                    | Q(ig_handle__icontains=search_term)
+                    | Q(discord_handle__icontains=search_term)
+                    | Q(x_handle__icontains=search_term)
+                    | Q(tiktok_handle__icontains=search_term)
+                    | Q(fb_handle__icontains=search_term)
                 )
-            
-            event_ids.update(keyword_events.values_list('id', flat=True))
+
+            event_ids.update(keyword_events.values_list("id", flat=True))
 
             # search_embedding = generate_embedding(search_term)
             # dtstart = request.GET.get("dtstart")
@@ -115,7 +115,7 @@ def get_event(request, event_id):
     """Get a single event by ID"""
     try:
         event = get_object_or_404(Events, id=event_id)
-        
+
         fields = [
             "id",
             "title",
@@ -137,10 +137,10 @@ def get_event(request, event_id):
             "tiktok_handle",
             "fb_handle",
         ]
-        
+
         event_data = {field: getattr(event, field) for field in fields}
         event_data["display_handle"] = events_utils.determine_display_handle(event_data)
-        
+
         return Response(event_data)
 
     except Exception as e:

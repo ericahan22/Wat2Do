@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+
 from utils.encryption_utils import email_encryption
 
 
