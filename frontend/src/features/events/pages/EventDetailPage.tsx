@@ -157,25 +157,25 @@ function EventDetailPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative"
+        className="relative max-w-lg mx-auto"
       >
         {/* Polaroid Frame */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 transform rotate-1 hover:rotate-0 transition-transform duration-300">
           {/* Image Section */}
-          <div className="relative mb-6">
+          <div className="relative mb-4">
             {event.source_image_url ? (
               <div className="relative">
                 <img
                   src={event.source_image_url}
                   alt={event.title}
-                  className="w-full h-80 object-cover rounded-xl shadow-lg"
+                  className="w-full h-48 object-cover rounded-lg shadow-lg aspect-square"
                 />
                 <EventStatusBadge event={event} />
                 <NewEventBadge event={event} />
                 <OrganizationBadge event={event} />
               </div>
             ) : (
-              <div className="w-full h-80 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-xl shadow-lg flex items-center justify-center">
+              <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-lg shadow-lg flex items-center justify-center aspect-square">
                 <div className="text-center">
                   <Calendar className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                   <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -187,23 +187,23 @@ function EventDetailPage() {
           </div>
 
           {/* Event Details */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Title */}
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 {event.title}
               </h1>
               {event.description && (
-                <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                   {event.description}
                 </p>
               )}
             </div>
 
             {/* Event Info Grid */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid gap-2">
               {/* Date & Time */}
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -217,7 +217,7 @@ function EventDetailPage() {
 
               {/* Location */}
               {event.location && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <MapPin className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">
@@ -231,7 +231,7 @@ function EventDetailPage() {
               )}
 
               {/* Price */}
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <DollarSign className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">
@@ -247,7 +247,7 @@ function EventDetailPage() {
 
               {/* Food */}
               {event.food && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <Utensils className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">
@@ -262,7 +262,7 @@ function EventDetailPage() {
 
               {/* Registration */}
               {event.registration && (
-                <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <Users className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-900 dark:text-white">
@@ -282,58 +282,53 @@ function EventDetailPage() {
               event.x_handle ||
               event.tiktok_handle ||
               event.fb_handle) && (
-              <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
-                  Connect with us
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {event.ig_handle && (
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-pink-50 dark:hover:bg-pink-900/20"
-                    >
-                      Instagram: {event.ig_handle}
-                    </Badge>
-                  )}
-                  {event.discord_handle && (
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                    >
-                      Discord: {event.discord_handle}
-                    </Badge>
-                  )}
-                  {event.x_handle && (
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    >
-                      X: {event.x_handle}
-                    </Badge>
-                  )}
-                  {event.tiktok_handle && (
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20"
-                    >
-                      TikTok: {event.tiktok_handle}
-                    </Badge>
-                  )}
-                  {event.fb_handle && (
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    >
-                      Facebook: {event.fb_handle}
-                    </Badge>
-                  )}
-                </div>
+              <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-wrap gap-2">
+                {event.ig_handle && (
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-pink-50 dark:hover:bg-pink-900/20"
+                  >
+                    Instagram: {event.ig_handle}
+                  </Badge>
+                )}
+                {event.discord_handle && (
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                  >
+                    Discord: {event.discord_handle}
+                  </Badge>
+                )}
+                {event.x_handle && (
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  >
+                    X: {event.x_handle}
+                  </Badge>
+                )}
+                {event.tiktok_handle && (
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900/20"
+                  >
+                    TikTok: {event.tiktok_handle}
+                  </Badge>
+                )}
+                {event.fb_handle && (
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  >
+                    Facebook: {event.fb_handle}
+                  </Badge>
+                )}
               </div>
             )}
 
             {/* Action Button */}
             {event.source_url && (
-              <div className="text-center pt-4">
+              <div className="text-center pt-2">
                 <Button onClick={handleExternalLink}>
                   <ExternalLink className="h-4 w-4" />
                   View Event Details

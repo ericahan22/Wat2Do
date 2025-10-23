@@ -5,24 +5,22 @@ import { SEOHead } from "@/shared/components/SEOHead";
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <SEOHead 
+      <SEOHead
         title="About Wat2Do - Discover University of Waterloo Events"
         description="Learn about Wat2Do, the platform helping University of Waterloo students discover exciting club events and campus activities. Built by students, for students."
         url="/about"
         keywords={[
-          'about Wat2Do',
-          'University of Waterloo events platform',
-          'campus event discovery',
-          'student event platform',
-          'UW event aggregator',
-          'campus activities',
-          'student life'
+          "about Wat2Do",
+          "University of Waterloo events platform",
+          "campus event discovery",
+          "student event platform",
+          "UW event aggregator",
+          "campus activities",
+          "student life",
         ]}
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold mb-8">
-          About Wat2Do
-        </h1>
+        <h1 className="text-4xl font-bold mb-8">About Wat2Do</h1>
 
         <p className="text-lg mb-4">
           Welcome to Wat2Do! We created this platform after stumbling upon way
@@ -66,8 +64,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          harbour boat cruise, a $30 trip to the Stratford Festival to
-          watch{" "}
+          harbour boat cruise, a $30 trip to the Stratford Festival to watch{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Activity/Performing%20Arts.webp"
             alt="Performing Arts"
@@ -91,15 +88,36 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          networking events (Atlassian, Patreon, Point72). We realized we were missing out on so much happening around campus
-          and built this for ourselves in <a href="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/Screenshot+2025-10-08+at+4.20.42%E2%80%AFAM.png" target="_blank" rel="noopener noreferrer" className="underline hover:text-gray-500 dark:hover:text-gray-200">August 2025</a>. After 2 months we're
-          extroardinarily excited to be sharing it with the rest of you! All art is done by Erica. P.S. We
-          don't run ads, everything runs out of our own pockets.
+          networking events (
+          <a
+            href="/events/136"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Atlassian
+          </a>
+          , Patreon,{" "}
+          <a
+            href="/events/143"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Point72
+          </a>
+          ). We realized we were missing out on so much happening around campus
+          and built this for ourselves in{" "}
+          <a
+            href="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/Screenshot+2025-10-08+at+4.20.42%E2%80%AFAM.png"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            August 2025
+          </a>
+          . After 2 months we're extroardinarily excited to be sharing it with
+          the rest of you! All art is done by Erica. P.S. We don't run ads,
+          everything runs out of our own pockets.
         </p>
 
-        <p className="text-lg font-bold mb-12">
-          — Tony & Erica
-        </p>
+        <p className="text-lg font-bold mb-12">— Tony & Erica</p>
 
         <p className="text-lg mb-12">
           We believe there are helpful tips to making the most out of this site,
@@ -107,9 +125,7 @@ const AboutPage: React.FC = () => {
           goals.
         </p>
 
-        <h2 className="text-2xl font-bold mb-6">
-          Networking
-        </h2>
+        <h2 className="text-2xl font-bold mb-6">Networking</h2>
         <p className="mb-4">
           Skip the generic LinkedIn messages. The best networking happens at
           events where people are in-person, sharing the present with you.
@@ -117,14 +133,14 @@ const AboutPage: React.FC = () => {
         <p className="mb-8">
           Check out events like{" "}
           <a
-            href="/events?view=calendar&search=All Things Legal Panel"
+            href="/events/2"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             All Things Legal Panel
           </a>
           ,
           <a
-            href="/events?view=calendar&search=Innovation Open House"
+            href="/events/27"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -132,7 +148,7 @@ const AboutPage: React.FC = () => {
           </a>
           , and
           <a
-            href="/events?view=calendar&search=WiE x Bloomberg"
+            href="/events/33"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -141,9 +157,7 @@ const AboutPage: React.FC = () => {
           for industry connections.
         </p>
 
-        <h2 className="text-2xl font-bold  mb-6">
-          Finding Your Crowd
-        </h2>
+        <h2 className="text-2xl font-bold  mb-6">Finding Your Crowd</h2>
         <p className=" mb-4">
           Don't just join clubs that match your major. The most interesting
           people often come from completely different fields. Use our filters to
@@ -152,14 +166,14 @@ const AboutPage: React.FC = () => {
         <p className=" mb-8">
           Try events like{" "}
           <a
-            href="/events?view=calendar&search=Gatka Classes"
+            href="/events/13"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Gatka Classes
           </a>
           ,
           <a
-            href="/events?view=calendar&search=Retro Rollers"
+            href="/events/44"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -167,7 +181,7 @@ const AboutPage: React.FC = () => {
           </a>
           , and
           <a
-            href="/events?view=calendar&search=Repair Club"
+            href="/events/47"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -189,14 +203,14 @@ const AboutPage: React.FC = () => {
         <p className=" mb-8">
           Great for groups:{" "}
           <a
-            href="/events?view=calendar&search=Nature Hike"
+            href="/events/3"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Nature Hike
           </a>
           ,
           <a
-            href="/events?view=calendar&search=Fall BBQ"
+            href="/events/20"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -204,7 +218,7 @@ const AboutPage: React.FC = () => {
           </a>
           , and
           <a
-            href="/events?view=calendar&search=Trivia Night"
+            href="/events/38"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             {" "}
@@ -213,9 +227,7 @@ const AboutPage: React.FC = () => {
           .
         </p>
 
-        <h2 className="text-2xl font-bold  mb-6">
-          Start Exploring
-        </h2>
+        <h2 className="text-2xl font-bold  mb-6">Start Exploring</h2>
         <p className=" mb-8">
           Check Wat2Do regularly for new events. Subscribe to our newsletter for
           daily updates. Don't be afraid to attend events alone! The best
