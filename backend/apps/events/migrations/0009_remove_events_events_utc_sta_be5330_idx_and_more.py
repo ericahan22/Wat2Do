@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0008_alter_events_raw_json_alter_events_reactions"),
     ]

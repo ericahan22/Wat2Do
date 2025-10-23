@@ -45,7 +45,7 @@ const QuickFilters: React.FC = () => {
               key={filterName}
               variant="ghost"
               size="sm"
-              className={`shrink-0 h-8 px-3 text-xs border rounded-full flex items-center gap-1 ${
+              className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-1 ${
                 isActive
                   ? "bg-gray-700 border-gray-700 hover:bg-gray-600 hover:border-gray-600 dark:bg-gray-200 dark:border-gray-200 dark:hover:bg-gray-300 dark:hover:border-gray-300"
                   : "border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700"

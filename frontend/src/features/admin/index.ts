@@ -1,4 +1,3 @@
-// Components
 export { default as AdminLogin } from './components/AdminLogin';
 export { default as PromoteEventForm } from './components/PromoteEventForm';
 

@@ -20,9 +20,9 @@ import {
   DollarSign,
 } from "lucide-react";
 import "@/shared/styles/calendar.css";
-import { formatEventDate, formatEventTimeRange, removeTimezoneInfo } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, removeTimezoneInfo, formatPrettyDate } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
-import { Event } from "@/features/events/types/events";
+import { Event } from "@/features/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { IconButton } from "@/shared/components/ui/icon-button";
 
@@ -38,7 +38,6 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Function to abbreviate month names in the label
 const abbreviateLabel = (label: string): string => {
   const monthAbbreviations: Record<string, string> = {
     January: "Jan",
@@ -63,7 +62,6 @@ const abbreviateLabel = (label: string): string => {
   return abbreviatedLabel;
 };
 
-// Event popup component
 const EventPopup: React.FC<{
   event: Event & { start: Date; end: Date; title: string };
   onClose: () => void;
@@ -105,7 +103,7 @@ const EventPopup: React.FC<{
     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
       <div className="flex items-center gap-2">
         <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-        <span>{formatEventDate(event.dtstart)}</span>
+        <span>{formatPrettyDate(event.dtstart)}</span>
       </div>
       
       <div className="flex items-center gap-2">
@@ -236,7 +234,6 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   }, [currentView, currentDate]); 
 
   const calendarEvents = events.map((event) => {
-    // Remove timezone info to treat as local time (not UTC)
     const start = new Date(removeTimezoneInfo(event.dtstart));
     const end = event.dtend
       ? new Date(removeTimezoneInfo(event.dtend))

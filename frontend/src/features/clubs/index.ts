@@ -1,4 +1,3 @@
-// Components
 export { default as ClubsGrid } from './components/ClubsGrid';
 
 // Hooks

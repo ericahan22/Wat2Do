@@ -25,7 +25,7 @@ Waterloo, scraped directly from Instagram.
 - **Club directory:** Explore all clubs with links to their website/Instagram
 - **Email newsletter:** Subscribe to get the latest events in your inbox, once daily
 
-## 🏗️ Environment Setup
+### Environment Setup
 
 #### Database
 ```bash
@@ -51,18 +51,6 @@ cd frontend
 npm install 
 npm run dev
 ```
-
-## 🌐 API Endpoints
-
-| Description         | URL/Command                                               |
-|---------------------|----------------------------------------------------------|
-| API info            | `curl http://localhost:8000/`                            |
-| Health check        | `curl http://localhost:8000/health/`                     |
-| Get all events      | `curl http://localhost:8000/events/`                     |
-| Get all clubs       | `curl http://localhost:8000/clubs/`                      |
-| Find similar events | `curl "http://localhost:8000/test-similarity/?text=..."` |
-
----
 
 ## 🤝 Support
 

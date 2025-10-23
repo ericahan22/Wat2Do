@@ -35,23 +35,21 @@ export default function FloatingEventExportBar({
         view !== "grid" || !isSelectMode || selectedEvents.size === 0
       }
     >
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-4xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 px-6 py-3 sm:flex-row flex-col flex items-center gap-4">
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-4xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 px-3 py-3 sm:flex-row flex-col flex items-center gap-4">
         {selectedEvents.size > 0 && (
           <>
             <Button
-              size="sm"
               onClick={onExportICalendar}
-              className="rounded-full"
-              variant="outline"
+              className="rounded-full w-full"
+              variant="ghost"
             >
               <SiApple className="h-4 w-4" />
               Export {selectedEvents.size} to Calendar
             </Button>
             <Button
-              size="sm"
               onClick={onExportGoogleCalendar}
-              className="rounded-full"
-              variant="outline"
+              className="rounded-full w-full"
+              variant="ghost"
             >
               <FcGoogle className="h-4 w-4" />
               Export {selectedEvents.size} to Google Calendar
@@ -59,10 +57,9 @@ export default function FloatingEventExportBar({
           </>
         )}
         <Button
-          size="sm"
           onMouseDown={onCancel}
-          className="rounded-full"
-          variant="outline"
+          className="rounded-full w-full"
+          variant="ghost"
         >
           <X className="h-4 w-4" />
           Cancel

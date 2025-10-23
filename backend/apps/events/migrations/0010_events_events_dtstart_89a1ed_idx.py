@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0009_remove_events_events_utc_sta_be5330_idx_and_more"),
     ]

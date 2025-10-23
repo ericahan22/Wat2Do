@@ -65,11 +65,25 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
+    "ratelimit.middleware.RatelimitMiddleware",
 ]
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF settings for development
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://wat2do.ca",
+    "https://www.wat2do.ca",
+]
+
+# CSRF settings for SPA frontend
+CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1"  # True in production (HTTPS)
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie for SPA
+CSRF_COOKIE_SAMESITE = "Lax"  # Allow cross-site requests
+CSRF_USE_SESSIONS = True  # Use sessions for CSRF tokens
 
 ROOT_URLCONF = "config.urls"
 
@@ -102,7 +116,7 @@ if os.getenv("PRODUCTION") == "1":
             "USER": os.getenv("POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
             "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
-            "PORT": os.getenv("POSTGRES_PORT", "6543"),   
+            "PORT": os.getenv("POSTGRES_PORT", "6543"),
             "OPTIONS": {
                 "options": "-c pool_mode=session",
                 "sslmode": "require",
@@ -117,7 +131,7 @@ else:
             "USER": os.getenv("LOCAL_POSTGRES_USER", "postgres"),
             "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
             "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
-            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),   
+            "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),
         }
     }
 
@@ -176,7 +190,14 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email confirmation settings
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+BASE_URL = (
+    "https://api.wat2do.ca"
+    if os.getenv("PRODUCTION") == "1"
+    else "http://localhost:8000"
+)
+FRONTEND_URL = (
+    "https://wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:5173"
+)
 
 # Global rate limiting settings
 RATELIMIT_VIEW = "ratelimit.views.ratelimited"
@@ -186,5 +207,5 @@ RATELIMIT_ENABLE = True
 # Global rate limits (applied to all routes)
 RATELIMIT_GLOBAL = "200/h"  # 1000 requests per hour per IP globally
 RATELIMIT_GROUP = {
-    "api": "60/h",  # 100 requests per hour for API endpoints
+    "api": "100/h",  # 100 requests per hour for API endpoints
 }

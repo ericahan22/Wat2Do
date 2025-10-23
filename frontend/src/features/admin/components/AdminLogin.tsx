@@ -62,7 +62,6 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
         // Store token in localStorage
         localStorage.setItem("admin_token", token);
 
-        // Notify parent component
         onLogin(token);
       } else {
         const errorData = await response.json();

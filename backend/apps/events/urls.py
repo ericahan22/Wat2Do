@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = [
     path("", views.get_events, name="events"),
+    path("<int:event_id>/", views.get_event, name="event_detail"),
     path("export.ics", views.export_events_ics, name="export_events_ics"),
     path(
         "google-calendar-urls/",

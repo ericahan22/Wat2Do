@@ -1,9 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Moon, Sun, Menu, X } from "lucide-react";
+import { Moon, Sun, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import GitHubLink from "./GitHubLink";
 import { useNavbar } from "@/shared/hooks";
+import { useAuth } from "@/shared/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
   const {
@@ -11,30 +10,23 @@ function Navbar() {
     theme,
     isActive,
     toggleMobileMenu,
-    closeMobileMenu,
-    handleNavigation,
     toggleTheme,
   } = useNavbar();
+  const navigate = useNavigate();
+
+  const { isAuthenticated, user, logout, isLoggingOut } = useAuth();
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex gap-6 items-center">
-            <div className="text-base font-bold">
-              <Link to="/">
-                <img
-                  src="/wat2do-logo.svg"
-                  alt="Wat2Do"
-                  className="h-14 w-14"
-                />
-              </Link>
-            </div>
+            <img onMouseDown={() => navigate("/")} src="/wat2do-logo.svg" alt="Wat2Do" className="cursor-pointer h-14 w-14" />
             {/* Desktop Navigation */}
             <div className="hidden md:flex gap-2">
               <Button
                 variant="link"
-                onMouseDown={() => handleNavigation("/events")}
+                onMouseDown={() => navigate("/events")}
                 className={`text-sm font-medium ${
                   isActive("/events")
                     ? "text-gray-900 dark:text-white"
@@ -45,7 +37,7 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
-                onMouseDown={() => handleNavigation("/clubs")}
+                onMouseDown={() => navigate("/clubs")}
                 className={`text-sm font-medium ${
                   isActive("/clubs")
                     ? "text-gray-900 dark:text-white"
@@ -56,7 +48,7 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
-                onMouseDown={() => handleNavigation("/about")}
+                onMouseDown={() => navigate("/about")}
                 className={`text-sm font-medium ${
                   isActive("/about")
                     ? "text-gray-900 dark:text-white"
@@ -67,7 +59,7 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
-                onMouseDown={() => handleNavigation("/contact")}
+                onMouseDown={() => navigate("/contact")}
                 className={`text-sm font-medium ${
                   isActive("/contact")
                     ? "text-gray-900 dark:text-white"
@@ -82,7 +74,7 @@ function Navbar() {
           <div className="flex items-center gap-2">
             {/* Desktop Right Side */}
             <div className="hidden md:flex items-center gap-2">
-              <Button
+              {/* <Button
                 variant="link"
                 asChild
                 className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -94,10 +86,42 @@ function Navbar() {
                 >
                   Feedback
                 </a>
-              </Button>
-              <GitHubLink />
+              </Button> */}
+              {/* <GitHubLink /> */}
+
+              {/* Auth Section */}
+              {isAuthenticated ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="link"
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    onMouseDown={() => navigate("/dashboard")}
+                  >
+                    <User className="h-4 w-4" />
+                    {user?.email}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onMouseDown={() => logout()}
+                    disabled={isLoggingOut}
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="default"
+                  className="text-sm font-medium"
+                  onMouseDown={() => navigate("/auth")}
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Button>
+              )}
             </div>
-            
+
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
@@ -111,12 +135,12 @@ function Navbar() {
                 <Menu className="h-4 w-4" />
               )}
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
               onMouseDown={toggleTheme}
-              className="p-2"
+              className="p-2 h-9 w-9"
             >
               {theme === "dark" ? (
                 <Sun className="h-4 w-4" />
@@ -126,7 +150,7 @@ function Navbar() {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200/50 dark:border-gray-700/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
@@ -134,34 +158,72 @@ function Navbar() {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => handleNavigation("/events")}
+                onMouseDown={() => navigate("/events")}
               >
                 Events
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => handleNavigation("/clubs")}
+                onMouseDown={() => navigate("/clubs")}
               >
                 Clubs
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => handleNavigation("/about")}
+                onMouseDown={() => navigate("/about")}
               >
                 About
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => handleNavigation("/contact")}
+                onMouseDown={() => navigate("/contact")}
               >
                 Contact
               </Button>
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
-              <div className="flex gap-2">
+
+              {/* Mobile Auth Section */}
+              {isAuthenticated ? (
+                <div className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    onMouseDown={() => {
+                      navigate("/dashboard");
+                    }}
+                  >
+                    <User className="h-4 w-4" />
+                    {user?.email}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    onMouseDown={() => logout()}
+                    disabled={isLoggingOut}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </Button>
+                </div>
+              ) : (
                 <Button
+                  variant="default"
+                  className="w-full justify-center text-sm font-medium"
+                  onMouseDown={() => {
+                    navigate("/auth");
+                  }}
+                >
+                  <User className="h-4 w-4" />
+                  Sign In
+                </Button>
+              )}
+
+              <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
+              <div className="flex gap-2">
+                {/* <Button
                   variant="ghost"
                   className="flex-1 justify-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   asChild
@@ -170,14 +232,13 @@ function Navbar() {
                     href="https://github.com/ericahan22/bug-free-octo-spork/issues"
                     target="_blank"
                     rel="noopener noreferrer"
-                    onMouseDown={closeMobileMenu}
                   >
                     Feedback
                   </a>
-                </Button>
-                <div className="flex items-center">
+                </Button> */}
+                {/* <div className="flex items-center">
                   <GitHubLink />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -187,4 +248,4 @@ function Navbar() {
   );
 }
 
-export default React.memo(Navbar);
+export default Navbar;

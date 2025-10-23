@@ -1,17 +1,7 @@
-import { useMemo, useRef, memo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
-import { useCategoryParam } from "@/shared/hooks/useCategoryParam";
-import { useClubs } from "@/features/clubs/hooks/useClubs";
+import { useMemo, useRef } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead } from "@/shared";
+import { useClubs, ClubsGrid } from "@/features/clubs";
 import SearchInput from "@/features/search/components/SearchInput";
-import ClubsGrid from "@/features/clubs/components/ClubsGrid";
-import { SEOHead } from "@/shared/components/SEOHead";
 
 function ClubsPage() {
   const {
@@ -116,4 +106,4 @@ function ClubsPage() {
   );
 }
 
-export default memo(ClubsPage);
+export default ClubsPage;

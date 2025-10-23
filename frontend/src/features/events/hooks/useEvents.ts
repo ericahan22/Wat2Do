@@ -6,7 +6,7 @@ import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { API_BASE_URL } from "@/shared/constants/api";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
 import { isEventOngoing } from "@/shared/lib/eventUtils";
-import { Event } from "@/features/events/types/events";
+import { Event } from "@/features/events";
 
 // Format the last updated timestamp into a human-readable format (in local time)
 const fetchEvents = async ({
@@ -16,6 +16,7 @@ const fetchEvents = async ({
 }): Promise<Event[]> => {
   const searchTerm = queryKey[1] || "";
   const dtstart = queryKey[2] || "";
+  const addedAt = queryKey[3] || "";
 
   const params = new URLSearchParams();
 
@@ -25,6 +26,10 @@ const fetchEvents = async ({
 
   if (dtstart) {
     params.append("dtstart", formatDtstartToMidnight(dtstart));
+  }
+
+  if (addedAt) {
+    params.append("added_at", addedAt);
   }
 
   const queryString = params.toString() ? `?${params.toString()}` : "";
@@ -40,11 +45,12 @@ export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
   const dtstart = searchParams.get("dtstart") || "";
+  const addedAt = searchParams.get("added_at") || "";
 
-  const hasActiveFilters = searchTerm !== "" || dtstart !== "";
+  const hasActiveFilters = searchTerm !== "" || dtstart !== "" || addedAt !== "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, dtstart],
+    queryKey: ["events", searchTerm, dtstart, addedAt],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: hasActiveFilters,
@@ -68,7 +74,7 @@ export function useEvents() {
       }
       return false;
     });
-  }, [hasActiveFilters, data, dtstart, isLoading]);
+  }, [hasActiveFilters, data, dtstart]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -81,6 +87,8 @@ export function useEvents() {
       title = `${events.length} Found Events - Wat2Do`;
     } else if (dtstart) {
       title = `${events.length} Total Events - Wat2Do`;
+    } else if (addedAt) {
+      title = `${events.length} New Events - Wat2Do`;
     } else {
       title = `${events.length} Upcoming Events - Wat2Do`;
     }
@@ -90,7 +98,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart]);
+  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart, addedAt]);
 
   useDocumentTitle(documentTitle);
 
@@ -109,11 +117,29 @@ export function useEvents() {
       const todayStr = getTodayString();
 
       if (dtstart && dtstart !== todayStr) {
-        // Remove dtstart to show upcoming events
         nextParams.delete("dtstart");
       } else {
-        // Set dtstart to 2025-01-01 to show past events
         nextParams.set("dtstart", formatDtstartToMidnight("2025-01-01"));
+      }
+      return nextParams;
+    });
+  };
+
+  const handleToggleNewEvents = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+
+      if (addedAt) {
+        nextParams.delete("added_at");
+      } else {
+        const now = new Date();
+        const todayAt7am = new Date();
+        todayAt7am.setHours(7, 0, 0, 0);
+        
+        const cutoffDate = now >= todayAt7am ? todayAt7am : new Date(todayAt7am.getTime() - 24 * 60 * 60 * 1000);
+        const isoString = cutoffDate.toISOString();
+        nextParams.set("added_at", isoString);
+        nextParams.delete("dtstart");
       }
       return nextParams;
     });
@@ -125,7 +151,9 @@ export function useEvents() {
     error,
     searchTerm,
     dtstart,
+    addedAt,
     handleViewChange,
     handleToggleStartDate,
+    handleToggleNewEvents,
   };
 }

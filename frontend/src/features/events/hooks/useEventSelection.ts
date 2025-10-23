@@ -42,8 +42,6 @@ export function useEventSelection(view: "grid" | "calendar") {
     const eventIds = Array.from(selectedEvents).join(",");
     const exportUrl = `${API_BASE_URL}/api/events/export.ics?ids=${eventIds}`;
 
-    // Create a hidden link and trigger download
-    // The .ics file is downloaded and can be opened once in Calendar app
     const link = document.createElement("a");
     link.href = exportUrl;
     link.download = "events.ics";

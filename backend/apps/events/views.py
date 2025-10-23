@@ -1,29 +1,32 @@
+from django.conf import settings
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.utils.html import escape
+from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from ratelimit.decorators import ratelimit
 
 from services.openai_service import generate_embedding
+from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
 from .models import Events
-from utils import events_utils
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@ratelimit(key='ip', rate='60/hr', block=True)
+@ratelimit(key="ip", rate="60/hr", block=True)
 def get_events(request):
     """Get all events from database with optional filtering"""
     try:
         search_term = request.GET.get("search", "").strip()
 
-        # Start with base queryset, ordered by dtstart
-        queryset = Events.objects.all().order_by('dtstart')
-
-        # Apply standard filters (dates, price, club_type, etc.)
+        queryset = Events.objects.all().order_by("dtstart")
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(
@@ -32,19 +35,47 @@ def get_events(request):
             )
         filtered_queryset = filterset.qs
 
-        # Apply vector similarity search if search term provided
         if search_term:
-            search_embedding = generate_embedding(search_term)
-            dtstart = request.GET.get("dtstart")
-            similar_events = find_similar_events(
-                embedding=search_embedding, min_date=dtstart
-            )
-            for event in similar_events:
-                print(event["title"], event["similarity"])
-            similar_event_ids = [event["id"] for event in similar_events]
-            filtered_queryset = filtered_queryset.filter(id__in=similar_event_ids)
+            event_ids = set()
 
-        # Return selected event fields (excluding description and embedding)
+            # Special handling for "free food" search
+            if search_term.lower() == "free food":
+                keyword_events = filtered_queryset.filter(
+                    Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"),
+                    Q(food__isnull=False) & ~Q(food=""),
+                )
+            else:
+                keyword_events = filtered_queryset.filter(
+                    Q(title__icontains=search_term)
+                    | Q(location__icontains=search_term)
+                    | Q(description__icontains=search_term)
+                    | Q(food__icontains=search_term)
+                    | Q(club_type__icontains=search_term)
+                    | Q(school__icontains=search_term)
+                    | Q(ig_handle__icontains=search_term)
+                    | Q(discord_handle__icontains=search_term)
+                    | Q(x_handle__icontains=search_term)
+                    | Q(tiktok_handle__icontains=search_term)
+                    | Q(fb_handle__icontains=search_term)
+                )
+
+            event_ids.update(keyword_events.values_list("id", flat=True))
+
+            # search_embedding = generate_embedding(search_term)
+            # dtstart = request.GET.get("dtstart")
+            # similar_events = find_similar_events(
+            #     embedding=search_embedding, min_date=dtstart
+            # )
+            # for event in similar_events:
+            #     print(event["title"], event["similarity"])
+            # similar_event_ids = [event["id"] for event in similar_events]
+            # event_ids.update(similar_event_ids)
+
+            if event_ids:
+                filtered_queryset = filtered_queryset.filter(id__in=event_ids)
+            else:
+                filtered_queryset = filtered_queryset.none()
+
         fields = [
             "id",
             "title",
@@ -67,12 +98,50 @@ def get_events(request):
             "fb_handle",
         ]
         results = list(filtered_queryset.values(*fields))
-        
-        # Add display_handle field to each event
+
         for event in results:
             event["display_handle"] = events_utils.determine_display_handle(event)
-                    
+
         return Response(results)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="60/hr", block=True)
+def get_event(request, event_id):
+    """Get a single event by ID"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+
+        fields = [
+            "id",
+            "title",
+            "description",
+            "location",
+            "dtstart",
+            "dtend",
+            "price",
+            "food",
+            "registration",
+            "source_image_url",
+            "club_type",
+            "added_at",
+            "school",
+            "source_url",
+            "ig_handle",
+            "discord_handle",
+            "x_handle",
+            "tiktok_handle",
+            "fb_handle",
+        ]
+
+        event_data = {field: getattr(event, field) for field in fields}
+        event_data["display_handle"] = events_utils.determine_display_handle(event_data)
+
+        return Response(event_data)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -94,7 +163,7 @@ def test_similarity(request):
         search_embedding = generate_embedding(search_query)
 
         # Test semantic search
-        threshold = float(request.GET.get("threshold", 0.3))
+        threshold = float(request.GET.get("threshold", 0.5))
         limit = int(request.GET.get("limit")) if request.GET.get("limit") else None
         similar_events = find_similar_events(
             search_embedding, threshold=threshold, limit=limit
@@ -277,9 +346,7 @@ def get_google_calendar_urls(request):
             # Format dates for Google Calendar (YYYYMMDDTHHMMSS)
             start_date = event.dtstart.strftime("%Y%m%d")
             start_time = event.dtstart.strftime("%H%M%S")
-            end_time = (
-                event.dtend.strftime("%H%M%S") if event.dtend else start_time
-            )
+            end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
 
             start_datetime = f"{start_date}T{start_time}"
             end_datetime = f"{start_date}T{end_time}"
@@ -313,3 +380,52 @@ def get_google_calendar_urls(request):
             {"error": f"Failed to generate Google Calendar URLs: {e!s}"},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+def rss_feed(request):
+    """
+    Simple RSS feed of upcoming events (returns application/rss+xml).
+    """
+    now = timezone.now()
+    items = Events.objects.filter(dtstart__gte=now).order_by("dtstart")[:50]
+
+    site_url = getattr(settings, "SITE_URL", "https://wat2do.ca")
+    rss_items = []
+    for ev in items:
+        title = escape(ev.title or "Untitled event")
+        link = ev.source_url or f"{site_url}/events/{ev.id}"
+        description = escape(ev.description or "")
+        pub_date = ev.dtstamp.astimezone(timezone.utc).strftime(
+            "%a, %d %b %Y %H:%M:%S GMT"
+        )
+        guid = f"{ev.id}@wat2do"
+        enclosure = ""
+        if ev.source_image_url:
+            enclosure = (
+                f'<media:content url="{escape(ev.source_image_url)}" medium="image" />'
+            )
+
+        item_xml = f"""
+      <item>
+        <title>{title}</title>
+        <link>{escape(link)}</link>
+        <description><![CDATA[{description}]]></description>
+        <guid isPermaLink="false">{guid}</guid>
+        <pubDate>{pub_date}</pubDate>
+        {enclosure}
+      </item>
+"""
+        rss_items.append(item_xml)
+
+    rss = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Wat2Do — Upcoming events</title>
+    <link>{site_url}</link>
+    <atom:link href="{site_url}/rss.xml" rel="self" type="application/rss+xml" />
+    <description>Upcoming events at the University of Waterloo</description>
+    <lastBuildDate>{timezone.now().astimezone(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")}</lastBuildDate>
+    {''.join(rss_items)}
+  </channel>
+</rss>"""
+    return HttpResponse(rss, content_type="application/rss+xml")

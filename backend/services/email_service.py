@@ -2,9 +2,9 @@ import os
 from datetime import date, datetime, timedelta
 
 import django
+import dotenv
 import requests
 from django.conf import settings
-import dotenv
 
 dotenv.load_dotenv()
 
@@ -13,6 +13,7 @@ if not settings.configured:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
     django.setup()
 
+# Import after Django setup
 from apps.events.models import Events
 
 
@@ -26,7 +27,6 @@ class EmailService:
         """Fetch events that were added to the database today"""
         today = date.today()
 
-        # Get events added today, ordered by date and start time
         events = (
             Events.objects.filter(added_at__date=today)
             .select_related()
@@ -46,8 +46,14 @@ class EmailService:
             else:
                 time_range = f"Starting at {start_time}"
 
-            # Get club name from social handles or use school as fallback
-            club_name = event.ig_handle or event.discord_handle or event.x_handle or event.tiktok_handle or event.fb_handle or event.school
+            club_name = (
+                event.ig_handle
+                or event.discord_handle
+                or event.x_handle
+                or event.tiktok_handle
+                or event.fb_handle
+                or event.school
+            )
 
             events_data.append(
                 {

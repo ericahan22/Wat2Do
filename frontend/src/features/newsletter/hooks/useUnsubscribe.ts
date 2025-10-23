@@ -108,7 +108,6 @@ export const useUnsubscribe = (token: string | undefined) => {
   const error = fetchError || submitError;
   const isError = isFetchError || isSubmitError;
 
-  // Helper function to submit unsubscribe
   const unsubscribe = (reason: string, feedback?: string) => {
     if (!token) {
       throw new Error('No unsubscribe token provided');

@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect } from "react";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
 import { AdminLogin } from "@/features/admin/components/AdminLogin";
 import { useEvents } from "@/features/events/hooks/useEvents";
@@ -29,14 +29,12 @@ function AdminPage() {
   const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Use the existing events hook
   const {
     data: events,
     isLoading: eventsLoading,
     error: eventsError,
   } = useEvents();
 
-  // Check authentication on component mount
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (token) {
@@ -405,4 +403,4 @@ function AdminPage() {
   );
 }
 
-export default memo(AdminPage);
+export default AdminPage;

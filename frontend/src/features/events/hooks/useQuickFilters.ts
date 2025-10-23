@@ -13,7 +13,6 @@ export const useQuickFilters = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [hasDragged, setHasDragged] = useState(false);
 
-  // Get current search term from URL
   const currentSearch = searchParams.get("search") || "";
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -29,7 +28,6 @@ export const useQuickFilters = () => {
     if (!scrollContainerRef.current) return;
     setIsDragging(false);
     scrollContainerRef.current.style.cursor = "grab";
-    // Reset hasDragged after a short delay to allow click event to check it
     setTimeout(() => setHasDragged(false), 100);
   }, []);
 
@@ -76,7 +74,6 @@ export const useQuickFilters = () => {
         const nextParams = new URLSearchParams(prev);
         const currentSearchValue = nextParams.get("search") || "";
 
-        // Create a regex to find the filter as a complete phrase (case-insensitive)
         // Use word boundaries for single words, or exact phrase matching for multi-word
         const filterRegex = new RegExp(
           `(^|\\s)${filterName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`,
@@ -85,7 +82,6 @@ export const useQuickFilters = () => {
         const isActive = filterRegex.test(currentSearchValue);
 
         if (isActive) {
-          // Remove the filter from search (exact phrase match)
           const updatedSearch = currentSearchValue
             .replace(filterRegex, " ")
             .replace(/\s+/g, " ") // Replace multiple spaces with single space
@@ -97,7 +93,6 @@ export const useQuickFilters = () => {
             nextParams.delete("search");
           }
         } else {
-          // Add filter to existing search
           const newSearchValue = currentSearchValue
             ? `${currentSearchValue} ${filterName}`
             : filterName;

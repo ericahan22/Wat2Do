@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0005_alter_events_options_remove_events_club_handle_and_more"),
     ]

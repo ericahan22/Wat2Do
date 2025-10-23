@@ -129,7 +129,7 @@ EMOJI_CATEGORIES = {
         "Worried%20Face",
         "Yawning%20Face",
         "Zany%20Face",
-        "Zipper%20Mouth%20Face"
+        "Zipper%20Mouth%20Face",
     ],
     "People": [
         "Baby",
@@ -219,7 +219,7 @@ EMOJI_CATEGORIES = {
         "Woman%20Vampire",
         "Woman%20Zombie",
         "Writing%20Hand",
-        "Zombie"
+        "Zombie",
     ],
     "Animals%20and%20Nature": [
         "Ant",
@@ -341,7 +341,7 @@ EMOJI_CATEGORIES = {
         "Waning%20Crescent%20Moon",
         "Waxing%20Crescent%20Moon",
         "Waxing%20Gibbous%20Moon",
-        "Zebra"
+        "Zebra",
     ],
     "Food%20and%20Drink": [
         "Baby%20Bottle",
@@ -391,7 +391,7 @@ EMOJI_CATEGORIES = {
         "Taco",
         "Tropical%20Drink",
         "Tumbler%20Glass",
-        "Wine%20Glass"
+        "Wine%20Glass",
     ],
     "Activity": [
         "1st%20Place%20Medal",
@@ -418,7 +418,7 @@ EMOJI_CATEGORIES = {
         "Sports%20Medal",
         "Ticket",
         "Trophy",
-        "Video%20Game"
+        "Video%20Game",
     ],
     "Travel%20and%20Places": [
         "Airplane",
@@ -436,7 +436,7 @@ EMOJI_CATEGORIES = {
         "Motor%20Boat",
         "Police%20Car",
         "Roller%20Coaster",
-        "Taxi"
+        "Taxi",
     ],
     "Objects": [
         "Abacus",
@@ -506,7 +506,7 @@ EMOJI_CATEGORIES = {
         "Test%20Tube",
         "Thermometer",
         "Toolbox",
-        "Top%20Hat"
+        "Top%20Hat",
     ],
     "Symbols": [
         "Anger%20Symbol",
@@ -577,7 +577,7 @@ EMOJI_CATEGORIES = {
         "White%20Question%20Mark",
         "Womens%20Room",
         "Yellow%20Heart",
-        "Zzz"
+        "Zzz",
     ],
     "Flags": [
         "Black%20Flag",
@@ -651,6 +651,6 @@ EMOJI_CATEGORIES = {
         "Flag%20Yemen",
         "Pirate%20Flag",
         "Triangular%20Flag",
-        "White%20Flag"
-    ]
-} 
+        "White%20Flag",
+    ],
+}

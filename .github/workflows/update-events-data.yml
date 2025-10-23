@@ -126,7 +126,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add frontend/src/data/staticData.ts frontend/public/rss.xml
           git commit -m "chore: update static data from DB" || echo "No changes to commit"
-          git pull --rebase && git push
+          git pull --rebase && git push --force
 
       - name: Send newsletter to subscribers
         if: github.event_name == 'schedule' || github.event.inputs.send_newsletter == 'true'

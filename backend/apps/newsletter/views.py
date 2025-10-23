@@ -5,9 +5,8 @@ Views for the newsletter app.
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from utils.encryption_utils import email_encryption
 
 from .models import NewsletterSubscriber
 
@@ -17,7 +16,7 @@ from .models import NewsletterSubscriber
 def newsletter_subscribe(request):
     """Subscribe to the newsletter (no authentication required)"""
     email = request.data.get("email", "").strip().lower()
-    
+
     if not email:
         return Response(
             {"error": "Email is required"},
@@ -25,10 +24,10 @@ def newsletter_subscribe(request):
         )
 
     try:
-        subscriber = NewsletterSubscriber.get_by_email(email)
-        created = False
+        try:
+            subscriber = NewsletterSubscriber.get_by_email(email)
+            created = False
 
-        if subscriber:
             if subscriber.is_active:
                 return Response(
                     {"message": "You're already subscribed to our newsletter!"},
@@ -37,7 +36,7 @@ def newsletter_subscribe(request):
             else:
                 subscriber.is_active = True
                 subscriber.save()
-        else:
+        except NewsletterSubscriber.DoesNotExist:
             subscriber = NewsletterSubscriber.create_subscriber(email)
             created = True
 
@@ -98,12 +97,10 @@ def newsletter_unsubscribe(request, token):
                 {"error": "Already unsubscribed"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get reason and feedback
         reason = request.data.get("reason", "").strip()
         feedback = request.data.get("feedback", "").strip()
         full_reason = f"{reason} - {feedback}" if feedback else reason
 
-        # Update subscriber
         subscriber.is_active = False
         subscriber.unsubscribe_reason = full_reason[:255]
         subscriber.unsubscribed_at = timezone.now()

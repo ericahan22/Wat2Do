@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
@@ -44,4 +44,4 @@ const NotFoundPage: React.FC = () => {
   );
 };
 
-export default memo(NotFoundPage);
+export default NotFoundPage;

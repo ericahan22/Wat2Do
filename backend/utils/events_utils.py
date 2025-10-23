@@ -1,6 +1,8 @@
 from datetime import timezone
-from scraping.logging_config import logger
+
 from dateutil import parser as dateutil_parser
+
+from scraping.logging_config import logger
 
 
 def determine_display_handle(event):
@@ -10,6 +12,7 @@ def determine_display_handle(event):
     Prefers social handles in order: ig, discord, x, tiktok, fb. Prepends '@' unless already present.
     Falls back to event.school or "Wat2Do Event".
     """
+
     def _get(key):
         # dict
         if hasattr(event, "get"):
@@ -29,7 +32,7 @@ def determine_display_handle(event):
     if social_handles:
         handle = social_handles[0]
         handle_str = str(handle)
-        return handle_str if handle_str.startswith("@") else f"@{handle_str}"
+        return handle_str
     school = _get("school")
     return school or "Wat2Do Event"
 
@@ -40,14 +43,14 @@ def tz_compute(dtstart, dtend):
     dtend_utc = None
     dtstart_utc = None
     all_day = False
-    
+
     def _to_utc(dt):
         if not dt:
             return None
         if dt.tzinfo:
             return dt.astimezone(timezone.utc)
         return dt.replace(tzinfo=timezone.utc)
-    
+
     def _ensure_dt(obj):
         """Accept datetime or ISO string, return datetime or None."""
         if not obj:
@@ -59,7 +62,7 @@ def tz_compute(dtstart, dtend):
                 logger.warning(f"Failed to parse datetime string {obj!r}: {e!s}")
                 return None
         return obj
-    
+
     try:
         dtstart_dt = _ensure_dt(dtstart)
         dtend_dt = _ensure_dt(dtend)

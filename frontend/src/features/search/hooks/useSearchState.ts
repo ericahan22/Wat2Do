@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocalStorage } from "react-use";
 
@@ -10,41 +10,38 @@ export function useSearchState() {
   
   const searchParam = searchParams.get("search") || "";
   const [inputValue, setInputValue] = useState(searchParam || lastSearch || "");
-  const isInitialMount = useRef(true);
 
-  // Sync input value with URL search param when it changes
+  // Sync input value with URL on mount and when URL changes externally (e.g., from filters)
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      // On initial mount, only sync if there's an actual search param
-      if (searchParam) {
-        setInputValue(searchParam);
-      } else if (lastSearch && lastSearch.trim()) {
-        // If URL is empty but we have a last search, redirect to it
-        setInputValue(lastSearch);
-        setSearchParams((prev) => {
-          const nextParams = new URLSearchParams(prev);
-          nextParams.set("search", lastSearch);
-          return nextParams;
-        });
-      }
-    } else {
-      // On subsequent updates, always sync with URL
-      setInputValue(searchParam);
-    }
-  }, [searchParam, lastSearch, setSearchParams]);
+    const urlSearchParam = searchParams.get("search") || "";
+    setInputValue(urlSearchParam);
+  }, [searchParams]); // Sync when URL search param changes
 
-  const handleSearch = useCallback(() => {
-    if (inputValue.trim()) {
-      setLastSearch(inputValue);
+  // Handle initial mount - restore last search if no URL param
+  useEffect(() => {
+    const urlSearchParam = searchParams.get("search") || "";
+    if (!urlSearchParam && lastSearch && lastSearch.trim()) {
+      // If URL is empty but we have a last search, redirect to it
+      setInputValue(lastSearch);
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
-        nextParams.set("search", inputValue);
+        nextParams.set("search", lastSearch);
+        return nextParams;
+      });
+    }
+  }, []); 
+
+  const handleSearch = useCallback(() => {
+    const trimmedValue = inputValue.trim();
+    if (trimmedValue) {
+      setLastSearch(trimmedValue);
+      setSearchParams((prev) => {
+        const nextParams = new URLSearchParams(prev);
+        nextParams.set("search", trimmedValue);
         return nextParams;
       });
     } else {
       // If input is empty, clear the search
-      setInputValue("");
       setLastSearch("");
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);

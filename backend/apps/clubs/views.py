@@ -3,28 +3,26 @@ Views for the clubs app.
 """
 
 import json
+
+from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from ratelimit.decorators import ratelimit
 
 from .models import Clubs
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@ratelimit(key='ip', rate='60/hr', block=True)
+@ratelimit(key="ip", rate="60/hr", block=True)
 def get_clubs(request):
     """Get all clubs from database (no pagination)"""
     try:
-        search_term = request.GET.get("search", "").strip()  # Get search term
-        category_filter = request.GET.get("category", "").strip()  # Get category filter
+        search_term = request.GET.get("search", "").strip()
+        category_filter = request.GET.get("category", "").strip()
 
-        # Build base queryset
         base_queryset = Clubs.objects.all()
-
-        # Apply filters to create filtered queryset
         filtered_queryset = base_queryset
         if search_term:
             filtered_queryset = filtered_queryset.filter(
@@ -39,17 +37,23 @@ def get_clubs(request):
         clubs_data = []
         for club in filtered_queryset:
             # Ensure categories is always a list
-            categories = club.categories if isinstance(club.categories, list) else json.loads(club.categories)
-            
-            clubs_data.append({
-                "id": club.id,
-                "club_name": club.club_name,
-                "categories": categories,
-                "club_page": club.club_page,
-                "ig": club.ig,
-                "discord": club.discord,
-                "club_type": club.club_type,
-            })
+            categories = (
+                club.categories
+                if isinstance(club.categories, list)
+                else json.loads(club.categories)
+            )
+
+            clubs_data.append(
+                {
+                    "id": club.id,
+                    "club_name": club.club_name,
+                    "categories": categories,
+                    "club_page": club.club_page,
+                    "ig": club.ig,
+                    "discord": club.discord,
+                    "club_type": club.club_type,
+                }
+            )
 
         return Response({"clubs": clubs_data})
     except Exception as e:

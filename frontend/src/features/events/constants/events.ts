@@ -1,1 +1,1 @@
-export const EVENTS_PER_PAGE = 48;
+export const EVENTS_PER_PAGE = 24;

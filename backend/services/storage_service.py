@@ -14,6 +14,7 @@ import requests
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from PIL import Image
+
 from scraping.logging_config import logger
 
 
@@ -111,7 +112,7 @@ class StorageService:
             )
             logger.info(f"Successfully uploaded image: {filename} -> {public_url}")
             return public_url
-        
+
         except Exception as e:
             logger.exception(f"Error uploading image: {e}")
             return None
