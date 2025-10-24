@@ -3,24 +3,8 @@ import asyncio
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup, NavigableString
 
-
-[{
 next_page_element = 'a.pager__link--next'
 base_url = "https://uwaterloo.ca/theatres/events"
-}, 
-{
-next_page_element = 'a.pager__link--next'
-base_url = "https://uwaterloo.ca/theatres/events"
-},
-{
-next_page_element = 'a.pager__link--next'
-base_url = "https://uwaterloo.ca/theatres/events"
-},
-{
-next_page_element = 'a.pager__link--next'
-base_url = "https://uwaterloo.ca/theatres/events"
-}]
-
 
 async def main():
     async with async_playwright() as p:

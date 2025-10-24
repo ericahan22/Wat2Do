@@ -18,6 +18,9 @@ requests==2.31.0
 beautifulsoup4
 lxml
 openai
+playwright==1.40.0
+greenlet==3.0.1
+pyee==11.0.1
 
 # Email service
 resend==0.8.0
