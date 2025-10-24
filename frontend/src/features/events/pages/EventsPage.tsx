@@ -84,7 +84,7 @@ function EventsPage() {
         ]}
       />
       <div className="sm:text-left">
-        <h1 className="text-3xl font-bold mb-2">
+        <h1 className="sm:text-3xl text-2xl font-bold mb-2">
           <NumberFlow
             value={data.length}
             suffix={` ${getEventTypeText()} events`}

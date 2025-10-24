@@ -276,7 +276,7 @@ const EventsGrid = memo(
     };
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 mt-4">
         {/* Events Grid with Section Headers */}
         <div className="space-y-6">
           {['today', 'tomorrow', 'later this week', 'later this month', 'later', 'past'].map((category) => {
@@ -287,9 +287,9 @@ const EventsGrid = memo(
             
             return (
               <div key={category} className="space-y-4">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="sm:text-xl text-lg font-semibold text-gray-900 dark:text-white">
                   {sectionTitle}
-                </h1>
+                </p>
                 <motion.div
                   key={`events-grid-${category}-${data.length}-${currentPage}`}
                   className="grid sm:grid-cols-[repeat(auto-fit,_minmax(175px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5"
