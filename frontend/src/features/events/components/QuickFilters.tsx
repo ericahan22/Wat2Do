@@ -3,6 +3,7 @@ import { Button } from "@/shared/components/ui/button";
 import { X } from "lucide-react";
 import { useQuickFilters } from "@/features/events/hooks/useQuickFilters";
 import { getEmojiUrl, FilterWithEmoji } from "@/shared/lib/emojiUtils";
+import { cn } from "@/shared/lib/utils";
 
 const QuickFilters: React.FC = () => {
   const {
@@ -45,7 +46,7 @@ const QuickFilters: React.FC = () => {
               key={filterName}
               variant="ghost"
               size="sm"
-              className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-1 ${
+              className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-2 ${
                 isActive
                   ? "bg-gray-700 border-gray-700 hover:bg-gray-600 hover:border-gray-600 dark:bg-gray-200 dark:border-gray-200 dark:hover:bg-gray-300 dark:hover:border-gray-300"
                   : "border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700"
@@ -63,13 +64,16 @@ const QuickFilters: React.FC = () => {
               <img
                 src={emojiUrl}
                 alt={filterName}
-                className="h-4 w-4 object-contain"
+                className="h-5 w-5 object-contain"
               />
-              <span
-                className={isActive ? "!text-gray-200 dark:!text-gray-800" : ""}
+              <p
+                className={cn(
+                  "text-sm",
+                  isActive ? "!text-gray-200 dark:!text-gray-800" : ""
+                )}
               >
                 {filterName}
-              </span>
+              </p>
             </Button>
           );
         })}
