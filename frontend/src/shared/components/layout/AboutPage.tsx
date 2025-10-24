@@ -72,7 +72,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          Annie,{" "}
+          <i>Annie</i>,{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Travel%20and%20Places/Roller%20Coaster.webp"
             alt="Roller Coaster"
@@ -138,20 +138,18 @@ const AboutPage: React.FC = () => {
           >
             All Things Legal Panel
           </a>
-          ,
+          ,{" "}
           <a
             href="/events/27"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             Innovation Open House
           </a>
-          , and
+          , and{" "}
           <a
             href="/events/33"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             WiE x Bloomberg Fall Kick Off
           </a>{" "}
           for industry connections.
@@ -171,20 +169,18 @@ const AboutPage: React.FC = () => {
           >
             Gatka Classes
           </a>
-          ,
+          ,{" "}
           <a
             href="/events/44"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             Retro Rollers
           </a>
-          , and
+          , and{" "}
           <a
             href="/events/47"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             Repair Club First Meeting
           </a>{" "}
           to find unexpected communities.
@@ -208,20 +204,18 @@ const AboutPage: React.FC = () => {
           >
             Nature Hike
           </a>
-          ,
+          ,{" "}
           <a
             href="/events/20"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             Fall BBQ Smash
           </a>
-          , and
+          , and{" "}
           <a
             href="/events/38"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            {" "}
             Trivia Night
           </a>
           .

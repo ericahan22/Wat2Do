@@ -103,15 +103,15 @@ export const AuthPage = () => {
 
             <TabsContent value="signup" className="space-y-4">
               {signupSuccess && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-sm text-green-800">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-md dark:bg-green-900 dark:border-green-700">
+                  <p className="text-sm text-green-800 dark:text-green-200">
                     ✅ Successfully sent confirmation email! Please check your inbox.
                   </p>
                 </div>
               )}
               <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-gray-700 dark:text-gray-200">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -119,12 +119,11 @@ export const AuthPage = () => {
                     {...signupForm.register('email')}
                   />
                   {signupForm.formState.errors.email && (
-                    <p className="text-sm text-red-600">{signupForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.email.message}</p>
                   )}
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-gray-700 dark:text-gray-200">Password</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -132,12 +131,11 @@ export const AuthPage = () => {
                     {...signupForm.register('password')}
                   />
                   {signupForm.formState.errors.password && (
-                    <p className="text-sm text-red-600">{signupForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.password.message}</p>
                   )}
                 </div>
-
                 <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <Label htmlFor="signup-confirm-password" className="text-gray-700 dark:text-gray-200">Confirm Password</Label>
                   <Input
                     id="signup-confirm-password"
                     type="password"
@@ -145,14 +143,12 @@ export const AuthPage = () => {
                     {...signupForm.register('confirmPassword')}
                   />
                   {signupForm.formState.errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{signupForm.formState.errors.confirmPassword.message}</p>
+                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.confirmPassword.message}</p>
                   )}
                 </div>
-
                 {signupError && (
-                  <p className="text-sm text-red-600">{signupError.message}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{signupError.message}</p>
                 )}
-
                 <Button type="submit" className="w-full" disabled={isSigningUp}>
                   {isSigningUp ? 'Creating account...' : 'Create Account'}
                 </Button>
