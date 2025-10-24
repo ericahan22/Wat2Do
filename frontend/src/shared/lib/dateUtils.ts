@@ -93,19 +93,29 @@ export const formatDtstartToMidnight = (dtstart: string): string => {
 };
 
 /**
- * Get date category for event grouping (today, tomorrow, later, past)
+ * Get date category for event grouping (today, tomorrow, later this week, later this month, later, past)
  */
-export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'later' | 'past' => {
+export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'later this week' | 'later this month' | 'later' | 'past' => {
   try {
     const eventDate = new Date(removeTimezoneInfo(dateString));
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
     
+    // Get end of this week (Sunday)
+    const endOfWeek = new Date(today);
+    const daysUntilSunday = (7 - today.getDay()) % 7;
+    endOfWeek.setDate(today.getDate() + daysUntilSunday);
+    
+    // Get end of this month
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
     // Reset time to start of day for comparison
     const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
     const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+    const endOfWeekOnly = new Date(endOfWeek.getFullYear(), endOfWeek.getMonth(), endOfWeek.getDate());
+    const endOfMonthOnly = new Date(endOfMonth.getFullYear(), endOfMonth.getMonth(), endOfMonth.getDate());
     
     if (eventDateOnly.getTime() === todayOnly.getTime()) {
       return 'today';
@@ -113,6 +123,10 @@ export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'lat
       return 'tomorrow';
     } else if (eventDateOnly.getTime() < todayOnly.getTime()) {
       return 'past';
+    } else if (eventDateOnly.getTime() <= endOfWeekOnly.getTime()) {
+      return 'later this week';
+    } else if (eventDateOnly.getTime() <= endOfMonthOnly.getTime()) {
+      return 'later this month';
     } else {
       return 'later';
     }

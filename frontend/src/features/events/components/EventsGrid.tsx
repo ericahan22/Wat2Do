@@ -78,18 +78,20 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   );
 };
 
-const OrganizationBadge = ({ event }: { event: Event }) => {
+const OrganizationBadge = ({ event, isSelectMode }: { event: Event; isSelectMode: boolean }) => {
   if (!event.display_handle) return null;
 
   return (
     <BadgeMask variant="bottom-left">
       <Badge
-        onMouseDown={() =>
-          window.open(
-            `https://www.instagram.com/${event.display_handle}/`,
-            "_blank"
-          )
-        }
+        onMouseDown={() => {
+          if (!isSelectMode) {
+            window.open(
+              `https://www.instagram.com/${event.display_handle}/`,
+              "_blank"
+            );
+          }
+        }}
         variant="outline"
         className="font-extrabold cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
       >
@@ -116,7 +118,7 @@ const EventsGrid = memo(
     }, [data, currentPage]);
 
     const groupedEvents = useMemo(() => {
-      const groups: { [key: string]: Event[] } = { today: [], tomorrow: [], later: [], past: [] };
+      const groups: { [key: string]: Event[] } = { today: [], tomorrow: [], 'later this week': [], 'later this month': [], later: [], past: [] };
       
       paginatedData.forEach(event => {
         const category = getDateCategory(event.dtstart);
@@ -188,7 +190,7 @@ const EventsGrid = memo(
               )}
               <EventStatusBadge event={event} />
               <NewEventBadge event={event} />
-              <OrganizationBadge event={event} />
+              <OrganizationBadge event={event} isSelectMode={isSelectMode} />
             </div>
             <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
               <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
@@ -277,7 +279,7 @@ const EventsGrid = memo(
       <div className="space-y-8">
         {/* Events Grid with Section Headers */}
         <div className="space-y-6">
-          {['today', 'tomorrow', 'later', 'past'].map((category) => {
+          {['today', 'tomorrow', 'later this week', 'later this month', 'later', 'past'].map((category) => {
             const events = groupedEvents[category];
             if (events.length === 0) return null;
 
