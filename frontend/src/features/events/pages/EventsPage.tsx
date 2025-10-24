@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import {
   useEvents,
   useEventSelection,
-  EventsStatusBar,
   EventsContent,
   QuickFilters,
 } from "@/features/events";
@@ -40,7 +39,6 @@ function EventsPage() {
     data,
     isLoading,
     error,
-    searchTerm,
     dtstart,
     addedAt,
     handleToggleStartDate,
@@ -110,12 +108,6 @@ function EventsPage() {
         <QuickFilters />
 
         <div className="flex items-center justify-between">
-          <EventsStatusBar
-            isLoading={isLoading}
-            searchTerm={searchTerm}
-            isShowingPastEvents={isShowingPastEvents}
-            totalCount={data.length}
-          />
           <div className="flex">
             <Button variant="ghost" onMouseDown={handleToggleNewEvents}>
               <Sparkles className="h-4 w-4" />
