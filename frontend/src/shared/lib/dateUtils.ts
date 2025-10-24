@@ -140,7 +140,8 @@ export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'lat
  */
 export const formatRelativeDateTime = (dateString: string): string => {
   try {
-    const date = new Date(removeTimezoneInfo(dateString));
+    // Parse the date string directly - JavaScript will handle UTC conversion automatically
+    const date = new Date(dateString);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
