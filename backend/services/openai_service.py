@@ -314,11 +314,10 @@ Available emojis organized by category (select the most fitting one for each fil
 IMPORTANT: You MUST use ONLY the emoji categories listed above (Smileys, People, Animals and Nature, Food and Drink, Activity, Travel and Places, Objects, Symbols, Flags). Do NOT use club types like "WUSA", "Student Society", or "Athletics" as categories - these are not emoji categories.
 
 Generate filter keywords that:
-1. Capture the most common themes that are actually found as a string within the events data above. if you do something that's 2 words, it better be fully included in the event data above.
+1. Capture the most common themes in the events titles data above that are actually found as a string within the events data above. if you do something that's 2 words, it better be fully included in the event data above.
 2. Are SHORT (1-3 words max) and SPECIFIC
-3. Reflect actual patterns in the event data above
-4. Focus on: event types, activities, professional topics, food/drinks, social aspects, clubs/organizations
-5. Are diverse enough to cover different student interests
+3. Reflect actual themes in the event data above  
+4. The list MUST start with ["Food%20and%20Drink", "Pizza", "free food"]
 
 For each filter, select the MOST FITTING emoji from the available list above.
 
