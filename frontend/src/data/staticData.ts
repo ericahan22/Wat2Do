@@ -1,6 +1,6 @@
 import { Event } from "@/features/events/types/events";
 
-export const LAST_UPDATED = "2025-10-24T16:30:31.416986+00:00";
+export const LAST_UPDATED = "2025-10-24T20:43:36.891387+00:00";
 
 export const staticEventsData: Event[] = [
   {
@@ -2938,13 +2938,13 @@ export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Food%20and%20Drink", "Hot%20Dog", "Hot dogs"],
   ["Food%20and%20Drink", "Bubble%20Tea", "Bubble tea"],
   ["Food%20and%20Drink", "Dango", "Dumplings"],
-  ["Activity", "Jack%20O%20Lantern", "Halloween"],
-  ["Activity", "Magic%20Wand", "Costume"],
-  ["Activity", "Trophy", "Competition"],
+  ["Activity", "Jack%20O%20Lantern", "Pumpkin Carving"],
+  ["Activity", "Fireworks", "Bonfire"],
+  ["Activity", "Magic%20Wand", "Halloween"],
+  ["Activity", "Confetti%20Ball", "Costume Contest"],
   ["Activity", "Soccer%20Ball", "Sports"],
-  ["Activity", "Performing%20Arts", "Open Mic"],
-  ["People", "Clapping%20Hands", "Networking"],
-  ["People", "Waving%20Hand", "Meetup"],
-  ["Animals%20and%20Nature", "Fire", "Outdoor"],
-  ["Smileys", "Grinning%20Face%20With%20Smiling%20Eyes", "Fun"]
+  ["Smileys", "Ghost", "Halloween"],
+  ["People", "Clapping%20Hands", "Open Mic"],
+  ["Smileys", "Smiling%20Face", "Wellness"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "Community"]
 ];
