@@ -14,13 +14,13 @@ export const removeTimezoneInfo = (dateTimeString: string): string => {
 
 
 /**
- * Format a date string to a prettier format (e.g., "August 10, 2025")
+ * Format a date string to a prettier format (e.g., "Friday, Sep 30")
  * Can handle both date strings (YYYY-MM-DD) and ISO datetime strings
  */
 export const formatPrettyDate = (dateString: string): string => {
   try {
     const date = new Date(removeTimezoneInfo(dateString));
-    return format(date, "MMMM d, yyyy");
+    return format(date, "EEEE, MMM d");
   } catch {
     return dateString // Return original string if parsing fails
   }
@@ -90,5 +90,63 @@ export const formatEventTimeRange = (startDateTime: string, endDateTime: string 
 export const formatDtstartToMidnight = (dtstart: string): string => {
   const date = dtstart.split('T')[0];
   return `${date}T00:00:00`;
+};
+
+/**
+ * Get date category for event grouping (today, tomorrow, later, past)
+ */
+export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'later' | 'past' => {
+  try {
+    const eventDate = new Date(removeTimezoneInfo(dateString));
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
+    // Reset time to start of day for comparison
+    const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
+    
+    if (eventDateOnly.getTime() === todayOnly.getTime()) {
+      return 'today';
+    } else if (eventDateOnly.getTime() === tomorrowOnly.getTime()) {
+      return 'tomorrow';
+    } else if (eventDateOnly.getTime() < todayOnly.getTime()) {
+      return 'past';
+    } else {
+      return 'later';
+    }
+  } catch {
+    return 'later';
+  }
+};
+
+/**
+ * Format a date string with relative date and time (e.g., "Yesterday 6:43PM EST", "Today 6:43PM EST", "Thursday 7:34PM EST")
+ */
+export const formatRelativeDateTime = (dateString: string): string => {
+  try {
+    const date = new Date(removeTimezoneInfo(dateString));
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    // Reset time to start of day for comparison
+    const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+    
+    const timeStr = format(date, "h:mm a zzz");
+    
+    if (dateOnly.getTime() === todayOnly.getTime()) {
+      return `Today ${timeStr}`;
+    } else if (dateOnly.getTime() === yesterdayOnly.getTime()) {
+      return `Yesterday ${timeStr}`;
+    } else {
+      return format(date, "EEEE h:mm a zzz");
+    }
+  } catch {
+    return dateString;
+  }
 };
 

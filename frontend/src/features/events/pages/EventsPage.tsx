@@ -1,9 +1,26 @@
 import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useEvents, useEventSelection, EventsHeader, EventsStatusBar, EventsContent, QuickFilters } from "@/features/events";
-import { getTodayString, SEOHead, Button, Tabs, TabsList, TabsTrigger, FloatingEventExportBar } from "@/shared";
+import {
+  useEvents,
+  useEventSelection,
+  EventsStatusBar,
+  EventsContent,
+  QuickFilters,
+} from "@/features/events";
+import {
+  getTodayString,
+  SEOHead,
+  Button,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  FloatingEventExportBar,
+  formatRelativeDateTime,
+} from "@/shared";
 import { Calendar, X, History, LayoutGrid, Sparkles } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
+import NumberFlow from "@number-flow/react";
+import { LAST_UPDATED } from "@/data/staticData";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,7 +77,13 @@ function EventsPage() {
           "campus activities",
         ]}
       />
-      <EventsHeader />
+      <div className="sm:text-left">
+        <h1 className="text-3xl font-bold mb-2">
+          <NumberFlow value={data.length} />{" "}
+          {isShowingPastEvents ? "Total" : "Upcoming"} events
+        </h1>
+        <p>Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
+      </div>
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
