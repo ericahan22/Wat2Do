@@ -50,7 +50,7 @@ def newsletter_subscribe(request):
         if email_sent:
             return Response(
                 {
-                    "message": "Successfully subscribed! Check your email for upcoming events.",
+                    "message": "Successfully subscribed! Check your email for upcoming events. (May take several minutes for student emails)",
                     "email": subscriber.get_email_display(),
                 },
                 status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
