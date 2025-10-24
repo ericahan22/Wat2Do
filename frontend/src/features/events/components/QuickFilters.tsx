@@ -26,57 +26,48 @@ const QuickFilters: React.FC = () => {
       }}
       onMouseDown={handleMouseDown}
     >
-      {filterOptions
-        .sort((a, b) => {
-          const aActive = isFilterActive(a);
-          const bActive = isFilterActive(b);
-          // Active filters first, then inactive ones
-          if (aActive && !bActive) return -1;
-          if (!aActive && bActive) return 1;
-          return 0; // Maintain original order for same state
-        })
-        .map((filter) => {
-          const isActive = isFilterActive(filter);
-          const filterItem = filter as FilterWithEmoji;
-          const emojiUrl = getEmojiUrl(filterItem);
-          const filterName = filterItem[2];
+      {filterOptions.map((filter) => {
+        const isActive = isFilterActive(filter);
+        const filterItem = filter as FilterWithEmoji;
+        const emojiUrl = getEmojiUrl(filterItem);
+        const filterName = filterItem[2];
 
-          return (
-            <Button
-              key={filterName}
-              variant="ghost"
-              size="sm"
-              className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-2 ${
-                isActive
-                  ? "bg-gray-700 border-gray-700 hover:bg-gray-600 hover:border-gray-600 dark:bg-gray-200 dark:border-gray-200 dark:hover:bg-gray-300 dark:hover:border-gray-300"
-                  : "border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700"
-              }`}
-              onClick={() => handleFilterClick(filter)}
-            >
-              {isActive && (
-                <X
-                  className={`h-3 w-3 ${
-                    isActive ? "!text-gray-200 dark:!text-gray-800" : ""
-                  }`}
-                  onClick={handleFilterRemoveClick}
-                />
-              )}
-              <img
-                src={emojiUrl}
-                alt={filterName}
-                className="h-5 w-5 object-contain"
-              />
-              <p
-                className={cn(
-                  "text-sm",
+        return (
+          <Button
+            key={filterName}
+            variant="ghost"
+            size="sm"
+            className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-2 ${
+              isActive
+                ? "bg-gray-700 border-gray-700 hover:bg-gray-600 hover:border-gray-600 dark:bg-gray-200 dark:border-gray-200 dark:hover:bg-gray-300 dark:hover:border-gray-300"
+                : "border-gray-100 bg-gray-100 hover:bg-gray-200 hover:border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-800 dark:hover:border-gray-700"
+            }`}
+            onClick={() => handleFilterClick(filter)}
+          >
+            {isActive && (
+              <X
+                className={`h-3 w-3 ${
                   isActive ? "!text-gray-200 dark:!text-gray-800" : ""
-                )}
-              >
-                {filterName}
-              </p>
-            </Button>
-          );
-        })}
+                }`}
+                onClick={handleFilterRemoveClick}
+              />
+            )}
+            <img
+              src={emojiUrl}
+              alt={filterName}
+              className="h-5 w-5 object-contain"
+            />
+            <p
+              className={cn(
+                "text-sm",
+                isActive ? "!text-gray-200 dark:!text-gray-800" : ""
+              )}
+            >
+              {filterName}
+            </p>
+          </Button>
+        );
+      })}
     </div>
   );
 };
