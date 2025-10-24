@@ -9,14 +9,14 @@ import {
 import {
   getTodayString,
   SEOHead,
-  Button,
   Tabs,
   TabsList,
   TabsTrigger,
   FloatingEventExportBar,
   formatRelativeDateTime,
+  FilterButton,
 } from "@/shared";
-import { Calendar, X, History, LayoutGrid, Sparkles } from "lucide-react";
+import { Calendar, History, LayoutGrid, Sparkles } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
 import { LAST_UPDATED } from "@/data/staticData";
@@ -85,7 +85,10 @@ function EventsPage() {
       />
       <div className="sm:text-left">
         <h1 className="text-3xl font-bold mb-2">
-          <NumberFlow value={data.length} suffix={` ${getEventTypeText()} events`} />
+          <NumberFlow
+            value={data.length}
+            suffix={` ${getEventTypeText()} events`}
+          />
         </h1>
         <p>Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
       </div>
@@ -115,31 +118,31 @@ function EventsPage() {
         <QuickFilters />
 
         <div className="flex items-center justify-between">
-          <div className="flex">
-            <Button variant="ghost" onMouseDown={handleToggleNewEvents}>
-              <Sparkles className="h-4 w-4" />
-              {isShowingNewEvents ? "All" : "Newly Added"}
-            </Button>
+          <div className="flex gap-2">
+            <FilterButton
+              isActive={isShowingNewEvents}
+              onToggle={handleToggleNewEvents}
+              icon={<Sparkles className="h-4 w-4" />}
+            >
+              Newly Added
+            </FilterButton>
             {!isShowingNewEvents && (
-              <Button variant="ghost" onMouseDown={handleToggleStartDate}>
-                <History className="h-4 w-4" />
-                {isShowingPastEvents ? "Upcoming" : "Past"}
-              </Button>
+              <FilterButton
+                isActive={isShowingPastEvents}
+                onToggle={handleToggleStartDate}
+                icon={<History className="h-4 w-4" />}
+              >
+                Past
+              </FilterButton>
             )}
             {view === "grid" && (
-              <Button variant="ghost" onMouseDown={toggleSelectMode}>
-                {isSelectMode ? (
-                  <>
-                    <X className="h-4 w-4" />
-                    Cancel
-                  </>
-                ) : (
-                  <>
-                    <Calendar className="h-4 w-4" />
-                    Export
-                  </>
-                )}
-              </Button>
+              <FilterButton
+                isActive={isSelectMode}
+                onToggle={toggleSelectMode}
+                icon={<Calendar className="h-4 w-4" />}
+              >
+                Export
+              </FilterButton>
             )}
           </div>
         </div>
