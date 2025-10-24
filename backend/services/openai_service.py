@@ -13,6 +13,8 @@ import time
 import traceback
 from copy import deepcopy
 from datetime import datetime
+import re
+from urllib.parse import urljoin
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -413,6 +415,66 @@ NO explanations, NO additional text, JUST the JSON array.
             logger.error(f"Traceback: {traceback.format_exc()}")
             return []
 
+    def extract_event_links_from_website(self, raw_text: str, base_url: str | None = None) -> set[str]:
+        """Send page text, return a JSON array of href strings"""
+        if not raw_text:
+            return set()
+
+        def normalize(h: str) -> str:
+            h = h.strip().strip('"\'')
+            return urljoin(base_url, h) if base_url else h
+
+        prompt = (
+            "Return ONLY a JSON array of URL strings (absolute or relative) that correspond to individual "
+            "event pages. Use the context (dates/times, event descriptions, LINK: ... -> href lines) to decide.\n\n"
+            "Text (BEGIN):\n"
+            f"{raw_text}\n"
+            "Text (END)"
+        )
+
+        messages = [
+            {"role": "system", "content": "You are a strict classifier: return ONLY a JSON array of href strings, no other text."},
+            {"role": "user", "content": prompt},
+        ]
+
+        try:
+            resp = self.client.chat.completions.create(
+                model="gpt-4o-mini", messages=messages, temperature=0.0, max_tokens=1500
+            )
+        except Exception as e:
+            logger.exception("OpenAI request failed: %s", e)
+            return set()
+
+        resp_text = ""
+        try:
+            resp_text = resp.choices[0].message.content.strip()
+        except Exception:
+            try:
+                resp_text = str(resp.choices[0].text).strip()
+            except Exception:
+                resp_text = ""
+
+        if not resp_text:
+            logger.warning("Empty AI response when extracting event links")
+            return set()
+
+        data = None
+        try:
+            data = json.loads(resp_text)
+        except Exception:
+            m = re.search(r"(\[.*\])", resp_text, re.DOTALL)
+            if m:
+                try:
+                    data = json.loads(m.group(1))
+                except Exception:
+                    data = None
+
+        if not isinstance(data, list):
+            logger.debug("AI did not return a JSON array; raw response: %s", resp_text[:1000])
+            return set()
+
+        return {normalize(item) for item in data if isinstance(item, str)}
+    
 
 def _get_default_event_structure(
     source_image_url: str | None = None,
