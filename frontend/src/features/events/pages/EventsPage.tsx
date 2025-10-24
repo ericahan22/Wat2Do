@@ -85,7 +85,7 @@ function EventsPage() {
       />
       <div className="sm:text-left">
         <h1 className="text-3xl font-bold mb-2">
-          <NumberFlow value={data.length} /> {getEventTypeText()} events
+          <NumberFlow value={data.length} suffix={` ${getEventTypeText()} events`} />
         </h1>
         <p>Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
       </div>
