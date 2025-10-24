@@ -41,6 +41,7 @@ function EventsPage() {
     error,
     dtstart,
     addedAt,
+    searchTerm,
     handleToggleStartDate,
     handleToggleNewEvents,
   } = useEvents();
@@ -57,6 +58,13 @@ function EventsPage() {
   const todayString = getTodayString();
   const isShowingPastEvents = Boolean(dtstart && dtstart !== todayString);
   const isShowingNewEvents = Boolean(addedAt);
+
+  const getEventTypeText = () => {
+    if (searchTerm) return "Found";
+    if (addedAt) return "New";
+    if (isShowingPastEvents) return "Past";
+    return "Upcoming";
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -77,8 +85,7 @@ function EventsPage() {
       />
       <div className="sm:text-left">
         <h1 className="text-3xl font-bold mb-2">
-          <NumberFlow value={data.length} />{" "}
-          {isShowingPastEvents ? "Total" : "Upcoming"} events
+          <NumberFlow value={data.length} /> {getEventTypeText()} events
         </h1>
         <p>Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
       </div>
@@ -111,7 +118,7 @@ function EventsPage() {
           <div className="flex">
             <Button variant="ghost" onMouseDown={handleToggleNewEvents}>
               <Sparkles className="h-4 w-4" />
-              {isShowingNewEvents ? "All" : "New"}
+              {isShowingNewEvents ? "All" : "Newly Added"}
             </Button>
             {!isShowingNewEvents && (
               <Button variant="ghost" onMouseDown={handleToggleStartDate}>
