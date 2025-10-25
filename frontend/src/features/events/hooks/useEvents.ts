@@ -1,7 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { staticEventsData } from "@/data/staticData";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { API_BASE_URL } from "@/shared/constants/api";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
@@ -47,26 +46,24 @@ export function useEvents() {
   const dtstart = searchParams.get("dtstart") || "";
   const addedAt = searchParams.get("added_at") || "";
 
-  const hasActiveFilters = searchTerm !== "" || dtstart !== "" || addedAt !== "";
-
   const { data, isLoading, error } = useQuery({
     queryKey: ["events", searchTerm, dtstart, addedAt],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
-    enabled: hasActiveFilters,
+    enabled: true,  
   });
 
   const events = useMemo(() => {
-    const rawEvents = hasActiveFilters && data ? data : staticEventsData;
+    if (!data) return [];
     
     if (dtstart) {
-      return rawEvents.filter((event) => {
+      return data.filter((event) => {
         return event.dtstart.split('T')[0] >= dtstart;
       });
     }
 
     const todayStr = getTodayString();
-    return rawEvents.filter((event) => {
+    return data.filter((event) => {
       const eventDate = event.dtstart.split('T')[0];
       if (eventDate > todayStr) return true;
       if (eventDate === todayStr) {
@@ -74,13 +71,11 @@ export function useEvents() {
       }
       return false;
     });
-  }, [hasActiveFilters, data, dtstart]);
+  }, [data, dtstart]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
   const documentTitle = useMemo(() => {
-    const isLoadingData = hasActiveFilters ? isLoading : false;
-
     let title: string;
 
     if (searchTerm) {
@@ -93,12 +88,12 @@ export function useEvents() {
       title = `${events.length} Upcoming Events - Wat2Do`;
     }
 
-    if (!isLoadingData) {
+    if (!isLoading) {
       previousTitleRef.current = title;
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart, addedAt]);
+  }, [events.length, isLoading, searchTerm, dtstart, addedAt]);
 
   useDocumentTitle(documentTitle);
 

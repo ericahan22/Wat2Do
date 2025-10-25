@@ -318,6 +318,7 @@ Generate filter keywords that:
 2. Are SHORT (1-3 words max) and SPECIFIC
 3. Reflect actual themes in the event data above  
 4. The list MUST start with ["Food%20and%20Drink", "Pizza", "free food"]
+5. The Filter string MUST exist in atleast 3 event titles above.
 
 For each filter, select the MOST FITTING emoji from the available list above.
 

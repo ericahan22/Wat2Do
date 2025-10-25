@@ -20,7 +20,7 @@ class Events(models.Model):
 
     # iCalendar datetime fields (RFC 5545 standard)
     dtstamp = models.DateTimeField(
-        default=timezone.now, help_text="'2024-03-15T10:30:00Z'"
+        default=timezone.now, help_text="'time created in UTC, 2024-03-15T10:30:00Z'"
     )
     dtstart = models.DateTimeField(
         default=timezone.now, help_text="'2024-03-20T09:00:00'"

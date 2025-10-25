@@ -131,45 +131,7 @@ def main():
         with output_path.open("w", encoding="utf-8") as f:
             # Write the last updated timestamp in UTC
             current_time = datetime.now(timezone.utc).isoformat()
-            f.write('import { Event } from "@/features/events/types/events";\n\n')
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
-
-            # Write static events data as an array of Event objects
-            f.write("export const staticEventsData: Event[] = [\n")
-            for i, event in enumerate(events):
-                event_id = event["id"]
-                f.write("  {\n")
-                f.write(f"    id: {format_value(event_id)},\n")
-                f.write(f'    ig_handle: {format_value(event["ig_handle"])},\n')
-                f.write(f'    source_url: {format_value(event["source_url"])},\n')
-                f.write(f'    title: {format_value(event["title"])},\n')
-                f.write(f'    dtstart: {format_value(event["dtstart"])},\n')
-                f.write(f'    dtend: {format_value(event["dtend"])},\n')
-                f.write(f'    location: {format_value(event["location"])},\n')
-                f.write(f'    price: {format_value(event["price"])},\n')
-                f.write(f'    food: {format_value(event["food"])},\n')
-                f.write(f'    registration: {format_value(event["registration"])},\n')
-                f.write(
-                    f'    source_image_url: {format_value(event["source_image_url"])},\n'
-                )
-                f.write(f'    club_type: {format_value(event["club_type"])},\n')
-                f.write(f'    added_at: {format_value(event["added_at"])},\n')
-                f.write(f'    description: {format_value(event["description"])},\n')
-                f.write(f'    school: {format_value(event["school"])},\n')
-                f.write(
-                    f'    discord_handle: {format_value(event["discord_handle"])},\n'
-                )
-                f.write(f'    x_handle: {format_value(event["x_handle"])},\n')
-                f.write(f'    tiktok_handle: {format_value(event["tiktok_handle"])},\n')
-                f.write(f'    fb_handle: {format_value(event["fb_handle"])},\n')
-                f.write(
-                    f'    display_handle: {format_value(event["display_handle"])},\n'
-                )
-                f.write("  }")
-                if i < len(events) - 1:
-                    f.write(",")
-                f.write("\n")
-            f.write("];\n\n")
 
             # Write recommended filters (now 3D array format)
             if recommended_filters:
@@ -195,7 +157,7 @@ def main():
                 )
 
         logger.info(
-            "Successfully updated staticData.ts with events and recommended filters"
+            "Successfully updated staticData.ts with recommended filters"
         )
 
         # --- Static RSS file ---

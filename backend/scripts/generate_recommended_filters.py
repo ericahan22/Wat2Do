@@ -50,52 +50,48 @@ def fetch_upcoming_events():
 
 def update_static_data_file(recommended_filters):
     """Update the staticData.ts file with new recommended filters"""
-    # Find the frontend staticEvents.ts or staticData.ts file
+    from datetime import datetime, timezone
+    
+    # Find the frontend staticData.ts file
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
-    static_events_path = frontend_dir / "src" / "data" / "staticEvents.ts"
     static_data_path = frontend_dir / "src" / "data" / "staticData.ts"
 
-    # Determine which file exists
-    if static_data_path.exists():
-        target_file = static_data_path
-        logger.info(f"Updating existing staticData.ts at {target_file}")
-    elif static_events_path.exists():
-        target_file = static_events_path
-        logger.info(f"Found staticEvents.ts, will update it at {target_file}")
-    else:
-        logger.error("Could not find staticEvents.ts or staticData.ts")
+    if not static_data_path.exists():
+        logger.error("Could not find staticData.ts")
         return False
 
     try:
-        # Read the current file
-        with open(target_file, encoding="utf-8") as f:
-            content = f.read()
+        # Write the complete file with LAST_UPDATED and RECOMMENDED_FILTERS
+        with open(static_data_path, "w", encoding="utf-8") as f:
+            # Write the last updated timestamp in UTC
+            current_time = datetime.now(timezone.utc).isoformat()
+            f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
 
-        # Format the recommended filters as a TypeScript array
-        filters_ts = "export const RECOMMENDED_FILTERS: string[] = [\n"
-        for filter_keyword in recommended_filters:
-            # Escape quotes in the keyword
-            escaped = filter_keyword.replace('"', '\\"')
-            filters_ts += f'  "{escaped}",\n'
-        filters_ts += "];\n"
-
-        # Check if RECOMMENDED_FILTERS already exists
-        if "export const RECOMMENDED_FILTERS" in content:
-            # Replace existing RECOMMENDED_FILTERS
-            pattern = r"export const RECOMMENDED_FILTERS:.*?\];"
-            content = re.sub(pattern, filters_ts.rstrip("\n"), content, flags=re.DOTALL)
-            logger.info("Updated existing RECOMMENDED_FILTERS")
-        else:
-            # Append to the end of the file
-            content += "\n" + filters_ts
-            logger.info("Added new RECOMMENDED_FILTERS export")
-
-        # Write back to the file
-        with open(target_file, "w", encoding="utf-8") as f:
-            f.write(content)
+            # Write recommended filters (3D array format)
+            if recommended_filters:
+                f.write(
+                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [\n"
+                )
+                for i, filter_item in enumerate(recommended_filters):
+                    if len(filter_item) == 3:
+                        category, emoji_string, filter_name = filter_item
+                        category_escaped = category.replace('"', '\\"')
+                        emoji_escaped = emoji_string.replace('"', '\\"')
+                        filter_escaped = filter_name.replace('"', '\\"')
+                        f.write(
+                            f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]'
+                        )
+                        if i < len(recommended_filters) - 1:
+                            f.write(",")
+                        f.write("\n")
+                f.write("];\n")
+            else:
+                f.write(
+                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n"
+                )
 
         logger.info(
-            f"✅ Successfully updated {target_file.name} with {len(recommended_filters)} filters"
+            f"✅ Successfully updated {static_data_path.name} with {len(recommended_filters)} filters"
         )
         return True
 
