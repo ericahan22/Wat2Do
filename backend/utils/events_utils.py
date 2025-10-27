@@ -1,4 +1,5 @@
 from datetime import timezone
+from zoneinfo import ZoneInfo
 
 from dateutil import parser as dateutil_parser
 
@@ -37,8 +38,8 @@ def determine_display_handle(event):
     return school or "Wat2Do Event"
 
 
-def tz_compute(dtstart, dtend):
-    """Compute dtstart_utc, dtend_utc, duration, all_day fields"""
+def tz_compute(dtstart, dtend, local_tz="America/Toronto"):
+    """Compute UTC-aware dtstart_utc, dtend_utc, duration, all_day fields, assuming local time if naive."""
     duration = None
     dtend_utc = None
     dtstart_utc = None
@@ -47,9 +48,16 @@ def tz_compute(dtstart, dtend):
     def _to_utc(dt):
         if not dt:
             return None
-        if dt.tzinfo:
+        if dt.tzinfo is not None:
             return dt.astimezone(timezone.utc)
-        return dt.replace(tzinfo=timezone.utc)
+        # Assume naive datetimes are in local time (America/Toronto)
+        try:
+            local_zone = ZoneInfo(local_tz)
+            dt_local = dt.replace(tzinfo=local_zone)
+            return dt_local.astimezone(timezone.utc)
+        except Exception as e:
+            logger.warning(f"Failed to localize naive datetime {dt!r}: {e!s}")
+            return dt.replace(tzinfo=timezone.utc)
 
     def _ensure_dt(obj):
         """Accept datetime or ISO string, return datetime or None."""
