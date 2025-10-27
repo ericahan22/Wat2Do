@@ -220,6 +220,10 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     embedding = event_data.get("embedding") or ""
     date = datetime.fromisoformat(dtstart).date()
     dtstart_utc, dtend_utc, duration, all_day = tz_compute(dtstart, dtend)
+    tz = event_data.get("tz", "")
+    latitude = event_data.get("latitude", None)
+    longitude = event_data.get("longitude", None)
+    school = event_data.get("school", "")
 
     if is_duplicate_event(event_data):
         logger.info(
@@ -285,8 +289,12 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "source_image_url": source_image_url or None,
         "raw_json": event_data,
         "status": "CONFIRMED",
-        "tz": "UTC",
+        "tz": tz,
         "all_day": all_day,
+        "latitude": latitude,
+        "longitude": longitude,
+        "school": school,
+        "rrule": event_data.get("rrule", ""),
     }
 
     try:
