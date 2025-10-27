@@ -14,7 +14,7 @@ import random
 import re
 import time
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as pytimezone
 from pathlib import Path
 
 import requests
@@ -342,7 +342,7 @@ def process_recent_feed(
     Stops scraping once posts become older than cutoff.
     """
     if not cutoff:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS)
+        cutoff = datetime.now(pytimezone.utc) - timedelta(days=CUTOFF_DAYS)
 
     events_added = 0
     posts_processed = 0
@@ -355,7 +355,7 @@ def process_recent_feed(
     try:
         for post in loader.get_feed_posts():
             try:
-                post_time = post.date_utc.replace(tzinfo=timezone.utc)
+                post_time = post.date_utc.replace(tzinfo=pytimezone.utc)
                 if post.shortcode in seen_shortcodes or post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
@@ -403,7 +403,7 @@ def process_recent_feed(
 
                 logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(events_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                today = datetime.now(timezone.utc).date()
+                today = datetime.now(pytimezone.utc).date()
 
                 # Process each event returned by the AI
                 for event_data in events_data:

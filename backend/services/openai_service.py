@@ -142,9 +142,12 @@ class OpenAIService:
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
-    - For price: this represents REGISTRATION COST ONLY. Extract dollar amounts (e.g., "$15", "15 dollars", "cost: $20") as numbers, use null for free events or when not mentioned
-    - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
-    - If the exact food items are not mentioned, e.g., the literal word "food" would be returned, output "Yes!" (exactly) for the food field to indicate that food is present. Do not output the literal word "food" by itself.
+    - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
+        * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price (the lower non-member value when multiple non-member options exist).
+        * If only member prices are given and non-member price is absent, use the listed member price.
+        * If multiple ticket tiers are listed (e.g., "early bird" and "regular"), use the lowest applicable price (e.g., early bird price).
+        * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
+    - For food: if specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks at all, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For all_day: set to true if the event mentions "all day", "all-day", "whole day", or if only a date is given without specific times (e.g., "March 15th" without "9am-5pm"). Set to false if specific start/end times are mentioned
     - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "Student Center", "DC Library", "University of Waterloo"). Use null if location is too vague or cannot be geocoded

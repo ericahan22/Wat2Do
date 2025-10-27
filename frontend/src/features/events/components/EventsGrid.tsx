@@ -213,8 +213,8 @@ const EventsGrid = memo(
               </div>
 
               {event.location && (
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <MapPin className="h-3 w-3" />
+                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                  <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
                   {event.longitude && event.latitude ? (
                     <button
                       onClick={() => window.open(`https://www.google.com/maps?q=${event.latitude},${event.longitude}`, '_blank')}
