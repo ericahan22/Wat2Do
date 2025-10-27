@@ -26,6 +26,7 @@ node_modules/
 # IDE/editor settings
 .vscode/
 chrome_profile/
+.flake8
 
 # SQLite database (for local dev only)
 db.sqlite3

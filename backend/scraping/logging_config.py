@@ -12,8 +12,9 @@ if not root_logger.handlers:
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
 
-    fmt = "%(asctime)s - pid=%(process)d - thread=%(threadName)s - %(name)s - %(levelname)s - %(message)s"
+    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),

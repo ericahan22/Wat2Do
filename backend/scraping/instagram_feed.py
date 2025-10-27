@@ -14,7 +14,7 @@ import random
 import re
 import time
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
@@ -22,6 +22,7 @@ from dotenv import load_dotenv
 from instaloader import Instaloader
 from logging_config import logger
 from zyte_setup import setup_zyte
+from django.utils import timezone
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
@@ -124,58 +125,85 @@ def append_event_to_csv(
 
     dtstart = event_data.get("dtstart", "")
     dtend = event_data.get("dtend", "")
-    dtstart_utc, dtend_utc, duration, all_day = tz_compute(dtstart, dtend)
+    dtstart_utc = event_data.get("dtstart_utc", "")
+    dtend_utc = event_data.get("dtend_utc", "")
+    duration = event_data.get("duration", "")
+    all_day = event_data.get("all_day", False)
+    location = event_data.get("location", "")
+    food = event_data.get("food", "")
+    price = event_data.get("price", "")
+    registration = bool(event_data.get("registration", False))
+    description = event_data.get("description", "")
+    rrule = event_data.get("rrule", "")
+    latitude = event_data.get("latitude", None)
+    longitude = event_data.get("longitude", None)
+    tz = event_data.get("tz", "")
+    school = event_data.get("school", "")
+    source_image_url = event_data.get("source_image_url", "")
+    title = event_data.get("title", "")
+
+    fieldnames = [
+        "ig_handle",
+        "title",
+        "source_url",
+        "dtstart",
+        "dtstart_utc",
+        "dtend",
+        "dtend_utc",
+        "duration",
+        "location",
+        "food",
+        "price",
+        "registration",
+        "description",
+        "rrule",
+        "latitude",
+        "longitude",
+        "tz",
+        "school",
+        "source_image_url",
+        "all_day",
+        "club_type",
+        "raw_json",
+        "added_to_db",
+        "status",
+        "embedding",
+    ]
 
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
-        fieldnames = [
-            "ig_handle",
-            "title",
-            "source_url",
-            "dtstart",
-            "dtstart_utc",
-            "dtend",
-            "dtend_utc",
-            "duration",
-            "location",
-            "food",
-            "price",
-            "registration",
-            "description",
-            "reactions",
-            "embedding",
-            "source_image_url",
-            "all_day",
-            "club_type",
-            "raw_json",
-            "added_to_db",
-        ]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, lineterminator="\n")
         if not file_exists:
             writer.writeheader()
         writer.writerow(
             {
                 "ig_handle": ig_handle,
-                "title": event_data.get("title"),
+                "title": title,
                 "source_url": source_url,
                 "dtstart": dtstart,
                 "dtstart_utc": dtstart_utc,
                 "dtend": dtend,
                 "dtend_utc": dtend_utc,
                 "duration": duration,
-                "location": event_data.get("location"),
-                "food": event_data.get("food", ""),
-                "price": event_data.get("price", ""),
-                "registration": bool(event_data.get("registration", False)),
-                "description": event_data.get("description", ""),
-                "reactions": json.dumps(event_data.get("reactions") or {}),
-                "embedding": embedding or "",
-                "source_image_url": event_data.get("source_image_url") or "",
+                "location": location,
+                "food": food,
+                "price": price,
+                "registration": registration,
+                "description": description,
+                "rrule": rrule,
+                "latitude": latitude,
+                "longitude": longitude,
+                "tz": tz,
+                "school": school,
+                "source_image_url": source_image_url,
                 "all_day": all_day,
                 "club_type": club_type or event_data.get("club_type") or "",
                 "raw_json": json.dumps(event_data, ensure_ascii=False),
                 "added_to_db": added_to_db,
+                "status": "CONFIRMED",
+                "embedding": embedding or "",
             }
         )
+        logger.info(f"Event written to CSV with status: {added_to_db}")
 
 
 def insert_event_to_db(event_data, ig_handle, source_url):
@@ -271,17 +299,21 @@ def insert_event_to_db(event_data, ig_handle, source_url):
             embedding=embedding,
             club_type=club_type,
         )
+        logger.info("Event added successfully")
         return True
     except Exception as e:
-        logger.error(f"Error inserting event to db: {e}")
-        append_event_to_csv(
-            event_data,
-            ig_handle,
-            source_url,
-            added_to_db="failed",
-            embedding=embedding,
-            club_type=club_type,
-        )
+        logger.error(f"Error inserting event to DB: {e}")
+        try:
+            append_event_to_csv(
+                event_data,
+                ig_handle,
+                source_url,
+                added_to_db="failed",
+                embedding=embedding,
+                club_type=club_type,
+            )
+        except Exception as csv_e:
+            logger.error(f"Error writing event to CSV after DB failure: {csv_e}")
         return False
 
 
@@ -327,7 +359,7 @@ def process_recent_feed(
                 if post.shortcode in seen_shortcodes or post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
-                        f"Skipping post {post.shortcode}; consec_old_posts={consec_old_posts}"
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping post; consec_old_posts={consec_old_posts}"
                     )
                     if consec_old_posts >= max_consec_old_posts:
                         termination_reason = (
@@ -342,19 +374,17 @@ def process_recent_feed(
                 consec_old_posts = 0
                 posts_processed += 1
                 logger.info("-" * 100)
-                logger.info(
-                    f"Processing post: {post.shortcode} by {post.owner_username}"
-                )
+                logger.info(f"[{post.shortcode}] [{post.owner_username}] Processing post")
 
                 # Safely get image URL and upload to S3
                 raw_image_url = get_post_image_url(post)
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
                     source_image_url = upload_image_from_url(raw_image_url)
-                    logger.info(f"Uploaded image to S3: {source_image_url}")
+                    logger.info(f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}")
                 else:
                     logger.warning(
-                        f"No image URL found for post {post.shortcode}, skipping image upload"
+                        f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
                     )
                     source_image_url = None
 
@@ -363,7 +393,7 @@ def process_recent_feed(
                 )
                 if not events_data or len(events_data) == 0:
                     logger.warning(
-                        f"AI client returned no events for post {post.shortcode}"
+                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
                     )
                     if posts_processed >= max_posts:
                         termination_reason = f"reached_max_posts={max_posts}"
@@ -371,6 +401,7 @@ def process_recent_feed(
                         break
                     continue
 
+                logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(events_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
                 today = datetime.now(timezone.utc).date()
 
@@ -388,7 +419,7 @@ def process_recent_feed(
                             if not event_data.get(key)
                         ]
                         logger.warning(
-                            f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
+                            f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
                         )
                         embedding = generate_event_embedding(event_data)
                         append_event_to_csv(
@@ -403,18 +434,18 @@ def process_recent_feed(
                     date = datetime.fromisoformat(event_data.get("dtstart")).date()
                     if date < today:
                         logger.info(
-                            f"Skipping event '{event_data.get('title')}' with past date {date}"
+                            f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {date}"
                         )
                         continue
 
                     if insert_event_to_db(event_data, post.owner_username, source_url):
                         events_added += 1
                         logger.info(
-                            f"Successfully added event '{event_data.get('title')}' from {post.owner_username}"
+                            f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
                         )
                     else:
                         logger.error(
-                            f"Failed to add event '{event_data.get('title')}' from {post.owner_username}"
+                            f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
                         )
 
                 if posts_processed >= max_posts:
@@ -426,9 +457,9 @@ def process_recent_feed(
 
             except Exception as e:
                 logger.error(
-                    f"Error processing post {post.shortcode} by {post.owner_username}: {e!s}"
+                    f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
                 )
-                logger.error(f"Traceback: {traceback.format_exc()}")
+                logger.error(f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}")
                 time.sleep(random.uniform(3, 8))
                 continue
 

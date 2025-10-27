@@ -136,7 +136,7 @@ class OpenAIService:
     - Title-case event titles (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
-    - For dtstart and dtend, if year not found, assume {now.year}
+    - For dtstart and dtend, if year not found, assume {now.year}. If an event's end time is earlier than its start time (e.g., "from 7 pm - 12 am"), interpret end time as being on the NEXT calendar day
     - For dtstart_utc and dtend_utc: convert the local time (dtstart/dtend) to UTC using the timezone (tz). Format as YYYY-MM-DD HH:MM:SSZ. If dtstart/dtend are empty, then dtstart_utc/dtend_utc should also be empty
     - For duration: calculate the duration between dtstart and dtend in HH:MM:SS format (e.g., "02:30:00" for 2 hours 30 minutes). If dtend is empty or not available, use empty string ""
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
@@ -365,7 +365,7 @@ IMPORTANT: You MUST use ONLY the emoji categories listed above (Smileys, People,
 Generate filter keywords that:
 1. Capture the most common themes in the events titles data above that are actually found as a string within the events data above. if you do something that's 2 words, it better be fully included in the event data above.
 2. Are SHORT (1-3 words max) and SPECIFIC
-3. Reflect actual themes in the event data above  
+3. Reflect actual themes in the event data above
 4. The list MUST start with ["Food%20and%20Drink", "Pizza", "free food"]
 5. The Filter string MUST exist in atleast 3 event titles above.
 
