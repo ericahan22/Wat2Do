@@ -96,6 +96,12 @@ jobs:
           pip install --upgrade pip setuptools wheel
           pip install --prefer-binary -r requirements.txt
 
+      - name: Randomize start time (sleep 0-600s)
+        run: |
+          SECONDS=$((RANDOM % 600))
+          echo "Sleeping for $SECONDS seconds to randomize start time within 10 minutes..."
+          sleep $SECONDS
+
       - name: Run scraper
         if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
         working-directory: backend/scraping

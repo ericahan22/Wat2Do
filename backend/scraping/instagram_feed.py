@@ -453,7 +453,7 @@ def process_recent_feed(
                     logger.info(f"Reached max post limit of {max_posts}, stopping")
                     break
 
-                time.sleep(random.uniform(15, 45))
+                time.sleep(random.uniform(30, 60))
 
             except Exception as e:
                 logger.error(
