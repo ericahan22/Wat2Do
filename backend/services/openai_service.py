@@ -78,14 +78,18 @@ class OpenAIService:
         return self.generate_embedding(enhanced_text)
 
     def extract_events_from_caption(
-        self, caption_text: str, source_image_url: str | None = None, post_created_at: datetime | None = None, school: str = "University of Waterloo"
+        self,
+        caption_text: str,
+        source_image_url: str | None = None,
+        post_created_at: datetime | None = None,
+        school: str = "University of Waterloo",
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract event information from Instagram caption text and optional image"""
         # Get current date and day of week for context
         now = datetime.now()
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
-        
+
         # Use post creation time if provided, otherwise use current time
         context_datetime = post_created_at if post_created_at else now
         context_date = context_datetime.strftime("%Y-%m-%d")

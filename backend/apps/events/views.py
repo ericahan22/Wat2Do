@@ -346,7 +346,9 @@ def get_google_calendar_urls(request):
             # Format dates for Google Calendar (YYYYMMDDTHHMMSSZ for UTC)
             start_date = event.dtstart_utc.strftime("%Y%m%d")
             start_time = event.dtstart_utc.strftime("%H%M%S")
-            end_time = event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
+            end_time = (
+                event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
+            )
 
             start_datetime = f"{start_date}T{start_time}Z"
             end_datetime = f"{start_date}T{end_time}Z"

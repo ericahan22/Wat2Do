@@ -156,9 +156,7 @@ def main():
                     "export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n"
                 )
 
-        logger.info(
-            "Successfully updated staticData.ts with recommended filters"
-        )
+        logger.info("Successfully updated staticData.ts with recommended filters")
 
         # --- Static RSS file ---
         try:

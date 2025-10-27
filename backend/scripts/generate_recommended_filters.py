@@ -10,7 +10,6 @@ This script:
 
 import logging
 import os
-import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -51,7 +50,7 @@ def fetch_upcoming_events():
 def update_static_data_file(recommended_filters):
     """Update the staticData.ts file with new recommended filters"""
     from datetime import datetime, timezone
-    
+
     # Find the frontend staticData.ts file
     frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
     static_data_path = frontend_dir / "src" / "data" / "staticData.ts"
