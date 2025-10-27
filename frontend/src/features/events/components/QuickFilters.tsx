@@ -34,7 +34,7 @@ const QuickFilters: React.FC = () => {
 
         return (
           <Button
-            key={filterName}
+            key={`${filterName}-${emojiUrl}`}
             variant="ghost"
             size="sm"
             className={`shrink-0 h-8 px-3 text-xs border rounded-xl flex items-center gap-2 ${

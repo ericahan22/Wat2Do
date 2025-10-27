@@ -109,6 +109,7 @@ class OpenAIService:
             "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
             "dtstart_utc": string,  // start date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtstart using tz)
             "dtend_utc": string,  // end date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtend using tz)
+            "duration": string,  // duration in HH:MM:SS format (e.g., "02:30:00" for 2.5 hours), empty string if dtend is not available
             "all_day": boolean,  // true if event is all day (no specific time mentioned), false otherwise
             "location": string,  // location of the event
             "latitude": number or null,  // latitude coordinate if location can be geocoded (e.g., 43.4723)
@@ -133,6 +134,7 @@ class OpenAIService:
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dtstart and dtend, if year not found, assume {now.year}
     - For dtstart_utc and dtend_utc: convert the local time (dtstart/dtend) to UTC using the timezone (tz). Format as YYYY-MM-DD HH:MM:SSZ. If dtstart/dtend are empty, then dtstart_utc/dtend_utc should also be empty
+    - For duration: calculate the duration between dtstart and dtend in HH:MM:SS format (e.g., "02:30:00" for 2 hours 30 minutes). If dtend is empty or not available, use empty string ""
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible

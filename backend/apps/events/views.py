@@ -81,8 +81,8 @@ def get_events(request):
             "title",
             "description",
             "location",
-            "dtstart",
-            "dtend",
+            "dtstart_utc",
+            "dtend_utc",
             "price",
             "food",
             "registration",
@@ -121,8 +121,8 @@ def get_event(request, event_id):
             "title",
             "description",
             "location",
-            "dtstart",
-            "dtend",
+            "dtstart_utc",
+            "dtend_utc",
             "price",
             "food",
             "registration",
@@ -267,13 +267,13 @@ def _generate_ics_content(events):
     dtstamp = now.strftime("%Y%m%dT%H%M%SZ")
 
     for event in events:
-        start_date = event.dtstart.strftime("%Y%m%d")
-        start_time = event.dtstart.strftime("%H%M%S")
-        end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
+        start_date = event.dtstart_utc.strftime("%Y%m%d")
+        start_time = event.dtstart_utc.strftime("%H%M%S")
+        end_time = event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
 
         lines.append("BEGIN:VEVENT")
-        lines.append(f"DTSTART:{start_date}T{start_time}")
-        lines.append(f"DTEND:{start_date}T{end_time}")
+        lines.append(f"DTSTART:{start_date}T{start_time}Z")
+        lines.append(f"DTEND:{start_date}T{end_time}Z")
         lines.append(f"DTSTAMP:{dtstamp}")
         lines.append(f"SUMMARY:{escape_text(event.title)}")
 
@@ -343,13 +343,13 @@ def get_google_calendar_urls(request):
         from urllib.parse import urlencode
 
         for event in events:
-            # Format dates for Google Calendar (YYYYMMDDTHHMMSS)
-            start_date = event.dtstart.strftime("%Y%m%d")
-            start_time = event.dtstart.strftime("%H%M%S")
-            end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
+            # Format dates for Google Calendar (YYYYMMDDTHHMMSSZ for UTC)
+            start_date = event.dtstart_utc.strftime("%Y%m%d")
+            start_time = event.dtstart_utc.strftime("%H%M%S")
+            end_time = event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
 
-            start_datetime = f"{start_date}T{start_time}"
-            end_datetime = f"{start_date}T{end_time}"
+            start_datetime = f"{start_date}T{start_time}Z"
+            end_datetime = f"{start_date}T{end_time}Z"
 
             # Build details field
             details_parts = []
@@ -387,7 +387,7 @@ def rss_feed(request):
     Simple RSS feed of upcoming events (returns application/rss+xml).
     """
     now = timezone.now()
-    items = Events.objects.filter(dtstart__gte=now).order_by("dtstart")[:50]
+    items = Events.objects.filter(dtstart_utc__gte=now).order_by("dtstart_utc")[:50]
 
     site_url = getattr(settings, "SITE_URL", "https://wat2do.ca")
     rss_items = []

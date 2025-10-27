@@ -131,7 +131,7 @@ function EventDetailPage() {
         title={`${event.title} - Event Details`}
         description={
           event.description ||
-          `Join us for ${event.title} on ${formatPrettyDate(event.dtstart)}`
+          `Join us for ${event.title} on ${formatPrettyDate(event.dtstart_utc)}`
         }
         url={`/event/${event.id}`}
         keywords={[
@@ -207,10 +207,10 @@ function EventDetailPage() {
                 <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {formatPrettyDate(event.dtstart)}
+                    {formatPrettyDate(event.dtstart_utc)}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {formatEventTimeRange(event.dtstart, event.dtend)}
+                    {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
                   </p>
                 </div>
               </div>

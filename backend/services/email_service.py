@@ -30,18 +30,18 @@ class EmailService:
         events = (
             Events.objects.filter(added_at__date=today)
             .select_related()
-            .order_by("dtstart", "dtend")
+            .order_by("dtstart_utc", "dtend_utc")
         )
 
         events_data = []
         for event in events:
             # Format the event data for email template
-            event_date = event.dtstart.strftime("%B %d, %Y")
+            event_date = event.dtstart_utc.strftime("%B %d, %Y")
 
             # Format time range
-            start_time = event.dtstart.strftime("%I:%M %p").lstrip("0")
-            if event.dtend:
-                end_time = event.dtend.strftime("%I:%M %p").lstrip("0")
+            start_time = event.dtstart_utc.strftime("%I:%M %p").lstrip("0")
+            if event.dtend_utc:
+                end_time = event.dtend_utc.strftime("%I:%M %p").lstrip("0")
                 time_range = f"{start_time} - {end_time}"
             else:
                 time_range = f"Starting at {start_time}"

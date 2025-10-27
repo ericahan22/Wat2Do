@@ -186,8 +186,8 @@ def get_promoted_events(request):
                 {
                     "id": event.id,
                     "title": event.title,
-                    "dtstart": event.dtstart.isoformat(),
-                    "dtend": event.dtend.isoformat() if event.dtend else None,
+                    "dtstart": event.dtstart_utc.isoformat(),
+                    "dtend": event.dtend_utc.isoformat() if event.dtend_utc else None,
                     "location": event.location,
                     "description": event.description,
                     "source_image_url": event.source_image_url,

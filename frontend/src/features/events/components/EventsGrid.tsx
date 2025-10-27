@@ -121,7 +121,7 @@ const EventsGrid = memo(
       const groups: { [key: string]: Event[] } = { today: [], tomorrow: [], 'later this week': [], 'later this month': [], later: [], past: [] };
       
       paginatedData.forEach(event => {
-        const category = getDateCategory(event.dtstart);
+        const category = getDateCategory(event.dtstart_utc);
         groups[category].push(event);
       });
       
@@ -201,14 +201,14 @@ const EventsGrid = memo(
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatPrettyDate(event.dtstart)}
+                  {formatPrettyDate(event.dtstart_utc)}
                 </span>
               </div>
 
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatEventTimeRange(event.dtstart, event.dtend)}
+                  {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
                 </span>
               </div>
 

@@ -14,7 +14,7 @@ const fetchEvents = async ({
   queryKey: string[];
 }): Promise<Event[]> => {
   const searchTerm = queryKey[1] || "";
-  const dtstart = queryKey[2] || "";
+  const dtstart_utc = queryKey[2] || "";
   const addedAt = queryKey[3] || "";
 
   const params = new URLSearchParams();
@@ -23,8 +23,8 @@ const fetchEvents = async ({
     params.append("search", searchTerm);
   }
 
-  if (dtstart) {
-    params.append("dtstart", formatDtstartToMidnight(dtstart));
+  if (dtstart_utc) {
+    params.append("dtstart_utc", formatDtstartToMidnight(dtstart_utc));
   }
 
   if (addedAt) {
@@ -43,11 +43,11 @@ const fetchEvents = async ({
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
-  const dtstart = searchParams.get("dtstart") || "";
+  const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, dtstart, addedAt],
+    queryKey: ["events", searchTerm, dtstart_utc, addedAt],
     queryFn: fetchEvents,
     refetchOnWindowFocus: false,
     enabled: true,  
@@ -56,22 +56,22 @@ export function useEvents() {
   const events = useMemo(() => {
     if (!data) return [];
     
-    if (dtstart) {
+    if (dtstart_utc) {
       return data.filter((event) => {
-        return event.dtstart.split('T')[0] >= dtstart;
+        return event.dtstart_utc.split('T')[0] >= dtstart_utc;
       });
     }
 
     const todayStr = getTodayString();
     return data.filter((event) => {
-      const eventDate = event.dtstart.split('T')[0];
+      const eventDate = event.dtstart_utc.split('T')[0];
       if (eventDate > todayStr) return true;
       if (eventDate === todayStr) {
         return isEventOngoing(event);
       }
       return false;
     });
-  }, [data, dtstart]);
+  }, [data, dtstart_utc]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -80,7 +80,7 @@ export function useEvents() {
 
     if (searchTerm) {
       title = `${events.length} Found Events - Wat2Do`;
-    } else if (dtstart) {
+    } else if (dtstart_utc) {
       title = `${events.length} Total Events - Wat2Do`;
     } else if (addedAt) {
       title = `${events.length} New Events - Wat2Do`;
@@ -93,7 +93,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, dtstart, addedAt]);
+  }, [events.length, isLoading, searchTerm, dtstart_utc, addedAt]);
 
   useDocumentTitle(documentTitle);
 
@@ -111,10 +111,10 @@ export function useEvents() {
 
       const todayStr = getTodayString();
 
-      if (dtstart && dtstart !== todayStr) {
-        nextParams.delete("dtstart");
+      if (dtstart_utc && dtstart_utc !== todayStr) {
+        nextParams.delete("dtstart_utc");
       } else {
-        nextParams.set("dtstart", formatDtstartToMidnight("2025-01-01"));
+        nextParams.set("dtstart_utc", formatDtstartToMidnight("2025-01-01"));
       }
       return nextParams;
     });
@@ -134,7 +134,7 @@ export function useEvents() {
         const cutoffDate = now >= todayAt7am ? todayAt7am : new Date(todayAt7am.getTime() - 24 * 60 * 60 * 1000);
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
-        nextParams.delete("dtstart");
+        nextParams.delete("dtstart_utc");
       }
       return nextParams;
     });
@@ -145,7 +145,7 @@ export function useEvents() {
     isLoading,
     error,
     searchTerm,
-    dtstart,
+    dtstart_utc,
     addedAt,
     handleViewChange,
     handleToggleStartDate,

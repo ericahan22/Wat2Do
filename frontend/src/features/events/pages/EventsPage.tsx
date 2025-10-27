@@ -39,7 +39,7 @@ function EventsPage() {
     data,
     isLoading,
     error,
-    dtstart,
+    dtstart_utc,
     addedAt,
     searchTerm,
     handleToggleStartDate,
@@ -56,7 +56,7 @@ function EventsPage() {
   } = useEventSelection(view);
 
   const todayString = getTodayString();
-  const isShowingPastEvents = Boolean(dtstart && dtstart !== todayString);
+  const isShowingPastEvents = Boolean(dtstart_utc && dtstart_utc !== todayString);
   const isShowingNewEvents = Boolean(addedAt);
 
   const getEventTypeText = () => {
