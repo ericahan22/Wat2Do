@@ -78,18 +78,26 @@ class OpenAIService:
         return self.generate_embedding(enhanced_text)
 
     def extract_events_from_caption(
-        self, caption_text: str, source_image_url: str | None = None
+        self, caption_text: str, source_image_url: str | None = None, post_created_at: datetime | None = None, school: str = "University of Waterloo"
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract event information from Instagram caption text and optional image"""
         # Get current date and day of week for context
         now = datetime.now()
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
+        
+        # Use post creation time if provided, otherwise use current time
+        context_datetime = post_created_at if post_created_at else now
+        context_date = context_datetime.strftime("%Y-%m-%d")
+        context_day = context_datetime.strftime("%A")
+        context_time = context_datetime.strftime("%H:%M")
 
         prompt = f"""
     Analyze the following Instagram caption and extract event information if it's an event post.
     
+    School context: This post is from {school}. Use this to guide location and timezone decisions.
     Current context: Today is {current_day_of_week}, {current_date}
+    Post was created on: {context_day}, {context_date} at {context_time}
     
     Caption: {caption_text}
     
@@ -99,10 +107,18 @@ class OpenAIService:
             "title": string,  // name of the event
             "dtstart": string,  // start date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
             "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
+            "dtstart_utc": string,  // start date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtstart using tz)
+            "dtend_utc": string,  // end date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtend using tz)
+            "all_day": boolean,  // true if event is all day (no specific time mentioned), false otherwise
             "location": string,  // location of the event
+            "latitude": number or null,  // latitude coordinate if location can be geocoded (e.g., 43.4723)
+            "longitude": number or null,  // longitude coordinate if location can be geocoded (e.g., -80.5449)
+            "tz": string,  // timezone based on location (e.g., "America/Toronto", "America/New_York", "America/Los_Angeles")
             "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
             "food": string,  // food information if mentioned, empty string if not
             "registration": boolean,  // true if registration is required/mentioned, false otherwise
+            "rrule": string,  // recurrence rule in iCalendar format if recurring (e.g., "FREQ=WEEKLY;BYDAY=MO" for every Monday)
+            "school": string,  // the school name (use the school context provided above)
             "source_image_url": string,  // URL of the event image if provided, empty string if not
             "description": string  // the caption text word-for-word, followed by any additional insights from the image not in the caption
         }}
@@ -116,6 +132,7 @@ class OpenAIService:
     - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
     - If recurring events are mentioned (e.g., "every Friday"), just create one event
     - For dtstart and dtend, if year not found, assume {now.year}
+    - For dtstart_utc and dtend_utc: convert the local time (dtstart/dtend) to UTC using the timezone (tz). Format as YYYY-MM-DD HH:MM:SSZ. If dtstart/dtend are empty, then dtstart_utc/dtend_utc should also be empty
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
     - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
@@ -123,8 +140,28 @@ class OpenAIService:
     - For food: extract and list all specific food or beverage items mentioned, separated by commas (e.g., "Snacks, drinks", "Pizza, bubble tea"). Always capitalize the first item mentioned
     - If the exact food items are not mentioned, e.g., the literal word "food" would be returned, output "Yes!" (exactly) for the food field to indicate that food is present. Do not output the literal word "food" by itself.
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
+    - For all_day: set to true if the event mentions "all day", "all-day", "whole day", or if only a date is given without specific times (e.g., "March 15th" without "9am-5pm"). Set to false if specific start/end times are mentioned
+    - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "Student Center", "DC Library", "University of Waterloo"). Use null if location is too vague or cannot be geocoded
+    - For tz: determine timezone based on location and school context. Use these mappings:
+        * University of Waterloo, Waterloo, Ontario, Canada -> "America/Toronto"
+        * Toronto, Ontario, Canada -> "America/Toronto"
+        * Vancouver, British Columbia, Canada -> "America/Vancouver"
+        * Calgary, Alberta, Canada -> "America/Edmonton"
+        * Montreal, Quebec, Canada -> "America/Toronto"
+        * New York, NY, USA -> "America/New_York"
+        * Los Angeles, CA, USA -> "America/Los_Angeles"
+        * Chicago, IL, USA -> "America/Chicago"
+        * Default to "America/Toronto" for {school} events or if location is unclear
+    - For rrule: if the event is recurring (mentions "every Monday", "every Wednesday", "weekly", "bi-weekly", etc.), generate the appropriate iCalendar recurrence rule:
+        * "every Monday" or "weekly on Monday" -> "FREQ=WEEKLY;BYDAY=MO"
+        * "every Wednesday" -> "FREQ=WEEKLY;BYDAY=WE" 
+        * "every Friday" -> "FREQ=WEEKLY;BYDAY=FR"
+        * "every Monday and Wednesday" -> "FREQ=WEEKLY;BYDAY=MO,WE"
+        * "every Tuesday and Thursday" -> "FREQ=WEEKLY;BYDAY=TU,TH"
+        * "bi-weekly" -> "FREQ=WEEKLY;INTERVAL=2"
+        * Use empty string "" if not recurring
     - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
-    - If information is not available, use empty string "" for strings, null for price, false for registration
+    - If information is not available, use empty string "" for strings, null for price/coordinates, false for registration
     - Be consistent with the exact field names
     - Return ONLY the JSON array, no additional text
     - If no events are found, return an empty array []
@@ -236,19 +273,25 @@ class OpenAIService:
                         "title",
                         "description",
                         "location",
-                        "club_type",
-                        "ig_handle",
+                        "latitude",
+                        "longitude",
                         "dtstart",
                         "dtend",
+                        "dtstart_utc",
+                        "dtend_utc",
+                        "all_day",
+                        "tz",
                         "food",
                         "price",
                         "registration",
+                        "rrule",
+                        "school",
                     ]
                     for field in required_fields:
                         if field not in event_data:
-                            if field == "price":
+                            if field in ["price", "latitude", "longitude"]:
                                 event_data[field] = None
-                            elif field == "registration":
+                            elif field in ["registration", "all_day"]:
                                 event_data[field] = False
                             else:
                                 event_data[field] = ""
@@ -422,10 +465,18 @@ def _get_default_event_structure(
         "title": "",
         "dtstart": "",
         "dtend": "",
+        "dtstart_utc": "",
+        "dtend_utc": "",
+        "all_day": False,
         "location": "",
+        "latitude": None,
+        "longitude": None,
+        "tz": "America/Toronto",
         "price": None,
         "food": "",
         "registration": False,
+        "rrule": "",
+        "school": "University of Waterloo",
         "source_image_url": source_image_url or "",
         "description": "",
     }

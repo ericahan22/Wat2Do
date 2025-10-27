@@ -359,7 +359,7 @@ def process_recent_feed(
                     source_image_url = None
 
                 events_data = extract_events_from_caption(
-                    post.caption, source_image_url
+                    post.caption, source_image_url, post.date_utc
                 )
                 if not events_data or len(events_data) == 0:
                     logger.warning(
