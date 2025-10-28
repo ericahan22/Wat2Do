@@ -15,6 +15,12 @@ urlpatterns = [
         views.get_google_calendar_urls,
         name="get_google_calendar_urls",
     ),
+    # Event submission endpoints
+    path("submit/", views.submit_event, name="submit_event"),
+    path("my-submissions/", views.get_user_submissions, name="get_user_submissions"),
+    path("submissions/", views.get_submissions, name="get_submissions"),
+    path("submissions/<int:submission_id>/process/", views.process_submission, name="process_submission"),
+    path("submissions/<int:submission_id>/review/", views.review_submission, name="review_submission"),
     # Test endpoints
     path("test-similarity/", views.test_similarity, name="test_similarity"),
 ]

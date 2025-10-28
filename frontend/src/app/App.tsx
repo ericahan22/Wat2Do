@@ -3,11 +3,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Analytics } from "@vercel/analytics/react";
 import { EventsPage } from "@/features/events";
 import EventDetailPage from "@/features/events/pages/EventDetailPage";
+import { SubmitEventPage } from "@/features/events/pages/SubmitEventPage";
+import { MySubmissionsPage } from "@/features/events/pages/MySubmissionsPage";
 import { ClubsPage } from "@/features/clubs";
 import { AdminPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
 import { VerifyEmailPage, DashboardPage, AuthPage } from "@/features/auth";
-import { ProtectedRoute, Navbar, Footer, AboutPage, ContactPage, NotFoundPage, TopBanner, SEOHead } from "@/shared";
+import { ProtectedRoute, ProtectedAdminRoute, Navbar, Footer, AboutPage, ContactPage, NotFoundPage, TopBanner, SEOHead } from "@/shared";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,10 +33,25 @@ function App() {
               <Route path="/" element={<EventsPage />} />
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:eventId" element={<EventDetailPage />} />
+              <Route
+                path="/submit"
+                element={
+                  <ProtectedRoute>
+                    <SubmitEventPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/clubs" element={<ClubsPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
-              <Route path="/admin" element={<AdminPage />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminPage />
+                  </ProtectedAdminRoute>
+                }
+              />
               <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
@@ -43,6 +60,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/submissions"
+                element={
+                  <ProtectedRoute>
+                    <MySubmissionsPage />
                   </ProtectedRoute>
                 }
               />

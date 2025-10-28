@@ -7,15 +7,17 @@ from django.utils.html import escape
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+import os
+import uuid
 
 from services.openai_service import generate_embedding
 from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
-from .models import Events
+from .models import Events, EventSubmission
 
 
 @api_view(["GET"])
@@ -435,3 +437,184 @@ def rss_feed(request):
   </channel>
 </rss>"""
     return HttpResponse(rss, content_type="application/rss+xml")
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+@ratelimit(key="ip", rate="5/hr", block=True)
+def submit_event(request):
+    """Submit event for review - accepts screenshot file and source URL"""
+    try:
+        screenshot = request.FILES.get("screenshot")
+        source_url = request.data.get("source_url")
+
+        if not screenshot or not source_url:
+            return Response(
+                {"error": "Screenshot and source URL are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Upload to S3
+        from services.storage_service import storage_service
+
+        filename = f"submissions/{uuid.uuid4()}.{screenshot.name.split('.')[-1]}"
+        screenshot_url = storage_service.upload_image_data(screenshot.read(), filename)
+
+        if not screenshot_url:
+            return Response(
+                {"error": "Failed to upload screenshot"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Create submission
+        submission = EventSubmission.objects.create(
+            screenshot_url=screenshot_url, 
+            source_url=source_url, 
+            status="pending",
+            submitted_by=request.user
+        )
+
+        return Response(
+            {"id": submission.id, "message": "Event submitted successfully"},
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def get_submissions(request):
+    """Get all event submissions (admin only)"""
+    try:
+        status_filter = request.GET.get("status", "pending")
+        submissions = EventSubmission.objects.filter(status=status_filter)
+
+        data = [
+            {
+                "id": s.id,
+                "screenshot_url": s.screenshot_url,
+                "source_url": s.source_url,
+                "status": s.status,
+                "submitted_at": s.submitted_at,
+                "submitted_by": s.submitted_by.email if s.submitted_by else None,
+                "extracted_data": s.extracted_data,
+                "admin_notes": s.admin_notes,
+            }
+            for s in submissions
+        ]
+
+        return Response(data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def process_submission(request, submission_id):
+    """Extract event data from submission using OpenAI"""
+    try:
+        submission = get_object_or_404(EventSubmission, id=submission_id)
+
+        # Extract event data using OpenAI
+        from services.openai_service import OpenAIService
+
+        openai_service = OpenAIService()
+
+        events_data = openai_service.extract_events_from_caption(
+            caption_text=f"Event source: {submission.source_url}",
+            source_image_url=submission.screenshot_url,
+        )
+
+        if events_data:
+            submission.extracted_data = events_data[0] if len(events_data) > 0 else {}
+            submission.save()
+
+            return Response(
+                {"id": submission.id, "extracted_data": submission.extracted_data}
+            )
+
+        return Response(
+            {"error": "Failed to extract event data"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def review_submission(request, submission_id):
+    """Approve, reject, or edit submission"""
+    try:
+        submission = get_object_or_404(EventSubmission, id=submission_id)
+        action = request.data.get("action")  # 'approve', 'reject', 'edit'
+
+        if action == "approve":
+            # Create event from extracted/edited data
+            event_data = request.data.get("event_data", submission.extracted_data)
+            event = Events.objects.create(**event_data)
+
+            submission.status = "approved"
+            submission.created_event = event
+            submission.reviewed_at = timezone.now()
+            submission.reviewed_by = request.user.email
+            submission.save()
+
+            return Response(
+                {"message": "Event approved and created", "event_id": event.id}
+            )
+
+        elif action == "reject":
+            submission.status = "rejected"
+            submission.reviewed_at = timezone.now()
+            submission.reviewed_by = request.user.email
+            submission.admin_notes = request.data.get("notes", "")
+            submission.save()
+
+            return Response({"message": "Event rejected"})
+
+        elif action == "edit":
+            submission.extracted_data = request.data.get("event_data")
+            submission.save()
+
+            return Response({"message": "Event data updated"})
+
+        return Response(
+            {"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def get_user_submissions(request):
+    """Get submissions for the authenticated user"""
+    try:
+        submissions = EventSubmission.objects.filter(submitted_by=request.user).order_by("-submitted_at")
+
+        data = [
+            {
+                "id": s.id,
+                "screenshot_url": s.screenshot_url,
+                "source_url": s.source_url,
+                "status": s.status,
+                "submitted_at": s.submitted_at,
+                "reviewed_at": s.reviewed_at,
+                "admin_notes": s.admin_notes,
+                "created_event_id": s.created_event.id if s.created_event else None,
+            }
+            for s in submissions
+        ]
+
+        return Response(data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

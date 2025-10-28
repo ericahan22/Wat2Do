@@ -214,16 +214,16 @@ const EventsGrid = memo(
 
               {event.location && (
                 <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <MapPin className="h-3 w-3" />
+                  <MapPin className="flex-shrink-0 h-3 w-3" />
                   {event.longitude && event.latitude ? (
                     <button
-                      onClick={() => window.open(`https://www.google.com/maps?q=${event.latitude},${event.longitude}`, '_blank')}
-                      className="hover:underline cursor-pointer"
+                      onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`, '_blank')}
+                      className="line-clamp-1 hover:underline cursor-pointer text-left"
                     >
                       {event.location}
                     </button>
                   ) : (
-                    <span>{event.location}</span>
+                    <span className="line-clamp-1">{event.location}</span>
                   )}
                 </div>
               )}

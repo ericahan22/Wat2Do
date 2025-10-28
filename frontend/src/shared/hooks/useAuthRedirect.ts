@@ -27,4 +27,3 @@ export const useGuestRedirect = (redirectTo: string = '/dashboard') => {
 
   return { isAuthenticated, isLoadingUser }
 }
-

@@ -10,6 +10,8 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -225,9 +227,12 @@ def user_info(request):
     """Get current user info"""
     u = request.user
     decrypted_email = email_encryption.decrypt_email(u.email)
-    return Response({"id": u.id, "email": decrypted_email}, status=status.HTTP_200_OK)
-    decrypted_email = email_encryption.decrypt_email(u.email)
-    return Response({"id": u.id, "email": decrypted_email}, status=status.HTTP_200_OK)
+    return Response({
+        "id": u.id, 
+        "email": decrypted_email,
+        "is_staff": u.is_staff,
+        "is_superuser": u.is_superuser
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

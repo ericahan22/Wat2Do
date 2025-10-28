@@ -25,7 +25,7 @@ function Footer() {
       return;
     }
 
-    subscribe(email, {
+    subscribe({ email }, {
       onSuccess: () => {
         setEmail("");
         setTimeout(() => {

@@ -1,3 +1,4 @@
+// Static data for the application
 export const LAST_UPDATED = "2025-10-24T20:43:36.891387+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
