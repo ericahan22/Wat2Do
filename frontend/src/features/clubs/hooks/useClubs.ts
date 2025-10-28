@@ -1,31 +1,24 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { ClubsResponse } from "@/features/clubs/types/clubs";
-import { API_BASE_URL } from "@/shared/constants/api";
+import { clubsAPIClient } from "@/shared/api";
+import type { Club, ClubsResponse } from "@/shared/api";
 
-const fetchClubs = async ({
-  queryKey,
-}: {
-  queryKey: string[];
-}): Promise<ClubsResponse> => {
-  const searchTerm = queryKey[1] || "";
-  const searchParam = searchTerm
-    ? `&search=${encodeURIComponent(searchTerm)}`
-    : "";
-  const categoryFilter = queryKey[2] || "all";
-  const categoryParam = categoryFilter
-    ? `&category=${encodeURIComponent(categoryFilter)}`
-    : "";
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/clubs/?${searchParam}${categoryParam}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch clubs");
+const fetchClubs = async (params: {
+  searchTerm?: string;
+  categoryFilter?: string;
+}): Promise<Club[]> => {
+  const queryParams: Record<string, string> = {};
+  
+  if (params.searchTerm) {
+    queryParams.search = params.searchTerm;
   }
-  const data: ClubsResponse = await response.json();
-  return data;
+  
+  if (params.categoryFilter && params.categoryFilter !== "all") {
+    queryParams.category = params.categoryFilter;
+  }
+
+  return clubsAPIClient.getClubs(queryParams);
 };
 
 export function useClubs() {
@@ -35,7 +28,7 @@ export function useClubs() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["clubs", searchTerm, categoryFilter],
-    queryFn: fetchClubs,
+    queryFn: () => fetchClubs({ searchTerm, categoryFilter }),
     refetchOnWindowFocus: false,
   });
 
@@ -57,7 +50,7 @@ export function useClubs() {
   }, []);
 
   return {
-    data: data?.clubs || [],
+    data: (data as unknown as ClubsResponse)?.clubs ?? [],
     uniqueCategories,
     isLoading,
     error,

@@ -1,50 +1,25 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import { Label } from '@/shared/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { LoginForm } from '@/features/auth/components/LoginForm'
+import { SignupForm } from '@/features/auth/components/SignupForm'
+import { SuccessMessage } from '@/features/auth/components/SuccessMessage'
 import { useAuth } from '@/shared/hooks/useAuth'
-import { useGuestRedirect } from '@/shared/hooks/useAuthRedirect'
-import { loginSchema, signupSchema, type LoginFormData, type SignupFormData } from '../schemas/authSchemas'
+import { AUTH_MESSAGES } from '@/features/auth/constants/auth'
+import type { SignupRequest, AuthMutationOptions } from '@/features/auth/types/auth'
 
 export const AuthPage = () => {
-  useGuestRedirect() // Redirect to dashboard if already authenticated
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login')
   const [signupSuccess, setSignupSuccess] = useState(false)
+  
   const { login, signup, isLoggingIn, isSigningUp, loginError, signupError } = useAuth()
 
-  const loginForm = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
-
-  const signupForm = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  })
-
-  const onLoginSubmit = (data: LoginFormData) => {
-    login(data)
+  const handleSignupSuccess = () => {
+    setSignupSuccess(true)
   }
 
-  const onSignupSubmit = (data: SignupFormData) => {
-    const { confirmPassword: _, ...signupData } = data
-    signup(signupData, {
-      onSuccess: () => {
-        setSignupSuccess(true)
-        signupForm.reset()
-      }
-    })
+  const handleSignupSubmit = (data: SignupRequest, options?: AuthMutationOptions) => {
+    signup(data, options)
   }
 
   return (
@@ -64,95 +39,23 @@ export const AuthPage = () => {
             </TabsList>
 
             <TabsContent value="login" className="space-y-4">
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    {...loginForm.register('email')}
-                  />
-                  {loginForm.formState.errors.email && (
-                    <p className="text-sm text-red-600">{loginForm.formState.errors.email.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Password</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    {...loginForm.register('password')}
-                  />
-                  {loginForm.formState.errors.password && (
-                    <p className="text-sm text-red-600">{loginForm.formState.errors.password.message}</p>
-                  )}
-                </div>
-
-                {loginError && (
-                  <p className="text-sm text-red-600">{loginError.message}</p>
-                )}
-
-                <Button type="submit" className="w-full" disabled={isLoggingIn}>
-                  {isLoggingIn ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
+              <LoginForm 
+                onSubmit={login}
+                isLoading={isLoggingIn}
+                error={loginError}
+              />
             </TabsContent>
 
             <TabsContent value="signup" className="space-y-4">
               {signupSuccess && (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-md dark:bg-green-900 dark:border-green-700">
-                  <p className="text-sm text-green-800 dark:text-green-200">
-                    ✅ Successfully sent confirmation email! Please check your inbox.
-                  </p>
-                </div>
+                <SuccessMessage message={AUTH_MESSAGES.SIGNUP_SUCCESS} />
               )}
-              <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-gray-700 dark:text-gray-200">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    {...signupForm.register('email')}
-                  />
-                  {signupForm.formState.errors.email && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.email.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-gray-700 dark:text-gray-200">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    {...signupForm.register('password')}
-                  />
-                  {signupForm.formState.errors.password && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.password.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password" className="text-gray-700 dark:text-gray-200">Confirm Password</Label>
-                  <Input
-                    id="signup-confirm-password"
-                    type="password"
-                    placeholder="Confirm your password"
-                    {...signupForm.register('confirmPassword')}
-                  />
-                  {signupForm.formState.errors.confirmPassword && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{signupForm.formState.errors.confirmPassword.message}</p>
-                  )}
-                </div>
-                {signupError && (
-                  <p className="text-sm text-red-600 dark:text-red-400">{signupError.message}</p>
-                )}
-                <Button type="submit" className="w-full" disabled={isSigningUp}>
-                  {isSigningUp ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
+              <SignupForm 
+                onSubmit={handleSignupSubmit}
+                isLoading={isSigningUp}
+                error={signupError}
+                onSuccess={handleSignupSuccess}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>

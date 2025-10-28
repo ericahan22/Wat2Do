@@ -29,7 +29,7 @@ export function useSearchState() {
         return nextParams;
       });
     }
-  }, []); 
+  }, [lastSearch, searchParams, setSearchParams]); 
 
   const handleSearch = useCallback(() => {
     const trimmedValue = inputValue.trim();

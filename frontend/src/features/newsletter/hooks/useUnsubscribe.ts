@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { API_BASE_URL } from '@/shared/constants/api';
+import { newsletterAPIClient } from '@/shared/api';
 
 interface UnsubscribeData {
   already_unsubscribed: boolean;
@@ -21,54 +21,14 @@ interface UnsubscribeResponse {
 
 
 const fetchUnsubscribeInfo = async (token: string): Promise<UnsubscribeData> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`);
-  
-  if (!response.ok) {
-    // Check if response is JSON before trying to parse
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to load unsubscribe information');
-    } else {
-      // Handle non-JSON responses (like HTML 404 pages)
-      if (response.status === 404) {
-        throw new Error('Invalid unsubscribe token');
-      }
-      throw new Error(`Server error: ${response.status}`);
-    }
-  }
-  
-  return response.json();
+  return newsletterAPIClient.getUnsubscribeInfo(token);
 };
 
 const submitUnsubscribe = async (
   token: string, 
   data: UnsubscribeRequest
 ): Promise<UnsubscribeResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    // Check if response is JSON before trying to parse
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to unsubscribe');
-    } else {
-      // Handle non-JSON responses
-      if (response.status === 404) {
-        throw new Error('Invalid unsubscribe token');
-      }
-      throw new Error(`Server error: ${response.status}`);
-    }
-  }
-
-  return response.json();
+  return newsletterAPIClient.submitUnsubscribe(token, data);
 };
 
 export const useUnsubscribe = (token: string | undefined) => {

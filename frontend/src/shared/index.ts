@@ -7,6 +7,7 @@ export { default as AboutPage } from './components/layout/AboutPage';
 export { default as ContactPage } from './components/layout/ContactPage';
 export { default as NotFoundPage } from './components/layout/NotFoundPage';
 export { ProtectedRoute } from './components/ProtectedRoute';
+export { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 export { default as FloatingEventExportBar } from './components/common/FloatingEventExportBar';
 export { SEOHead } from './components/SEOHead';
 
@@ -27,6 +28,9 @@ export * from './lib/theme';
 
 // Types
 export type { ApiResponse, PaginatedResponse, ErrorResponse, Theme, NavbarState } from './types/common';
+
+// API Clients
+export * from './api';
 
 // Constants
 export { API_BASE_URL } from './constants/api';

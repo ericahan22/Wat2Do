@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 from pgvector.django import VectorField
 
 
@@ -133,3 +134,49 @@ class Events(models.Model):
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"
+
+
+class EventSubmission(models.Model):
+    """User-submitted events pending admin review"""
+
+    STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    # Submission details
+    id = models.BigAutoField(primary_key=True)
+    screenshot_url = models.URLField(help_text="S3 URL of uploaded screenshot")
+    source_url = models.URLField(help_text="URL to original event source")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True
+    )
+    submitted_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True, help_text="User who submitted this event"
+    )
+
+    # Timestamps
+    submitted_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+
+    # Extracted event data (populated after OpenAI processing)
+    extracted_data = models.JSONField(
+        null=True, blank=True, help_text="Event data extracted by OpenAI"
+    )
+
+    # Optional: link to created event if approved
+    created_event = models.ForeignKey(
+        Events, null=True, blank=True, on_delete=models.SET_NULL, related_name="submission"
+    )
+
+    # Admin notes
+    admin_notes = models.TextField(blank=True)
+
+    class Meta:
+        db_table = "event_submissions"
+        ordering = ["-submitted_at"]
+
+    def __str__(self):
+        return f"Submission {self.id} - {self.status}"

@@ -2,42 +2,32 @@ import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
-import { API_BASE_URL } from "@/shared/constants/api";
+import { eventsAPIClient } from "@/shared/api";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
 import { isEventOngoing } from "@/shared/lib/eventUtils";
 import { Event } from "@/features/events";
 
 // Format the last updated timestamp into a human-readable format (in local time)
-const fetchEvents = async ({
-  queryKey,
-}: {
-  queryKey: string[];
+const fetchEvents = async (params: {
+  searchTerm?: string;
+  dtstart_utc?: string;
+  addedAt?: string;
 }): Promise<Event[]> => {
-  const searchTerm = queryKey[1] || "";
-  const dtstart_utc = queryKey[2] || "";
-  const addedAt = queryKey[3] || "";
-
-  const params = new URLSearchParams();
-
-  if (searchTerm) {
-    params.append("search", searchTerm);
+  const queryParams: Record<string, string> = {};
+  
+  if (params.searchTerm) {
+    queryParams.search = params.searchTerm;
+  }
+  
+  if (params.dtstart_utc) {
+    queryParams.dtstart_utc = formatDtstartToMidnight(params.dtstart_utc);
+  }
+  
+  if (params.addedAt) {
+    queryParams.added_at = params.addedAt;
   }
 
-  if (dtstart_utc) {
-    params.append("dtstart_utc", formatDtstartToMidnight(dtstart_utc));
-  }
-
-  if (addedAt) {
-    params.append("added_at", addedAt);
-  }
-
-  const queryString = params.toString() ? `?${params.toString()}` : "";
-  const response = await fetch(`${API_BASE_URL}/api/events/${queryString}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch events");
-  }
-  const data: Event[] = await response.json();
-  return data;
+  return eventsAPIClient.getEvents(queryParams);
 };
 
 export function useEvents() {
@@ -48,7 +38,7 @@ export function useEvents() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["events", searchTerm, dtstart_utc, addedAt],
-    queryFn: fetchEvents,
+    queryFn: () => fetchEvents({ searchTerm, dtstart_utc, addedAt }),
     refetchOnWindowFocus: false,
     enabled: true,  
   });

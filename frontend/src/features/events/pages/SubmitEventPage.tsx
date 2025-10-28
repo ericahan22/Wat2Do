@@ -1,0 +1,180 @@
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { DragDropFileUpload } from '@/shared/components/ui/DragDropFileUpload';
+import { useEventSubmission } from '@/features/events/hooks/useEventSubmission';
+import { submissionSchema, type SubmissionFormData } from '@/features/events/schemas/submissionSchema';
+import { CheckCircle, Calendar, Link, Upload, Image as ImageIcon } from 'lucide-react';
+
+export function SubmitEventPage() {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const { submitEvent, isLoading } = useEventSubmission();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useForm<SubmissionFormData>({
+    resolver: zodResolver(submissionSchema),
+  });
+
+  const handleFileSelect = (file: File) => {
+    setValue('screenshot', file);
+    setPreview(URL.createObjectURL(file));
+  };
+
+  const handleFileRemove = () => {
+    setValue('screenshot', undefined as unknown as File);
+    setPreview(null);
+  };
+
+  const onSubmit = async (data: SubmissionFormData) => {
+    try {
+      submitEvent(data, {
+        onSuccess: () => {
+          setSuccess(true);
+          reset();
+          setPreview(null);
+          setTimeout(() => setSuccess(false), 5000);
+        },
+        onError: (error) => {
+          console.error('Submission error:', error);
+        }
+      });
+    } catch (error) {
+      console.error('Submission error:', error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+            <Calendar className="h-8 w-8 text-blue-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            Submit an Event
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            Share an event with the community by uploading a screenshot and source URL
+          </p>
+        </div>
+
+        <Card className="shadow-lg">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="h-5 w-5" />
+              Event Submission
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {success ? (
+              <div className="text-center py-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-green-800 mb-2">
+                  Event Submitted Successfully!
+                </h3>
+                <p className="text-green-600 mb-4">
+                  Thank you for contributing to the community. We'll review your submission and get back to you soon.
+                </p>
+                <Button 
+                  onClick={() => {
+                    setSuccess(false);
+                    reset();
+                    setPreview(null);
+                  }}
+                  variant="outline"
+                >
+                  Submit Another Event
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                {/* Screenshot Upload */}
+                <div className="space-y-3">
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Event Screenshot
+                  </Label>
+                  <DragDropFileUpload
+                    onFileSelect={handleFileSelect}
+                    onFileRemove={handleFileRemove}
+                    preview={preview}
+                    error={errors.screenshot?.message}
+                    disabled={isLoading}
+                    accept="image/jpeg,image/png,image/webp"
+                    maxSize={10}
+                  />
+                </div>
+
+                {/* Source URL */}
+                <div className="space-y-3">
+                  <Label htmlFor="source_url" className="text-base font-medium flex items-center gap-2">
+                    <Link className="h-4 w-4" />
+                    Event Source URL
+                  </Label>
+                  <Input
+                    id="source_url"
+                    type="url"
+                    placeholder="https://example.com/event-page"
+                    className="h-12 text-base"
+                    {...register('source_url')}
+                    disabled={isLoading}
+                  />
+                  {errors.source_url && (
+                    <p className="text-sm text-red-500 mt-1">{errors.source_url.message}</p>
+                  )}
+                  <p className="text-sm text-gray-500">
+                    Provide the original URL where this event was posted (Instagram, Facebook, website, etc.)
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <Button 
+                  type="submit" 
+                  disabled={isLoading} 
+                  className="w-full h-12 text-base font-medium"
+                  size="lg"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Submitting Event...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      Submit Event
+                    </div>
+                  )}
+                </Button>
+
+                {/* Help Text */}
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    💡 Tips for better submissions:
+                  </h4>
+                  <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                    <li>• Make sure the screenshot clearly shows event details (date, time, location)</li>
+                    <li>• Include the original source URL for verification</li>
+                    <li>• High-quality images are processed faster by our AI</li>
+                  </ul>
+                </div>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

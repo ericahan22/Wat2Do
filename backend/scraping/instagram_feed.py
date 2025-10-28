@@ -265,7 +265,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "ig_handle": ig_handle,
         "title": title,
         "source_url": source_url,
-        "dtstamp": timezone.now(),
+        "dtstamp": datetime.now(timezone.utc),
         "dtstart": dtstart,
         "dtstart_utc": dtstart_utc,
         "dtend": dtend or None,
