@@ -105,6 +105,8 @@ class OpenAIService:
     
     Caption: {caption_text}
     
+    Do NOT extract events that only mention a date without a specific start time. Only include events if a specific start time is mentioned in the caption or image.
+    
     Return a JSON array of event objects. Each event should have the following structure (all fields must be present):
     [
         {{
@@ -141,13 +143,13 @@ class OpenAIService:
     - For duration: calculate the duration between dtstart and dtend in HH:MM:SS format (e.g., "02:30:00" for 2 hours 30 minutes). If dtend is empty or not available, use empty string ""
     - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
     - For weekly events, calculate the next occurrence based on the current date and day of week
-    - For (off-campus) addresses: use the format "[Street Address], [City], [Province] [Postal Code]" when possible
+    - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
     - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
         * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price (the lower non-member value when multiple non-member options exist).
         * If only member prices are given and non-member price is absent, use the listed member price.
         * If multiple ticket tiers are listed (e.g., "early bird" and "regular"), use the lowest applicable price (e.g., early bird price).
         * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
-    - For food: if specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks at all, output an empty string "".
+    - For food: if specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize only the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks at all, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
     - For all_day: set to true if the event mentions "all day", "all-day", "whole day", or if only a date is given without specific times (e.g., "March 15th" without "9am-5pm"). Set to false if specific start/end times are mentioned
     - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "Student Center", "DC Library", "University of Waterloo"). Use null if location is too vague or cannot be geocoded
