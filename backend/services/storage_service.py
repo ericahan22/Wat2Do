@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from PIL import Image
 
 from scraping.logging_config import logger
-from backend.scraping.instagram_feed import USER_AGENTS
+from shared.constants.user_agents import USER_AGENTS
 
 
 class StorageService:
