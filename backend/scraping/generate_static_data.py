@@ -12,9 +12,6 @@ from utils import events_utils
 
 load_dotenv()
 
-# Ensure this script always uses development settings, even in CI environments
-os.environ["PRODUCTION"] = "0"
-
 os.environ.setdefault(
     "DJANGO_SETTINGS_MODULE",
     os.getenv("DJANGO_SETTINGS_MODULE", "config.settings.development"),

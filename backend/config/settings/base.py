@@ -68,7 +68,6 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'clerkapp.auth.JwtAuthBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 
@@ -189,6 +188,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+# Clerk configuration
+CLERK_ISSUER = os.getenv("CLERK_ISSUER", "https://clerk.wat2do.ca")
+CLERK_JWKS_URL = os.getenv(
+    "CLERK_JWKS_URL",
+    "https://clerk.wat2do.ca/.well-known/jwks.json",
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
