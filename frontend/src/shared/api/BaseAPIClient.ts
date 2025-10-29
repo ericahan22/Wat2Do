@@ -32,8 +32,6 @@ class BaseAPIClient {
       config.body = JSON.stringify(body);
     }
 
-    console.log(config);
-
     try {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, config);
 

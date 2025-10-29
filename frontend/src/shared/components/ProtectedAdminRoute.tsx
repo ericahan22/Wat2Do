@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@clerk/clerk-react'
+import { useAuth, useUser } from '@clerk/clerk-react'
 
 interface ProtectedAdminRouteProps {
   children: React.ReactNode
@@ -7,6 +7,7 @@ interface ProtectedAdminRouteProps {
 
 export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
 
   if (!isLoaded) {
     return (
@@ -20,9 +21,8 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
     return <Navigate to="/auth/sign-in" replace />
   }
 
-  // For now, we'll assume all signed-in users are admins
-  // In a real app, you'd check user.organizationMemberships or similar
-  const isAdmin = true // TODO: Implement proper admin check
+  const isAdmin = user?.publicMetadata?.role === 'admin'
+  console.log(user);
 
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />

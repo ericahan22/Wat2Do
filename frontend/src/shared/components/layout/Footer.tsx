@@ -59,12 +59,12 @@ function Footer() {
                 placeholder="your.email@uwaterloo.ca"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isPending || isSuccess}
+                disabled={isPending}
               />
               <Button
                 variant="outline"
                 type="submit"
-                disabled={isPending || isSuccess}
+                disabled={isPending}
                 className="whitespace-nowrap h-9"
               >
                 {isPending ? (
