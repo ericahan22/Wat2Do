@@ -3,7 +3,7 @@ Clerk-based email service for sending emails through Clerk's email functionality
 """
 
 import os
-from datetime import date, datetime, timedelta
+from datetime import date
 
 import django
 import dotenv
@@ -17,7 +17,7 @@ if not settings.configured:
     django.setup()
 
 # Import after Django setup
-from apps.events.models import Events
+from apps.events.models import Events  # noqa: E402
 
 
 class ClerkEmailService:
@@ -163,7 +163,7 @@ class ClerkEmailService:
         
         return True
 
-    def send_custom_email(self, to_email, subject, html_content, text_content=None):
+    def send_custom_email(self, to_email, subject, html_content, _text_content=None):
         """
         Send a custom email through Clerk.
         This would use Clerk's email API for custom email sending.

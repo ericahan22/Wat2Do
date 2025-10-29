@@ -3,8 +3,6 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  longitude: number | null;
-  latitude: number | null;
   dtstart_utc: string; // ISO datetime string
   dtend_utc: string | null; // ISO datetime string
   price: number | null;

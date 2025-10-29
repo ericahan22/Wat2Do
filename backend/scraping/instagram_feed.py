@@ -14,26 +14,27 @@ import random
 import re
 import time
 import traceback
-from datetime import datetime, timedelta, timezone as pytimezone
+from datetime import datetime, timedelta
+from datetime import timezone as pytimezone
 from pathlib import Path
 
 import requests
+from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
-from scraping.logging_config import logger
-from scraping.zyte_setup import setup_zyte
-from django.utils import timezone
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
+from scraping.logging_config import logger
+from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
     extract_events_from_caption,
     generate_event_embedding,
 )
 from services.storage_service import upload_image_from_url
+from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
 from utils.events_utils import tz_compute
-from shared.constants.user_agents import USER_AGENTS
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10

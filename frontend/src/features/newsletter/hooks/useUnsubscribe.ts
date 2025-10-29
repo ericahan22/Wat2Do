@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/shared/hooks/useApi';
+import NewsletterAPIClient from '@/shared/api/NewsletterAPIClient';
 
 interface UnsubscribeData {
   already_unsubscribed: boolean;
@@ -20,14 +21,14 @@ interface UnsubscribeResponse {
 }
 
 
-const fetchUnsubscribeInfo = async (token: string, newsletterAPI: any): Promise<UnsubscribeData> => {
+const fetchUnsubscribeInfo = async (token: string, newsletterAPI: NewsletterAPIClient): Promise<UnsubscribeData> => {
   return newsletterAPI.getUnsubscribeInfo(token);
 };
 
 const submitUnsubscribe = async (
   token: string, 
   data: UnsubscribeRequest,
-  newsletterAPI: any
+  newsletterAPI: NewsletterAPIClient
 ): Promise<UnsubscribeResponse> => {
   return newsletterAPI.submitUnsubscribe(token, data);
 };

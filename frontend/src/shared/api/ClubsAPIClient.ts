@@ -1,4 +1,5 @@
 import type { Club } from '@/features/clubs/types/clubs';
+import BaseAPIClient from '@/shared/api/BaseAPIClient';
 
 export interface ClubsResponse {
   clubs: Club[];
@@ -35,7 +36,7 @@ class ClubsAPIClient {
   /**
    * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
    */
-  constructor(private apiClient: any) {}
+  constructor(private apiClient: BaseAPIClient) {}
 
   /**
    * Fetches all clubs from the backend.

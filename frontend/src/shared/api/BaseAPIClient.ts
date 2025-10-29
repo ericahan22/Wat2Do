@@ -1,20 +1,20 @@
 // src/api/baseApiClient.js
 
 class BaseAPIClient {
-  private getAuthToken: () => Promise<string | null>;
+  private _getAuthToken: () => Promise<string | null>;
   private baseUrl: string;
 
   constructor(getAuthToken: () => Promise<string | null>) {
-    this.getAuthToken = getAuthToken;
+    this._getAuthToken = getAuthToken;
     this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
   }
 
   async request({ endpoint, method = 'GET', body = null }: {
     endpoint: string;
     method?: string;
-    body?: any;
+    body?: unknown;
   }) {
-    const token = await this.getAuthToken();
+    const token = await this._getAuthToken();
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -53,16 +53,21 @@ class BaseAPIClient {
     }
   }
 
+  // Public method to get auth token (needed for special cases like FormData)
+  getAuthToken(): Promise<string | null> {
+    return this._getAuthToken();
+  }
+
   // Convenience methods for each HTTP verb
   get(endpoint: string) {
     return this.request({ endpoint, method: 'GET' });
   }
 
-  post(endpoint: string, body?: any) {
+  post(endpoint: string, body?: unknown) {
     return this.request({ endpoint, method: 'POST', body });
   }
 
-  put(endpoint: string, body?: any) {
+  put(endpoint: string, body?: unknown) {
     return this.request({ endpoint, method: 'PUT', body });
   }
 

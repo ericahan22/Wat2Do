@@ -74,29 +74,31 @@ export const useQuickFilters = () => {
         const nextParams = new URLSearchParams(prev);
         const currentSearchValue = nextParams.get("search") || "";
 
-        // Use word boundaries for single words, or exact phrase matching for multi-word
-        const filterRegex = new RegExp(
-          `(^|\\s)${filterName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`,
-          "i"
+        // Parse semicolon-separated filters
+        const filters = currentSearchValue
+          ? currentSearchValue.split(";").map((f) => f.trim()).filter((f) => f)
+          : [];
+
+        // Check if filter is already active (case-insensitive)
+        const isActive = filters.some(
+          (f) => f.toLowerCase() === filterName.toLowerCase()
         );
-        const isActive = filterRegex.test(currentSearchValue);
 
         if (isActive) {
-          const updatedSearch = currentSearchValue
-            .replace(filterRegex, " ")
-            .replace(/\s+/g, " ") // Replace multiple spaces with single space
-            .trim();
+          // Remove the filter
+          const updatedFilters = filters.filter(
+            (f) => f.toLowerCase() !== filterName.toLowerCase()
+          );
 
-          if (updatedSearch) {
-            nextParams.set("search", updatedSearch);
+          if (updatedFilters.length > 0) {
+            nextParams.set("search", updatedFilters.join(";"));
           } else {
             nextParams.delete("search");
           }
         } else {
-          const newSearchValue = currentSearchValue
-            ? `${currentSearchValue} ${filterName}`
-            : filterName;
-          nextParams.set("search", newSearchValue);
+          // Add the filter
+          filters.push(filterName);
+          nextParams.set("search", filters.join(";"));
         }
 
         return nextParams;
@@ -107,14 +109,16 @@ export const useQuickFilters = () => {
 
   const isFilterActive = useCallback(
     (filter: FilterWithEmoji) => {
-      const filterName = filter[2]; // Extract filter name from 3D array
-      // Direct match: check if filter exists as a complete phrase in the search
-      // Use word boundaries for single words, or exact phrase matching for multi-word
-      const filterRegex = new RegExp(
-        `(^|\\s)${filterName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`,
-        "i"
+      const filterName = filter[2];
+      // Parse semicolon-separated filters and check if this filter is active
+      if (!currentSearch) return false;
+      const filters = currentSearch
+        .split(";")
+        .map((f) => f.trim())
+        .filter((f) => f);
+      return filters.some(
+        (f) => f.toLowerCase() === filterName.toLowerCase()
       );
-      return filterRegex.test(currentSearch);
     },
     [currentSearch]
   );

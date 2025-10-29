@@ -10,7 +10,6 @@ import AdminAPIClient from '../api/AdminAPIClient';
 
 export const useApi = () => {
   const { getToken } = useAuth();
-  const token = useMemo(async () => await getToken(), [getToken]);
 
   // useMemo ensures we don't create new instances on every render
   const apiClients = useMemo(() => {

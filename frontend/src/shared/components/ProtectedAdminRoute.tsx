@@ -22,7 +22,6 @@ export function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
   }
 
   const isAdmin = user?.publicMetadata?.role === 'admin'
-  console.log(user);
 
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />

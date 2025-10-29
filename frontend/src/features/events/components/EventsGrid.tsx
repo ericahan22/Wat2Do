@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 import { Event, EVENTS_PER_PAGE } from "@/features/events";
 import { memo, useState, useMemo, useEffect } from "react";
-import { formatEventTimeRange, formatPrettyDate, getDateCategory } from "@/shared/lib/dateUtils";
+import {
+  formatEventTimeRange,
+  formatPrettyDate,
+  getDateCategory,
+} from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 import { motion } from "framer-motion";
@@ -78,7 +82,13 @@ const NewEventBadge = ({ event }: { event: Event }) => {
   );
 };
 
-const OrganizationBadge = ({ event, isSelectMode }: { event: Event; isSelectMode: boolean }) => {
+const OrganizationBadge = ({
+  event,
+  isSelectMode,
+}: {
+  event: Event;
+  isSelectMode: boolean;
+}) => {
   if (!event.display_handle) return null;
 
   return (
@@ -118,13 +128,20 @@ const EventsGrid = memo(
     }, [data, currentPage]);
 
     const groupedEvents = useMemo(() => {
-      const groups: { [key: string]: Event[] } = { today: [], tomorrow: [], 'later this week': [], 'later this month': [], later: [], past: [] };
-      
-      paginatedData.forEach(event => {
+      const groups: { [key: string]: Event[] } = {
+        today: [],
+        tomorrow: [],
+        "later this week": [],
+        "later this month": [],
+        later: [],
+        past: [],
+      };
+
+      paginatedData.forEach((event) => {
         const category = getDateCategory(event.dtstart_utc);
         groups[category].push(event);
       });
-      
+
       return groups;
     }, [paginatedData]);
 
@@ -213,18 +230,9 @@ const EventsGrid = memo(
               </div>
 
               {event.location && (
-                <div className="flex items-center gap-2 text-xs text-gray-600">
+                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <MapPin className="flex-shrink-0 h-3.5 w-3.5" />
-                  {event.longitude && event.latitude ? (
-                    <button
-                      onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`, '_blank')}
-                      className="line-clamp-1 hover:underline cursor-pointer text-left"
-                    >
-                      {event.location}
-                    </button>
-                  ) : (
-                    <span className="line-clamp-1">{event.location}</span>
-                  )}
+                  <span className="line-clamp-1">{event.location}</span>
                 </div>
               )}
 
@@ -286,12 +294,20 @@ const EventsGrid = memo(
       <div className="space-y-8 mt-4">
         {/* Events Grid with Section Headers */}
         <div className="space-y-6">
-          {['today', 'tomorrow', 'later this week', 'later this month', 'later', 'past'].map((category) => {
+          {[
+            "today",
+            "tomorrow",
+            "later this week",
+            "later this month",
+            "later",
+            "past",
+          ].map((category) => {
             const events = groupedEvents[category];
             if (events.length === 0) return null;
 
-            const sectionTitle = category.charAt(0).toUpperCase() + category.slice(1);
-            
+            const sectionTitle =
+              category.charAt(0).toUpperCase() + category.slice(1);
+
             return (
               <div key={category} className="space-y-4">
                 <p className="sm:text-xl text-lg font-semibold text-gray-900 dark:text-white">

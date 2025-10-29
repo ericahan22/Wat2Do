@@ -6,8 +6,8 @@ specifically AWS S3. It handles image validation, optimization, and upload.
 """
 
 import os
-import uuid
 import random
+import uuid
 from io import BytesIO
 
 import boto3

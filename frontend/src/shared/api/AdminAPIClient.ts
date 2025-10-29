@@ -7,6 +7,7 @@ import type {
   PromotedEventsResponse, 
   PromotionStatusResponse 
 } from '@/features/admin/types/promotion';
+import BaseAPIClient from './BaseAPIClient';
 
 /**
  * Admin API Client - Clean class pattern!
@@ -16,7 +17,7 @@ class AdminAPIClient {
   /**
    * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
    */
-  constructor(private apiClient: any) {}
+  constructor(private apiClient: BaseAPIClient) {}
 
   /**
    * Promotes an event.
@@ -62,7 +63,7 @@ class AdminAPIClient {
    * Gets all promotions.
    * Corresponds to a GET request to /api/promotions/
    */
-  async getAllPromotions(): Promise<{ promotions: any[] }> {
+  async getAllPromotions(): Promise<{ promotions: unknown[] }> {
     return this.apiClient.get('promotions/');
   }
 

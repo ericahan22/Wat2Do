@@ -1,6 +1,7 @@
 import type { EventSubmission } from '@/features/events/types/submission';
 import type { Event } from '@/features/events/types/events';
 import type { SubmissionFormData } from '@/features/events/schemas/submissionSchema';
+import BaseAPIClient from '@/shared/api/BaseAPIClient';
 
 // Re-export types for external use
 export type { Event, EventSubmission, SubmissionFormData };
@@ -41,7 +42,7 @@ class EventsAPIClient {
   /**
    * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
    */
-  constructor(private apiClient: any) {}
+  constructor(private apiClient: BaseAPIClient) {}
 
   /**
    * Fetches all events from the backend.

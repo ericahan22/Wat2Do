@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { useApi } from "@/shared/hooks/useApi";
@@ -20,13 +20,7 @@ export function PromotionsManager() {
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEvents();
   const { promotedEvents, promotedEventsLoading, promotedEventsError, refetchPromotedEvents } = useEventPromotion();
 
-  useEffect(() => {
-    if (selectedEventId) {
-      checkPromotionStatus(selectedEventId);
-    }
-  }, [selectedEventId]);
-
-  const checkPromotionStatus = async (eventId: string) => {
+  const checkPromotionStatus = useCallback(async (eventId: string) => {
     try {
       const data = await admin.getPromotionStatus(eventId);
       setIsPromoted(data.is_promoted);
@@ -34,7 +28,13 @@ export function PromotionsManager() {
     } catch (err) {
       console.error("Error checking promotion status:", err);
     }
-  };
+  }, [admin]);
+
+  useEffect(() => {
+    if (selectedEventId) {
+      checkPromotionStatus(selectedEventId);
+    }
+  }, [selectedEventId, checkPromotionStatus]);
 
   const handleEventSelect = (eventId: string) => {
     const event = events.find((e: Event) => e.id.toString() === eventId);

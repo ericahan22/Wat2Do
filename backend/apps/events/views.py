@@ -1,3 +1,6 @@
+import uuid
+
+from clerk_django.permissions.clerk import ClerkAuthenticated
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
@@ -9,13 +12,9 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
-from clerk_django.permissions.clerk import ClerkAuthenticated
-from services.storage_service import storage_service
-
-import os
-import uuid
 
 from services.openai_service import extract_events_from_caption, generate_embedding
+from services.storage_service import storage_service
 from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
@@ -43,27 +42,38 @@ def get_events(request):
         if search_term:
             event_ids = set()
 
-            # Special handling for "free food" search
-            if search_term.lower() == "free food":
-                keyword_events = filtered_queryset.filter(
-                    Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"),
-                    Q(food__isnull=False) & ~Q(food=""),
-                )
-            else:
-                keyword_events = filtered_queryset.filter(
-                    Q(title__icontains=search_term)
-                    | Q(location__icontains=search_term)
-                    | Q(description__icontains=search_term)
-                    | Q(food__icontains=search_term)
-                    | Q(club_type__icontains=search_term)
-                    | Q(school__icontains=search_term)
-                    | Q(ig_handle__icontains=search_term)
-                    | Q(discord_handle__icontains=search_term)
-                    | Q(x_handle__icontains=search_term)
-                    | Q(tiktok_handle__icontains=search_term)
-                    | Q(fb_handle__icontains=search_term)
-                )
+            # Parse semicolon-separated filters (for OR query)
+            search_terms = [
+                term.strip() for term in search_term.split(";") if term.strip()
+            ]
 
+            # Build OR query: match any of the search terms in any field
+            or_queries = Q()
+            for term in search_terms:
+                # Special handling for "free food" search
+                if term.lower() == "free food":
+                    term_query = Q(
+                        (Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"))
+                        & Q(food__isnull=False)
+                        & ~Q(food="")
+                    )
+                else:
+                    term_query = (
+                        Q(title__icontains=term)
+                        | Q(location__icontains=term)
+                        | Q(description__icontains=term)
+                        | Q(food__icontains=term)
+                        | Q(club_type__icontains=term)
+                        | Q(school__icontains=term)
+                        | Q(ig_handle__icontains=term)
+                        | Q(discord_handle__icontains=term)
+                        | Q(x_handle__icontains=term)
+                        | Q(tiktok_handle__icontains=term)
+                        | Q(fb_handle__icontains=term)
+                    )
+                or_queries |= term_query
+
+            keyword_events = filtered_queryset.filter(or_queries)
             event_ids.update(keyword_events.values_list("id", flat=True))
 
             # search_embedding = generate_embedding(search_term)
@@ -86,8 +96,6 @@ def get_events(request):
             "title",
             "description",
             "location",
-            "longitude",
-            "latitude",
             "dtstart_utc",
             "dtend_utc",
             "price",
@@ -128,8 +136,6 @@ def get_event(request, event_id):
             "title",
             "description",
             "location",
-            "longitude",
-            "latitude",
             "dtstart_utc",
             "dtend_utc",
             "price",

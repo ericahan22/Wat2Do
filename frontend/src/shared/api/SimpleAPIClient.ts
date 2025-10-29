@@ -12,7 +12,7 @@ class BaseAPIClient {
   async request({ endpoint, method = 'GET', body = null }: {
     endpoint: string;
     method?: string;
-    body?: any;
+    body?: unknown;
   }) {
     const token = await this.getAuthToken();
     const headers: HeadersInit = {
@@ -58,11 +58,11 @@ class BaseAPIClient {
     return this.request({ endpoint, method: 'GET' });
   }
 
-  post(endpoint: string, body?: any) {
+  post(endpoint: string, body?: unknown) {
     return this.request({ endpoint, method: 'POST', body });
   }
 
-  put(endpoint: string, body?: any) {
+  put(endpoint: string, body?: unknown) {
     return this.request({ endpoint, method: 'PUT', body });
   }
 
