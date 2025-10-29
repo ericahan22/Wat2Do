@@ -264,40 +264,40 @@ class OpenAIService:
                     event_data = {}
 
                 # Ensure required fields are present
-                    required_fields = [
-                        "title",
-                        "description",
-                        "location",
-                        "latitude",
-                        "longitude",
-                        "dtstart",
-                        "dtend",
-                        "dtstart_utc",
-                        "dtend_utc",
-                        "all_day",
-                        "tz",
-                        "food",
-                        "price",
-                        "registration",
-                        "rrule",
+                required_fields = [
+                    "title",
+                    "description",
+                    "location",
+                    "latitude",
+                    "longitude",
+                    "dtstart",
+                    "dtend",
+                    "dtstart_utc",
+                    "dtend_utc",
+                    "all_day",
+                    "tz",
+                    "food",
+                    "price",
+                    "registration",
+                    "rrule",
                     "rdate",
-                        "school",
+                    "school",
                     "source_image_url",
-                    ]
-                    for field in required_fields:
-                        if field not in event_data:
-                            if field in ["price", "latitude", "longitude"]:
-                                event_data[field] = None
-                            elif field in ["registration", "all_day"]:
-                                event_data[field] = False
+                ]
+                for field in required_fields:
+                    if field not in event_data:
+                        if field in ["price", "latitude", "longitude"]:
+                            event_data[field] = None
+                        elif field in ["registration", "all_day"]:
+                            event_data[field] = False
                         elif field == "rdate":
                             event_data[field] = []
-                            else:
-                                event_data[field] = ""
+                        else:
+                            event_data[field] = ""
 
-                    # Set source_image_url if provided
-                    if source_image_url and not event_data.get("source_image_url"):
-                        event_data["source_image_url"] = source_image_url
+                # Set source_image_url if provided
+                if source_image_url and not event_data.get("source_image_url"):
+                    event_data["source_image_url"] = source_image_url
 
                 return event_data
 
