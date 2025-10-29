@@ -25,7 +25,12 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex gap-6 items-center">
-            <img onMouseDown={() => navigate("/")} src="/wat2do-logo.svg" alt="Wat2Do" className="cursor-pointer h-14 w-14" />
+            <img
+              onMouseDown={() => navigate("/")}
+              src="/wat2do-logo.svg"
+              alt="Wat2Do"
+              className="cursor-pointer h-14 w-14"
+            />
             {/* Desktop Navigation */}
             <div className="hidden md:flex gap-2">
               <Button
@@ -39,17 +44,7 @@ function Navbar() {
               >
                 Events
               </Button>
-              <Button
-                variant="link"
-                onMouseDown={() => navigate("/submit")}
-                className={`text-sm font-medium ${
-                  isActive("/submit")
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                }`}
-              >
-                Submit
-              </Button>
+
               <Button
                 variant="link"
                 onMouseDown={() => navigate("/clubs")}
@@ -98,17 +93,16 @@ function Navbar() {
                     onMouseDown={() => navigate(CLERK_ROUTES.DASHBOARD)}
                   >
                     <User className="h-4 w-4" />
-                    {primaryEmail || user?.firstName || 'User'}
+                    {primaryEmail || user?.firstName || "User"}
                   </Button>
                 </div>
               ) : (
                 <Button
                   variant="default"
                   className="text-sm font-medium"
-                  onMouseDown={() => navigate(CLERK_ROUTES.SIGN_IN)}
+                  onMouseDown={() => navigate("/submit")}
                 >
-                  <User className="h-4 w-4" />
-                  Sign In
+                  Submit Event
                 </Button>
               )}
             </div>
@@ -156,13 +150,6 @@ function Navbar() {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => navigate("/submit")}
-              >
-                Submit
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 onMouseDown={() => navigate("/clubs")}
               >
                 Clubs
@@ -194,7 +181,7 @@ function Navbar() {
                     }}
                   >
                     <User className="h-4 w-4" />
-                    {primaryEmail || user?.firstName || 'User'}
+                    {primaryEmail || user?.firstName || "User"}
                   </Button>
                 </div>
               ) : (
@@ -202,11 +189,10 @@ function Navbar() {
                   variant="default"
                   className="w-full justify-center text-sm font-medium"
                   onMouseDown={() => {
-                    navigate(CLERK_ROUTES.SIGN_IN);
+                    navigate("/submit");
                   }}
                 >
-                  <User className="h-4 w-4" />
-                  Sign In
+                  Submit Event
                 </Button>
               )}
             </div>

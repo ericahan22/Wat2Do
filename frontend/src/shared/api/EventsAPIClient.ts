@@ -87,6 +87,9 @@ class EventsAPIClient {
     const dataForm = new FormData();
     dataForm.append('screenshot', formData.screenshot);
     dataForm.append('source_url', formData.source_url);
+    if (formData.other_handle) {
+      dataForm.append('other_handle', formData.other_handle);
+    }
     
     // For FormData, we need to handle it differently
     const token = await this.apiClient.getAuthToken();
