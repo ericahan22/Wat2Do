@@ -452,7 +452,7 @@ def rss_feed(request):
 @permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="5/hr", block=True)
 def submit_event(request):
-    """Submit event for review - accepts screenshot file and source URL"""
+    """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
     try:
         screenshot = request.FILES.get("screenshot")
         source_url = request.data.get("source_url")
@@ -464,8 +464,6 @@ def submit_event(request):
             )
 
         # Upload to S3
-        
-
         filename = f"submissions/{uuid.uuid4()}.{screenshot.name.split('.')[-1]}"
         screenshot_url = storage_service.upload_image_data(screenshot.read(), filename)
 
@@ -475,16 +473,33 @@ def submit_event(request):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # Create submission
+        # Run OpenAI extraction to build event data
+        event_data = extract_events_from_caption(
+            caption_text=f"Event source: {source_url}",
+            source_image_url=screenshot_url,
+        )
+
+        # Ensure provenance
+        if isinstance(event_data, dict):
+            event_data["source_url"] = source_url
+            event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
+        else:
+            event_data = {"source_url": source_url, "source_image_url": screenshot_url}
+
+        # Create Event immediately and link submission
+        event = Events.objects.create(**{k: v for k, v in event_data.items() if k in {f.name for f in Events._meta.get_fields()}})
+
         submission = EventSubmission.objects.create(
-            screenshot_url=screenshot_url, 
-            source_url=source_url, 
+            screenshot_url=screenshot_url,
+            source_url=source_url,
             status="pending",
-            submitted_by=request.clerk_user.get('id')
+            submitted_by=request.clerk_user.get('id'),
+            created_event=event,
+            extracted_data=event_data,
         )
 
         return Response(
-            {"id": submission.id, "message": "Event submitted successfully"},
+            {"id": submission.id, "message": "Event submitted successfully", "event_id": event.id},
             status=status.HTTP_201_CREATED,
         )
 
@@ -496,26 +511,23 @@ def submit_event(request):
 @permission_classes([IsAdminUser])
 @ratelimit(key="ip", rate="100/hr", block=True)
 def get_submissions(request):
-    """Get all event submissions (admin only)"""
     try:
-        status_filter = request.GET.get("status", "pending")
-        submissions = EventSubmission.objects.filter(status=status_filter)
-
+        submissions = EventSubmission.objects.all().order_by("-submitted_at")
         data = [
             {
                 "id": s.id,
                 "screenshot_url": s.screenshot_url,
                 "source_url": s.source_url,
                 "status": s.status,
+                "submitted_by": s.submitted_by,
                 "submitted_at": s.submitted_at,
-                "submitted_by": s.submitted_by.email if s.submitted_by else None,
                 "extracted_data": s.extracted_data,
-                "admin_notes": s.admin_notes,
+                "event_id": s.created_event_id,
             }
             for s in submissions
         ]
-
         return Response(data)
+
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -524,21 +536,29 @@ def get_submissions(request):
 @permission_classes([IsAdminUser])
 @ratelimit(key="ip", rate="100/hr", block=True)
 def process_submission(request, submission_id):
-    """Extract event data from submission using OpenAI"""
+    """Re-run extraction and update linked Event/extracted_data"""
     try:
         submission = get_object_or_404(EventSubmission, id=submission_id)
 
-        events_data = extract_events_from_caption(
+        event_data = extract_events_from_caption(
             caption_text=f"Event source: {submission.source_url}",
             source_image_url=submission.screenshot_url,
         )
 
-        if events_data:
-            submission.extracted_data = events_data[0] if len(events_data) > 0 else {}
+        if event_data:
+            submission.extracted_data = event_data if isinstance(event_data, dict) else {}
             submission.save()
 
+            # Update linked event with fresh data (only known fields)
+            event = submission.created_event
+            if event and isinstance(event_data, dict):
+                for field in [f.name for f in Events._meta.get_fields()]:
+                    if field in event_data:
+                        setattr(event, field, event_data[field])
+                event.save()
+
             return Response(
-                {"id": submission.id, "extracted_data": submission.extracted_data}
+                {"id": submission.id, "extracted_data": submission.extracted_data, "event_id": submission.created_event_id}
             )
 
         return Response(
@@ -560,18 +580,18 @@ def review_submission(request, submission_id):
         action = request.data.get("action")  # 'approve', 'reject', 'edit'
 
         if action == "approve":
-            # Create event from extracted/edited data
-            event_data = request.data.get("event_data", submission.extracted_data)
-            event = Events.objects.create(**event_data)
+            # Ensure event exists (it should from submission time)
+            event = submission.created_event
+            if not event:
+                return Response({"error": "No linked event to approve"}, status=status.HTTP_400_BAD_REQUEST)
 
             submission.status = "approved"
-            submission.created_event = event
             submission.reviewed_at = timezone.now()
             submission.reviewed_by = request.clerk_user.get('email_addresses', [{}])[0].get('email_address')
             submission.save()
 
             return Response(
-                {"message": "Event approved and created", "event_id": event.id}
+                {"message": "Event approved", "event_id": event.id}
             )
 
         elif action == "reject":
@@ -584,8 +604,17 @@ def review_submission(request, submission_id):
             return Response({"message": "Event rejected"})
 
         elif action == "edit":
-            submission.extracted_data = request.data.get("event_data")
+            # Update event data and extracted_data
+            event_data = request.data.get("event_data") or {}
+            submission.extracted_data = event_data
             submission.save()
+
+            event = submission.created_event
+            if event and isinstance(event_data, dict):
+                for field in [f.name for f in Events._meta.get_fields()]:
+                    if field in event_data:
+                        setattr(event, field, event_data[field])
+                event.save()
 
             return Response({"message": "Event data updated"})
 

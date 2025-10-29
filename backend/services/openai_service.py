@@ -55,7 +55,7 @@ class OpenAIService:
 
         import re
 
-        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\s+", " ")
 
         try:
             response = self.client.embeddings.create(
@@ -100,8 +100,8 @@ class OpenAIService:
         source_image_url: str | None = None,
         post_created_at: datetime | None = None,
         school: str = "University of Waterloo",
-    ) -> list[dict[str, str | bool | float | None]]:
-        """Extract event information from Instagram caption text and optional image"""
+    ) -> dict[str, str | bool | float | None]:
+        """Extract a SINGLE event from caption text/image. Multiple dates -> use rdate list."""
         # Get current date and day of week for context
         now = datetime.now()
         current_date = now.strftime("%Y-%m-%d")
@@ -122,78 +122,45 @@ class OpenAIService:
     
     Caption: {caption_text}
     
-    Do NOT extract events that only mention a date without a specific start time. Only include events if a specific start time is mentioned in the caption or image.
+    Do NOT extract events that only mention a date without a specific start time. Only include an event if a specific start time is mentioned in the caption or image.
     
-    Return a JSON array of event objects. Each event should have the following structure (all fields must be present):
-    [
-        {{
-            "title": string,  // name of the event
-            "dtstart": string,  // start date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
-            "dtend": string,  // end date in YYYY-MM-DD HH:MM:SS+HH format if found, empty string if not
-            "dtstart_utc": string,  // start date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtstart using tz)
-            "dtend_utc": string,  // end date in UTC format YYYY-MM-DD HH:MM:SSZ (convert from dtend using tz)
-            "duration": string,  // duration in HH:MM:SS format (e.g., "02:30:00" for 2.5 hours), empty string if dtend is not available
-            "all_day": boolean,  // true if event is all day (no specific time mentioned), false otherwise
-            "location": string,  // location of the event
-            "latitude": number or null,  // latitude coordinate if location can be geocoded (e.g., 43.4723)
-            "longitude": number or null,  // longitude coordinate if location can be geocoded (e.g., -80.5449)
-            "tz": string,  // timezone based on location (e.g., "America/Toronto", "America/New_York", "America/Los_Angeles")
-            "price": number or null,  // price in dollars (e.g., 15.00) if mentioned, null if free or not mentioned
-            "food": string,  // food information if mentioned, empty string if not
-            "registration": boolean,  // true if registration is required/mentioned, false otherwise
-            "rrule": string,  // recurrence rule in iCalendar format if recurring (e.g., "FREQ=WEEKLY;BYDAY=MO" for every Monday)
-            "school": string,  // the school name (use the school context provided above)
-            "source_image_url": string,  // URL of the event image if provided, empty string if not
-            "description": string  // the caption text word-for-word, followed by any additional insights from the image not in the caption
-        }}
-    ]
+    Return ONE JSON object (not an array). The object must have ALL of the following fields:
+    {{
+        "title": string,
+        "dtstart": string,            // local start in "YYYY-MM-DD HH:MM:SS+HH"
+        "dtend": string,              // local end in "YYYY-MM-DD HH:MM:SS+HH" or empty string
+        "dtstart_utc": string,        // UTC start "YYYY-MM-DD HH:MM:SSZ" or empty string
+        "dtend_utc": string,          // UTC end "YYYY-MM-DD HH:MM:SSZ" or empty string
+        "duration": string,           // "HH:MM:SS" or empty string
+        "all_day": boolean,
+        "location": string,
+        "latitude": number or null,
+        "longitude": number or null,
+        "tz": string,
+        "price": number or null,
+        "food": string,
+        "registration": boolean,
+        "rrule": string,
+        "rdate": array,               // additional occurrence dates as ["YYYY-MM-DD", ...] when multiple dates are listed
+        "school": string,
+        "source_image_url": string,
+        "description": string
+    }}
     
-    Guidelines:
-    - PRIORITIZE CAPTION TEXT for extracting fields (dtstart, dtend, location, price, food, registration, description, etc.).
-    - EXCEPTION: For the event "title" field ONLY, prefer an explicit title found in the image (e.g., poster text) if the caption does not contain a clear, explicit event title. If both caption and image provide a name, prefer the image-derived title for the "title" field; otherwise use the caption.
-    - Return an array of events - if multiple events are mentioned, create separate objects for each
-    - Title-case event titles (e.g., "...talk" -> "...Talk", "COFFEE CRAWL" -> "Coffee Crawl")
-    - If multiple dates are mentioned (e.g., "Friday and Saturday"), create separate events for each date
-    - If recurring events are mentioned (e.g., "every Friday"), just create one event
-    - For dtstart and dtend, if year not found, assume {now.year}. If an event's end time is earlier than its start time (e.g., "from 7 pm - 12 am"), interpret end time as being on the NEXT calendar day
-    - For dtstart_utc and dtend_utc: convert the local time (dtstart/dtend) to UTC using the timezone (tz). Format as YYYY-MM-DD HH:MM:SSZ. If dtstart/dtend are empty, then dtstart_utc/dtend_utc should also be empty
-    - For duration: calculate the duration between dtstart and dtend in HH:MM:SS format (e.g., "02:30:00" for 2 hours 30 minutes). If dtend is empty or not available, use empty string ""
-    - When interpreting relative terms like "tonight", "tomorrow", "weekly", "every Friday", use the current date context above and the date the post was made. If an explicit date is found in the image, use that date
-    - For weekly events, calculate the next occurrence based on the current date and day of week
-    - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
-    - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
-        * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price (the lower non-member value when multiple non-member options exist).
-        * If only member prices are given and non-member price is absent, use the listed member price.
-        * If multiple ticket tiers are listed (e.g., "early bird" and "regular"), use the lowest applicable price (e.g., early bird price).
-        * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
-    - For food: if specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize only the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks at all, output an empty string "".
-    - For registration: only set to true if there is a clear instruction to register, RSVP, sign up, or follow a link before the event, otherwise they do not need registration so set to false
-    - For all_day: set to true if the event mentions "all day", "all-day", "whole day", or if only a date is given without specific times (e.g., "March 15th" without "9am-5pm"). Set to false if specific start/end times are mentioned
-    - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "Student Center", "DC Library", "University of Waterloo"). Use null if location is too vague or cannot be geocoded
-    - For tz: determine timezone based on location and school context. Use these mappings:
-        * University of Waterloo, Waterloo, Ontario, Canada -> "America/Toronto"
-        * Toronto, Ontario, Canada -> "America/Toronto"
-        * Vancouver, British Columbia, Canada -> "America/Vancouver"
-        * Calgary, Alberta, Canada -> "America/Edmonton"
-        * Montreal, Quebec, Canada -> "America/Toronto"
-        * New York, NY, USA -> "America/New_York"
-        * Los Angeles, CA, USA -> "America/Los_Angeles"
-        * Chicago, IL, USA -> "America/Chicago"
-        * Default to "America/Toronto" for {school} events or if location is unclear
-    - For rrule: if the event is recurring (mentions "every Monday", "every Wednesday", "weekly", "bi-weekly", etc.), generate the appropriate iCalendar recurrence rule:
-        * "every Monday" or "weekly on Monday" -> "FREQ=WEEKLY;BYDAY=MO"
-        * "every Wednesday" -> "FREQ=WEEKLY;BYDAY=WE" 
-        * "every Friday" -> "FREQ=WEEKLY;BYDAY=FR"
-        * "every Monday and Wednesday" -> "FREQ=WEEKLY;BYDAY=MO,WE"
-        * "every Tuesday and Thursday" -> "FREQ=WEEKLY;BYDAY=TU,TH"
-        * "bi-weekly" -> "FREQ=WEEKLY;INTERVAL=2"
-        * Use empty string "" if not recurring
-    - For description: start with the caption text word-for-word, then append any additional insights extracted from the image that are not already mentioned in the caption (e.g., visual details, atmosphere, decorations, crowd size, specific activities visible)
-    - If information is not available, use empty string "" for strings, null for price/coordinates, false for registration
-    - Be consistent with the exact field names
-    - Return ONLY the JSON array, no additional text
-    - If no events are found, return an empty array []
-        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text over visual cues from the image." if source_image_url else ""}
+    IMPORTANT RULES:
+    - Return EXACTLY ONE JSON object. NEVER return an array.
+    - If multiple dates are listed (e.g., "Friday and Saturday" or explicit multiple dates), keep the primary occurrence in dtstart/dtend and put the additional occurrence dates (dates only) into rdate as an array of ISO dates.
+    - PRIORITIZE CAPTION TEXT for extracting fields. Only prefer image text for the title when the caption lacks a clear title.
+    - Title-case event titles.
+    - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
+    - Convert local times to UTC using tz for dtstart_utc/dtend_utc when available.
+    - Set price null if free/not mentioned, food "" if not mentioned, registration true only if explicit.
+    - For all_day: true only if no specific time is mentioned.
+    - For tz mappings, default to "America/Toronto" for {school}.
+    - For rrule: only when recurring is mentioned; otherwise empty string.
+    - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
+    - Return ONLY the JSON object text, no extra commentary.
+        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
         """
 
         try:
@@ -273,7 +240,7 @@ class OpenAIService:
                         logger.exception(
                             f"Retry without image also failed, returning default structure: {e}"
                         )
-                        return [_get_default_event_structure(source_image_url)]
+                        return _get_default_event_structure(source_image_url)
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
@@ -286,17 +253,17 @@ class OpenAIService:
                 if response_text.endswith("```"):
                     response_text = response_text[:-3]
 
-                events_data = json.loads(response_text.strip())
+                event_data = json.loads(response_text.strip())
 
-                # Ensure events_data is a list
-                if not isinstance(events_data, list):
-                    logger.warning("Response is not a list, wrapping in array")
-                    events_data = [events_data] if events_data else []
+                # If the model returned an array, take the first element for backward compatibility
+                if isinstance(event_data, list):
+                    event_data = event_data[0] if event_data else {}
 
-                # Process each event in the array
-                processed_events = []
-                for event_data in events_data:
-                    # Ensure all required fields are present
+                if not isinstance(event_data, dict):
+                    logger.warning("Response is not an object, using default structure")
+                    event_data = {}
+
+                # Ensure required fields are present
                     required_fields = [
                         "title",
                         "description",
@@ -313,7 +280,9 @@ class OpenAIService:
                         "price",
                         "registration",
                         "rrule",
+                    "rdate",
                         "school",
+                    "source_image_url",
                     ]
                     for field in required_fields:
                         if field not in event_data:
@@ -321,6 +290,8 @@ class OpenAIService:
                                 event_data[field] = None
                             elif field in ["registration", "all_day"]:
                                 event_data[field] = False
+                        elif field == "rdate":
+                            event_data[field] = []
                             else:
                                 event_data[field] = ""
 
@@ -328,22 +299,20 @@ class OpenAIService:
                     if source_image_url and not event_data.get("source_image_url"):
                         event_data["source_image_url"] = source_image_url
 
-                    processed_events.append(event_data)
-
-                return processed_events
+                return event_data
 
             except json.JSONDecodeError:
                 logger.exception("Error parsing JSON response")
                 logger.error(f"Response text: {response_text}")
                 # Return default structure if JSON parsing fails
-                return [_get_default_event_structure(source_image_url)]
+                return _get_default_event_structure(source_image_url)
 
         except Exception:
             logger.exception("Error parsing caption")
             logger.error(f"Caption text: {caption_text}")
             logger.error(f"Traceback: {traceback.format_exc()}")
             # Return default structure if API call fails
-            return [_get_default_event_structure(source_image_url)]
+            return _get_default_event_structure(source_image_url)
 
     def generate_recommended_filters(self, events_data: list[dict]) -> list[list[str]]:
         """Generate recommended filter keywords with emojis from upcoming events data using GPT
@@ -504,6 +473,7 @@ def _get_default_event_structure(
         "food": "",
         "registration": False,
         "rrule": "",
+        "rdate": [],
         "school": "University of Waterloo",
         "source_image_url": source_image_url or "",
         "description": "",

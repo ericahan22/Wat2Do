@@ -31,12 +31,6 @@ export interface AuthFormData {
   password: string;
 }
 
-export interface SignupFormData extends AuthFormData {
-  confirmPassword: string;
-}
-
-export type LoginFormData = AuthFormData;
-
 export interface AuthMutationOptions {
   onSuccess?: () => void;
   onError?: (error: AuthError) => void;

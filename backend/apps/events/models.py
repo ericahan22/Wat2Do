@@ -165,9 +165,13 @@ class EventSubmission(models.Model):
         null=True, blank=True, help_text="Event data extracted by OpenAI"
     )
 
-    # Optional: link to created event if approved
+    # Required link to created event
     created_event = models.ForeignKey(
-        Events, null=True, blank=True, on_delete=models.SET_NULL, related_name="submission"
+        Events,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="submission",
     )
 
     # Admin notes
