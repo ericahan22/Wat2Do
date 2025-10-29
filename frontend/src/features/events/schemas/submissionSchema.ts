@@ -12,6 +12,12 @@ export const submissionSchema = z.object({
     .string()
     .min(1, 'Event URL is required')
     .url('Please enter a valid URL'),
+  other_handle: z
+    .string()
+    .trim()
+    .url('Please enter a valid URL')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
 });
 
 export type SubmissionFormData = z.infer<typeof submissionSchema>;

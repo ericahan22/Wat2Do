@@ -124,6 +124,9 @@ class Events(models.Model):
     fb_handle = models.CharField(
         max_length=100, blank=True, null=True, help_text="'uwcareercenter'"
     )
+    other_handle = models.CharField(
+        max_length=100, blank=True, null=True, help_text="Other social media handle"
+    )
 
     class Meta:
         db_table = "events"

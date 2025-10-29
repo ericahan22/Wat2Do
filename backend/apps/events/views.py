@@ -30,7 +30,7 @@ def get_events(request):
     try:
         search_term = request.GET.get("search", "").strip()
 
-        queryset = Events.objects.all().order_by("dtstart")
+        queryset = Events.objects.filter(status__iexact="CONFIRMED").order_by("dtstart")
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(
@@ -50,27 +50,19 @@ def get_events(request):
             # Build OR query: match any of the search terms in any field
             or_queries = Q()
             for term in search_terms:
-                # Special handling for "free food" search
-                if term.lower() == "free food":
-                    term_query = Q(
-                        (Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"))
-                        & Q(food__isnull=False)
-                        & ~Q(food="")
-                    )
-                else:
-                    term_query = (
-                        Q(title__icontains=term)
-                        | Q(location__icontains=term)
-                        | Q(description__icontains=term)
-                        | Q(food__icontains=term)
-                        | Q(club_type__icontains=term)
-                        | Q(school__icontains=term)
-                        | Q(ig_handle__icontains=term)
-                        | Q(discord_handle__icontains=term)
-                        | Q(x_handle__icontains=term)
-                        | Q(tiktok_handle__icontains=term)
-                        | Q(fb_handle__icontains=term)
-                    )
+                term_query = (
+                    Q(title__icontains=term)
+                    | Q(location__icontains=term)
+                    | Q(description__icontains=term)
+                    | Q(food__icontains=term)
+                    | Q(club_type__icontains=term)
+                    | Q(school__icontains=term)
+                    | Q(ig_handle__icontains=term)
+                    | Q(discord_handle__icontains=term)
+                    | Q(x_handle__icontains=term)
+                    | Q(tiktok_handle__icontains=term)
+                    | Q(fb_handle__icontains=term)
+                )
                 or_queries |= term_query
 
             keyword_events = filtered_queryset.filter(or_queries)
@@ -111,6 +103,7 @@ def get_events(request):
             "x_handle",
             "tiktok_handle",
             "fb_handle",
+            "other_handle",
         ]
         results = list(filtered_queryset.values(*fields))
 
@@ -449,13 +442,14 @@ def rss_feed(request):
 
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="5/hr", block=True)
 def submit_event(request):
     """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
     try:
         screenshot = request.FILES.get("screenshot")
         source_url = request.data.get("source_url")
+        other_handle = request.data.get("other_handle")
 
         if not screenshot or not source_url:
             return Response(
@@ -483,8 +477,12 @@ def submit_event(request):
         if isinstance(event_data, dict):
             event_data["source_url"] = source_url
             event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
+            if other_handle:
+                event_data["other_handle"] = other_handle
         else:
             event_data = {"source_url": source_url, "source_image_url": screenshot_url}
+            if other_handle:
+                event_data["other_handle"] = other_handle
 
         # Create Event immediately and link submission
         allowed_fields = {f.name for f in Events._meta.get_fields()}
@@ -502,6 +500,9 @@ def submit_event(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Create event with pending status by default
+        if "status" not in cleaned or not cleaned.get("status"):
+            cleaned["status"] = "PENDING"
         event = Events.objects.create(**cleaned)
 
         # Attempt to capture submitting user if available (optional for anonymous)

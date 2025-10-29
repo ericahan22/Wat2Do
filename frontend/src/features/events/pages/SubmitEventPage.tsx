@@ -114,7 +114,7 @@ export function SubmitEventPage() {
                 <div className="space-y-3">
                   <Label className="text-base font-medium flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
-                    Event Screenshot
+                    Event Screenshot*
                   </Label>
                   <DragDropFileUpload
                     onFileSelect={handleFileSelect}
@@ -127,11 +127,10 @@ export function SubmitEventPage() {
                   />
                 </div>
 
-                {/* Source URL */}
                 <div className="space-y-3">
                   <Label htmlFor="source_url" className="text-base font-medium flex items-center gap-2">
                     <Link className="h-4 w-4" />
-                    Event Source URL
+                    Event Source URL*
                   </Label>
                   <Input
                     id="source_url"
@@ -147,6 +146,24 @@ export function SubmitEventPage() {
                   <p className="text-sm text-gray-500">
                     Provide the original URL where this event was posted (Instagram, Facebook, website, etc.)
                   </p>
+                </div>
+
+                {/* Organizer link / other handle (optional) */}
+                <div className="space-y-3">
+                <Label htmlFor="source_url" className="text-base font-medium flex items-center gap-2">
+                    Where can people find more events from you?
+                  </Label>
+                  <Input
+                    id="other_handle"
+                    type="url"
+                    placeholder="https://instagram.com/yourclub or https://discord.gg/yourinvite"
+                    className="h-12 text-base"
+                    {...register('other_handle')}
+                    disabled={isLoading}
+                  />
+                  {errors.other_handle && (
+                    <p className="text-sm text-red-500 mt-1">{errors.other_handle.message as string}</p>
+                  )}
                 </div>
 
                 {/* Submit Button */}
