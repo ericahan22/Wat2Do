@@ -63,7 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "clerk_django.middlewares.clerk.ClerkAuthMiddleware",
+    "apps.core.middleware.ClerkJWKSAuthMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
 ]
 
