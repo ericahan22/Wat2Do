@@ -1,7 +1,7 @@
-import { Moon, Sun, Menu, X, User, LogOut } from "lucide-react";
+import { Moon, Sun, Menu, X, User } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useNavbar } from "@/shared/hooks";
-import { useAuth, useUser, useClerk } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { CLERK_ROUTES } from "@/shared/config/clerk";
 
@@ -15,9 +15,8 @@ function Navbar() {
   } = useNavbar();
   const navigate = useNavigate();
 
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const { signOut } = useClerk();
 
   const primaryEmail = user?.primaryEmailAddress?.emailAddress;
 
@@ -100,15 +99,6 @@ function Navbar() {
                   >
                     <User className="h-4 w-4" />
                     {primaryEmail || user?.firstName || 'User'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onMouseDown={() => signOut()}
-                    disabled={!isLoaded}
-                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  >
-                    <LogOut className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
@@ -205,15 +195,6 @@ function Navbar() {
                   >
                     <User className="h-4 w-4" />
                     {primaryEmail || user?.firstName || 'User'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    onMouseDown={() => signOut()}
-                    disabled={!isLoaded}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
                   </Button>
                 </div>
               ) : (
