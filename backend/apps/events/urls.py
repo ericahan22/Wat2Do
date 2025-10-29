@@ -21,6 +21,7 @@ urlpatterns = [
     path("submissions/", views.get_submissions, name="get_submissions"),
     path("submissions/<int:submission_id>/process/", views.process_submission, name="process_submission"),
     path("submissions/<int:submission_id>/review/", views.review_submission, name="review_submission"),
+    path("submissions/<int:submission_id>/", views.delete_submission, name="delete_submission"),
     # Test endpoints
     path("test-similarity/", views.test_similarity, name="test_similarity"),
 ]

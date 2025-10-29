@@ -143,6 +143,14 @@ class EventsAPIClient {
   }
 
   /**
+   * Deletes a user's own submission.
+   * Corresponds to a DELETE request to /api/events/submissions/{id}/
+   */
+  async deleteSubmission(submissionId: number): Promise<{ message: string }> {
+    return this.apiClient.delete(`events/submissions/${submissionId}/`);
+  }
+
+  /**
    * Exports events as ICS file.
    * Corresponds to a GET request to /api/events/export/ics/
    * Special handling for file download

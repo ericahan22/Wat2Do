@@ -1,16 +1,33 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/shared/hooks/useApi';
 import { useAuth } from '@clerk/clerk-react';
+import type { EventSubmission } from '@/features/events/types/submission';
 
 export const useUserSubmissions = () => {
   const { isSignedIn, userId } = useAuth();
   const { events } = useApi();
+  const queryClient = useQueryClient();
 
-  return useQuery({
+  // Fetch current user's submissions
+  const submissionsQuery = useQuery<EventSubmission[]>({
     queryKey: ['user-submissions', userId],
     queryFn: () => events.getUserSubmissions(),
     enabled: isSignedIn && !!userId,
     staleTime: 30 * 1000, // 30 seconds - submissions don't change often
     gcTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Delete a submission owned by the current user
+  const { mutate: removeSubmission, isPending: isDeleting } = useMutation({
+    mutationFn: (submissionId: number) => events.deleteSubmission(submissionId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['user-submissions'] });
+    },
+  });
+
+  return {
+    ...submissionsQuery,
+    removeSubmission,
+    isDeleting,
+  };
 };

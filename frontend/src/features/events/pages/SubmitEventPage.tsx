@@ -136,7 +136,7 @@ export function SubmitEventPage() {
                   <Input
                     id="source_url"
                     type="url"
-                    placeholder="https://example.com/event-page"
+                    placeholder="https://wusa.ca/event/watch-party"
                     className="h-12 text-base"
                     {...register('source_url')}
                     disabled={isLoading}

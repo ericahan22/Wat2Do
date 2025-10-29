@@ -675,3 +675,33 @@ def get_user_submissions(request):
         return Response(data)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["DELETE"])
+@permission_classes([ClerkAuthenticated])
+@ratelimit(key="ip", rate="30/hr", block=True)
+def delete_submission(request, submission_id): 
+    try:
+        submission = get_object_or_404(EventSubmission, id=submission_id)
+
+        current_user_id = (getattr(request, "clerk_user", None) or {}).get("id")
+        if not current_user_id or submission.submitted_by != current_user_id:
+            return Response({"error": "Not authorized to delete this submission"}, status=status.HTTP_403_FORBIDDEN)
+
+        if submission.status == "approved":
+            return Response({
+                "error": "Approved submissions cannot be removed. Contact support if needed."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Delete linked event first (cascades to submission)
+        event = submission.created_event
+        if event:
+            event.delete()
+            return Response({"message": "Submission and linked event removed"}, status=status.HTTP_200_OK)
+
+        # Fallback: if no linked event, delete submission directly
+        submission.delete()
+        return Response({"message": "Submission removed"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

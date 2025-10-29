@@ -1,43 +1,61 @@
-import { useUserSubmissions } from '@/features/events/hooks/useUserSubmissions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { Button } from '@/shared/components/ui/button'
-import { Calendar, ExternalLink, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import { formatPrettyDate } from '@/shared/lib/dateUtils'
-import type { EventSubmission } from '@/features/events/types/submission'
-import { useNavigate } from 'react-router-dom'
+import { useUserSubmissions } from "@/features/events/hooks/useUserSubmissions";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Calendar,
+  ExternalLink,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Trash2,
+} from "lucide-react";
+import { formatPrettyDate } from "@/shared/lib/dateUtils";
+import type { EventSubmission } from "@/features/events/types/submission";
+import { useNavigate } from "react-router-dom";
 
 export function MySubmissionsPage() {
-  const { data: submissions = [], isLoading } = useUserSubmissions()
-  const navigate = useNavigate()    
+  const {
+    data: submissions = [],
+    isLoading,
+    removeSubmission,
+    isDeleting,
+  } = useUserSubmissions();
+  const navigate = useNavigate();
   // Type assertion to fix TypeScript issues
-  const submissionsArray = submissions as EventSubmission[]
+  const submissionsArray = submissions as EventSubmission[];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'rejected':
-        return <XCircle className="h-4 w-4 text-red-600" />
-      case 'pending':
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />
+      case "approved":
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "rejected":
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case "pending":
+        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />
+        return <AlertCircle className="h-4 w-4 text-gray-600" />;
     }
-  }
+  };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'approved':
-        return 'default' as const
-      case 'rejected':
-        return 'destructive' as const
-      case 'pending':
-        return 'secondary' as const
+      case "approved":
+        return "default" as const;
+      case "rejected":
+        return "destructive" as const;
+      case "pending":
+        return "secondary" as const;
       default:
-        return 'outline' as const
+        return "outline" as const;
     }
-  }
+  };
 
   if (isLoading) {
     return (
@@ -45,11 +63,13 @@ export function MySubmissionsPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading your submissions...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Loading your submissions...
+            </p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -77,7 +97,7 @@ export function MySubmissionsPage() {
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Submit your first event to get started!
                 </p>
-                <Button onClick={() => navigate('/submit')}>
+                <Button onClick={() => navigate("/submit")}>
                   Submit Event
                 </Button>
               </div>
@@ -86,12 +106,17 @@ export function MySubmissionsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {submissionsArray.map((submission) => (
-              <Card key={submission.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={submission.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(submission.status)}
-                      <CardTitle className="text-lg">Submission #{submission.id}</CardTitle>
+                      <CardTitle className="text-lg">
+                        Submission #{submission.id}
+                      </CardTitle>
                     </div>
                     <Badge variant={getStatusBadgeVariant(submission.status)}>
                       {submission.status}
@@ -162,12 +187,35 @@ export function MySubmissionsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => navigate(`/events/${submission.created_event_id}`)}
+                        onClick={() =>
+                          navigate(`/events/${submission.created_event_id}`)
+                        }
                         className="w-full"
                       >
                         View Created Event
                       </Button>
                     </div>
+                  )}
+
+                  {/* Remove Button (only if not approved) */}
+                  {submission.status !== "approved" && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                      disabled={isDeleting}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          "Remove this submission? If it created an event, that event will also be removed. This cannot be undone."
+                        );
+                        if (confirmed) {
+                          removeSubmission(submission.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Remove Submission
+                    </Button>
                   )}
                 </CardContent>
               </Card>
@@ -176,5 +224,5 @@ export function MySubmissionsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
