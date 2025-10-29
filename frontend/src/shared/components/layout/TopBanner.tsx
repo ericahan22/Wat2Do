@@ -19,7 +19,7 @@ function TopBanner() {
           className="hover:text-gray-200"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatPrettyDate("2025-10-19")} - App is no longer broken!
+            {formatPrettyDate("2025-10-28")} - Submit events now available!
           </span>
         </a>
         <IconButton

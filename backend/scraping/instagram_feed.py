@@ -20,8 +20,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from instaloader import Instaloader
-from logging_config import logger
-from zyte_setup import setup_zyte
+from scraping.logging_config import logger
+from scraping.zyte_setup import setup_zyte
 from django.utils import timezone
 
 from apps.clubs.models import Clubs

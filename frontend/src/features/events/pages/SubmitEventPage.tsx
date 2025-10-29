@@ -158,18 +158,7 @@ export function SubmitEventPage() {
                     </div>
                   )}
                 </Button>
-
-                {/* Help Text */}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    💡 Tips for better submissions:
-                  </h4>
-                  <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                    <li>• Make sure the screenshot clearly shows event details (date, time, location)</li>
-                    <li>• Include the original source URL for verification</li>
-                    <li>• High-quality images are processed faster by our AI</li>
-                  </ul>
-                </div>
+             
               </form>
             )}
           </CardContent>

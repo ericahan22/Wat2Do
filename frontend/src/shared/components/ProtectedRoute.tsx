@@ -1,26 +1,27 @@
-import { ReactNode } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '@/shared/hooks/useAuth'
-import { Loading } from '@/shared/components/ui/loading'
+// src/components/ProtectedRoute.jsx
+import { useAuth } from '@clerk/clerk-react';
+import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
-  children: ReactNode
+  children: React.ReactNode;
+  redirectTo?: string;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoadingUser } = useAuth()
-  const location = useLocation()
+function ProtectedRoute({ children, redirectTo = '/auth/sign-in' }: ProtectedRouteProps) {
+  const { isLoaded, isSignedIn } = useAuth();
 
-  // While determining auth state, show a lightweight loading UI
-  if (isLoadingUser) {
-    return <Loading message="Checking authentication..." />
+  // Wait until Clerk has loaded its state
+  if (!isLoaded) {
+    return <div>Loading...</div>;
   }
 
-  // If not authenticated, redirect to /auth and keep the intended destination
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />
+  // If the user is signed in, render the children
+  if (isSignedIn) {
+    return <>{children}</>;
   }
 
-  // Otherwise render the protected content
-  return <>{children}</>
+  // If the user is not signed in, redirect to sign in
+  return <Navigate to={redirectTo} replace />;
 }
+
+export default ProtectedRoute;

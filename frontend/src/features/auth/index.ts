@@ -2,6 +2,8 @@
 export { LoginForm } from './components/LoginForm';
 export { SignupForm } from './components/SignupForm';
 export { SuccessMessage } from './components/SuccessMessage';
+export { ForgotPassword } from './components/ForgotPassword';
+export { ResetPassword } from './components/ResetPassword';
 
 // Types
 export type {
@@ -27,3 +29,5 @@ export type { LoginFormData as LoginFormDataSchema, SignupFormData as SignupForm
 export { AuthPage } from './pages/AuthPage';
 export { VerifyEmailPage } from './pages/VerifyEmailPage';
 export { DashboardPage } from './pages/DashboardPage';
+export { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+export { ResetPasswordPage } from './pages/ResetPasswordPage';

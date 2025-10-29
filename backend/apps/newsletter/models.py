@@ -2,11 +2,9 @@ import uuid
 
 from django.db import models
 
-from utils.encryption_utils import email_encryption
-
 
 class NewsletterSubscriber(models.Model):
-    email_encrypted = models.TextField(help_text="Encrypted email address")
+    email = models.EmailField(help_text="Email address")
     subscribed_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     unsubscribe_token = models.UUIDField(
@@ -30,19 +28,16 @@ class NewsletterSubscriber(models.Model):
     @classmethod
     def get_by_email(cls, email):
         """Get subscriber by email"""
-        encrypted_email = email_encryption.encrypt_email(email)
-        return cls.objects.get(email_encrypted=encrypted_email)
+        return cls.objects.get(email=email.lower().strip())
 
     @classmethod
     def create_subscriber(cls, email):
         """Create a new subscriber for an email"""
-        encrypted_email = email_encryption.encrypt_email(email)
-        return cls.objects.create(email_encrypted=encrypted_email, is_active=True)
+        return cls.objects.create(email=email.lower().strip(), is_active=True)
 
     def get_email(self):
-        """Get the email (decrypted)"""
-
-        return email_encryption.decrypt_email(self.email_encrypted)
+        """Get the email"""
+        return self.email
 
     def get_email_display(self):
         """Return a masked version of the email for display purposes"""

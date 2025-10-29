@@ -1,57 +1,64 @@
-import { BaseAPIClient } from './BaseAPIClient';
-
 export interface NewsletterSubscribeRequest {
   email: string;
 }
 
 export interface NewsletterSubscribeResponse {
   message: string;
-  success: boolean;
+  email: string;
+  unsubscribe_token: string;
 }
 
 export interface NewsletterUnsubscribeRequest {
-  email: string;
   token: string;
 }
 
 export interface NewsletterUnsubscribeResponse {
   message: string;
-  success: boolean;
+  email: string;
+  unsubscribed_at: string;
 }
 
-export class NewsletterAPIClient extends BaseAPIClient {
-  constructor() {
-    super();
-  }
+/**
+ * Newsletter API Client - Clean class pattern!
+ * Takes BaseAPIClient as constructor parameter
+ */
+class NewsletterAPIClient {
+  /**
+   * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
+   */
+  constructor(private apiClient: any) {}
 
+  /**
+   * Subscribes to newsletter.
+   * Corresponds to a POST request to /api/newsletter/subscribe/
+   */
   async subscribe(data: NewsletterSubscribeRequest): Promise<NewsletterSubscribeResponse> {
-    return this.post<NewsletterSubscribeResponse>('/api/newsletter/subscribe/', data);
+    return this.apiClient.post('newsletter/subscribe/', data);
   }
 
+  /**
+   * Unsubscribes from newsletter.
+   * Corresponds to a POST request to /api/newsletter/unsubscribe/
+   */
   async unsubscribe(data: NewsletterUnsubscribeRequest): Promise<NewsletterUnsubscribeResponse> {
-    return this.post<NewsletterUnsubscribeResponse>('/api/newsletter/unsubscribe/', data);
+    return this.apiClient.post('newsletter/unsubscribe/', data);
   }
 
-  async getUnsubscribeInfo(token: string): Promise<{
-    already_unsubscribed: boolean;
-    email: string;
-    message: string;
-    unsubscribed_at?: string;
-  }> {
-    return this.get(`/api/newsletter/unsubscribe/${token}`);
+  /**
+   * Gets subscription status.
+   * Corresponds to a GET request to /api/newsletter/status/
+   */
+  async getSubscriptionStatus(email: string): Promise<{ subscribed: boolean; email: string }> {
+    return this.apiClient.get(`newsletter/status/?email=${encodeURIComponent(email)}`);
   }
 
-  async submitUnsubscribe(token: string, data: {
-    reason: string;
-    feedback?: string;
-  }): Promise<{
-    message: string;
-    email: string;
-    unsubscribed_at: string;
-  }> {
-    return this.post(`/api/newsletter/unsubscribe/${token}`, data);
+  /**
+   * Resubscribes to newsletter.
+   * Corresponds to a POST request to /api/newsletter/resubscribe/
+   */
+  async resubscribe(email: string): Promise<{ message: string; email: string }> {
+    return this.apiClient.post('newsletter/resubscribe/', { email });
   }
 }
 
-// Export a default instance
-export const newsletterAPIClient = new NewsletterAPIClient();
+export default NewsletterAPIClient;

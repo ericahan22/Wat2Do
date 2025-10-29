@@ -11,9 +11,10 @@ interface LoginFormProps {
   onSubmit: (data: LoginFormData) => void;
   isLoading?: boolean;
   error?: AuthError | null;
+  onForgotPassword?: () => void;
 }
 
-export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps) => {
+export const LoginForm = ({ onSubmit, isLoading = false, error, onForgotPassword }: LoginFormProps) => {
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -51,6 +52,16 @@ export const LoginForm = ({ onSubmit, isLoading = false, error }: LoginFormProps
         />
         {form.formState.errors.password && (
           <p className="text-sm text-red-600">{form.formState.errors.password.message}</p>
+        )}
+        {onForgotPassword && (
+            <Button
+              type="button"
+              variant="link"
+              onClick={onForgotPassword}
+              className='text-sm mt-2 text-right text-'
+            >
+              Forgot password?
+            </Button>
         )}
       </div>
 

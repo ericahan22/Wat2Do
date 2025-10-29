@@ -162,7 +162,7 @@ export function MySubmissionsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.location.href = `/events/${submission.created_event_id}`}
+                        onClick={() => navigate(`/events/${submission.created_event_id}`)}
                         className="w-full"
                       >
                         View Created Event

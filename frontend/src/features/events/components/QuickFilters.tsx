@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "@/shared/components/ui/button";
-import { X } from "lucide-react";
 import { useQuickFilters } from "@/features/events/hooks/useQuickFilters";
 import { getEmojiUrl, FilterWithEmoji } from "@/shared/lib/emojiUtils";
 import { cn } from "@/shared/lib/utils";
@@ -11,7 +10,6 @@ const QuickFilters: React.FC = () => {
     scrollContainerRef,
     handleMouseDown,
     handleFilterClick,
-    handleFilterRemoveClick,
     isFilterActive,
   } = useQuickFilters();
 
@@ -44,14 +42,6 @@ const QuickFilters: React.FC = () => {
             }`}
             onClick={() => handleFilterClick(filter)}
           >
-            {isActive && (
-              <X
-                className={`h-3 w-3 ${
-                  isActive ? "!text-gray-200 dark:!text-gray-800" : ""
-                }`}
-                onClick={handleFilterRemoveClick}
-              />
-            )}
             <img
               src={emojiUrl}
               alt={filterName}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
-import { adminAPIClient } from "@/shared/api";
+import { useApi } from "@/shared/hooks/useApi";
 import type { EventPromotion, PromotedEvent } from "@/features/admin/types/promotion";
 import { Event } from "@/features/events/types/events";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
@@ -16,8 +16,8 @@ export function PromotionsManager() {
   const [isPromoted, setIsPromoted] = useState<boolean>(false);
   const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
 
+  const { admin } = useApi();
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEvents();
-
   const { promotedEvents, promotedEventsLoading, promotedEventsError, refetchPromotedEvents } = useEventPromotion();
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export function PromotionsManager() {
 
   const checkPromotionStatus = async (eventId: string) => {
     try {
-      const data = await adminAPIClient.getPromotionStatus(eventId);
+      const data = await admin.getPromotionStatus(eventId);
       setIsPromoted(data.is_promoted);
       setCurrentPromotion(data.promotion);
     } catch (err) {

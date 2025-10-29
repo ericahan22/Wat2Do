@@ -1,6 +1,5 @@
 import React from "react";
 import { Button } from "./button";
-import { X } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface FilterButtonProps {
@@ -30,9 +29,6 @@ export const FilterButton: React.FC<FilterButtonProps> = ({
         className
       )}
     >
-      {isActive && (
-        <X className="h-3 w-3 !text-gray-200 dark:!text-gray-800" />
-      )}
       <div
         className={cn(
           "h-4 w-4",

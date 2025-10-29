@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminAPIClient } from "@/shared/api";
+import { useApi } from "@/shared/hooks/useApi";
 import type {
   PromoteEventRequest,
   UpdatePromotionRequest,
@@ -13,11 +13,12 @@ import type {
  */
 export function useEventPromotion() {
   const queryClient = useQueryClient();
+  const { admin } = useApi();
 
   // Mutations
   const promoteMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: PromoteEventRequest }) =>
-      adminAPIClient.promoteEvent(eventId, data),
+      admin.promoteEvent(eventId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -26,7 +27,7 @@ export function useEventPromotion() {
 
   const updateMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: UpdatePromotionRequest }) =>
-      adminAPIClient.updatePromotion(eventId, data),
+      admin.updatePromotion(eventId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -34,7 +35,7 @@ export function useEventPromotion() {
   });
 
   const unpromoteMutation = useMutation({
-    mutationFn: (eventId: string) => adminAPIClient.unpromoteEvent(eventId),
+    mutationFn: (eventId: string) => admin.unpromoteEvent(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -42,7 +43,7 @@ export function useEventPromotion() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (eventId: string) => adminAPIClient.deletePromotion(eventId),
+    mutationFn: (eventId: string) => admin.deletePromotion(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -52,12 +53,12 @@ export function useEventPromotion() {
   // Queries
   const promotedEventsQuery = useQuery({
     queryKey: ["admin", "promoted-events"],
-    queryFn: adminAPIClient.getPromotedEvents,
+    queryFn: () => admin.getPromotedEvents(),
   });
 
   const getPromotionStatusQueryOptions = (eventId: string) => ({
     queryKey: ["admin", "promotion-status", eventId],
-    queryFn: () => adminAPIClient.getPromotionStatus(eventId),
+    queryFn: () => admin.getPromotionStatus(eventId),
     enabled: !!eventId,
   });
 
@@ -94,9 +95,11 @@ export function useEventPromotion() {
 }
 
 export function usePromotionStatus(eventId: string) {
+  const { admin } = useApi();
+  
   return useQuery({
     queryKey: ["admin", "promotion-status", eventId],
-    queryFn: () => adminAPIClient.getPromotionStatus(eventId),
+    queryFn: () => admin.getPromotionStatus(eventId),
     enabled: !!eventId,
   });
 }

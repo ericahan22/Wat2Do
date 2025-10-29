@@ -2,7 +2,7 @@ import os
 import ssl
 from pathlib import Path
 
-from logging_config import logger
+from scraping.logging_config import logger
 
 
 def setup_zyte():

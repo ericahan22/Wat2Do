@@ -24,7 +24,20 @@ from shared.constants.emojis import EMOJI_CATEGORIES
 class OpenAIService:
     def __init__(self):
         load_dotenv()
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.client = None
+        self._initialize_client()
+    
+    def _initialize_client(self):
+        """Initialize OpenAI client only when needed."""
+        try:
+            api_key = os.getenv("OPENAI_API_KEY")
+            if api_key:
+                self.client = OpenAI(api_key=api_key)
+            else:
+                print("Warning: OPENAI_API_KEY not set. OpenAI functionality will be limited.")
+        except Exception as e:
+            print(f"Warning: Failed to initialize OpenAI client: {e}")
+            self.client = None
 
     def generate_embedding(self, text: str) -> list[float]:
         """
@@ -32,6 +45,10 @@ class OpenAIService:
         """
         if not text:
             return None
+        
+        if not self.client:
+            print("Warning: OpenAI client not available. Returning empty embedding.")
+            return [0.0] * 1536
 
         # Clean up the text for better embedding quality
         text = text.replace("\n", " ").replace("\r", " ").strip()

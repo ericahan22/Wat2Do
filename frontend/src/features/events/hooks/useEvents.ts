@@ -2,43 +2,36 @@ import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
-import { eventsAPIClient } from "@/shared/api";
+import { useApi } from "@/shared/hooks/useApi";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
 import { isEventOngoing } from "@/shared/lib/eventUtils";
-import { Event } from "@/features/events";
-
-// Format the last updated timestamp into a human-readable format (in local time)
-const fetchEvents = async (params: {
-  searchTerm?: string;
-  dtstart_utc?: string;
-  addedAt?: string;
-}): Promise<Event[]> => {
-  const queryParams: Record<string, string> = {};
-  
-  if (params.searchTerm) {
-    queryParams.search = params.searchTerm;
-  }
-  
-  if (params.dtstart_utc) {
-    queryParams.dtstart_utc = formatDtstartToMidnight(params.dtstart_utc);
-  }
-  
-  if (params.addedAt) {
-    queryParams.added_at = params.addedAt;
-  }
-
-  return eventsAPIClient.getEvents(queryParams);
-};
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { events: eventsAPI } = useApi();
   const searchTerm = searchParams.get("search") || "";
   const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["events", searchTerm, dtstart_utc, addedAt],
-    queryFn: () => fetchEvents({ searchTerm, dtstart_utc, addedAt }),
+    queryFn: async () => {
+      const queryParams: Record<string, string> = {};
+      
+      if (searchTerm) {
+        queryParams.search = searchTerm;
+      }
+      
+      if (dtstart_utc) {
+        queryParams.dtstart_utc = formatDtstartToMidnight(dtstart_utc);
+      }
+      
+      if (addedAt) {
+        queryParams.added_at = addedAt;
+      }
+
+      return eventsAPI.getEvents(queryParams);
+    },
     refetchOnWindowFocus: false,
     enabled: true,  
   });

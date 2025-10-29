@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import User
 from pgvector.django import VectorField
 
 
@@ -152,8 +151,8 @@ class EventSubmission(models.Model):
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True
     )
-    submitted_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, null=True, blank=True, help_text="User who submitted this event"
+    submitted_by = models.CharField(
+        max_length=255, null=True, blank=True, help_text="Clerk user ID who submitted this event"
     )
 
     # Timestamps

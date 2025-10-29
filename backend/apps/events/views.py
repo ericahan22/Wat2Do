@@ -7,12 +7,15 @@ from django.utils.html import escape
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
+from clerk_django.permissions.clerk import ClerkAuthenticated
+from services.storage_service import storage_service
+
 import os
 import uuid
 
-from services.openai_service import generate_embedding
+from services.openai_service import extract_events_from_caption, generate_embedding
 from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
@@ -216,7 +219,7 @@ def export_events_ics(request):
             id_list = [int(x) for x in ids_param.split(",") if x]
         except ValueError:
             return Response(
-                {"error": "ids must be a comma-separated list of integers"},
+                {"error": "IDs must be a comma-separated list of integers"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -325,7 +328,7 @@ def get_google_calendar_urls(request):
             id_list = [int(x) for x in ids_param.split(",") if x]
         except ValueError:
             return Response(
-                {"error": "ids must be a comma-separated list of integers"},
+                {"error": "IDs must be a comma-separated list of integers"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -440,7 +443,7 @@ def rss_feed(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="5/hr", block=True)
 def submit_event(request):
     """Submit event for review - accepts screenshot file and source URL"""
@@ -455,7 +458,7 @@ def submit_event(request):
             )
 
         # Upload to S3
-        from services.storage_service import storage_service
+        
 
         filename = f"submissions/{uuid.uuid4()}.{screenshot.name.split('.')[-1]}"
         screenshot_url = storage_service.upload_image_data(screenshot.read(), filename)
@@ -471,7 +474,7 @@ def submit_event(request):
             screenshot_url=screenshot_url, 
             source_url=source_url, 
             status="pending",
-            submitted_by=request.user
+            submitted_by=request.clerk_user.get('id')
         )
 
         return Response(
@@ -519,12 +522,7 @@ def process_submission(request, submission_id):
     try:
         submission = get_object_or_404(EventSubmission, id=submission_id)
 
-        # Extract event data using OpenAI
-        from services.openai_service import OpenAIService
-
-        openai_service = OpenAIService()
-
-        events_data = openai_service.extract_events_from_caption(
+        events_data = extract_events_from_caption(
             caption_text=f"Event source: {submission.source_url}",
             source_image_url=submission.screenshot_url,
         )
@@ -563,7 +561,7 @@ def review_submission(request, submission_id):
             submission.status = "approved"
             submission.created_event = event
             submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.user.email
+            submission.reviewed_by = request.clerk_user.get('email_addresses', [{}])[0].get('email_address')
             submission.save()
 
             return Response(
@@ -573,7 +571,7 @@ def review_submission(request, submission_id):
         elif action == "reject":
             submission.status = "rejected"
             submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.user.email
+            submission.reviewed_by = request.clerk_user.get('email_addresses', [{}])[0].get('email_address')
             submission.admin_notes = request.data.get("notes", "")
             submission.save()
 
@@ -594,12 +592,12 @@ def review_submission(request, submission_id):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="100/hr", block=True)
 def get_user_submissions(request):
     """Get submissions for the authenticated user"""
     try:
-        submissions = EventSubmission.objects.filter(submitted_by=request.user).order_by("-submitted_at")
+        submissions = EventSubmission.objects.filter(submitted_by=request.clerk_user.get('id')).order_by("-submitted_at")
 
         data = [
             {

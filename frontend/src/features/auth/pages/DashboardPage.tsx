@@ -1,21 +1,22 @@
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { useAuth } from '@/shared/hooks/useAuth'
+import { useUser, useClerk } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, FileText, Calendar, User } from 'lucide-react'
 import { useUserSubmissions } from '@/features/events/hooks/useUserSubmissions'
 import type { EventSubmission } from '@/features/events/types/submission'
 
 export const DashboardPage = () => {
-  const { user, logout, isLoggingOut } = useAuth()
+  const { user } = useUser()
+  const { signOut } = useClerk()
   const navigate = useNavigate()
 
   // Fetch user's submissions
   const { data: submissions = [] } = useUserSubmissions()
 
   const handleLogout = () => {
-    logout()
+    signOut()
   }
 
   const pendingCount = submissions.filter((s: EventSubmission) => s.status === 'pending').length
@@ -27,7 +28,7 @@ export const DashboardPage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Welcome back, {user?.email}
+            Welcome back, {user?.firstName || user?.username || 'User'}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
             Manage your event submissions and activities
@@ -118,16 +119,16 @@ export const DashboardPage = () => {
                 <span className="font-medium">User Details</span>
               </div>
               <p><strong>ID:</strong> {user?.id}</p>
-              <p><strong>Email:</strong> {user?.email}</p>
+              <p><strong>Email:</strong> {user?.primaryEmailAddress?.emailAddress}</p>
             </div>
             
             <Button 
               onClick={handleLogout} 
               className="w-full" 
               variant="destructive"
-              disabled={isLoggingOut}
+              disabled={false}
             >
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
+              Logout
             </Button>
           </CardContent>
         </Card>

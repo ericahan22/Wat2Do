@@ -21,20 +21,18 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Credentials
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-dev-key-for-local-development-only-please-change-in-production",
-)
-DEBUG = os.getenv("PRODUCTION") != "1"  # Fixed the DEBUG logic
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    if os.getenv("PRODUCTION") == "1":
+        raise ValueError("SECRET_KEY environment variable must be set in production!")
+    # Only allow insecure default in development
+    SECRET_KEY = "django-insecure-dev-key-for-local-development-only-please-change-in-production"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    ".vercel.app",
-    ".elasticbeanstalk.com",
-    ".elb.amazonaws.com",
-    "*",
-]
+DEBUG = os.getenv("PRODUCTION") != "1"
+
+ALLOWED_PARTIES = os.getenv("ALLOWED_PARTIES").split(",") if os.getenv('ALLOWED_PARTIES') else []
+CLERK_ALLOWED_PARTIES = ALLOWED_PARTIES
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",") if os.getenv('ALLOWED_HOSTS') else []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -64,26 +62,37 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "ratelimit.middleware.RatelimitMiddleware",
+    "clerk_django.middlewares.clerk.ClerkAuthMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'clerkapp.auth.JwtAuthBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
+
+
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF settings for development
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "https://wat2do.ca",
-    "https://www.wat2do.ca",
-]
-
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8000",
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+    
 # CSRF settings for SPA frontend
-CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1"  # True in production (HTTPS)
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie for SPA
-CSRF_COOKIE_SAMESITE = "Lax"  # Allow cross-site requests
-CSRF_USE_SESSIONS = True  # Use sessions for CSRF tokens
+CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1" 
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_COOKIE_SAMESITE = "Lax" 
+CSRF_USE_SESSIONS = True 
 
 ROOT_URLCONF = "config.urls"
 
@@ -112,10 +121,10 @@ if os.getenv("PRODUCTION") == "1":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB", "postgres"),
-            "USER": os.getenv("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
-            "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
             "PORT": os.getenv("POSTGRES_PORT", "6543"),
             "OPTIONS": {
                 "options": "-c pool_mode=session",
@@ -166,14 +175,10 @@ USE_TZ = True
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
 }
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { newsletterAPIClient } from '@/shared/api';
+import { useApi } from '@/shared/hooks/useApi';
 
 interface UnsubscribeData {
   already_unsubscribed: boolean;
@@ -20,19 +20,21 @@ interface UnsubscribeResponse {
 }
 
 
-const fetchUnsubscribeInfo = async (token: string): Promise<UnsubscribeData> => {
-  return newsletterAPIClient.getUnsubscribeInfo(token);
+const fetchUnsubscribeInfo = async (token: string, newsletterAPI: any): Promise<UnsubscribeData> => {
+  return newsletterAPI.getUnsubscribeInfo(token);
 };
 
 const submitUnsubscribe = async (
   token: string, 
-  data: UnsubscribeRequest
+  data: UnsubscribeRequest,
+  newsletterAPI: any
 ): Promise<UnsubscribeResponse> => {
-  return newsletterAPIClient.submitUnsubscribe(token, data);
+  return newsletterAPI.submitUnsubscribe(token, data);
 };
 
 export const useUnsubscribe = (token: string | undefined) => {
   const queryClient = useQueryClient();
+  const { newsletter } = useApi();
 
   // Query to fetch unsubscribe info
   const {
@@ -42,7 +44,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     isError: isFetchError,
   } = useQuery({
     queryKey: ['unsubscribe', token],
-    queryFn: () => fetchUnsubscribeInfo(token!),
+    queryFn: () => fetchUnsubscribeInfo(token!, newsletter),
     enabled: !!token,
     retry: false,
   });
@@ -57,7 +59,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     data: submitData,
     reset: resetSubmit,
   } = useMutation({
-    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data),
+    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data, newsletter),
     onSuccess: () => {
       // Invalidate and refetch the unsubscribe info
       queryClient.invalidateQueries({ queryKey: ['unsubscribe', token] });

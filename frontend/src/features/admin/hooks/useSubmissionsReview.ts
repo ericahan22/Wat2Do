@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { eventsAPIClient } from "@/shared/api";
+import { useApi } from "@/shared/hooks/useApi";
 import type { EventSubmission } from "@/features/events/types/submission";
 
 type ReviewAction = "approve" | "reject";
 
 export function useSubmissionsReview() {
   const queryClient = useQueryClient();
+  const { events } = useApi();
 
   // List submissions (admin scope)
   const submissionsQuery = useQuery<EventSubmission[]>({
     queryKey: ["admin", "submissions"],
-    queryFn: eventsAPIClient.getSubmissions,
+    queryFn: () => events.getSubmissions(),
   });
 
   // Ensure freshest data on mount
@@ -22,7 +23,7 @@ export function useSubmissionsReview() {
 
   // Process submission (extract event data)
   const processMutation = useMutation({
-    mutationFn: (submissionId: number) => eventsAPIClient.processSubmission(submissionId),
+    mutationFn: (submissionId: number) => events.processSubmission(submissionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "submissions"] });
     },
@@ -31,7 +32,7 @@ export function useSubmissionsReview() {
   // Review submission (approve/reject)
   const reviewMutation = useMutation({
     mutationFn: ({ submissionId, action, notes }: { submissionId: number; action: ReviewAction; notes?: string }) =>
-      eventsAPIClient.reviewSubmission(submissionId, action, notes),
+      events.reviewSubmission(submissionId, action, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "submissions"] });
     },

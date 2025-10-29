@@ -105,14 +105,6 @@ export const useQuickFilters = () => {
     [hasDragged, setSearchParams]
   );
 
-  const handleFilterRemove = useCallback(() => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      nextParams.delete("search");
-      return nextParams;
-    });
-  }, [setSearchParams]);
-
   const isFilterActive = useCallback(
     (filter: FilterWithEmoji) => {
       const filterName = filter[2]; // Extract filter name from 3D array
@@ -125,14 +117,6 @@ export const useQuickFilters = () => {
       return filterRegex.test(currentSearch);
     },
     [currentSearch]
-  );
-
-  const handleFilterRemoveClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent triggering the filter click
-      handleFilterRemove();
-    },
-    [handleFilterRemove]
   );
 
   return {
@@ -150,7 +134,6 @@ export const useQuickFilters = () => {
     // Event handlers
     handleMouseDown,
     handleFilterClick,
-    handleFilterRemoveClick,
 
     // Utilities
     isFilterActive,

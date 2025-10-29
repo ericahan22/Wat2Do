@@ -3,9 +3,10 @@ Views for the newsletter app.
 """
 
 from django.utils import timezone
+from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 
 from .models import NewsletterSubscriber
@@ -13,6 +14,7 @@ from .models import NewsletterSubscriber
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@ratelimit(key="ip", rate="5/hr", block=True)  # Rate limit to prevent abuse
 def newsletter_subscribe(request):
     """Subscribe to the newsletter (no authentication required)"""
     email = request.data.get("email", "").strip().lower()
@@ -41,9 +43,9 @@ def newsletter_subscribe(request):
             created = True
 
         # Send welcome email with mock events
-        from services.email_service import email_service
+        from services.clerk_email_service import clerk_email_service
 
-        email_sent = email_service.send_welcome_email(
+        email_sent = clerk_email_service.send_welcome_email(
             subscriber.get_email(), str(subscriber.unsubscribe_token)
         )
 
@@ -126,14 +128,14 @@ def newsletter_unsubscribe(request, token):
 
 
 @api_view(["POST"])
-@permission_classes([AllowAny])
+@permission_classes([IsAdminUser])  # Changed: Restrict to admin only
 def test_email(request):
     """Internal testing route to send test email to e22han@uwaterloo.ca"""
     try:
-        from services.email_service import email_service
-
         # Send test newsletter email
-        email_sent = email_service.send_newsletter_email(
+        from services.clerk_email_service import clerk_email_service
+        
+        email_sent = clerk_email_service.send_newsletter_email(
             "e22han@uwaterloo.ca", "test-unsubscribe-token"
         )
 

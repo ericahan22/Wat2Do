@@ -1,185 +1,76 @@
-import { API_BASE_URL } from '@/shared/constants/api';
+// src/api/baseApiClient.js
 
-export interface ApiResponse<T = unknown> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
+class BaseAPIClient {
+  private getAuthToken: () => Promise<string | null>;
+  private baseUrl: string;
 
-export interface ApiErrorResponse {
-  error: string;
-  detail?: string;
-  message?: string;
-}
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status?: number,
-    public response?: Response
-  ) {
-    super(message);
-    this.name = 'ApiError';
+  constructor(getAuthToken: () => Promise<string | null>) {
+    this.getAuthToken = getAuthToken;
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
   }
-}
 
-export interface RequestConfig {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  headers?: Record<string, string>;
-  body?: unknown;
-  credentials?: RequestCredentials;
-  signal?: AbortSignal;
-}
-
-export class BaseAPIClient {
-  protected baseURL: string;
-  protected defaultHeaders: Record<string, string>;
-
-  constructor(baseURL: string = API_BASE_URL) {
-    this.baseURL = baseURL;
-    this.defaultHeaders = {
+  async request({ endpoint, method = 'GET', body = null }: {
+    endpoint: string;
+    method?: string;
+    body?: any;
+  }) {
+    const token = await this.getAuthToken();
+    const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-  }
 
-  protected async getCSRFToken(): Promise<string | null> {
-    // Try to get CSRF token from cookie first
-    const cookies = document.cookie.split(';');
-    for (const cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'csrftoken') {
-        return value;
-      }
-    }
-    
-    // If no CSRF token in cookie, try to get it from Django
-    try {
-      const response = await fetch(`${this.baseURL}/api/auth/csrf-token/`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.csrfToken || null;
-      }
-    } catch {
-      // Silently fail - CSRF token might not be required for some endpoints
-    }
-    
-    return null;
-  }
-
-  protected async getAuthHeaders(): Promise<Record<string, string>> {
-    const headers: Record<string, string> = {};
-    const csrfToken = await this.getCSRFToken();
-    if (csrfToken) {
-      headers['X-CSRFToken'] = csrfToken;
-    }
-    return headers;
-  }
-
-  protected async request<T = unknown>(
-    endpoint: string,
-    config: RequestConfig = {}
-  ): Promise<T> {
-    const {
-      method = 'GET',
-      headers = {},
-      body,
-      credentials = 'include',
-      signal,
-    } = config;
-
-    const url = `${this.baseURL}${endpoint}`;
-    const requestHeaders = {
-      ...this.defaultHeaders,
-      ...headers,
-    };
-
-    // Remove Content-Type for FormData
-    if (body instanceof FormData) {
-      delete requestHeaders['Content-Type'];
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
 
-    const requestConfig: RequestInit = {
+    const config: RequestInit = {
       method,
-      headers: requestHeaders,
-      credentials,
-      signal,
+      headers,
     };
 
     if (body) {
-      if (body instanceof FormData) {
-        requestConfig.body = body;
-      } else {
-        requestConfig.body = JSON.stringify(body);
-      }
+      config.body = JSON.stringify(body);
     }
 
+    console.log(config);
+
     try {
-      const response = await fetch(url, requestConfig);
+      const response = await fetch(`${this.baseUrl}/${endpoint}`, config);
 
       if (!response.ok) {
-        const errorData = await this.parseErrorResponse(response);
-        throw new ApiError(
-          errorData.error || errorData.message || 'Request failed',
-          response.status,
-          response
-        );
+        // Handle HTTP errors (e.g., 4xx, 5xx)
+        const errorData = await response.json().catch(() => ({})); // Try to parse error, otherwise empty object
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
       }
-
-      // Handle empty responses (204 No Content)
+      
+      // For DELETE or other methods that might not return a body
       if (response.status === 204) {
-        return {} as T;
+        return null;
       }
-
-      return await response.json();
+      
+      return response.json();
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        error instanceof Error ? error.message : 'Network error',
-        undefined,
-        undefined
-      );
+      console.error("API request failed:", error);
+      throw error; // Re-throw so it can be caught by the hook
     }
   }
 
-  private async parseErrorResponse(response: Response): Promise<ApiErrorResponse> {
-    try {
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        return await response.json();
-      }
-      return { error: response.statusText };
-    } catch {
-      return { error: response.statusText };
-    }
+  // Convenience methods for each HTTP verb
+  get(endpoint: string) {
+    return this.request({ endpoint, method: 'GET' });
   }
 
-  // Convenience methods
-  async get<T = unknown>(endpoint: string, config?: Omit<RequestConfig, 'method'>): Promise<T> {
-    return this.request<T>(endpoint, { ...config, method: 'GET' });
+  post(endpoint: string, body?: any) {
+    return this.request({ endpoint, method: 'POST', body });
   }
 
-  async post<T = unknown>(endpoint: string, body?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<T> {
-    return this.request<T>(endpoint, { ...config, method: 'POST', body });
+  put(endpoint: string, body?: any) {
+    return this.request({ endpoint, method: 'PUT', body });
   }
 
-  async put<T = unknown>(endpoint: string, body?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<T> {
-    return this.request<T>(endpoint, { ...config, method: 'PUT', body });
-  }
-
-  async patch<T = unknown>(endpoint: string, body?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<T> {
-    return this.request<T>(endpoint, { ...config, method: 'PATCH', body });
-  }
-
-  async delete<T = unknown>(endpoint: string, config?: Omit<RequestConfig, 'method'>): Promise<T> {
-    return this.request<T>(endpoint, { ...config, method: 'DELETE' });
+  delete(endpoint: string) {
+    return this.request({ endpoint, method: 'DELETE' });
   }
 }
 
-// Export a default instance
-export const baseAPIClient = new BaseAPIClient();
+export default BaseAPIClient;

@@ -1,29 +1,29 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './useAuth'
+import { useAuth } from '@clerk/clerk-react'
 
 export const useAuthRedirect = (redirectTo: string = '/auth') => {
-  const { isAuthenticated, isLoadingUser } = useAuth()
+  const { isSignedIn, isLoaded } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isLoadingUser && !isAuthenticated) {
+    if (isLoaded && !isSignedIn) {
       navigate(redirectTo)
     }
-  }, [isAuthenticated, isLoadingUser, navigate, redirectTo])
+  }, [isSignedIn, isLoaded, navigate, redirectTo])
 
-  return { isAuthenticated, isLoadingUser }
+  return { isSignedIn, isLoaded }
 }
 
 export const useGuestRedirect = (redirectTo: string = '/dashboard') => {
-  const { isAuthenticated, isLoadingUser } = useAuth()
+  const { isSignedIn, isLoaded } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isLoadingUser && isAuthenticated) {
+    if (isLoaded && isSignedIn) {
       navigate(redirectTo)
     }
-  }, [isAuthenticated, isLoadingUser, navigate, redirectTo])
+  }, [isSignedIn, isLoaded, navigate, redirectTo])
 
-  return { isAuthenticated, isLoadingUser }
+  return { isSignedIn, isLoaded }
 }

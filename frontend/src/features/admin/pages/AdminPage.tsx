@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { useAuth } from "@/shared/hooks/useAuth";
+import { useClerk } from "@clerk/clerk-react";
 import { PromotionsManager } from "@/features/admin/components/PromotionsManager";
 import { SubmissionsReview } from "@/features/admin/components/SubmissionsReview";
 
@@ -11,11 +11,11 @@ import { SubmissionsReview } from "@/features/admin/components/SubmissionsReview
  * Requires admin authentication
  */
 function AdminPage() {
-  const { logout } = useAuth();
+  const { signOut } = useClerk();
   const [error, setError] = useState<string | null>(null);
 
   const handleLogout = () => {
-    logout();
+    signOut();
   };
 
   return (

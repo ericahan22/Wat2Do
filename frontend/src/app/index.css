@@ -81,6 +81,11 @@ a {
   @apply text-gray-700 dark:text-gray-300;
 }
 
+/* Error text - override default text color */
+.text-red-600 {
+  @apply !text-red-600 dark:!text-red-400;
+}
+
 /* Form inputs */
 input,
 textarea,
