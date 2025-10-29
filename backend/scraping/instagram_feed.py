@@ -15,10 +15,10 @@ import re
 import time
 import traceback
 from datetime import datetime, timedelta
-from datetime import timezone as pytimezone
 from pathlib import Path
 
 import requests
+from requests.exceptions import ReadTimeout, ConnectionError
 from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
@@ -266,7 +266,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "ig_handle": ig_handle,
         "title": title,
         "source_url": source_url,
-        "dtstamp": datetime.now(timezone.utc),
+        "dtstamp": timezone.now(),
         "dtstart": dtstart,
         "dtstart_utc": dtstart_utc,
         "dtend": dtend or None,
@@ -333,6 +333,22 @@ def get_seen_shortcodes():
         return set()
 
 
+def safe_feed_posts(loader, retries=3, backoff=60):
+    consecutive_errors = 0
+    while True:
+        try:
+            for post in loader.get_feed_posts():
+                yield post
+            break
+        except (ReadTimeout, ConnectionError) as e:
+            consecutive_errors += 1
+            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds ({consecutive_errors}/{retries})...")
+            time.sleep(backoff)
+            if consecutive_errors >= retries:
+                logger.error("Too many consecutive network errors. Aborting feed scrape.")
+                break
+
+
 def process_recent_feed(
     loader,
     cutoff=None,
@@ -344,7 +360,7 @@ def process_recent_feed(
     Stops scraping once posts become older than cutoff.
     """
     if not cutoff:
-        cutoff = datetime.now(pytimezone.utc) - timedelta(days=CUTOFF_DAYS)
+        cutoff = timezone.now() - timedelta(days=CUTOFF_DAYS)
 
     events_added = 0
     posts_processed = 0
@@ -355,9 +371,9 @@ def process_recent_feed(
     seen_shortcodes = get_seen_shortcodes()
 
     try:
-        for post in loader.get_feed_posts():
+        for post in safe_feed_posts(loader):
             try:
-                post_time = post.date_utc.replace(tzinfo=pytimezone.utc)
+                post_time = timezone.make_aware(post.date_utc) if timezone.is_naive(post.date_utc) else post.date_utc
                 if post.shortcode in seen_shortcodes or post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
@@ -383,7 +399,7 @@ def process_recent_feed(
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
                     source_image_url = upload_image_from_url(raw_image_url)
-                    logger.info(f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}")
+                    logger.debug(f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}")
                 else:
                     logger.warning(
                         f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
@@ -405,7 +421,7 @@ def process_recent_feed(
 
                 logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(events_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                today = datetime.now(pytimezone.utc).date()
+                today = timezone.now().date()
 
                 # Process each event returned by the AI
                 for event_data in events_data:
@@ -455,6 +471,7 @@ def process_recent_feed(
                     logger.info(f"Reached max post limit of {max_posts}, stopping")
                     break
 
+                seen_shortcodes.add(post.shortcode)
                 time.sleep(random.uniform(30, 60))
 
             except Exception as e:
@@ -474,7 +491,7 @@ def process_recent_feed(
         logger.error(f"Feed processing aborted due to error: {e!s}")
         logger.error(f"Traceback: {traceback.format_exc()}")
 
-    logger.info(
+    logger.debug(
         "Feed processing completed. reason=%s, posts_processed=%d, events_added=%d",
         termination_reason,
         posts_processed,
@@ -575,6 +592,7 @@ if __name__ == "__main__":
     test_zyte_proxy("CA")
     logger.info("Attemping to load Instagram session...")
     L = session()
+    L.context.request_timeout = 120
     if L:
         logger.info("Session created successfully!")
         process_recent_feed(L)
