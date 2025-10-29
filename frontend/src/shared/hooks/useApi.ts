@@ -2,11 +2,11 @@
 import { useMemo } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 
-import BaseAPIClient from '../api/BaseAPIClient';
-import EventsAPIClient from '../api/EventsAPIClient';
-import NewsletterAPIClient from '../api/NewsletterAPIClient';
-import ClubsAPIClient from '../api/ClubsAPIClient';
-import AdminAPIClient from '../api/AdminAPIClient';
+import BaseAPIClient from '@/shared/api/BaseAPIClient';
+import EventsAPIClient from '@/shared/api/EventsAPIClient';
+import NewsletterAPIClient from '@/shared/api/NewsletterAPIClient';
+import ClubsAPIClient from '@/shared/api/ClubsAPIClient';
+import AdminAPIClient from '@/shared/api/AdminAPIClient';
 
 export const useApi = () => {
   const { getToken } = useAuth();

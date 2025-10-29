@@ -20,7 +20,7 @@ import { Event } from "@/features/events/types/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 
 const fetchEvent = async (eventId: string): Promise<Event> => {
-  const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+  const response = await fetch(`${API_BASE_URL}/events/${eventId}`);
   if (!response.ok) {
     throw new Error("Event not found");
   }

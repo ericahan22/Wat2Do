@@ -401,7 +401,6 @@ Return ONLY a JSON array of arrays, where each inner array has exactly 3 element
 Example format:
 [
   ["Smileys", "Grinning%20Face", "networking"],
-  ["Food%20and%20Drink", "Pizza", "free food"],
   ["Objects", "Graduation%20Cap", "career fair"],
   ["Objects", "Musical%20Note", "live music"],
   ["Objects", "Books", "workshop"]

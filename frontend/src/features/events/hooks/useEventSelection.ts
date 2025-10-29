@@ -40,7 +40,7 @@ export function useEventSelection(view: "grid" | "calendar") {
 
   const exportToCalendar = async () => {
     const eventIds = Array.from(selectedEvents).join(",");
-    const exportUrl = `${API_BASE_URL}/api/events/export.ics?ids=${eventIds}`;
+    const exportUrl = `${API_BASE_URL}/events/export.ics?ids=${eventIds}`;
 
     const link = document.createElement("a");
     link.href = exportUrl;
@@ -56,7 +56,7 @@ export function useEventSelection(view: "grid" | "calendar") {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/events/google-calendar-urls/?ids=${eventIds}`
+        `${API_BASE_URL}/events/google-calendar-urls/?ids=${eventIds}`
       );
 
       if (!response.ok) {

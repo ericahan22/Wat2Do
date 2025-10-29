@@ -47,7 +47,7 @@ export function AdminLogin({ onLogin }: AdminLoginProps) {
     setError(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/token/`, {
+      const response = await fetch(`${API_BASE_URL}/auth/token/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
