@@ -42,6 +42,17 @@ function Navbar() {
               </Button>
               <Button
                 variant="link"
+                onMouseDown={() => navigate("/submit")}
+                className={`text-sm font-medium ${
+                  isActive("/submit")
+                    ? "text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                Submit
+              </Button>
+              <Button
+                variant="link"
                 onMouseDown={() => navigate("/clubs")}
                 className={`text-sm font-medium ${
                   isActive("/clubs")
@@ -151,6 +162,13 @@ function Navbar() {
                 onMouseDown={() => navigate("/events")}
               >
                 Events
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                onMouseDown={() => navigate("/submit")}
+              >
+                Submit
               </Button>
               <Button
                 variant="ghost"

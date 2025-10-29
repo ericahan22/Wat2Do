@@ -13,6 +13,7 @@ import { CheckCircle, Calendar, Link, Upload, Image as ImageIcon } from 'lucide-
 export function SubmitEventPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { submitEvent, isLoading } = useEventSubmission();
 
   const {
@@ -37,19 +38,23 @@ export function SubmitEventPage() {
 
   const onSubmit = async (data: SubmissionFormData) => {
     try {
+      setErrorMsg(null);
       submitEvent(data, {
         onSuccess: () => {
           setSuccess(true);
+          setErrorMsg(null);
           reset();
           setPreview(null);
           setTimeout(() => setSuccess(false), 5000);
         },
         onError: (error) => {
-          console.error('Submission error:', error);
+          const msg = error instanceof Error && error.message ? error.message : 'We could not process this submission. Please ensure it clearly describes an event with a specific start time and is appropriate.';
+          setErrorMsg(msg);
         }
       });
     } catch (error) {
-      console.error('Submission error:', error);
+      const msg = error instanceof Error && error.message ? error.message : 'Submission failed. Please try again.';
+      setErrorMsg(msg);
     }
   };
 
@@ -76,6 +81,11 @@ export function SubmitEventPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {errorMsg && (
+              <div className="mb-6 rounded-md border border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200 p-4 text-sm">
+                {errorMsg}
+              </div>
+            )}
             {success ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">

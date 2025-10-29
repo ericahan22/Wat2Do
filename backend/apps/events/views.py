@@ -449,7 +449,7 @@ def rss_feed(request):
 
 
 @api_view(["POST"])
-@permission_classes([ClerkAuthenticated])
+@permission_classes([AllowAny])
 @ratelimit(key="ip", rate="5/hr", block=True)
 def submit_event(request):
     """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
@@ -487,13 +487,37 @@ def submit_event(request):
             event_data = {"source_url": source_url, "source_image_url": screenshot_url}
 
         # Create Event immediately and link submission
-        event = Events.objects.create(**{k: v for k, v in event_data.items() if k in {f.name for f in Events._meta.get_fields()}})
+        allowed_fields = {f.name for f in Events._meta.get_fields()}
+        cleaned = {
+            k: v
+            for k, v in (event_data or {}).items()
+            if k in allowed_fields
+            and not (isinstance(v, str) and v.strip() in {"", "\"\"", "''", "“”"})
+        }
+
+        # Basic guard: require at least a title and a start datetime to consider it an event
+        if not cleaned.get("title") or not cleaned.get("dtstart"):
+            return Response(
+                {"error": "Submission does not appear to be an event."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        event = Events.objects.create(**cleaned)
+
+        # Attempt to capture submitting user if available (optional for anonymous)
+        clerk_user_id = None
+        try:
+            clerk_user_id = (
+                getattr(request, "clerk_user", None) or {}
+            ).get("id")
+        except Exception:
+            clerk_user_id = None
 
         submission = EventSubmission.objects.create(
             screenshot_url=screenshot_url,
             source_url=source_url,
             status="pending",
-            submitted_by=request.clerk_user.get('id'),
+            submitted_by=clerk_user_id,
             created_event=event,
             extracted_data=event_data,
         )

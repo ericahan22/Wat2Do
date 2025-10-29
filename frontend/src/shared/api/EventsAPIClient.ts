@@ -102,7 +102,18 @@ class EventsAPIClient {
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let message = `Submission failed (status ${response.status})`;
+      try {
+        const errBody = await response.json();
+        if (typeof errBody?.error === 'string' && errBody.error.trim()) {
+          message = errBody.error;
+        } else if (typeof errBody?.message === 'string' && errBody.message.trim()) {
+          message = errBody.message;
+        }
+      } catch (_) {
+        // ignore JSON parse errors
+      }
+      throw new Error(message);
     }
     
     return response.json();

@@ -122,6 +122,11 @@ class OpenAIService:
     
     Caption: {caption_text}
     
+    STRICT CONTENT POLICY:
+    - If the content is NOT actually trying to announce or describe a real-world event (e.g., a meme, personal photo dump, random advertisement, generic brand post with no time/place), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
+    - If the content is inappropriate (nudity, explicit sexual content, or graphic violence), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
+    - If there is no specific start time, DO NOT extract an event.
+    
     Do NOT extract events that only mention a date without a specific start time. Only include an event if a specific start time is mentioned in the caption or image.
     
     Return ONE JSON object (not an array). The object must have ALL of the following fields:
@@ -158,6 +163,7 @@ class OpenAIService:
     - For all_day: true only if no specific time is mentioned.
     - For tz mappings, default to "America/Toronto" for {school}.
     - For rrule: only when recurring is mentioned; otherwise empty string.
+    - If the content violates the STRICT CONTENT POLICY or is not an event, set title to "" and leave the rest of the fields empty as per defaults below. Do not fabricate an event.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON object text, no extra commentary.
         {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
