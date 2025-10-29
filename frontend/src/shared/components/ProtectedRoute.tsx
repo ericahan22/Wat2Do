@@ -1,5 +1,5 @@
 // src/components/ProtectedRoute.jsx
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
@@ -9,14 +9,20 @@ interface ProtectedRouteProps {
 
 function ProtectedRoute({ children, redirectTo = '/auth/sign-in' }: ProtectedRouteProps) {
   const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
 
   // Wait until Clerk has loaded its state
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
 
-  // If the user is signed in, render the children
+  // If the user is signed in and is an admin, redirect to /admin
   if (isSignedIn) {
+    const isAdmin = user?.publicMetadata?.role === 'admin';
+    if (isAdmin) {
+      return <Navigate to="/admin" replace />;
+    }
+    // Otherwise render the children
     return <>{children}</>;
   }
 

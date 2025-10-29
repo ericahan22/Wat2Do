@@ -76,7 +76,7 @@ AUTHENTICATION_BACKENDS = [
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
+    CORS_ALLOWED_ORIGINS = ALLOWED_PARTIES
 CORS_ALLOW_CREDENTIALS = True
 
 # CSRF settings for development
@@ -86,7 +86,7 @@ if DEBUG:
         "http://localhost:8000",
     ]
 else:
-    CSRF_TRUSTED_ORIGINS = ALLOWED_HOSTS
+    CSRF_TRUSTED_ORIGINS = ALLOWED_PARTIES
     
 # CSRF settings for SPA frontend
 CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1" 
