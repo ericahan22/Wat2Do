@@ -59,6 +59,7 @@ jobs:
       ZYTE_PROXY: ${{ secrets.ZYTE_PROXY }}
       EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
       
     steps:
       - uses: actions/checkout@v4
