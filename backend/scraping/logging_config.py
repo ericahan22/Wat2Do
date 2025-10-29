@@ -6,21 +6,24 @@ LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "scraping.log"
 
-root_logger = logging.getLogger()
-if not root_logger.handlers:
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("botocore").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("openai").setLevel(logging.WARNING)
 
-    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    handlers = [
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(LOG_FILE, encoding="utf-8"),
-    ]
-    logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
-else:
-    root_logger.setLevel(root_logger.level or logging.DEBUG)
+def setup_logging():
+    root_logger = logging.getLogger()
+    if not getattr(root_logger, "_wat2do_configured", False):
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("requests").setLevel(logging.WARNING)
+        logging.getLogger("botocore").setLevel(logging.WARNING)
+        logging.getLogger("httpcore").setLevel(logging.WARNING)
+        logging.getLogger("openai").setLevel(logging.WARNING)
 
+        fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        handlers = [
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        ]
+        logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
+        root_logger._wat2do_configured = True
+
+
+setup_logging()
 logger = logging.getLogger(__name__)

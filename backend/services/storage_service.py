@@ -57,9 +57,10 @@ class StorageService:
         """Download image from URL"""
         try:
             headers = {
-                "User-Agent": random.choice(USER_AGENTS)
+                "User-Agent": random.choice(USER_AGENTS),
+                "Referer": "https://www.instagram.com/",
             }
-            response = requests.get(image_url, headers=headers, timeout=30)
+            response = requests.get(image_url, headers=headers, timeout=60)
             response.raise_for_status()
 
             return response.content

@@ -110,7 +110,7 @@ class EventsAPIClient {
         } else if (typeof errBody?.message === 'string' && errBody.message.trim()) {
           message = errBody.message;
         }
-      } catch (_) {
+      } catch {
         // ignore JSON parse errors
       }
       throw new Error(message);

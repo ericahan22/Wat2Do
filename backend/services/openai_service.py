@@ -26,7 +26,7 @@ class OpenAIService:
         load_dotenv()
         self.client = None
         self._initialize_client()
-    
+
     def _initialize_client(self):
         """Initialize OpenAI client only when needed."""
         try:
@@ -45,7 +45,7 @@ class OpenAIService:
         """
         if not text:
             return None
-        
+
         if not self.client:
             print("Warning: OpenAI client not available. Returning empty embedding.")
             return [0.0] * 1536
@@ -123,11 +123,9 @@ class OpenAIService:
     Caption: {caption_text}
     
     STRICT CONTENT POLICY:
-    - If the content is NOT actually trying to announce or describe a real-world event (e.g., a meme, personal photo dump, random advertisement, generic brand post with no time/place), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
+    - If the content is NOT announcing or describing a real-world event (e.g., a meme, personal photo dump, generic brand post with no time/place), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
     - If the content is inappropriate (nudity, explicit sexual content, or graphic violence), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
-    - If there is no specific start time, DO NOT extract an event.
-    
-    Do NOT extract events that only mention a date without a specific start time. Only include an event if a specific start time is mentioned in the caption or image.
+    - DO NOT extract events that only mention a date or day (e.g., "this Sunday", "November 2") WITHOUT a specific start time. ONLY include events if a specific start time (e.g., "at 2pm", "from 10am-4pm") is mentioned in the caption or image.
     
     Return ONE JSON object (not an array). The object must have ALL of the following fields:
     {{
@@ -158,16 +156,26 @@ class OpenAIService:
     - PRIORITIZE CAPTION TEXT for extracting fields. Only prefer image text for the title when the caption lacks a clear title.
     - Title-case event titles.
     - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
+    - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
     - Convert local times to UTC using tz for dtstart_utc/dtend_utc when available.
-    - Set price null if free/not mentioned, food "" if not mentioned, registration true only if explicit.
     - For all_day: true only if no specific time is mentioned.
+    - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
+    - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "DC Library"). Otherwise, attempt geocoding using the school context. Use null if location is too vague or cannot be geocoded.
     - For tz mappings, default to "America/Toronto" for {school}.
+    - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
+        * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price.
+        * If only member prices are given and non-member price is absent, use the listed member price.
+        * If multiple ticket tiers are listed (e.g., "early bird" and "regular"), use the lowest applicable price (e.g., early bird price).
+        * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
+    - For food: Only set this field if the post says food or drinks will be served, provided, or available for attendees. If specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize ONLY the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks, output an empty string "".
+    - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
     - For rrule: only when recurring is mentioned; otherwise empty string.
+    - For description: start with the caption text word-for-word, then append any additional insights about the event extracted from the image that are not already mentioned in the caption.
     - If the content violates the STRICT CONTENT POLICY or is not an event, set title to "" and leave the rest of the fields empty as per defaults below. Do not fabricate an event.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON object text, no extra commentary.
         {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
-        """
+    """
 
         try:
             logger.debug(

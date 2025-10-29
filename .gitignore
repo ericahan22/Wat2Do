@@ -36,6 +36,7 @@ backend/db.sqlite3
 frontend/dist/
 backend/staticfiles/
 backend/config/static/
+frontend/tsconfig.tsbuildinfo
 
 # OS-specific files
 .DS_Store
