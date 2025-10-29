@@ -334,19 +334,34 @@ def get_seen_shortcodes():
 
 
 def safe_feed_posts(loader, retries=3, backoff=60):
-    consecutive_errors = 0
-    while True:
+    """
+    Yield posts from loader.get_feed_posts(), retrying on network errors.
+    On error, re-instantiate the session and skip already-yielded posts.
+    """
+    seen_shortcodes = set()
+    attempts = 0
+    while attempts < retries:
         try:
             for post in loader.get_feed_posts():
+                if hasattr(post, "shortcode"):
+                    if post.shortcode in seen_shortcodes:
+                        continue
+                    seen_shortcodes.add(post.shortcode)
                 yield post
-            break
+            break  # Finished all posts
         except (ReadTimeout, ConnectionError) as e:
-            consecutive_errors += 1
-            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds ({consecutive_errors}/{retries})...")
+            attempts += 1
+            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})...")
             time.sleep(backoff)
-            if consecutive_errors >= retries:
-                logger.error("Too many consecutive network errors. Aborting feed scrape.")
+            try:
+                new_loader = session()
+                loader.__dict__.update(new_loader.__dict__)
+                logger.info("Session re-instantiated successfully. Continuing feed scrape.")
+            except Exception as session_e:
+                logger.error(f"Failed to re-instantiate session: {session_e}")
                 break
+    if attempts >= retries:
+        logger.error("Too many consecutive network errors. Aborting feed scrape.")
 
 
 def process_recent_feed(
@@ -370,6 +385,14 @@ def process_recent_feed(
 
     seen_shortcodes = get_seen_shortcodes()
 
+    def check_post_limit():
+        nonlocal termination_reason
+        if posts_processed >= max_posts:
+            termination_reason = f"reached_max_posts={max_posts}"
+            logger.info(f"Reached max post limit of {max_posts}, stopping")
+            return True
+        return False
+
     try:
         for post in safe_feed_posts(loader):
             try:
@@ -390,7 +413,6 @@ def process_recent_feed(
                     continue
 
                 consec_old_posts = 0
-                posts_processed += 1
                 logger.info("-" * 100)
                 logger.info(f"[{post.shortcode}] [{post.owner_username}] Processing post")
 
@@ -406,69 +428,67 @@ def process_recent_feed(
                     )
                     source_image_url = None
 
-                events_data = extract_events_from_caption(
+                posts_processed += 1
+                event_data = extract_events_from_caption(
                     post.caption, source_image_url, post.date_utc
                 )
-                if not events_data or len(events_data) == 0:
+                if not event_data:
                     logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
+                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no event for post"
                     )
-                    if posts_processed >= max_posts:
-                        termination_reason = f"reached_max_posts={max_posts}"
-                        logger.info(f"Reached max post limit of {max_posts}, stopping")
+                    if check_post_limit():
                         break
                     continue
 
-                logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(events_data, ensure_ascii=False, separators=(',', ':'))}")
+                logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
                 today = timezone.now().date()
 
-                # Process each event returned by the AI
-                for event_data in events_data:
-                    # If missing fields
-                    if not (
-                        event_data.get("title")
-                        and event_data.get("dtstart")
-                        and event_data.get("location")
-                    ):
-                        missing_fields = [
-                            key
-                            for key in ["title", "dtstart", "location"]
-                            if not event_data.get(key)
-                        ]
-                        logger.warning(
-                            f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
-                        )
-                        embedding = generate_event_embedding(event_data)
-                        append_event_to_csv(
-                            event_data,
-                            post.owner_username,
-                            source_url,
-                            added_to_db="missing_fields",
-                            embedding=embedding,
-                        )
-                        continue
+                if not (
+                    event_data.get("title")
+                    and event_data.get("dtstart")
+                    and event_data.get("location")
+                ):
+                    missing_fields = [
+                        key
+                        for key in ["title", "dtstart", "location"]
+                        if not event_data.get(key)
+                    ]
+                    logger.warning(
+                        f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
+                    )
+                    embedding = generate_event_embedding(event_data)
+                    append_event_to_csv(
+                        event_data,
+                        post.owner_username,
+                        source_url,
+                        added_to_db="missing_fields",
+                        embedding=embedding,
+                    )
+                    if check_post_limit():
+                        break
+                    continue
 
-                    date = datetime.fromisoformat(event_data.get("dtstart")).date()
-                    if date < today:
-                        logger.info(
-                            f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {date}"
-                        )
-                        continue
+                date = datetime.fromisoformat(event_data.get("dtstart")).date()
+                if date < today:
+                    logger.info(
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {date}"
+                    )
+                    if check_post_limit():
+                        break
+                    continue
 
-                    if insert_event_to_db(event_data, post.owner_username, source_url):
-                        events_added += 1
-                        logger.info(
-                            f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
-                        )
-                    else:
-                        logger.error(
-                            f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
-                        )
+                if insert_event_to_db(event_data, post.owner_username, source_url):
+                    events_added += 1
+                    logger.info(
+                        f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
+                    )
+                else:
+                    logger.error(
+                        f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
+                    )
 
-                if posts_processed >= max_posts:
-                    termination_reason = f"reached_max_posts={max_posts}"
-                    logger.info(f"Reached max post limit of {max_posts}, stopping")
+                if check_post_limit():
                     break
 
                 seen_shortcodes.add(post.shortcode)
