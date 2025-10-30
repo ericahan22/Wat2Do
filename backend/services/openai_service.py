@@ -115,18 +115,21 @@ class OpenAIService:
 
         prompt = f"""
     Analyze the following Instagram caption and extract event information if it's an event post.
-    
+
     School context: This post is from {school}. Use this to guide location and timezone decisions.
     Current context: Today is {current_day_of_week}, {current_date}
     Post was created on: {context_day}, {context_date} at {context_time}
-    
+
     Caption: {caption_text}
-    
+
     STRICT CONTENT POLICY:
-    - If the content is NOT announcing or describing a real-world event (e.g., a meme, personal photo dump, generic brand post with no time/place), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
-    - If the content is inappropriate (nudity, explicit sexual content, or graphic violence), DO NOT extract an event. Return an object with empty strings/nulls as specified below.
-    - DO NOT extract events that only mention a date or day (e.g., "this Sunday", "November 2") WITHOUT a specific start time. ONLY include events if a specific start time (e.g., "at 2pm", "from 10am-4pm") is mentioned in the caption or image.
-    
+    - ONLY extract an event if the post is clearly announcing or describing a real-world event with a specific date AND a specific start time (e.g., "at 2pm", "from 10am-4pm").
+    - DO NOT extract an event if:
+        * The post is a meme, personal photo dump, or generic post with no time/place.
+        * The post is inappropriate (nudity, explicit sexual content, or graphic violence).
+        * There is no explicit mention of BOTH a date (e.g., "October 31", "Friday", "tomorrow") AND a time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening") in the caption or image.
+        * The post only introduces people or some topic, UNLESS there is a clear call to attend or participate in an actual event (such as a meeting, workshop, performance, or competition).
+
     Return ONE JSON object (not an array). The object must have ALL of the following fields:
     {{
         "title": string,
@@ -149,7 +152,7 @@ class OpenAIService:
         "source_image_url": string,
         "description": string
     }}
-    
+
     IMPORTANT RULES:
     - Return EXACTLY ONE JSON object. NEVER return an array.
     - If multiple dates are listed (e.g., "Friday and Saturday" or explicit multiple dates), keep the primary occurrence in dtstart/dtend and put the additional occurrence dates (dates only) into rdate as an array of ISO dates.
@@ -339,7 +342,7 @@ class OpenAIService:
 
         # Prepare event summaries for the prompt
         event_summaries = []
-        for event in events_data[:20]: 
+        for event in events_data[:20]:
             title = event.get("title")
             summary = f"- {title}"
             event_summaries.append(summary)
