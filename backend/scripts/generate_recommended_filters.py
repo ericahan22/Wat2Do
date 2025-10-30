@@ -34,16 +34,18 @@ logger = logging.getLogger(__name__)
 
 
 def fetch_upcoming_events():
-    """Fetch all events with dates >= today"""
+    """Fetch up to 10 upcoming events (by start date) for filter generation"""
     today = date.today()
     logger.info(f"Fetching upcoming events from {today}...")
 
-    events = Events.objects.filter(date__gte=today).values(
-        "name", "location", "date", "food", "club_type", "description"
+    events_qs = (
+        Events.objects.filter(dtstart__date__gte=today)
+        .order_by("dtstart_utc")
+        .values("title")[:10]
     )
 
-    events_list = list(events)
-    logger.info(f"Found {len(events_list)} upcoming events")
+    events_list = list(events_qs)
+    logger.info(f"Found {len(events_list)} upcoming events (capped at 10)")
     return events_list
 
 
