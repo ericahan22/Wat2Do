@@ -118,9 +118,11 @@ def append_event_to_csv(
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
 
-    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=None)
-    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=None) \
-        if event_data.get("dtend") else None
+    dtstart_raw = event_data.get("dtstart")
+    dtend_raw = event_data.get("dtend")
+    dtstart = dateutil_parser.parse(dtstart_raw).replace(tzinfo=None) if dtstart_raw else ""
+    dtend = dateutil_parser.parse(dtend_raw).replace(tzinfo=None) if dtend_raw else ""
+
     dtstart_utc = event_data.get("dtstart_utc", "")
     dtend_utc = event_data.get("dtend_utc", "")
     duration = event_data.get("duration", "")
