@@ -123,14 +123,17 @@ class OpenAIService:
     Caption: {caption_text}
 
     STRICT CONTENT POLICY:
-    - ONLY extract an event if the post is clearly announcing or describing a real-world event with a specific date AND a specific start time (e.g., "at 2pm", "from 10am-4pm").
+    - ONLY extract an event if the post is clearly announcing or describing a real-world event with BOTH:
+        * a specific date (e.g., "October 31", "Friday", "tomorrow")
+        * AND a specific start time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening").
+    - DO NOT extract an event if there is no explicit mention of a start time. Do NOT default to midnight or any other time if none is given.
     - DO NOT extract an event if:
         * The post is a meme, personal photo dump, or generic post with no time/place.
         * The post is inappropriate (nudity, explicit sexual content, or graphic violence).
         * There is no explicit mention of BOTH a date (e.g., "October 31", "Friday", "tomorrow") AND a time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening") in the caption or image.
         * The post only introduces people or some topic, UNLESS there is a clear call to attend or participate in an actual event (such as a meeting, workshop, performance, or competition).
 
-    Return ONE JSON object (not an array). The object must have ALL of the following fields:
+    If you determine that there is NO event in the post, return the JSON value: null (not an object, not an array, just the literal null). Otherwise, return ONE JSON object (not an array) with ALL of the following fields:
     {{
         "title": string,
         "dtstart": string,            // local start in "YYYY-MM-DD HH:MM:SS+HH"
@@ -161,7 +164,7 @@ class OpenAIService:
     - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
     - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
     - Convert local times to UTC using tz for dtstart_utc/dtend_utc when available.
-    - For all_day: true only if no specific time is mentioned.
+    - For all_day: ONLY set to true if the post **explicitly states** it is an all-day event (e.g., "all day", "full day").
     - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
     - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "DC Library"). Otherwise, attempt geocoding using the school context. Use null if location is too vague or cannot be geocoded.
     - For tz mappings, default to "America/Toronto" for {school}.

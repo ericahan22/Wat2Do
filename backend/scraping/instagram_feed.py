@@ -17,6 +17,7 @@ import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from dateutil import parser as dateutil_parser
+from difflib import SequenceMatcher
 
 import requests
 from requests.exceptions import ReadTimeout, ConnectionError
@@ -89,7 +90,7 @@ def normalize_string(s):
 
 
 def is_duplicate_event(event_data):
-    """Check for duplicate events (same name, date, location, time)"""
+    """Check for duplicate events (similar name, date, location)"""
     title = normalize_string(event_data.get("title"))
     location = normalize_string(event_data.get("location"))
     date = datetime.fromisoformat(event_data.get("dtstart")).date()
@@ -99,7 +100,10 @@ def is_duplicate_event(event_data):
         for c in candidates:
             c_title = normalize_string(getattr(c, "title", ""))
             c_loc = normalize_string(getattr(c, "location", ""))
-            if c_title == title and c_loc == location:
+            # Fuzzy match: consider as duplicate if similarity > 0.85
+            title_sim = SequenceMatcher(None, c_title, title).ratio()
+            loc_sim = SequenceMatcher(None, c_loc, location).ratio()
+            if title_sim > 0.85 and loc_sim > 0.85:
                 return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
@@ -206,12 +210,12 @@ def append_event_to_csv(
 
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
-    title = event_data.get("title")
+    title = event_data.get("title", "")
     dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=None)
     dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=None) \
         if event_data.get("dtend") else None
     source_image_url = event_data.get("source_image_url") or ""
-    description = event_data.get("description") or ""
+    description = event_data.get("description", "") or ""
     location = event_data.get("location")
     price = event_data.get("price", None)
     food = event_data.get("food", None)
