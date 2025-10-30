@@ -339,7 +339,7 @@ class OpenAIService:
 
         # Prepare event summaries for the prompt
         event_summaries = []
-        for event in events_data[:10]: 
+        for event in events_data[:20]: 
             title = event.get("title")
             summary = f"- {title}"
             event_summaries.append(summary)

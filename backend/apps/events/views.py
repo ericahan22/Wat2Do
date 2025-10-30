@@ -1,6 +1,6 @@
 import uuid
 
-from clerk_django.permissions.clerk import ClerkAuthenticated
+from apps.core.auth import jwt_required
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
@@ -442,8 +442,8 @@ def rss_feed(request):
 
 
 @api_view(["POST"])
-@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="5/hr", block=True)
+@jwt_required
 def submit_event(request):
     """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
     try:
@@ -509,7 +509,7 @@ def submit_event(request):
         clerk_user_id = None
         try:
             clerk_user_id = (
-                getattr(request, "clerk_user", None) or {}
+                getattr(request, "user", None) or {}
             ).get("id")
         except Exception:
             clerk_user_id = None
@@ -612,7 +612,7 @@ def review_submission(request, submission_id):
 
             submission.status = "approved"
             submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.clerk_user.get('email_addresses', [{}])[0].get('email_address')
+            submission.reviewed_by = request.user.get('email_addresses', [{}])[0].get('email_address')
             submission.save()
 
             return Response(
@@ -622,7 +622,7 @@ def review_submission(request, submission_id):
         elif action == "reject":
             submission.status = "rejected"
             submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.clerk_user.get('email_addresses', [{}])[0].get('email_address')
+            submission.reviewed_by = request.user.get('email_addresses', [{}])[0].get('email_address')
             submission.admin_notes = request.data.get("notes", "")
             submission.save()
 
@@ -652,12 +652,12 @@ def review_submission(request, submission_id):
 
 
 @api_view(["GET"])
-@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
 def get_user_submissions(request):
     """Get submissions for the authenticated user"""
     try:
-        submissions = EventSubmission.objects.filter(submitted_by=request.clerk_user.get('id')).order_by("-submitted_at")
+        submissions = EventSubmission.objects.filter(submitted_by=request.user.get('id')).order_by("-submitted_at")
 
         data = [
             {
@@ -679,13 +679,13 @@ def get_user_submissions(request):
 
 
 @api_view(["DELETE"])
-@permission_classes([ClerkAuthenticated])
 @ratelimit(key="ip", rate="30/hr", block=True)
+@jwt_required
 def delete_submission(request, submission_id): 
     try:
         submission = get_object_or_404(EventSubmission, id=submission_id)
 
-        current_user_id = (getattr(request, "clerk_user", None) or {}).get("id")
+        current_user_id = (getattr(request, "user", None) or {}).get("id")
         if not current_user_id or submission.submitted_by != current_user_id:
             return Response({"error": "Not authorized to delete this submission"}, status=status.HTTP_403_FORBIDDEN)
 

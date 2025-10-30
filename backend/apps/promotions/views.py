@@ -30,7 +30,7 @@ def promote_event(request, event_id):
 
     priority = request.data.get("priority", 1)
     expires_at = request.data.get("expires_at")
-    promoted_by = request.data.get("promoted_by", request.clerk_user.username)
+    promoted_by = request.data.get("promoted_by", request.user.username)
     promotion_type = request.data.get("promotion_type", "standard")
     notes = request.data.get("notes", "")
 

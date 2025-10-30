@@ -41,7 +41,7 @@ def fetch_upcoming_events():
     events_qs = (
         Events.objects.filter(dtstart__date__gte=today)
         .order_by("dtstart_utc")
-        .values("title")[:10]
+        .values("title")[:20]
     )
 
     events_list = list(events_qs)

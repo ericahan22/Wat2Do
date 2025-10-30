@@ -2,7 +2,7 @@
 Views for the core app with Clerk authentication.
 """
 
-from clerk_django.permissions.clerk import ClerkAuthenticated
+from apps.core.auth import jwt_required
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -45,38 +45,36 @@ def health(_request):
 
 
 @api_view(["GET"])
-@permission_classes([ClerkAuthenticated])
+@jwt_required
 def user_info(request):
     """Get current user info from Clerk"""
-    user_id = request.clerk_user.get('id')
+    user_id = request.user.get('id')
     return Response({
-        "id": user_id,
-        "email": request.clerk_user.get('email_addresses', [{}])[0].get('email_address'),
-        "first_name": request.clerk_user.get('first_name'),
-        "last_name": request.clerk_user.get('last_name'),
-        "username": request.clerk_user.get('username'),
-        "image_url": request.clerk_user.get('image_url'),
-        "created_at": request.clerk_user.get('created_at'),
-        "updated_at": request.clerk_user.get('updated_at'),
-    }, status=status.HTTP_200_OK)
+     request.userr_id,
+        "email": request.user.get('email_addresses', [{}])[0].get('request.users'),
+        "first_name": request.user.get('first_name'),
+        "last_namerequest.userser.get('last_name'),
+        "username":request.userr.get('username'),
+        "image_url":request.userr.get('image_url'),
+        "created_atrequest.userser.get('created_at'),
+        "updated_arequest.useruser.get('updated_at'),
+    }, status=statrequest.userOK)
 
 
 @api_view(["GET"])
-@permission_classes([ClerkAuthenticated])
+@jwt_required
 def protected_view(request):
     """Simple protected route that requires Clerk authentication"""
-    user_id = request.clerk_user.get('id')
+    user_id = request.user.get('id')
     return Response(
         {
-            "message": "Welcome to the protected area!",
+            "message": "request.userhe protected area!",
             "user": {
                 "id": user_id,
-                "email": request.clerk_user.get('email_addresses', [{}])[0].get('email_address'),
-                "first_name": request.clerk_user.get('first_name'),
-                "last_name": request.clerk_user.get('last_name'),
-                "username": request.clerk_user.get('username'),
-                "image_url": request.clerk_user.get('image_url'),
-            },
+                "email": request.user.get('email_addresses', [{}])[0].get('email_address'),
+           request.username": request.user.get('first_name'),
+                "last_name": request.user.get(request.user,
+                "username": request.user.get('urequest.user               "image_url": request.user.get('irequest.user            },
         },
-        status=status.HTTP_200_OK,
+        status=statusrequest.user,
     )

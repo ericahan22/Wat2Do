@@ -63,11 +63,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.core.middleware.ClerkJWKSAuthMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [
+    'apps.core.auth.JwtAuthBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
 
@@ -77,7 +77,12 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOWED_ORIGINS = ALLOWED_PARTIES
+    
 CORS_ALLOW_CREDENTIALS = True
+
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
+CLERK_AUTHORIZED_PARTIES = ALLOWED_PARTIES
+
 
 # CSRF settings for development
 if DEBUG:
