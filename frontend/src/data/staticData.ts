@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-10-30T04:05:06.067447+00:00";
+export const LAST_UPDATED = "2025-10-30T17:35:18.463634+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Smileys", "Ghost", "Halloween"],
-  ["Activity", "Jack%20O%20Lantern", "pumpkin painting"],
+  ["Smileys", "Skull", "spooky"],
+  ["Smileys", "Grinning%20Face", "fun"],
   ["People", "Woman%20Vampire", "costume"],
-  ["Activity", "Party%20Popper", "event"],
-  ["Smileys", "Alien%20Monster", "spooky"],
+  ["People", "Man%20Vampire", "costume"],
+  ["Activity", "Jack%20O%20Lantern", "pumpkin"],
+  ["Activity", "Sparkles", "art"],
   ["Food%20and%20Drink", "Bubble%20Tea", "boba"],
-  ["Activity", "Confetti%20Ball", "games night"],
+  ["Smileys", "Face%20Screaming%20In%20Fear", "scary"],
+  ["Objects", "Coffin", "mystery"],
+  ["Objects", "Graduation%20Cap", "workshop"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "community"],
+  ["Smileys", "Alien", "alien"],
   ["Smileys", "Clown%20Face", "fun"],
-  ["Objects", "Coffin", "scary"],
-  ["Smileys", "Face%20Screaming%20In%20Fear", "fear"],
-  ["People", "Busts%20In%20Silhouette", "community"],
-  ["Activity", "Fireworks", "celebration"],
-  ["Smileys", "Face%20With%20Medical%20Mask", "therapy"],
-  ["Activity", "Trophy", "competition"],
-  ["Activity", "Video%20Game", "movie night"]
+  ["Smileys", "Face%20With%20Medical%20Mask", "health"]
 ];
