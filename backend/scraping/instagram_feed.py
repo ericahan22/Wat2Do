@@ -214,7 +214,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
     embedding = event_data.get("embedding") or ""
-    date = datetime.fromisoformat(dtstart).date()
+    date = dtstart.date()
     dtstart_utc, dtend_utc, duration, all_day = tz_compute(dtstart, dtend)
     tz = event_data.get("tz", "")
     latitude = event_data.get("latitude", None)
