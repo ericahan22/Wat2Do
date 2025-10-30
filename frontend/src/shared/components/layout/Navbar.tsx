@@ -100,9 +100,10 @@ function Navbar() {
                 <Button
                   variant="default"
                   className="text-sm font-medium"
-                  onMouseDown={() => navigate("/submit")}
+                  onMouseDown={() => navigate(CLERK_ROUTES.SIGN_IN)}
                 >
-                  Submit Event
+                  <User className="h-4 w-4" />
+                  Sign in
                 </Button>
               )}
             </div>
@@ -189,10 +190,11 @@ function Navbar() {
                   variant="default"
                   className="w-full justify-center text-sm font-medium"
                   onMouseDown={() => {
-                    navigate("/submit");
+                    navigate(CLERK_ROUTES.SIGN_IN);
                   }}
                 >
-                  Submit Event
+                  <User className="h-4 w-4" />
+                  Sign in
                 </Button>
               )}
             </div>

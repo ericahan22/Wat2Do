@@ -339,14 +339,9 @@ class OpenAIService:
 
         # Prepare event summaries for the prompt
         event_summaries = []
-        for event in events_data[:200]:  # Limit to 200 events to avoid token limits
-            summary = (
-                f"- {event.get('title', 'Unnamed')} at {event.get('location', 'TBD')}"
-            )
-            if event.get("food"):
-                summary += f" (food: {event.get('food')})"
-            if event.get("club_type"):
-                summary += f" [type: {event.get('club_type')}]"
+        for event in events_data[:10]: 
+            title = event.get("title")
+            summary = f"- {title}"
             event_summaries.append(summary)
 
         # Get the categorized emoji list for the prompt
@@ -357,9 +352,9 @@ class OpenAIService:
             emoji_list_str += ", ".join(emojis) + "\n"
 
         prompt = f"""
-Analyze the following list of {len(event_summaries)} upcoming student events and generate 20-25 search filter keywords with matching emojis.
+Analyze the following list of {len(event_summaries)} upcoming student event titles and generate 20-25 search filter keywords with matching emojis.
 
-Events:
+Event titles:
 {chr(10).join(event_summaries)}
 
 Available emojis organized by category (select the most fitting one for each filter):
@@ -368,12 +363,10 @@ Available emojis organized by category (select the most fitting one for each fil
 IMPORTANT: You MUST use ONLY the emoji categories listed above (Smileys, People, Animals and Nature, Food and Drink, Activity, Travel and Places, Objects, Symbols, Flags). Do NOT use club types like "WUSA", "Student Society", or "Athletics" as categories - these are not emoji categories.
 
 Generate filter keywords that:
-1. Capture the most common themes in the events titles data above that are actually found as a string within the events data above. if you do something that's 2 words, it better be fully included in the event data above.
-2. Are SHORT (1-3 words max) and SPECIFIC
-3. Reflect actual themes in the event data above
-4. The list MUST start with ["Food%20and%20Drink", "Pizza", "free food"]
-5. The Filter string MUST exist in atleast 3 event titles above.
-6. Avoid having more than 3 food filters.
+1. Are derived ONLY from words and themes present in the event TITLES above. Ignore captions, descriptions, locations, and food mentions.
+2. Are SHORT (1-3 words max) and SPECIFIC.
+3. Reflect common themes that actually appear in multiple titles.
+4. The filter string MUST exist verbatim in at least 3 event titles above.
 
 For each filter, select the MOST FITTING emoji from the available list above.
 
