@@ -16,6 +16,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
+from dateutil import parser as dateutil_parser
 
 import requests
 from requests.exceptions import ReadTimeout, ConnectionError
@@ -203,8 +204,9 @@ def append_event_to_csv(
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
     title = event_data.get("title")
-    dtstart = event_data.get("dtstart")
-    dtend = event_data.get("dtend") or None
+    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=None)
+    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=None) \
+        if event_data.get("dtend") else None
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description") or ""
     location = event_data.get("location")
