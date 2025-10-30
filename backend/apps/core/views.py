@@ -50,15 +50,15 @@ def user_info(request):
     """Get current user info from Clerk"""
     user_id = request.user.get('id')
     return Response({
-     request.userr_id,
-        "email": request.user.get('email_addresses', [{}])[0].get('request.users'),
+        "id": user_id,
+        "email": request.user.get('email_addresses', [{}])[0].get('email_address'),
         "first_name": request.user.get('first_name'),
-        "last_namerequest.userser.get('last_name'),
-        "username":request.userr.get('username'),
-        "image_url":request.userr.get('image_url'),
-        "created_atrequest.userser.get('created_at'),
-        "updated_arequest.useruser.get('updated_at'),
-    }, status=statrequest.userOK)
+        "last_name": request.user.get('last_name'),
+        "username": request.user.get('username'),
+        "image_url": request.user.get('image_url'),
+        "created_at": request.user.get('created_at'),
+        "updated_at": request.user.get('updated_at'),
+    }, status=status.HTTP_200_OK)
 
 
 @api_view(["GET"])
@@ -68,13 +68,15 @@ def protected_view(request):
     user_id = request.user.get('id')
     return Response(
         {
-            "message": "request.userhe protected area!",
+            "message": "Welcome to the protected area!",
             "user": {
                 "id": user_id,
                 "email": request.user.get('email_addresses', [{}])[0].get('email_address'),
-           request.username": request.user.get('first_name'),
-                "last_name": request.user.get(request.user,
-                "username": request.user.get('urequest.user               "image_url": request.user.get('irequest.user            },
+                "first_name": request.user.get('first_name'),
+                "last_name": request.user.get('last_name'),
+                "username": request.user.get('username'),
+                "image_url": request.user.get('image_url'),
+            },
         },
-        status=statusrequest.user,
+        status=status.HTTP_200_OK,
     )

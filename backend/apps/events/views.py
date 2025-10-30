@@ -657,7 +657,13 @@ def review_submission(request, submission_id):
 def get_user_submissions(request):
     """Get submissions for the authenticated user"""
     try:
-        submissions = EventSubmission.objects.filter(submitted_by=request.user.get('id')).order_by("-submitted_at")
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        user_id_source = 'auth_payload'
+        if not user_id:
+            logger.warning("events.get_user_submissions: no user_id resolved; returning 401-like response context")
+        submissions = EventSubmission.objects.filter(submitted_by=user_id).order_by("-submitted_at")
+
+        count = submissions.count()
 
         data = [
             {
