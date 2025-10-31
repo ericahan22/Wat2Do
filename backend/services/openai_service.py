@@ -280,8 +280,8 @@ class OpenAIService:
                     event_data = event_data[0] if event_data else {}
 
                 if not isinstance(event_data, dict):
-                    logger.warning("Response is not an object, using default structure")
-                    event_data = {}
+                    logger.warning("Response is not an object, returning None (no event)")
+                    return None
 
                 # Ensure required fields are present
                 required_fields = [

@@ -211,9 +211,8 @@ def append_event_to_csv(
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
     title = event_data.get("title", "")
-    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=None)
-    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=None) \
-        if event_data.get("dtend") else None
+    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=timezone.utc) if event_data.get("dtstart") else None
+    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=timezone.utc) if event_data.get("dtend") else None
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description", "") or ""
     location = event_data.get("location")

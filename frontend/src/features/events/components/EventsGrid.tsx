@@ -210,7 +210,10 @@ const EventsGrid = memo(
               <OrganizationBadge event={event} isSelectMode={isSelectMode} />
             </div>
             <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
-              <CardTitle className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white">
+              <CardTitle
+                className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white"
+                title={event.title}
+              >
                 {event.title}
               </CardTitle>
             </CardHeader>
