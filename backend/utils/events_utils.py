@@ -1,3 +1,15 @@
+from dateutil import parser as dateutil_parser
+
+
+def clean_datetime(val):
+    if not val or not isinstance(val, str) or not val.strip():
+        return None
+    try:
+        return dateutil_parser.parse(val)
+    except Exception:
+        return None
+
+
 def determine_display_handle(event):
     """
     Determine a display handle for an event.

@@ -16,7 +16,6 @@ import time
 import traceback
 from datetime import datetime, timedelta, timezone as pytimezone
 from pathlib import Path
-from dateutil import parser as dateutil_parser
 from difflib import SequenceMatcher
 
 import requests
@@ -36,6 +35,7 @@ from services.openai_service import (
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
+from utils.events_utils import clean_datetime
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10
@@ -121,10 +121,12 @@ def append_event_to_csv(
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
 
-    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=pytimezone.utc) if event_data.get("dtstart") else None
-    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=pytimezone.utc) if event_data.get("dtend") else None
-    dtstart_utc = event_data.get("dtstart_utc")
-    dtend_utc = event_data.get("dtend_utc")
+    dtstart = clean_datetime(event_data.get("dtstart"))
+    dtend = clean_datetime(event_data.get("dtend"))
+    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
+    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
+    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
     duration = event_data.get("duration")
     all_day = event_data.get("all_day")
     location = event_data.get("location", "")
@@ -207,8 +209,14 @@ def append_event_to_csv(
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
     title = event_data.get("title", "")
-    dtstart = dateutil_parser.parse(event_data.get("dtstart")).replace(tzinfo=pytimezone.utc) if event_data.get("dtstart") else None
-    dtend = dateutil_parser.parse(event_data.get("dtend")).replace(tzinfo=pytimezone.utc) if event_data.get("dtend") else None
+    dtstart = clean_datetime(event_data.get("dtstart"))
+    dtend = clean_datetime(event_data.get("dtend"))
+    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
+    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
+    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
+    duration = clean_datetime(event_data.get("duration"))
+    all_day = event_data.get("all_day")
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description", "") or ""
     location = event_data.get("location")
@@ -217,10 +225,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     registration = bool(event_data.get("registration", False))
     embedding = event_data.get("embedding") or ""
     date = dtstart.date()
-    dtstart_utc = event_data.get("dtstart_utc")
-    dtend_utc = event_data.get("dtend_utc")
-    duration = event_data.get("duration")
-    all_day = event_data.get("all_day")
     tz = event_data.get("tz", "")
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
