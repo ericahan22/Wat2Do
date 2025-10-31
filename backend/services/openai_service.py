@@ -114,7 +114,7 @@ class OpenAIService:
         context_time = context_datetime.strftime("%H:%M")
 
         prompt = f"""
-    Analyze the following Instagram caption and extract event information if it's an event post.
+    Analyze the following Instagram caption and image and extract event information if it's an event post.
 
     School context: This post is from {school}. Use this to guide location and timezone decisions.
     Current context: Today is {current_day_of_week}, {current_date}
@@ -159,7 +159,7 @@ class OpenAIService:
     IMPORTANT RULES:
     - Return EXACTLY ONE JSON object. NEVER return an array.
     - If multiple dates are listed (e.g., "Friday and Saturday" or explicit multiple dates), keep the primary occurrence in dtstart/dtend and put the additional occurrence dates (dates only) into rdate as an array of ISO dates.
-    - PRIORITIZE CAPTION TEXT for extracting fields. Only prefer image text for the title when the caption lacks a clear title.
+    - Prioritize caption text for extracting fields, but use image text if details are not provided in the caption.
     - Title-case event titles.
     - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
     - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
@@ -177,7 +177,6 @@ class OpenAIService:
     - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
     - For rrule: only when recurring is mentioned; otherwise empty string.
     - For description: start with the caption text word-for-word, then append any additional insights about the event extracted from the image that are not already mentioned in the caption.
-    - If the content violates the STRICT CONTENT POLICY or is not an event, set title to "" and leave the rest of the fields empty as per defaults below. Do not fabricate an event.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON object text, no extra commentary.
         {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}

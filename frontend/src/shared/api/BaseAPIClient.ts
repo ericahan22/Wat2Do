@@ -23,7 +23,7 @@ class BaseAPIClient {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    console.log('headers', headers);
+    // console.log('headers', headers);
     const config: RequestInit = {
       method,
       headers,

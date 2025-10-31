@@ -235,7 +235,9 @@ const EventsGrid = memo(
               {event.location && (
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <MapPin className="flex-shrink-0 h-3.5 w-3.5" />
-                  <span className="line-clamp-1">{event.location}</span>
+                  <span className="line-clamp-1" title={event.location}>
+                    {event.location}
+                  </span>
                 </div>
               )}
 
