@@ -35,7 +35,7 @@ from services.openai_service import (
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
-from utils.events_utils import clean_datetime
+from utils.events_utils import clean_datetime, clean_duration
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
 MAX_CONSEC_OLD_POSTS = 10
@@ -127,7 +127,7 @@ def append_event_to_csv(
     dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
     dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
     dtend_utc = clean_datetime(event_data.get("dtend_utc"))
-    duration = event_data.get("duration")
+    duration = clean_duration(event_data.get("duration"))
     all_day = event_data.get("all_day")
     location = event_data.get("location", "")
     food = event_data.get("food", "")
@@ -215,7 +215,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
     dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
     dtend_utc = clean_datetime(event_data.get("dtend_utc"))
-    duration = event_data.get("duration")
+    duration = clean_duration(event_data.get("duration"))
     all_day = event_data.get("all_day")
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description", "") or ""
