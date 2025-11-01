@@ -215,7 +215,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
     dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
     dtend_utc = clean_datetime(event_data.get("dtend_utc"))
-    duration = clean_datetime(event_data.get("duration"))
+    duration = event_data.get("duration")
     all_day = event_data.get("all_day")
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description", "") or ""
@@ -453,7 +453,6 @@ def process_recent_feed(
 
                 logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                today = timezone.now().date()
 
                 if not (
                     event_data.get("title")
@@ -480,10 +479,11 @@ def process_recent_feed(
                         break
                     continue
 
-                date = datetime.fromisoformat(event_data.get("dtstart")).date()
-                if date < today:
+                dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+                now = timezone.now()
+                if dtstart_utc < now:
                     logger.info(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {date}"
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
                     )
                     if check_post_limit():
                         break

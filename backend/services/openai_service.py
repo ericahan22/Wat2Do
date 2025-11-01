@@ -19,6 +19,8 @@ from openai import OpenAI
 
 from scraping.logging_config import logger
 from shared.constants.emojis import EMOJI_CATEGORIES
+from utils.events_utils import clean_datetime
+from datetime import timezone as pytimezone
 
 
 class OpenAIService:
@@ -317,6 +319,20 @@ class OpenAIService:
                 # Set source_image_url if provided
                 if source_image_url and not event_data.get("source_image_url"):
                     event_data["source_image_url"] = source_image_url
+
+                # --- Manual UTC conversion for dtstart_utc and dtend_utc ---
+                dtstart = clean_datetime(event_data.get("dtstart"))
+                dtend = clean_datetime(event_data.get("dtend"))
+
+                if dtstart:
+                    event_data["dtstart_utc"] = dtstart.astimezone(pytimezone.utc).isoformat()
+                else:
+                    event_data["dtstart_utc"] = None
+
+                if dtend:
+                    event_data["dtend_utc"] = dtend.astimezone(pytimezone.utc).isoformat()
+                else:
+                    event_data["dtend_utc"] = None
 
                 return event_data
 
