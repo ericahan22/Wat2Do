@@ -16,19 +16,19 @@ export function PromotionsManager() {
   const [isPromoted, setIsPromoted] = useState<boolean>(false);
   const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
 
-  const { admin } = useApi();
-  const { data: events, isLoading: eventsLoading, error: eventsError } = useEvents();
+  const { adminAPIClient } = useApi();
+  const { events, isLoading: eventsLoading, error: eventsError } = useEvents();
   const { promotedEvents, promotedEventsLoading, promotedEventsError, refetchPromotedEvents } = useEventPromotion();
 
   const checkPromotionStatus = useCallback(async (eventId: string) => {
     try {
-      const data = await admin.getPromotionStatus(eventId);
+      const data = await adminAPIClient.getPromotionStatus(eventId);
       setIsPromoted(data.is_promoted);
       setCurrentPromotion(data.promotion);
     } catch (err) {
       console.error("Error checking promotion status:", err);
     }
-  }, [admin]);
+  }, [adminAPIClient]);
 
   useEffect(() => {
     if (selectedEventId) {
@@ -205,7 +205,7 @@ export function PromotionsManager() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {promotedEvents.filter((e) => e.promotion.promotion_type === "featured").length}
+                  {promotedEvents.filter((e: PromotedEvent) => e.promotion.promotion_type === "featured").length}
                 </div>
                 <div className="text-sm ">Featured</div>
               </div>

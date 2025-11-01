@@ -36,9 +36,9 @@ function EventsPage() {
   );
 
   const {
-    data,
+    events,
     isLoading,
-    error,
+    error, 
     dtstart_utc,
     addedAt,
     searchTerm,
@@ -86,7 +86,7 @@ function EventsPage() {
       <div className="sm:text-left">
         <h1 className="sm:text-3xl text-2xl font-bold mb-2">
           <NumberFlow
-            value={data.length}
+            value={events.length}
             suffix={` ${getEventTypeText()} events`}
           />
         </h1>
@@ -150,7 +150,7 @@ function EventsPage() {
 
       <EventsContent
         view={view}
-        data={data}
+        data={events}
         isSelectMode={isSelectMode}
         selectedEvents={selectedEvents}
         onToggleEvent={toggleEventSelection}

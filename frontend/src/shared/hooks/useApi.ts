@@ -18,10 +18,10 @@ export const useApi = () => {
     const baseApiClient = new BaseAPIClient(() => getToken());
 
     return {
-      events: new EventsAPIClient(baseApiClient),
-      newsletter: new NewsletterAPIClient(baseApiClient),
-      clubs: new ClubsAPIClient(baseApiClient),
-      admin: new AdminAPIClient(baseApiClient),
+      eventsAPIClient: new EventsAPIClient(baseApiClient),
+      newsletterAPIClient: new NewsletterAPIClient(baseApiClient),
+      clubsAPIClient: new ClubsAPIClient(baseApiClient),
+      adminAPIClient: new AdminAPIClient(baseApiClient),
     };
   }, [getToken]);
 

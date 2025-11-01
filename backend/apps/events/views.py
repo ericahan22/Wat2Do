@@ -1,6 +1,6 @@
 import uuid
 
-from apps.core.auth import jwt_required
+from apps.core.auth import jwt_required, admin_required
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
@@ -29,8 +29,19 @@ def get_events(request):
     """Get all events from database with optional filtering"""
     try:
         search_term = request.GET.get("search", "").strip()
+        dtstart_utc_param = request.GET.get("dtstart_utc", "").strip()
 
-        queryset = Events.objects.filter(status__iexact="CONFIRMED").order_by("dtstart")
+        queryset = Events.objects.filter(
+            status="CONFIRMED",
+            school="University of Waterloo"
+        )
+        
+        # Apply default dtstart_utc filter only if not provided in request
+        if not dtstart_utc_param:
+            queryset = queryset.filter(dtstart_utc__gte=timezone.now())
+        
+        queryset = queryset.order_by("dtstart_utc")
+        
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(
@@ -40,8 +51,6 @@ def get_events(request):
         filtered_queryset = filterset.qs
 
         if search_term:
-            event_ids = set()
-
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
@@ -65,8 +74,7 @@ def get_events(request):
                 )
                 or_queries |= term_query
 
-            keyword_events = filtered_queryset.filter(or_queries)
-            event_ids.update(keyword_events.values_list("id", flat=True))
+            filtered_queryset = filtered_queryset.filter(or_queries)
 
             # search_embedding = generate_embedding(search_term)
             # dtstart = request.GET.get("dtstart")
@@ -77,11 +85,6 @@ def get_events(request):
             #     print(event["title"], event["similarity"])
             # similar_event_ids = [event["id"] for event in similar_events]
             # event_ids.update(similar_event_ids)
-
-            if event_ids:
-                filtered_queryset = filtered_queryset.filter(id__in=event_ids)
-            else:
-                filtered_queryset = filtered_queryset.none()
 
         fields = [
             "id",
@@ -533,10 +536,11 @@ def submit_event(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAdminUser])
 @ratelimit(key="ip", rate="100/hr", block=True)
+@admin_required
 def get_submissions(request):
     try:
+        print('request', request.user)
         submissions = EventSubmission.objects.all().order_by("-submitted_at")
         data = [
             {
@@ -558,7 +562,7 @@ def get_submissions(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAdminUser])
+@admin_required
 @ratelimit(key="ip", rate="100/hr", block=True)
 def process_submission(request, submission_id):
     """Re-run extraction and update linked Event/extracted_data"""
@@ -596,7 +600,7 @@ def process_submission(request, submission_id):
 
 
 @api_view(["POST"])
-@permission_classes([IsAdminUser])
+@admin_required
 @ratelimit(key="ip", rate="100/hr", block=True)
 def review_submission(request, submission_id):
     """Approve, reject, or edit submission"""

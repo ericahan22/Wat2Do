@@ -13,12 +13,12 @@ import type {
  */
 export function useEventPromotion() {
   const queryClient = useQueryClient();
-  const { admin } = useApi();
+  const { adminAPIClient } = useApi();
 
   // Mutations
   const promoteMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: PromoteEventRequest }) =>
-      admin.promoteEvent(eventId, data),
+      adminAPIClient.promoteEvent(eventId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -27,7 +27,7 @@ export function useEventPromotion() {
 
   const updateMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: string; data: UpdatePromotionRequest }) =>
-      admin.updatePromotion(eventId, data),
+      adminAPIClient.updatePromotion(eventId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -35,7 +35,7 @@ export function useEventPromotion() {
   });
 
   const unpromoteMutation = useMutation({
-    mutationFn: (eventId: string) => admin.unpromoteEvent(eventId),
+    mutationFn: (eventId: string) => adminAPIClient.unpromoteEvent(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -43,7 +43,7 @@ export function useEventPromotion() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (eventId: string) => admin.deletePromotion(eventId),
+    mutationFn: (eventId: string) => adminAPIClient.deletePromotion(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "promoted-events"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "promotion-status"] });
@@ -53,12 +53,12 @@ export function useEventPromotion() {
   // Queries
   const promotedEventsQuery = useQuery({
     queryKey: ["admin", "promoted-events"],
-    queryFn: () => admin.getPromotedEvents(),
+    queryFn: () => adminAPIClient.getPromotedEvents(),
   });
 
   const getPromotionStatusQueryOptions = (eventId: string) => ({
     queryKey: ["admin", "promotion-status", eventId],
-    queryFn: () => admin.getPromotionStatus(eventId),
+    queryFn: () => adminAPIClient.getPromotionStatus(eventId),
     enabled: !!eventId,
   });
 
@@ -95,11 +95,11 @@ export function useEventPromotion() {
 }
 
 export function usePromotionStatus(eventId: string) {
-  const { admin } = useApi();
+  const { adminAPIClient } = useApi();
   
   return useQuery({
     queryKey: ["admin", "promotion-status", eventId],
-    queryFn: () => admin.getPromotionStatus(eventId),
+    queryFn: () => adminAPIClient.getPromotionStatus(eventId),
     enabled: !!eventId,
   });
 }

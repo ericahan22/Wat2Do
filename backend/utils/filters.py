@@ -11,7 +11,7 @@ class EventFilter(FilterSet):
     min_price = NumberFilter(field_name="price", lookup_expr="gte")
     max_price = NumberFilter(field_name="price", lookup_expr="lte")
     club_type = CharFilter(field_name="club_type")
-    school = CharFilter(field_name="school", lookup_expr="icontains")
+    school = CharFilter(field_name="school", lookup_expr="exact")
     added_at = DateTimeFilter(field_name="added_at", lookup_expr="gte")
 
     class Meta:

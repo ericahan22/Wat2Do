@@ -206,6 +206,10 @@ CLERK_JWKS_URL = os.getenv(
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Silenced system checks
+# Allow longer index names (models.E034 - index name length > 30 characters)
+SILENCED_SYSTEM_CHECKS = ["models.E034"]
+
 # Email confirmation settings
 BASE_URL = (
     "https://api.wat2do.ca"
@@ -226,3 +230,21 @@ RATELIMIT_GLOBAL = "200/h"  # 1000 requests per hour per IP globally
 RATELIMIT_GROUP = {
     "api": "100/h",  # 100 requests per hour for API endpoints
 }
+
+# Database query logging (only in DEBUG mode)
+if DEBUG:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "django.db.backends": {
+                "handlers": ["console"],
+                "level": "DEBUG",  # Shows all SQL queries
+            },
+        },
+    }

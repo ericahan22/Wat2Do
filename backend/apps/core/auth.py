@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 from config.settings.base import CLERK_SECRET_KEY, CLERK_AUTHORIZED_PARTIES
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,48 @@ def jwt_required(view_func):
             error = getattr(request, 'error_message', 'User not authenticated')
             return JsonResponse({'detail': error}, status=401)
         request.user = user
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+
+
+def is_admin(request) -> bool:
+    """Return True if Clerk public metadata contains role == 'admin'."""
+    try:
+        payload = getattr(request, "auth_payload", {}) or {}
+        public_meta = payload.get("public_metadata") or payload.get("publicMetadata") or {}
+        if not public_meta:
+            user_id = payload.get("sub") or payload.get("id")
+            if user_id and CLERK_SECRET_KEY:
+                try:
+                    with httpx.Client(timeout=5.0) as client:
+                        resp = client.get(
+                            f"https://api.clerk.com/v1/users/{user_id}",
+                            headers={
+                                "Authorization": f"Bearer {CLERK_SECRET_KEY}",
+                                "Content-Type": "application/json",
+                            },
+                        )
+                        if resp.status_code == 200:
+                            data = resp.json() or {}
+                            public_meta = data.get("public_metadata") or {}
+                            try:
+                                request.clerk_user = data
+                            except Exception:
+                                pass
+                except Exception:
+                    public_meta = {}
+        return public_meta.get("role") == "admin"
+    except Exception:
+        return False
+
+
+def admin_required(view_func):
+    @wraps(view_func)
+    @jwt_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not is_admin(request):
+            return JsonResponse({'detail': 'Admin only'}, status=403)
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view

@@ -4,16 +4,15 @@ import { useSearchParams } from "react-router-dom";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useApi } from "@/shared/hooks/useApi";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
-import { isEventOngoing } from "@/shared/lib/eventUtils";
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { events: eventsAPI } = useApi();
+  const { eventsAPIClient } = useApi();
   const searchTerm = searchParams.get("search") || "";
   const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
 
-  const { data, isLoading, error } = useQuery({
+  const { data: events = [], isLoading, error } = useQuery({
     queryKey: ["events", searchTerm, dtstart_utc, addedAt],
     queryFn: async () => {
       const queryParams: Record<string, string> = {};
@@ -30,31 +29,11 @@ export function useEvents() {
         queryParams.added_at = addedAt;
       }
 
-      return eventsAPI.getEvents(queryParams);
+      return eventsAPIClient.getEvents(queryParams);
     },
     refetchOnWindowFocus: false,
     enabled: true,  
   });
-
-  const events = useMemo(() => {
-    if (!data) return [];
-    
-    if (dtstart_utc) {
-      return data.filter((event) => {
-        return event.dtstart_utc.split('T')[0] >= dtstart_utc;
-      });
-    }
-
-    const todayStr = getTodayString();
-    return data.filter((event) => {
-      const eventDate = event.dtstart_utc.split('T')[0];
-      if (eventDate > todayStr) return true;
-      if (eventDate === todayStr) {
-        return isEventOngoing(event);
-      }
-      return false;
-    });
-  }, [data, dtstart_utc]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -124,7 +103,7 @@ export function useEvents() {
   };
 
   return {
-    data: events,
+    events,
     isLoading,
     error,
     searchTerm,
