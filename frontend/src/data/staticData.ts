@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-01T22:26:11.859701+00:00";
+export const LAST_UPDATED = "2025-11-02T03:56:01.906509+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["Activity", "Basketball", "basketball"],
-  ["Activity", "Ticket", "tournament"],
-  ["Activity", "Party%20Popper", "event"],
   ["Activity", "Video%20Game", "game night"],
-  ["Smileys", "Ghost", "halloween"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "coffeehouse"],
+  ["Activity", "Ticket", "conference"],
   ["Activity", "Sparkles", "workshop"],
-  ["Activity", "Fireworks", "bonfire"],
+  ["Activity", "Performing%20Arts", "night"],
+  ["People", "Clapping%20Hands", "community"],
+  ["People", "Raised%20Hand", "meeting"],
+  ["Objects", "Microphone", "talk"],
+  ["Objects", "Graduation%20Cap", "info session"],
+  ["Objects", "Books", "workshop"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "network"],
+  ["Smileys", "Alien", "TEDx"],
+  ["Activity", "Confetti%20Ball", "afterparty"],
   ["Activity", "Trophy", "league"],
-  ["Smileys", "Alien", "special"],
-  ["People", "Clapping%20Hands", "network"],
-  ["Smileys", "Grinning%20Face%20With%20Smiling%20Eyes", "tryouts"],
-  ["Activity", "Confetti%20Ball", "collab"],
-  ["Smileys", "Smiling%20Face%20With%20Sunglasses", "weekend"],
-  ["Activity", "Performing%20Arts", "karate"]
+  ["Food%20and%20Drink", "Cupcake", "slime"],
+  ["Smileys", "Ghost", "nightmare"]
 ];
