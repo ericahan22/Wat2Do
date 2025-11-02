@@ -156,7 +156,7 @@ class EventSubmission(models.Model):
         max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True
     )
     submitted_by = models.CharField(
-        max_length=255, null=True, blank=True, help_text="Clerk user ID who submitted this event"
+        max_length=255, help_text="Clerk user ID who submitted this event"
     )
 
     # Timestamps

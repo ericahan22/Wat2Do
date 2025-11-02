@@ -137,11 +137,12 @@ class EventsAPIClient {
   async reviewSubmission(
     submissionId: number,
     action: 'approve' | 'reject',
-    adminNotes?: string
+    adminNotes?: string,
+    extractedData?: Record<string, unknown>
   ): Promise<{ message: string }> {
     return this.apiClient.post(
       `events/submissions/${submissionId}/review/`,
-      { action, admin_notes: adminNotes }
+      { action, admin_notes: adminNotes, extracted_data: extractedData }
     );
   }
 

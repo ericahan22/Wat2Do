@@ -1,16 +1,18 @@
-from functools import wraps
+from functools import wraps, lru_cache
 import logging
 
-from clerk_backend_api import authenticate_request, AuthenticateRequestOptions
+from clerk_backend_api import authenticate_request, AuthenticateRequestOptions, Clerk
 from django.contrib.auth import authenticate
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
 from config.settings.base import CLERK_SECRET_KEY, CLERK_AUTHORIZED_PARTIES
-import httpx
 
 logger = logging.getLogger(__name__)
+
+# Create a single Clerk instance to reuse across requests
+_clerk_client = Clerk(bearer_auth=CLERK_SECRET_KEY)
 
 
 class JwtAuthBackend(BaseBackend):
@@ -42,10 +44,11 @@ class JwtAuthBackend(BaseBackend):
                 request.error_message = request_state.message
                 logger.warning("JWT auth: Clerk rejected token: %s", request_state.message)
                 return None
+            print(request_state.payload, 'request_state.payload')
             # Ideally at this point user object must be fetched from DB and returned, but we will just return a dummy
             # user object
             user = User(username=request_state.payload.get("sub", "unknown"), password="None")
-            # Attach payload for downstream usage if needed
+            # Attach payload for downstream usage
             try:
                 request.auth_payload = request_state.payload
             except Exception:
@@ -74,42 +77,22 @@ def jwt_required(view_func):
     return _wrapped_view
 
 
-def is_admin(request) -> bool:
-    """Return True if Clerk public metadata contains role == 'admin'."""
+@lru_cache(maxsize=100)
+def _get_user_metadata(user_id: str) -> dict:
+    """Fetch user public_metadata from Clerk API."""
     try:
-        payload = getattr(request, "auth_payload", {}) or {}
-        public_meta = payload.get("public_metadata") or payload.get("publicMetadata") or {}
-        if not public_meta:
-            user_id = payload.get("sub") or payload.get("id")
-            if user_id and CLERK_SECRET_KEY:
-                try:
-                    with httpx.Client(timeout=5.0) as client:
-                        resp = client.get(
-                            f"https://api.clerk.com/v1/users/{user_id}",
-                            headers={
-                                "Authorization": f"Bearer {CLERK_SECRET_KEY}",
-                                "Content-Type": "application/json",
-                            },
-                        )
-                        if resp.status_code == 200:
-                            data = resp.json() or {}
-                            public_meta = data.get("public_metadata") or {}
-                            try:
-                                request.clerk_user = data
-                            except Exception:
-                                pass
-                except Exception:
-                    public_meta = {}
-        return public_meta.get("role") == "admin"
+        user = _clerk_client.users.get(user_id=user_id)
+        return getattr(user, "public_metadata", None) or getattr(user, "publicMetadata", None) or {}
     except Exception:
-        return False
+        return {}
 
 
 def admin_required(view_func):
     @wraps(view_func)
     @jwt_required
     def _wrapped_view(request, *args, **kwargs):
-        if not is_admin(request):
+        user_id = getattr(request, "auth_payload", {}).get("sub")
+        if not user_id or _get_user_metadata(user_id).get("role") != "admin":
             return JsonResponse({'detail': 'Admin only'}, status=403)
         return view_func(request, *args, **kwargs)
 

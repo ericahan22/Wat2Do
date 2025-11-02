@@ -508,14 +508,10 @@ def submit_event(request):
             cleaned["status"] = "PENDING"
         event = Events.objects.create(**cleaned)
 
-        # Attempt to capture submitting user if available (optional for anonymous)
-        clerk_user_id = None
-        try:
-            clerk_user_id = (
-                getattr(request, "user", None) or {}
-            ).get("id")
-        except Exception:
-            clerk_user_id = None
+        user_info = getattr(request, "auth_payload", {})
+        clerk_user_id = user_info.get("sub")
+        if not clerk_user_id:
+            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
 
         submission = EventSubmission.objects.create(
             screenshot_url=screenshot_url,
@@ -537,24 +533,29 @@ def submit_event(request):
 
 @api_view(["GET"])
 @ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
 @admin_required
 def get_submissions(request):
     try:
-        print('request', request.user)
-        submissions = EventSubmission.objects.all().order_by("-submitted_at")
-        data = [
-            {
+        user_info = getattr(request, "auth_payload", {})
+        email_from_request = user_info.get("email_addresses", [{}])[0].get("email_address", None)
+        
+        submissions = EventSubmission.objects.select_related("created_event").all().order_by("-submitted_at")
+        data = []
+        for s in submissions:
+            data.append({
                 "id": s.id,
                 "screenshot_url": s.screenshot_url,
                 "source_url": s.source_url,
                 "status": s.status,
                 "submitted_by": s.submitted_by,
+                "submitted_by_email": email_from_request,
                 "submitted_at": s.submitted_at,
                 "extracted_data": s.extracted_data,
                 "event_id": s.created_event_id,
-            }
-            for s in submissions
-        ]
+                "event_title": s.created_event.title if s.created_event else None,
+                "admin_notes": s.admin_notes,
+            })
         return Response(data)
 
     except Exception as e:
@@ -603,56 +604,43 @@ def process_submission(request, submission_id):
 @admin_required
 @ratelimit(key="ip", rate="100/hr", block=True)
 def review_submission(request, submission_id):
-    """Approve, reject, or edit submission"""
-    try:
-        submission = get_object_or_404(EventSubmission, id=submission_id)
-        action = request.data.get("action")  # 'approve', 'reject', 'edit'
+    """Approve or reject submission."""
+    submission = get_object_or_404(EventSubmission, id=submission_id)
+    action = request.data.get("action")
+    reviewer_id = getattr(request, "auth_payload", {}).get("sub")
 
-        if action == "approve":
-            # Ensure event exists (it should from submission time)
+    if action == "approve":
+        if not submission.created_event:
+            return Response({"error": "No linked event to approve"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get edited extracted_data if provided, otherwise use existing
+        edited_data = request.data.get("extracted_data")
+        if edited_data:
+            submission.extracted_data = edited_data
+            
+            # Update the linked event with the edited data
             event = submission.created_event
-            if not event:
-                return Response({"error": "No linked event to approve"}, status=status.HTTP_400_BAD_REQUEST)
-
-            submission.status = "approved"
-            submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.user.get('email_addresses', [{}])[0].get('email_address')
-            submission.save()
-
-            return Response(
-                {"message": "Event approved", "event_id": event.id}
-            )
-
-        elif action == "reject":
-            submission.status = "rejected"
-            submission.reviewed_at = timezone.now()
-            submission.reviewed_by = request.user.get('email_addresses', [{}])[0].get('email_address')
-            submission.admin_notes = request.data.get("notes", "")
-            submission.save()
-
-            return Response({"message": "Event rejected"})
-
-        elif action == "edit":
-            # Update event data and extracted_data
-            event_data = request.data.get("event_data") or {}
-            submission.extracted_data = event_data
-            submission.save()
-
-            event = submission.created_event
-            if event and isinstance(event_data, dict):
+            if event and isinstance(edited_data, dict):
                 for field in [f.name for f in Events._meta.get_fields()]:
-                    if field in event_data:
-                        setattr(event, field, event_data[field])
+                    if field in edited_data:
+                        setattr(event, field, edited_data[field])
                 event.save()
+        
+        submission.status = "approved"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = reviewer_id
+        submission.save()
+        return Response({"message": "Event approved", "event_id": submission.created_event.id})
 
-            return Response({"message": "Event data updated"})
+    elif action == "reject":
+        submission.status = "rejected"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = reviewer_id
+        submission.admin_notes = request.data.get("admin_notes", "")
+        submission.save()
+        return Response({"message": "Event rejected"})
 
-        return Response(
-            {"error": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST
-        )
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
