@@ -4,6 +4,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Mail, Check, X, Rss } from "lucide-react";
 import { useNewsletterSubscribe } from "@/features/newsletter/hooks/useNewsletterSubscribe";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "@/shared/utils/errorUtils";
 
 function Footer() {
   const [email, setEmail] = useState("");
@@ -87,10 +88,10 @@ function Footer() {
               </div>
             )}
 
-            {isError && error && (
+            {isError && !!error && (
               <div className="mt-2 text-sm flex items-center gap-1 text-red-600 dark:text-red-400">
                 <X className="h-4 w-4" />
-                {error.message}
+                {getErrorMessage(error)}
               </div>
             )}
           </div>

@@ -17,11 +17,17 @@ export const useApi = () => {
     // fetched for every request.
     const baseApiClient = new BaseAPIClient(() => getToken());
 
+    // create instances once and reuse
+    const eventsAPIClient = new EventsAPIClient(baseApiClient);
+    const newsletterAPIClient = new NewsletterAPIClient(baseApiClient);
+    const clubsAPIClient = new ClubsAPIClient(baseApiClient);
+    const adminAPIClient = new AdminAPIClient(baseApiClient);
+
     return {
-      eventsAPIClient: new EventsAPIClient(baseApiClient),
-      newsletterAPIClient: new NewsletterAPIClient(baseApiClient),
-      clubsAPIClient: new ClubsAPIClient(baseApiClient),
-      adminAPIClient: new AdminAPIClient(baseApiClient),
+      eventsAPIClient,
+      newsletterAPIClient,
+      clubsAPIClient,
+      adminAPIClient,
     };
   }, [getToken]);
 

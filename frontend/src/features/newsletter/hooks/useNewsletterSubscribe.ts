@@ -1,11 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { useApi } from '@/shared/hooks/useApi';
+import type { NewsletterSubscribeRequest, NewsletterSubscribeResponse } from '@/shared/api/NewsletterAPIClient';
 
 export const useNewsletterSubscribe = () => {
-  const { newsletter } = useApi();
+  const { newsletterAPIClient } = useApi();
   
-  const mutation = useMutation({
-    mutationFn: (data: Parameters<typeof newsletter.subscribe>[0]) => newsletter.subscribe(data),
+  const mutation = useMutation<NewsletterSubscribeResponse, unknown, NewsletterSubscribeRequest>({
+    mutationFn: (data) => newsletterAPIClient.subscribe(data),
   });
 
   return {

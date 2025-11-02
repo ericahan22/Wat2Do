@@ -35,7 +35,7 @@ const submitUnsubscribe = async (
 
 export const useUnsubscribe = (token: string | undefined) => {
   const queryClient = useQueryClient();
-  const { newsletter } = useApi();
+  const { newsletterAPIClient } = useApi();
 
   // Query to fetch unsubscribe info
   const {
@@ -45,7 +45,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     isError: isFetchError,
   } = useQuery({
     queryKey: ['unsubscribe', token],
-    queryFn: () => fetchUnsubscribeInfo(token!, newsletter),
+    queryFn: () => fetchUnsubscribeInfo(token!, newsletterAPIClient),
     enabled: !!token,
     retry: false,
   });
@@ -60,7 +60,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     data: submitData,
     reset: resetSubmit,
   } = useMutation({
-    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data, newsletter),
+    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data, newsletterAPIClient),
     onSuccess: () => {
       // Invalidate and refetch the unsubscribe info
       queryClient.invalidateQueries({ queryKey: ['unsubscribe', token] });

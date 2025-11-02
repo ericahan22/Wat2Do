@@ -7,12 +7,12 @@ type ReviewAction = "approve" | "reject";
 
 export function useSubmissionsReview() {
   const queryClient = useQueryClient();
-  const { events } = useApi();
+  const { eventsAPIClient } = useApi();
 
   // List submissions (admin scope)
   const submissionsQuery = useQuery<EventSubmission[]>({
     queryKey: ["admin", "submissions"],
-    queryFn: () => events.getSubmissions(),
+    queryFn: () => eventsAPIClient.getSubmissions(),
   });
 
   // Ensure freshest data on mount
@@ -23,7 +23,7 @@ export function useSubmissionsReview() {
 
   // Process submission (extract event data)
   const processMutation = useMutation({
-    mutationFn: (submissionId: number) => events.processSubmission(submissionId),
+    mutationFn: (submissionId: number) => eventsAPIClient.processSubmission(submissionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "submissions"] });
     },
@@ -32,7 +32,7 @@ export function useSubmissionsReview() {
   // Review submission (approve/reject)
   const reviewMutation = useMutation({
     mutationFn: ({ submissionId, action, notes }: { submissionId: number; action: ReviewAction; notes?: string }) =>
-      events.reviewSubmission(submissionId, action, notes),
+      eventsAPIClient.reviewSubmission(submissionId, action, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "submissions"] });
     },

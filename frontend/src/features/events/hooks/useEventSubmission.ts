@@ -3,10 +3,10 @@ import { useApi } from '@/shared/hooks/useApi';
 
 export const useEventSubmission = () => {
   const queryClient = useQueryClient();
-  const { events } = useApi();
+  const { eventsAPIClient } = useApi();
 
   const submitEventMutation = useMutation({
-    mutationFn: (data: Parameters<typeof events.submitEvent>[0]) => events.submitEvent(data),
+    mutationFn: (data: Parameters<typeof eventsAPIClient.submitEvent>[0]) => eventsAPIClient.submitEvent(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-submissions'] });
     },

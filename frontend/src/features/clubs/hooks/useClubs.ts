@@ -6,7 +6,7 @@ import type { ClubsResponse } from "@/shared/api";
 
 export function useClubs() {
   const [searchParams] = useSearchParams();
-  const { clubs } = useApi();
+  const { clubsAPIClient } = useApi();
   const searchTerm = searchParams.get("search") || "";
   const categoryFilter = searchParams.get("category") || "all";
 
@@ -23,7 +23,7 @@ export function useClubs() {
         queryParams.category = categoryFilter;
       }
 
-      return clubs.getClubs(queryParams);
+      return clubsAPIClient.getClubs(queryParams);
     },
     refetchOnWindowFocus: false,
   });
