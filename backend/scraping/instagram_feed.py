@@ -37,7 +37,7 @@ from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
 from utils.events_utils import clean_datetime, clean_duration
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "25"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
@@ -89,21 +89,42 @@ def normalize_string(s):
 
 
 def is_duplicate_event(event_data):
-    """Check for duplicate events (similar name, date, location)"""
-    title = normalize_string(event_data.get("title"))
-    location = normalize_string(event_data.get("location"))
-    date = datetime.fromisoformat(event_data.get("dtstart")).date()
+    """Check for duplicate events using ig_handle, title, datetime, location, and description."""
+    ig_handle = normalize_string(event_data.get("ig_handle") or "")
+    title = normalize_string(event_data.get("title") or "")
+    location = normalize_string(event_data.get("location") or "")
+    description = normalize_string(event_data.get("description") or "")
+    dtstart = event_data.get("dtstart")
+    if not dtstart:
+        return False
 
     try:
-        candidates = Events.objects.filter(dtstart__date=date)
+        date = datetime.fromisoformat(dtstart)
+        # Candidates: same ig_handle and same day
+        candidates = Events.objects.filter(
+            dtstart__date=date.date(),
+            ig_handle__isnull=False,
+        )
         for c in candidates:
-            c_title = normalize_string(getattr(c, "title", ""))
-            c_loc = normalize_string(getattr(c, "location", ""))
-            # Fuzzy match: consider as duplicate if similarity > 0.85
-            title_sim = SequenceMatcher(None, c_title, title).ratio()
-            loc_sim = SequenceMatcher(None, c_loc, location).ratio()
-            if title_sim > 0.85 and loc_sim > 0.85:
-                return True
+            c_ig_handle = normalize_string(getattr(c, "ig_handle", "") or "")
+            c_title = normalize_string(getattr(c, "title", "") or "")
+            c_loc = normalize_string(getattr(c, "location", "") or "")
+            c_desc = normalize_string(getattr(c, "description", "") or "")
+            c_dtstart = getattr(c, "dtstart", None)
+            # Require same ig_handle and dtstart within 2 hours
+            if (
+                ig_handle
+                and c_ig_handle
+                and ig_handle == c_ig_handle
+                and c_dtstart
+                and abs((c_dtstart - date).total_seconds()) <= 2 * 3600
+            ):
+                # Fuzzy match title, location, and description
+                title_sim = SequenceMatcher(None, c_title, title).ratio()
+                loc_sim = SequenceMatcher(None, c_loc, location).ratio()
+                desc_sim = SequenceMatcher(None, c_desc, description).ratio()
+                if title_sim > 0.55 and loc_sim > 0.55 and desc_sim > 0.55:
+                    return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
     return False
