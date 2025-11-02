@@ -82,10 +82,8 @@ def extract_s3_filename_from_url(image_url: str) -> str:
     return f"events/{filename}"
 
 
-def normalize_string(s):
-    if not s:
-        return ""
-    return re.sub(r"\W+", "", s).lower().strip()
+def normalize(s):
+    return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
 def jaccard_similarity(a, b):
@@ -100,8 +98,7 @@ def jaccard_similarity(a, b):
 
 
 def is_duplicate_event(event_data):
-    """Check for duplicate events using ig_handle, title, datetime, location, and description."""
-    ig_handle = event_data.get("ig_handle") or ""
+    """Check for duplicate events using title, datetime, location, and description."""
     title = event_data.get("title") or ""
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
@@ -111,25 +108,18 @@ def is_duplicate_event(event_data):
 
     try:
         date = datetime.fromisoformat(dtstart_utc)
-        candidates = Events.objects.filter(
-            dtstart_utc__date=date.date(),
-            ig_handle__isnull=False,
-        )
+        candidates = Events.objects.filter(dtstart_utc__date=date.date())
+        print(f"Checking for duplicates on {date.date()} - found {candidates.count()} candidates")
         for c in candidates:
-            c_ig_handle = getattr(c, "ig_handle", "") or ""
+            print("Candidate:", c.title, c.location, c.dtstart_utc)
             c_title = getattr(c, "title", "") or ""
             c_loc = getattr(c, "location", "") or ""
             c_desc = getattr(c, "description", "") or ""
             c_dtstart_utc = getattr(c, "dtstart_utc", None)
-            # Require same ig_handle and dtstart_utc within 2 hours
-            if (
-                ig_handle
-                and c_ig_handle
-                and ig_handle == c_ig_handle
-                and c_dtstart_utc
-                and c_dtstart_utc.date() == date.date()
-            ):
-                # Use Jaccard similarity for context-based matching
+            if c_dtstart_utc and c_dtstart_utc.date() == date.date():
+                # Use substring match and Jaccard similarity
+                if normalize(c_title) in normalize(title) or normalize(title) in normalize(c_title):
+                    return True
                 title_sim = max(
                     jaccard_similarity(c_title, title),
                     SequenceMatcher(None, c_title.lower(), title.lower()).ratio(),
