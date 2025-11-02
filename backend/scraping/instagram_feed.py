@@ -88,42 +88,55 @@ def normalize_string(s):
     return re.sub(r"\W+", "", s).lower().strip()
 
 
+def jaccard_similarity(a, b):
+    """Compute Jaccard similarity between two strings (case-insensitive, word-based)."""
+    set_a = set(re.findall(r"\w+", a.lower()))
+    set_b = set(re.findall(r"\w+", b.lower()))
+    if not set_a or not set_b:
+        return 0.0
+    intersection = set_a & set_b
+    union = set_a | set_b
+    return len(intersection) / len(union)
+
+
 def is_duplicate_event(event_data):
     """Check for duplicate events using ig_handle, title, datetime, location, and description."""
-    ig_handle = normalize_string(event_data.get("ig_handle") or "")
-    title = normalize_string(event_data.get("title") or "")
-    location = normalize_string(event_data.get("location") or "")
-    description = normalize_string(event_data.get("description") or "")
-    dtstart = event_data.get("dtstart")
-    if not dtstart:
+    ig_handle = event_data.get("ig_handle") or ""
+    title = event_data.get("title") or ""
+    location = event_data.get("location") or ""
+    description = event_data.get("description") or ""
+    dtstart_utc = event_data.get("dtstart_utc")
+    if not dtstart_utc:
         return False
 
     try:
-        date = datetime.fromisoformat(dtstart)
-        # Candidates: same ig_handle and same day
+        date = datetime.fromisoformat(dtstart_utc)
         candidates = Events.objects.filter(
-            dtstart__date=date.date(),
+            dtstart_utc__date=date.date(),
             ig_handle__isnull=False,
         )
         for c in candidates:
-            c_ig_handle = normalize_string(getattr(c, "ig_handle", "") or "")
-            c_title = normalize_string(getattr(c, "title", "") or "")
-            c_loc = normalize_string(getattr(c, "location", "") or "")
-            c_desc = normalize_string(getattr(c, "description", "") or "")
-            c_dtstart = getattr(c, "dtstart", None)
-            # Require same ig_handle and dtstart within 2 hours
+            c_ig_handle = getattr(c, "ig_handle", "") or ""
+            c_title = getattr(c, "title", "") or ""
+            c_loc = getattr(c, "location", "") or ""
+            c_desc = getattr(c, "description", "") or ""
+            c_dtstart_utc = getattr(c, "dtstart_utc", None)
+            # Require same ig_handle and dtstart_utc within 2 hours
             if (
                 ig_handle
                 and c_ig_handle
                 and ig_handle == c_ig_handle
-                and c_dtstart
-                and abs((c_dtstart - date).total_seconds()) <= 2 * 3600
+                and c_dtstart_utc
+                and c_dtstart_utc.date() == date.date()
             ):
-                # Fuzzy match title, location, and description
-                title_sim = SequenceMatcher(None, c_title, title).ratio()
-                loc_sim = SequenceMatcher(None, c_loc, location).ratio()
-                desc_sim = SequenceMatcher(None, c_desc, description).ratio()
-                if title_sim > 0.55 and loc_sim > 0.55 and desc_sim > 0.55:
+                # Use Jaccard similarity for context-based matching
+                title_sim = max(
+                    jaccard_similarity(c_title, title),
+                    SequenceMatcher(None, c_title.lower(), title.lower()).ratio(),
+                )
+                loc_sim = jaccard_similarity(c_loc, location)
+                desc_sim = jaccard_similarity(c_desc, description)
+                if (title_sim > 0.4) or (loc_sim > 0.5 and desc_sim > 0.3):
                     return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
