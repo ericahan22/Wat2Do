@@ -102,8 +102,13 @@ class OpenAIService:
         source_image_url: str | None = None,
         post_created_at: datetime | None = None,
         school: str = "University of Waterloo",
-    ) -> dict[str, str | bool | float | None]:
-        """Extract a SINGLE event from caption text/image. Multiple dates -> use rdate list."""
+    ) -> list[dict[str, str | bool | float | None]]:
+        """Extract ZERO OR MORE events from caption text/image.
+
+        - Return an array of JSON objects, each object representing a unique event.
+        - If the same event lists multiple dates/times, represent it as a single object
+          and use rdate (additional dates) and/or rrule (recurrence rule) appropriately.
+        """
         # Get current date and day of week for context
         now = datetime.now()
         current_date = now.strftime("%Y-%m-%d")
@@ -135,7 +140,7 @@ class OpenAIService:
         * There is no explicit mention of BOTH a date (e.g., "October 31", "Friday", "tomorrow") AND a time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening") in the caption or image.
         * The post only introduces people or some topic, UNLESS there is a clear call to attend or participate in an actual event (such as a meeting, workshop, performance, or competition).
 
-    If you determine that there is NO event in the post, return the JSON value: null (not an object, not an array, just the literal null). Otherwise, return ONE JSON object (not an array) with ALL of the following fields:
+    If you determine that there is NO event in the post, return the JSON value: null (not an object, not an array, just the literal null). Otherwise, return an array of JSON objects with ALL of the following fields:
     {{
         "title": string,
         "dtstart": string,            // local start in "YYYY-MM-DD HH:MM:SS+HH"
@@ -158,10 +163,15 @@ class OpenAIService:
         "description": string
     }}
 
-    IMPORTANT RULES:
-    - Return EXACTLY ONE JSON object. NEVER return an array.
-    - If multiple dates are listed (e.g., "Friday and Saturday" or explicit multiple dates), keep the primary occurrence in dtstart/dtend and put the additional occurrence dates (dates only) into rdate as an array of ISO dates.
-    - Prioritize caption text for extracting fields, but use image text if details are not provided in the caption.
+    CONSOLIDATION RULES (VERY IMPORTANT):
+    - If multiple dates/times describe the SAME event (same title/location/content), CONSOLIDATE into ONE object:
+        * Put the primary occurrence in dtstart/dtend.
+        * Add the additional dates (date-only) to rdate, or set rrule if a clear recurrence pattern is stated (e.g., "every Monday").
+        * Never create separate objects for the same event just because of multiple dates.
+    - Only create multiple objects when the caption clearly describes DISTINCT events (different titles, venues, or clearly different activities).
+
+    ADDITIONAL RULES:
+    - Prioritize caption text; use image text if missing details.
     - Title-case event titles.
     - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
     - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
@@ -180,7 +190,7 @@ class OpenAIService:
     - For rrule: only when recurring is mentioned; otherwise empty string.
     - For description: start with the caption text word-for-word, then append any additional insights about the event extracted from the image that are not already mentioned in the caption.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
-    - Return ONLY the JSON object text, no extra commentary.
+    - Return ONLY the JSON array text, no extra commentary.
         {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
     """
 
@@ -274,17 +284,12 @@ class OpenAIService:
                 if response_text.endswith("```"):
                     response_text = response_text[:-3]
 
-                event_data = json.loads(response_text.strip())
+                parsed = json.loads(response_text.strip())
 
-                # If the model returned an array, take the first element for backward compatibility
-                if isinstance(event_data, list):
-                    event_data = event_data[0] if event_data else {}
+                # Normalize to a list of dicts
+                events_list = parsed if isinstance(parsed, list) else []
 
-                if not isinstance(event_data, dict):
-                    logger.warning("Response is not an object, returning None (no event)")
-                    return None
-
-                # Ensure required fields are present
+                cleaned_events: list[dict] = []
                 required_fields = [
                     "title",
                     "description",
@@ -305,49 +310,52 @@ class OpenAIService:
                     "school",
                     "source_image_url",
                 ]
-                for field in required_fields:
-                    if field not in event_data:
-                        if field in ["price", "latitude", "longitude"]:
-                            event_data[field] = None
-                        elif field in ["registration", "all_day"]:
-                            event_data[field] = False
-                        elif field == "rdate":
-                            event_data[field] = []
-                        else:
-                            event_data[field] = ""
 
-                # Set source_image_url if provided
-                if source_image_url and not event_data.get("source_image_url"):
-                    event_data["source_image_url"] = source_image_url
+                for event_obj in events_list:
+                    for field in required_fields:
+                        if field not in event_obj:
+                            if field in ["price", "latitude", "longitude"]:
+                                event_obj[field] = None
+                            elif field in ["registration", "all_day"]:
+                                event_obj[field] = False
+                            elif field == "rdate":
+                                event_obj[field] = []
+                            else:
+                                event_obj[field] = ""
 
-                # --- Manual UTC conversion for dtstart_utc and dtend_utc ---
-                dtstart = clean_datetime(event_data.get("dtstart"))
-                dtend = clean_datetime(event_data.get("dtend"))
+                    if source_image_url and not event_obj.get("source_image_url"):
+                        event_obj["source_image_url"] = source_image_url
 
-                if dtstart:
-                    event_data["dtstart_utc"] = dtstart.astimezone(pytimezone.utc).isoformat()
-                else:
-                    event_data["dtstart_utc"] = None
+                    # --- Manual UTC conversion for dtstart_utc and dtend_utc ---
+                    dtstart = clean_datetime(event_obj.get("dtstart"))
+                    dtend = clean_datetime(event_obj.get("dtend"))
 
-                if dtend:
-                    event_data["dtend_utc"] = dtend.astimezone(pytimezone.utc).isoformat()
-                else:
-                    event_data["dtend_utc"] = None
+                    if dtstart:
+                        event_obj["dtstart_utc"] = dtstart.astimezone(pytimezone.utc).isoformat()
+                    else:
+                        event_obj["dtstart_utc"] = None
 
-                return event_data
+                    if dtend:
+                        event_obj["dtend_utc"] = dtend.astimezone(pytimezone.utc).isoformat()
+                    else:
+                        event_obj["dtend_utc"] = None
+
+                    cleaned_events.append(event_obj)
+
+                return cleaned_events
 
             except json.JSONDecodeError:
                 logger.exception("Error parsing JSON response")
                 logger.error(f"Response text: {response_text}")
-                # Return default structure if JSON parsing fails
-                return _get_default_event_structure(source_image_url)
+                # Return empty list if JSON parsing fails
+                return []
 
         except Exception:
             logger.exception("Error parsing caption")
             logger.error(f"Caption text: {caption_text}")
             logger.error(f"Traceback: {traceback.format_exc()}")
-            # Return default structure if API call fails
-            return _get_default_event_structure(source_image_url)
+            # Return empty list if API call fails
+            return []
 
     def generate_recommended_filters(self, events_data: list[dict]) -> list[list[str]]:
         """Generate recommended filter keywords with emojis from upcoming events data using GPT
