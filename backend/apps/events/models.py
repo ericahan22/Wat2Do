@@ -38,11 +38,10 @@ class Events(models.Model):
     duration = models.DurationField(blank=True, null=True, help_text="'8:00:00'")
 
     # Event categorization
-    categories = models.CharField(
-        max_length=255,
-        null=True,
+    categories = models.JSONField(
+        default=list,
         blank=True,
-        help_text="'Career, Networking, Professional Development'",
+        help_text="List of event categories (e.g. ['Academic', 'Cultural'])",
     )
 
     # Timezone information

@@ -135,6 +135,7 @@ def append_event_to_csv(
     school = event_data.get("school", "")
     source_image_url = event_data.get("source_image_url", "")
     title = event_data.get("title", "")
+    categories = event_data.get("categories", [])
 
     fieldnames = [
         "ig_handle",
@@ -158,6 +159,7 @@ def append_event_to_csv(
         "source_image_url",
         "all_day",
         "club_type",
+        "categories",
         "raw_json",
         "added_to_db",
         "status",
@@ -191,6 +193,7 @@ def append_event_to_csv(
                 "source_image_url": source_image_url,
                 "all_day": all_day,
                 "club_type": club_type or event_data.get("club_type") or "",
+                "categories": json.dumps(categories, ensure_ascii=False),
                 "raw_json": json.dumps(event_data, ensure_ascii=False),
                 "added_to_db": added_to_db,
                 "status": "CONFIRMED",
@@ -223,6 +226,11 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
     school = event_data.get("school", "")
+    categories = event_data.get("categories", [])
+
+    if not categories or not isinstance(categories, list):
+        logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
+        categories = ["Uncategorized"]
 
     if is_duplicate_event(event_data):
         try:
@@ -232,6 +240,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
                 source_url,
                 added_to_db="duplicate",
                 embedding=event_data.get("embedding"),
+                club_type=None,
             )
         except Exception as csv_e:
             logger.error(f"Error writing duplicate event to CSV: {csv_e}")
@@ -301,6 +310,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "longitude": longitude,
         "school": school,
         "rrule": event_data.get("rrule", ""),
+        "categories": categories,
     }
 
     try:

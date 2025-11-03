@@ -120,10 +120,9 @@ jobs:
         id: generate_static
         working-directory: backend/scraping
         run: python generate_static_data.py
-        if: github.event_name == 'schedule'
 
       - name: Commit and push changes
-        if: github.event_name == 'schedule' && steps.generate_static.outcome == 'success'
+        if: steps.generate_static.outcome == 'success'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'

@@ -19,6 +19,7 @@ from openai import OpenAI
 
 from scraping.logging_config import logger
 from shared.constants.emojis import EMOJI_CATEGORIES
+from shared.constants.event_categories import EVENT_CATEGORIES
 from utils.events_utils import clean_datetime
 from utils.date_utils import get_current_semester_end_time
 from datetime import timezone as pytimezone
@@ -120,9 +121,10 @@ class OpenAIService:
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")
-        
+
         # Get current semester end time for inferring RRULE UNTIL dates
         semester_end_time = get_current_semester_end_time(school)
+        categories_str = "\n".join(f"- {cat}" for cat in EVENT_CATEGORIES)
 
         prompt = f"""
     Analyze the following Instagram caption and image and extract event information if it's an event post.
@@ -165,7 +167,8 @@ class OpenAIService:
         "rdate": string,              // comma-separated datetime strings in format "YYYYMMDDTHHMMSS,YYYYMMDDTHHMMSS,..." (e.g., "20251113T170000,20251204T170000,20251218T170000")
         "school": string,
         "source_image_url": string,
-        "description": string
+        "description": string,
+        "categories": list            // one or more of the following, as a JSON array of strings: {categories_str}
     }}
 
     CONSOLIDATION RULES (VERY IMPORTANT):
