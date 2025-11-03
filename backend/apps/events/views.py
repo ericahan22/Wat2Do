@@ -37,9 +37,13 @@ def get_events(request):
             school="University of Waterloo"
         )
         
-        # Apply default dtstart_utc filter only if not provided in request
+        # Apply default upcoming events filter only if not provided in request
         if not dtstart_utc_param:
-            queryset = queryset.filter(dtstart_utc__gte=timezone.now() - timedelta(hours=1))
+            now = timezone.now()
+            one_hour_ago = now - timedelta(hours=1)
+            queryset = queryset.filter(
+                Q(dtend_utc__gte=now) | (Q(dtend_utc__isnull=True) & Q(dtstart_utc__gte=one_hour_ago))
+            )
         
         queryset = queryset.order_by("dtstart_utc")
         

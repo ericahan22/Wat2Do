@@ -131,8 +131,12 @@ class Events(models.Model):
     class Meta:
         db_table = "events"
         indexes = [
-            # Composite index for school, status, dtstart_utc (used for ordering), and added_at
-            models.Index(fields=["school", "status", "dtstart_utc", "added_at"], name="events_school_status_dtstart_utc_added_at_idx"),
+            models.Index(fields=["school", "status", "dtend_utc"], name="events_school_status_dtend_idx"),
+            models.Index(
+                fields=["school", "status", "dtstart_utc"],
+                condition=models.Q(dtend_utc__isnull=True),
+                name="events_school_status_dtstart_nullend_idx",
+            ),
         ]
 
     def __str__(self):
