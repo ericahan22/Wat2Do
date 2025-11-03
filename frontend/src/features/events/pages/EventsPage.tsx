@@ -100,7 +100,7 @@ function EventsPage() {
               suffix={` ${getEventTypeText()} events`}
             />
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
             Updated {formatRelativeDateTime(LAST_UPDATED)}
           </p>
         </div>
