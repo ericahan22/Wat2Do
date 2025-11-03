@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-03T17:51:43.180341+00:00";
+export const LAST_UPDATED = "2025-11-03T22:38:42.197509+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["People", "Clapping%20Hands", "community meeting"],
   ["Activity", "Ticket", "info session"],
-  ["Activity", "Fireworks", "night"],
-  ["Activity", "Party%20Popper", "event"],
-  ["People", "Raised%20Hand", "meeting"],
-  ["Activity", "Trophy", "competition"],
-  ["Objects", "Books", "workshop"],
-  ["People", "People%20Hugging", "support"],
-  ["Activity", "Confetti%20Ball", "celebration"],
-  ["People", "Victory%20Hand", "success"],
-  ["Activity", "Sparkles", "fun"],
+  ["Activity", "Sparkles", "social night"],
+  ["Activity", "Trophy", "career fair"],
+  ["Activity", "Sports%20Medal", "clinics"],
+  ["Smileys", "Smiling%20Face%20With%20Hearts", "support"],
+  ["Smileys", "Grinning%20Face", "meetup"],
+  ["Smileys", "Hushed%20Face", "talk"],
   ["Objects", "Microphone", "talk"],
-  ["Symbols", "Check%20Mark", "registration"],
-  ["People", "Waving%20Hand", "welcome"],
-  ["People", "Family%20Man%20Woman%20Girl%20Boy", "community"]
+  ["Objects", "Open%20Book", "workshop"],
+  ["Objects", "Gem%20Stone", "art sale"],
+  ["Objects", "Graduation%20Cap", "thesis"],
+  ["People", "Raised%20Hand", "meeting"],
+  ["People", "People%20Hugging", "community"],
+  ["People", "Flexed%20Biceps", "support"],
+  ["Activity", "Fireworks", "celebration"]
 ];
