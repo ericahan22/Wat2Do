@@ -117,16 +117,24 @@ def is_duplicate_event(event_data):
             c_desc = getattr(c, "description", "") or ""
             c_dtstart_utc = getattr(c, "dtstart_utc", None)
             if c_dtstart_utc and c_dtstart_utc.date() == date.date():
-                # Use substring match and Jaccard similarity
-                if normalize(c_title) in normalize(title) or normalize(title) in normalize(c_title):
-                    return True
+                norm_title = normalize(title)
+                norm_c_title = normalize(c_title)
+                substring_match = norm_c_title in norm_title or norm_title in norm_c_title
                 title_sim = max(
                     jaccard_similarity(c_title, title),
                     SequenceMatcher(None, c_title.lower(), title.lower()).ratio(),
                 )
                 loc_sim = jaccard_similarity(c_loc, location)
                 desc_sim = jaccard_similarity(c_desc, description)
+                logger.debug(
+                    f"Comparing to candidate: '{c_title}' @ '{c_loc}'",
+                    f"substring_match={substring_match}, title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f}"
+                )
+                if substring_match:
+                    logger.debug("-> Duplicate by substring match")
+                    return True
                 if (title_sim > 0.4) or (loc_sim > 0.5 and desc_sim > 0.3):
+                    logger.debug("-> Duplicate by similarity threshold")
                     return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
@@ -258,6 +266,16 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         logger.info(
             f"Duplicate event detected, skipping {title} on {date} at {location}"
         )
+        try:
+            append_event_to_csv(
+                event_data,
+                ig_handle,
+                source_url,
+                added_to_db="duplicate",
+                embedding=event_data.get("embedding"),
+            )
+        except Exception as csv_e:
+            logger.error(f"Error writing duplicate event to CSV: {csv_e}")
         return False
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
