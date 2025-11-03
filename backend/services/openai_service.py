@@ -198,7 +198,7 @@ class OpenAIService:
     Example: "Weekly sessions every Wednesday: 5-6 PM and 8-10 PM through December"
     Should create TWO event objects:
     [
-        {
+        {{
             "...": "...",
             "dtstart": "2025-11-05 17:00:00-05",
             "dtend": "2025-11-05 18:00:00-05",
@@ -208,8 +208,8 @@ class OpenAIService:
             "all_day": false,
             "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
             "rdate": "",
-        },
-        {
+        }},
+        {{
             "...": "...",
             "dtstart": "2025-11-05 20:00:00-05",
             "dtend": "2025-11-05 22:00:00-05",
@@ -218,7 +218,7 @@ class OpenAIService:
             "duration": "02:00:00",
             "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
             "rdate": "",
-        }
+        }}
     ]
     This represents two separate recurring time slots (5-6 PM and 8-10 PM) on every Wednesday from November through December.
 
@@ -273,6 +273,7 @@ class OpenAIService:
                 model = "gpt-4o-mini"
 
             # If image download by OpenAI errors out, retry without image content by using URL in text
+            response = None
             try:
                 response = self.client.chat.completions.create(
                     model=model, messages=messages, temperature=0.1, max_tokens=2000
@@ -324,6 +325,10 @@ class OpenAIService:
                             f"Retry without image also failed, returning default structure: {e}"
                         )
                         return _get_default_event_structure(source_image_url)
+
+            # If both attempts failed and no response is available, return empty list
+            if response is None:
+                return []
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
