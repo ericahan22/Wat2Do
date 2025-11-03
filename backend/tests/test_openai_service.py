@@ -8,16 +8,8 @@ sys.path.insert(0, str(backend_dir))
 from services.openai_service import extract_events_from_caption
 
 
-image_url = "https://cdn.discordapp.com/attachments/715319623637270638/1434992256691081277/6ebcb7f6-e9a3-4f92-81ee-694c55b039ce.png?ex=690a582e&is=690906ae&hm=dae3dda56c30ee2da72fb70133a32a6cd8ff8423ca27712925db43322399405b"
-post_caption="""It’s time to spread some ✨Jewish Joy✨ across campus!
-Join us all week long for food, fun, and community — here’s what’s coming up:
-🍔 Monday: BBQ with @standwithuscanada
-📱 Tuesday: Instagram Challenges (join the fun on our stories!)
-🥯 Wednesday: Bagel Brunch sponsored by FJMC
-💛 Thursday: Boothing at Laurier
-🕯️ Friday: Shabbat Dinner with @aepiwaterloo + @tailormadebirthright
-Let’s make it a week full of connection, pride, and joy 💫
-Check out our full lineup on our story — and don’t forget to bring your friends!"""
+image_url = "https://media.discordapp.net/attachments/715319623637270638/1434995045269897277/Screenshot_2025-11-03_at_2.57.51_PM.png?ex=690a5ac7&is=69090947&hm=28813841083723f2071222b18790c8ac6bb2777382b66c11c9db2478abb46cc6&=&format=webp&quality=lossless&width=1064&height=1344"
+post_caption="""Correction"""
 
 # Test AI client
 result = extract_events_from_caption(post_caption, image_url)

@@ -24,8 +24,11 @@ import { LAST_UPDATED, RECOMMENDED_FILTERS } from "@/data/staticData";
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
-  const randomFilter = useMemo(() => 
-    RECOMMENDED_FILTERS[Math.floor(Math.random() * RECOMMENDED_FILTERS.length)][2],
+  const randomFilter = useMemo(
+    () =>
+      RECOMMENDED_FILTERS[
+        Math.floor(Math.random() * RECOMMENDED_FILTERS.length)
+      ][2],
     []
   );
   const placeholder = searchParams.get("placeholder") || randomFilter;
@@ -42,7 +45,7 @@ function EventsPage() {
   const {
     events,
     isLoading,
-    error, 
+    error,
     dtstart_utc,
     addedAt,
     searchTerm,
@@ -60,7 +63,9 @@ function EventsPage() {
   } = useEventSelection(view);
 
   const todayString = getTodayString();
-  const isShowingPastEvents = Boolean(dtstart_utc && dtstart_utc !== todayString);
+  const isShowingPastEvents = Boolean(
+    dtstart_utc && dtstart_utc !== todayString
+  );
   const isShowingNewEvents = Boolean(addedAt);
 
   const getEventTypeText = () => {
@@ -71,7 +76,7 @@ function EventsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <SEOHead
         title="Events - Discover University of Waterloo Club Events"
         description="Browse and discover exciting club events at the University of Waterloo. Find upcoming events, filter by date, and stay connected with campus activities."
@@ -87,90 +92,97 @@ function EventsPage() {
           "campus activities",
         ]}
       />
-      <div className="sm:text-left">
-        <h1 className="sm:text-3xl text-2xl font-bold mb-2">
-          <NumberFlow
-            value={events.length}
-            suffix={` ${getEventTypeText()} events`}
-          />
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
-      </div>
-
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <SearchInput placeholder={placeholder} className="flex-1" />
-          <Tabs
-            value={view}
-            onValueChange={(value) =>
-              handleViewChange(value as "grid" | "calendar")
-            }
-          >
-            <TabsList>
-              <TabsTrigger value="grid" className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4" />
-                Grid
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Calendar
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className="sm:text-left">
+          <h1 className="sm:text-3xl text-2xl font-bold mb-2 -mt-3 sm:mt-0">
+            <NumberFlow
+              value={events.length}
+              suffix={` ${getEventTypeText()} events`}
+            />
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Updated {formatRelativeDateTime(LAST_UPDATED)}
+          </p>
         </div>
 
-        <QuickFilters />
-
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2">
-            <FilterButton
-              isActive={isShowingNewEvents}
-              onToggle={handleToggleNewEvents}
-              icon={<Sparkles className="h-4 w-4" />}
+        <div className="flex flex-col sm:gap-4 gap-3.5">
+          <div className="flex items-center sm:gap-4 gap-2">
+            <SearchInput placeholder={placeholder} className="flex-1" />
+            <Tabs
+              value={view}
+              onValueChange={(value) =>
+                handleViewChange(value as "grid" | "calendar")
+              }
             >
-              Newly Added
-            </FilterButton>
-            {!isShowingNewEvents && (
+              <TabsList>
+                <TabsTrigger value="grid" className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger
+                  value="calendar"
+                  className="flex items-center gap-2"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Calendar
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <QuickFilters />
+
+          <div className="flex items-center justify-between">
+            <div className="flex gap-2">
               <FilterButton
-                isActive={isShowingPastEvents}
-                onToggle={handleToggleStartDate}
-                icon={<History className="h-4 w-4" />}
+                isActive={isShowingNewEvents}
+                onToggle={handleToggleNewEvents}
+                icon={<Sparkles className="h-4 w-4" />}
               >
-                Past
+                Newly Added
               </FilterButton>
-            )}
-            {view === "grid" && (
-              <FilterButton
-                isActive={isSelectMode}
-                onToggle={toggleSelectMode}
-                icon={<Calendar className="h-4 w-4" />}
-              >
-                Export
-              </FilterButton>
-            )}
+              {!isShowingNewEvents && (
+                <FilterButton
+                  isActive={isShowingPastEvents}
+                  onToggle={handleToggleStartDate}
+                  icon={<History className="h-4 w-4" />}
+                >
+                  Past
+                </FilterButton>
+              )}
+              {view === "grid" && (
+                <FilterButton
+                  isActive={isSelectMode}
+                  onToggle={toggleSelectMode}
+                  icon={<Calendar className="h-4 w-4" />}
+                >
+                  Export
+                </FilterButton>
+              )}
+            </div>
           </div>
         </div>
+
+        <EventsContent
+          view={view}
+          data={events}
+          isSelectMode={isSelectMode}
+          selectedEvents={selectedEvents}
+          onToggleEvent={toggleEventSelection}
+          isLoading={isLoading}
+          error={error}
+        />
+
+        <FloatingEventExportBar
+          view={view}
+          isSelectMode={isSelectMode}
+          selectedEvents={selectedEvents}
+          onCancel={toggleSelectMode}
+          onExportICalendar={exportToCalendar}
+          onExportGoogleCalendar={exportToGoogleCalendar}
+        />
       </div>
-
-      <EventsContent
-        view={view}
-        data={events}
-        isSelectMode={isSelectMode}
-        selectedEvents={selectedEvents}
-        onToggleEvent={toggleEventSelection}
-        isLoading={isLoading}
-        error={error}
-      />
-
-      <FloatingEventExportBar
-        view={view}
-        isSelectMode={isSelectMode}
-        selectedEvents={selectedEvents}
-        onCancel={toggleSelectMode}
-        onExportICalendar={exportToCalendar}
-        onExportGoogleCalendar={exportToGoogleCalendar}
-      />
-    </div>
+    </>
   );
 }
 
