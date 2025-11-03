@@ -20,6 +20,7 @@ from openai import OpenAI
 from scraping.logging_config import logger
 from shared.constants.emojis import EMOJI_CATEGORIES
 from utils.events_utils import clean_datetime
+from utils.date_utils import get_current_semester_end_time
 from datetime import timezone as pytimezone
 
 
@@ -119,6 +120,9 @@ class OpenAIService:
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")
+        
+        # Get current semester end time for inferring RRULE UNTIL dates
+        semester_end_time = get_current_semester_end_time(school)
 
         prompt = f"""
     Analyze the following Instagram caption and image and extract event information if it's an event post.
@@ -126,6 +130,7 @@ class OpenAIService:
     School context: This post is from {school}. Use this to guide location and timezone decisions.
     Current context: Today is {current_day_of_week}, {current_date}
     Post was created on: {context_day}, {context_date} at {context_time}
+    Current semester end date: {semester_end_time}
 
     Caption: {caption_text}
 
@@ -157,7 +162,7 @@ class OpenAIService:
         "food": string,
         "registration": boolean,
         "rrule": string,
-        "rdate": array,               // additional occurrence dates as ["YYYY-MM-DD", ...] when multiple dates are listed
+        "rdate": string,              // comma-separated datetime strings in format "YYYYMMDDTHHMMSS,YYYYMMDDTHHMMSS,..." (e.g., "20251113T170000,20251204T170000,20251218T170000")
         "school": string,
         "source_image_url": string,
         "description": string
@@ -169,6 +174,53 @@ class OpenAIService:
         * Add the additional dates (date-only) to rdate, or set rrule if a clear recurrence pattern is stated (e.g., "every Monday").
         * Never create separate objects for the same event just because of multiple dates.
     - Only create multiple objects when the caption clearly describes DISTINCT events (different titles, venues, or clearly different activities).
+
+    RDATE vs RRULE RULES (CRITICAL):
+    - Use RDATE when multiple specific dates are listed but NO recurring pattern is explicitly stated:
+        * Example: "Join us Oct 15, Oct 22, Nov 3, and Nov 10" -> Use RDATE with the additional dates
+        * RDATE should be a comma-separated string of datetime values in format YYYYMMDDTHHMMSS
+        * Example: "20251022T140000,20251103T140000,20251110T140000"
+        * Put the first occurrence in dtstart/dtend, remaining dates/times in rdate
+    
+    - Use RRULE when a recurring pattern IS explicitly stated (e.g., "every Monday", "weekly on Wednesdays", "daily"):
+        * RRULE MUST include the UNTIL parameter to specify when the recurrence ends
+        * Format: FREQ=WEEKLY;BYDAY=MO;UNTIL={semester_end_time}
+        * If no end date is mentioned, use {semester_end_time} as the UNTIL value
+        * Common RRULE examples:
+            - Every Wednesday until December: FREQ=WEEKLY;BYDAY=WE;UNTIL=20251130T235959Z
+            - Daily for a week: FREQ=DAILY;UNTIL=20251110T235959Z
+            - Every Tuesday and Thursday: FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20251215T235959Z
+    
+    - If uncertain whether it's recurring or just multiple dates, prefer RDATE
+
+    MULTIPLE TIME SLOTS FOR SAME RECURRING EVENT:
+    When the same event has multiple time slots on the same day(s) of the week, create SEPARATE event objects for each time slot.
+    Example: "Weekly sessions every Wednesday: 5-6 PM and 8-10 PM through December"
+    Should create TWO event objects:
+    [
+        {
+            "...": "...",
+            "dtstart": "2025-11-05 17:00:00-05",
+            "dtend": "2025-11-05 18:00:00-05",
+            "dtstart_utc": "2025-11-05 22:00:00Z",
+            "dtend_utc": "2025-11-05 23:00:00Z",
+            "duration": "01:00:00",
+            "all_day": false,
+            "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
+            "rdate": "",
+        },
+        {
+            "...": "...",
+            "dtstart": "2025-11-05 20:00:00-05",
+            "dtend": "2025-11-05 22:00:00-05",
+            "dtstart_utc": "2025-11-06 01:00:00Z",
+            "dtend_utc": "2025-11-06 03:00:00Z",
+            "duration": "02:00:00",
+            "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
+            "rdate": "",
+        }
+    ]
+    This represents two separate recurring time slots (5-6 PM and 8-10 PM) on every Wednesday from November through December.
 
     ADDITIONAL RULES:
     - Prioritize caption text; use image text if missing details.
@@ -318,8 +370,6 @@ class OpenAIService:
                                 event_obj[field] = None
                             elif field in ["registration", "all_day"]:
                                 event_obj[field] = False
-                            elif field == "rdate":
-                                event_obj[field] = []
                             else:
                                 event_obj[field] = ""
 
@@ -509,7 +559,7 @@ def _get_default_event_structure(
         "food": "",
         "registration": False,
         "rrule": "",
-        "rdate": [],
+        "rdate": "",
         "school": "University of Waterloo",
         "source_image_url": source_image_url or "",
         "description": "",
