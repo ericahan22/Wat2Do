@@ -138,7 +138,7 @@ const EventsGrid = memo(
       };
 
       paginatedData.forEach((event) => {
-        const category = getDateCategory(event.dtstart_utc);
+        const category = getDateCategory(event.dtstart_utc, event.dtend_utc);
         groups[category].push(event);
       });
 
