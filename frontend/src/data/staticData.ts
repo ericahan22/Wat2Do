@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-03T17:34:30.315722+00:00";
+export const LAST_UPDATED = "2025-11-03T17:51:43.180341+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["Smileys", "Smiling%20Face", "meeting"],
-  ["Smileys", "Grinning%20Face", "info night"],
-  ["Smileys", "Hugging%20Face", "community"],
-  ["Activity", "Ticket", "event"],
-  ["Food%20and%20Drink", "Birthday%20Cake", "bake sale"],
-  ["Activity", "Party%20Popper", "bbq"],
-  ["Activity", "Sparkles", "art sale"],
-  ["Objects", "Open%20Book", "workshop"],
-  ["People", "Raised%20Hand", "info session"],
-  ["Smileys", "Face%20With%20Open%20Mouth", "talk"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "support"],
+  ["People", "Clapping%20Hands", "community meeting"],
+  ["Activity", "Ticket", "info session"],
+  ["Activity", "Fireworks", "night"],
+  ["Activity", "Party%20Popper", "event"],
+  ["People", "Raised%20Hand", "meeting"],
   ["Activity", "Trophy", "competition"],
+  ["Objects", "Books", "workshop"],
+  ["People", "People%20Hugging", "support"],
+  ["Activity", "Confetti%20Ball", "celebration"],
+  ["People", "Victory%20Hand", "success"],
+  ["Activity", "Sparkles", "fun"],
   ["Objects", "Microphone", "talk"],
-  ["Objects", "Books", "course"],
-  ["Smileys", "Face%20With%20Thermometer", "health"]
+  ["Symbols", "Check%20Mark", "registration"],
+  ["People", "Waving%20Hand", "welcome"],
+  ["People", "Family%20Man%20Woman%20Girl%20Boy", "community"]
 ];
