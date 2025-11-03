@@ -11,12 +11,10 @@ django.setup()
 import csv
 import json
 import random
-import re
 import time
 import traceback
 from datetime import datetime, timedelta, timezone as pytimezone
 from pathlib import Path
-from difflib import SequenceMatcher
 
 import requests
 from requests.exceptions import ReadTimeout, ConnectionError
@@ -36,6 +34,13 @@ from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
 from utils.events_utils import clean_datetime, clean_duration
+from utils.scraping_utils import (
+    normalize,
+    jaccard_similarity,
+    sequence_similarity,
+    get_post_image_url,
+)
+
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "25"))
 MAX_CONSEC_OLD_POSTS = 10
@@ -55,48 +60,6 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
-def get_post_image_url(post):
-    try:
-        if post._node.get("image_versions2"):
-            return post._node["image_versions2"]["candidates"][0]["url"]
-
-        if post._node.get("carousel_media"):
-            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0][
-                "url"
-            ]
-
-        if post._node.get("display_url"):
-            return post._node["display_url"]
-        return None
-    except (KeyError, AttributeError) as e:
-        logger.error(
-            f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {e!s}"
-        )
-        return None
-
-
-def extract_s3_filename_from_url(image_url: str) -> str:
-    if not image_url:
-        return None
-    filename = image_url.split("/")[-1]
-    return f"events/{filename}"
-
-
-def normalize(s):
-    return re.sub(r"[^a-z0-9]", "", s.lower())
-
-
-def jaccard_similarity(a, b):
-    """Compute Jaccard similarity between two strings (case-insensitive, word-based)."""
-    set_a = set(re.findall(r"\w+", a.lower()))
-    set_b = set(re.findall(r"\w+", b.lower()))
-    if not set_a or not set_b:
-        return 0.0
-    intersection = set_a & set_b
-    union = set_a | set_b
-    return len(intersection) / len(union)
-
-
 def is_duplicate_event(event_data):
     """Check for duplicate events using title, datetime, location, and description."""
     title = event_data.get("title") or ""
@@ -109,9 +72,7 @@ def is_duplicate_event(event_data):
     try:
         date = datetime.fromisoformat(dtstart_utc)
         candidates = Events.objects.filter(dtstart_utc__date=date.date())
-        print(f"Checking for duplicates on {date.date()} - found {candidates.count()} candidates")
         for c in candidates:
-            print("Candidate:", c.title, c.location, c.dtstart_utc)
             c_title = getattr(c, "title", "") or ""
             c_loc = getattr(c, "location", "") or ""
             c_desc = getattr(c, "description", "") or ""
@@ -122,19 +83,20 @@ def is_duplicate_event(event_data):
                 substring_match = norm_c_title in norm_title or norm_title in norm_c_title
                 title_sim = max(
                     jaccard_similarity(c_title, title),
-                    SequenceMatcher(None, c_title.lower(), title.lower()).ratio(),
+                    sequence_similarity(c_title, title),
                 )
                 loc_sim = jaccard_similarity(c_loc, location)
                 desc_sim = jaccard_similarity(c_desc, description)
-                logger.debug(
-                    f"Comparing to candidate: '{c_title}' @ '{c_loc}'",
-                    f"substring_match={substring_match}, title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f}"
-                )
                 if substring_match:
-                    logger.debug("-> Duplicate by substring match")
+                    logger.warning(
+                        f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
+                    )
                     return True
                 if (title_sim > 0.4) or (loc_sim > 0.5 and desc_sim > 0.3):
-                    logger.debug("-> Duplicate by similarity threshold")
+                    logger.warning(
+                        f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
+                        f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
+                    )
                     return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
@@ -263,7 +225,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     school = event_data.get("school", "")
 
     if is_duplicate_event(event_data):
-        logger.info(
+        logger.warning(
             f"Duplicate event detected, skipping {title} on {date} at {location}"
         )
         try:
@@ -276,7 +238,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
             )
         except Exception as csv_e:
             logger.error(f"Error writing duplicate event to CSV: {csv_e}")
-        return False
+        return "duplicate"
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
     try:
@@ -531,10 +493,15 @@ def process_recent_feed(
                         break
                     continue
 
-                if insert_event_to_db(event_data, post.owner_username, source_url):
+                result = insert_event_to_db(event_data, post.owner_username, source_url)
+                if result is True:
                     events_added += 1
                     logger.info(
                         f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
+                    )
+                elif result == "duplicate":
+                    logger.warning(
+                        f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
                     )
                 else:
                     logger.error(

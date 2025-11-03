@@ -60,6 +60,7 @@ jobs:
       EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       
     steps:
       - uses: actions/checkout@v4

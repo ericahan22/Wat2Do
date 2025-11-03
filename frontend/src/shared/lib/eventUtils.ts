@@ -25,13 +25,8 @@ export const isEventNew = (event: Event): boolean => {
   const now = new Date();
   const addedAt = new Date(event.added_at);
   
-  // Match the logic from handleToggleNewEvents
-  const todayAt7am = new Date();
-  todayAt7am.setHours(7, 0, 0, 0);
-  
-  const cutoffDate = now >= todayAt7am ? todayAt7am : new Date(todayAt7am.getTime() - 24 * 60 * 60 * 1000);
-  
-  return addedAt >= cutoffDate;
+  // New events are those added in past 24 hours
+  return (now.getTime() - addedAt.getTime()) <= 24 * 60 * 60 * 1000;
 };
 
 /**
