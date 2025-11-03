@@ -1,4 +1,5 @@
 import uuid
+from datetime import timedelta
 
 from apps.core.auth import jwt_required, admin_required
 from django.conf import settings
@@ -38,7 +39,7 @@ def get_events(request):
         
         # Apply default dtstart_utc filter only if not provided in request
         if not dtstart_utc_param:
-            queryset = queryset.filter(dtstart_utc__gte=timezone.now())
+            queryset = queryset.filter(dtstart_utc__gte=timezone.now() - timedelta(hours=1))
         
         queryset = queryset.order_by("dtstart_utc")
         
