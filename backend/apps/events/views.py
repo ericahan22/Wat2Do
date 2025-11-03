@@ -475,22 +475,19 @@ def submit_event(request):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # Run OpenAI extraction to build event data
-        event_data = extract_events_from_caption(
+        # Run OpenAI extraction to build event data (returns a list of events)
+        extracted_list = extract_events_from_caption(
             caption_text=f"Event source: {source_url}",
             source_image_url=screenshot_url,
         )
 
+        # Choose the first event to create; store the full extracted list on submission
+        event_data = (extracted_list or [])[:1][0] if extracted_list else {}
         # Ensure provenance
-        if isinstance(event_data, dict):
-            event_data["source_url"] = source_url
-            event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
-            if other_handle:
-                event_data["other_handle"] = other_handle
-        else:
-            event_data = {"source_url": source_url, "source_image_url": screenshot_url}
-            if other_handle:
-                event_data["other_handle"] = other_handle
+        event_data["source_url"] = source_url
+        event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
+        if other_handle:
+            event_data["other_handle"] = other_handle
 
         # Create Event immediately and link submission
         allowed_fields = {f.name for f in Events._meta.get_fields()}
@@ -524,7 +521,7 @@ def submit_event(request):
             status="pending",
             submitted_by=clerk_user_id,
             created_event=event,
-            extracted_data=event_data,
+            extracted_data=extracted_list or [],
         )
 
         return Response(
@@ -575,21 +572,21 @@ def process_submission(request, submission_id):
     try:
         submission = get_object_or_404(EventSubmission, id=submission_id)
 
-        event_data = extract_events_from_caption(
+        extracted_list = extract_events_from_caption(
             caption_text=f"Event source: {submission.source_url}",
             source_image_url=submission.screenshot_url,
         )
 
-        if event_data:
-            submission.extracted_data = event_data if isinstance(event_data, dict) else {}
+        if extracted_list:
+            submission.extracted_data = extracted_list
             submission.save()
 
-            # Update linked event with fresh data (only known fields)
             event = submission.created_event
-            if event and isinstance(event_data, dict):
+            if event and extracted_list:
+                first_item = extracted_list[0]
                 for field in [f.name for f in Events._meta.get_fields()]:
-                    if field in event_data:
-                        setattr(event, field, event_data[field])
+                    if field in first_item:
+                        setattr(event, field, first_item[field])
                 event.save()
 
             return Response(

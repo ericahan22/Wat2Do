@@ -444,69 +444,73 @@ def process_recent_feed(
                     source_image_url = None
 
                 posts_processed += 1
-                event_data = extract_events_from_caption(
+                extracted_list = extract_events_from_caption(
                     post.caption, source_image_url, post.date_utc
                 )
-                if not event_data:
+                if not extracted_list:
                     logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no event for post"
+                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
                     )
                     if check_post_limit():
                         break
                     continue
 
-                logger.debug(f"[{post.shortcode}] [{post.owner_username}] Event data: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}")
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                for idx, event_data in enumerate(extracted_list):
+                    try:
+                        logger.debug(
+                            f"[{post.shortcode}] [{post.owner_username}] Event {idx+1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
+                        )
 
-                if not (
-                    event_data.get("title")
-                    and event_data.get("dtstart")
-                    and event_data.get("location")
-                ):
-                    missing_fields = [
-                        key
-                        for key in ["title", "dtstart", "location"]
-                        if not event_data.get(key)
-                    ]
-                    logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
-                    )
-                    embedding = generate_event_embedding(event_data)
-                    append_event_to_csv(
-                        event_data,
-                        post.owner_username,
-                        source_url,
-                        added_to_db="missing_fields",
-                        embedding=embedding,
-                    )
-                    if check_post_limit():
-                        break
-                    continue
+                        if not (
+                            event_data.get("title")
+                            and event_data.get("dtstart")
+                            and event_data.get("location")
+                        ):
+                            missing_fields = [
+                                key
+                                for key in ["title", "dtstart", "location"]
+                                if not event_data.get(key)
+                            ]
+                            logger.warning(
+                                f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
+                            )
+                            embedding = generate_event_embedding(event_data)
+                            append_event_to_csv(
+                                event_data,
+                                post.owner_username,
+                                source_url,
+                                added_to_db="missing_fields",
+                                embedding=embedding,
+                            )
+                            continue
 
-                dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
-                now = timezone.now()
-                if dtstart_utc < now:
-                    logger.info(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
-                    )
-                    if check_post_limit():
-                        break
-                    continue
+                        dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+                        now = timezone.now()
+                        if dtstart_utc < now:
+                            logger.info(
+                                f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
+                            )
+                            continue
 
-                result = insert_event_to_db(event_data, post.owner_username, source_url)
-                if result is True:
-                    events_added += 1
-                    logger.info(
-                        f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
-                    )
-                elif result == "duplicate":
-                    logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
-                    )
-                else:
-                    logger.error(
-                        f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
-                    )
+                        result = insert_event_to_db(event_data, post.owner_username, source_url)
+                        if result is True:
+                            events_added += 1
+                            logger.info(
+                                f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
+                            )
+                        elif result == "duplicate":
+                            logger.warning(
+                                f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
+                            )
+                        else:
+                            logger.error(
+                                f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
+                            )
+                    except Exception as inner_e:
+                        logger.error(
+                            f"[{post.shortcode}] [{post.owner_username}] Error handling extracted event index {idx}: {inner_e!s}"
+                        )
 
                 if check_post_limit():
                     break
