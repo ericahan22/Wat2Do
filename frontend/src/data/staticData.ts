@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-03T04:04:41.028008+00:00";
+export const LAST_UPDATED = "2025-11-03T12:57:50.759065+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
+  ["Food%20and%20Drink", "Birthday%20Cake", "bake sale"],
   ["Activity", "Ticket", "info session"],
   ["Activity", "Trophy", "meeting"],
-  ["Activity", "Sparkles", "night"],
-  ["Activity", "Fireworks", "event"],
   ["People", "Clapping%20Hands", "community"],
   ["People", "Raised%20Hand", "talk"],
-  ["People", "Waving%20Hand", "meetup"],
+  ["People", "People%20Hugging", "support"],
+  ["Activity", "Confetti%20Ball", "event"],
   ["Objects", "Open%20Book", "workshop"],
   ["Objects", "Microphone", "talk"],
-  ["Objects", "Graduation%20Cap", "session"],
-  ["Objects", "Gem%20Stone", "spotlight"],
-  ["Symbols", "Check%20Mark", "info"],
-  ["Symbols", "Exclamation%20Mark", "perspective"],
-  ["Smileys", "Smiling%20Face", "social"],
-  ["Smileys", "Face%20With%20Open%20Mouth", "perspective"]
+  ["Activity", "Sparkles", "night"],
+  ["Activity", "Balloon", "celebration"],
+  ["People", "Family%20Man%20Woman%20Girl%20Boy", "community"],
+  ["Food%20and%20Drink", "Cupcake", "bake"],
+  ["Activity", "Magic%20Wand", "venture"],
+  ["Activity", "Fireworks", "celebration"]
 ];
