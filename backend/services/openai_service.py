@@ -174,18 +174,28 @@ class OpenAIService:
     CONSOLIDATION RULES (VERY IMPORTANT):
     - If multiple dates/times describe the SAME event (same title/location/content), CONSOLIDATE into ONE object:
         * Put the primary occurrence in dtstart/dtend.
-        * Add the additional dates (date-only) to rdate, or set rrule if a clear recurrence pattern is stated (e.g., "every Monday").
+        * For additional dates: use EITHER rdate (for specific dates without a pattern) OR rrule (for a clear recurring pattern like "every Monday").
+        * IMPORTANT: Use EITHER rrule OR rdate, NEVER both. If using rdate, set rrule to "". If using rrule, set rdate to "".
         * Never create separate objects for the same event just because of multiple dates.
     - Only create multiple objects when the caption clearly describes DISTINCT events (different titles, venues, or clearly different activities).
 
     RDATE vs RRULE RULES (CRITICAL):
+    
+    MUTUAL EXCLUSIVITY (MANDATORY):
+    - RRULE and RDATE are MUTUALLY EXCLUSIVE - you must use EITHER one OR the other, NEVER both.
+    - If an event has multiple specific dates with NO recurring pattern, use RDATE only (rrule must be "").
+    - If an event has a recurring pattern (e.g., "every Monday", "weekly"), use RRULE only (rdate must be "").
+    - If an event has no recurrence or additional dates, both rrule and rdate should be empty strings "".
+    
     - Use RDATE when multiple specific dates are listed but NO recurring pattern is explicitly stated:
-        * Example: "Join us Oct 15, Oct 22, Nov 3, and Nov 10" -> Use RDATE with the additional dates
+        * Example: "Join us Oct 15, Oct 22, Nov 3, and Nov 10" -> Use RDATE with the additional dates, rrule must be ""
         * RDATE should be a comma-separated string of datetime values in format YYYYMMDDTHHMMSS
         * Example: "20251022T140000,20251103T140000,20251110T140000"
         * Put the first occurrence in dtstart/dtend, remaining dates/times in rdate
+        * When using RDATE, always set rrule to ""
     
     - Use RRULE when a recurring pattern IS explicitly stated (e.g., "every Monday", "weekly on Wednesdays", "daily"):
+    * DO NOT USE RRULE IF THE EVENT HAS NO RECURRING PATTERN
         * RRULE MUST include the UNTIL parameter to specify when the recurrence ends
         * Format: FREQ=WEEKLY;BYDAY=MO;UNTIL={semester_end_time}
         * If no end date is mentioned, use {semester_end_time} as the UNTIL value
@@ -193,8 +203,7 @@ class OpenAIService:
             - Every Wednesday until December: FREQ=WEEKLY;BYDAY=WE;UNTIL=20251130T235959Z
             - Daily for a week: FREQ=DAILY;UNTIL=20251110T235959Z
             - Every Tuesday and Thursday: FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20251215T235959Z
-    
-    - If uncertain whether it's recurring or just multiple dates, prefer RDATE
+        * When using RRULE, always set rdate to ""
 
     MULTIPLE TIME SLOTS FOR SAME RECURRING EVENT:
     When the same event has multiple time slots on the same day(s) of the week, create SEPARATE event objects for each time slot.
@@ -242,7 +251,7 @@ class OpenAIService:
         * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
     - For food: Only set this field if the post says food or drinks will be served, provided, or available for attendees. If specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize ONLY the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
-    - For rrule: only when recurring is mentioned; otherwise empty string.
+    - For rrule and rdate: they are MUTUALLY EXCLUSIVE. Use EITHER rrule (for recurring patterns) OR rdate (for specific dates without a pattern), NEVER both. If using rrule, set rdate to "". If using rdate, set rrule to "".
     - For description: start with the caption text word-for-word, then append any additional insights about the event extracted from the image that are not already mentioned in the caption.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON array text, no extra commentary.
@@ -271,66 +280,14 @@ class OpenAIService:
                 messages[1]["content"].append(
                     {"type": "image_url", "image_url": {"url": source_image_url}}
                 )
-                model = "gpt-4o-mini"  # Use vision-capable model
-            else:
-                model = "gpt-4o-mini"
+            model = "gpt-5-mini"
 
-            # If image download by OpenAI errors out, retry without image content by using URL in text
-            response = None
             try:
                 response = self.client.chat.completions.create(
-                    model=model, messages=messages, temperature=0.1, max_tokens=2000
+                    model=model, messages=messages
                 )
             except Exception as e:
-                err_text = str(e)
-                if (
-                    "invalid_image_url" in err_text
-                    or "Timeout while downloading" in err_text
-                ):
-                    logger.warning(
-                        f"OpenAI failed to fetch the image ({err_text}); retrying without image"
-                    )
-                    fallback = deepcopy(messages)
-                    if isinstance(fallback[1].get("content"), list):
-                        fallback[1]["content"] = [
-                            c
-                            for c in fallback[1]["content"]
-                            if not (
-                                isinstance(c, dict) and c.get("type") == "image_url"
-                            )
-                        ]
-                        if source_image_url:
-                            if (
-                                isinstance(fallback[1]["content"][0], dict)
-                                and "text" in fallback[1]["content"][0]
-                            ):
-                                fallback[1]["content"][0]["text"] += (
-                                    f"\n\nImage URL: {source_image_url}"
-                                )
-                            else:
-                                fallback[1]["content"].insert(
-                                    0,
-                                    {
-                                        "type": "text",
-                                        "text": f"Image URL: {source_image_url}",
-                                    },
-                                )
-                    time.sleep(1)
-                    try:
-                        response = self.client.chat.completions.create(
-                            model="gpt-4o-mini",
-                            messages=fallback,
-                            temperature=0.1,
-                            max_tokens=2000,
-                        )
-                    except Exception as e:
-                        logger.exception(
-                            f"Retry without image also failed, returning default structure: {e}"
-                        )
-                        return _get_default_event_structure(source_image_url)
-
-            # If both attempts failed and no response is available, return empty list
-            if response is None:
+                logger.exception(f"OpenAI API call failed: {e}")
                 return []
 
             # Extract the JSON response
@@ -479,7 +436,7 @@ NO explanations, NO additional text, JUST the JSON array.
             )
 
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-5-mini",
                 messages=[
                     {
                         "role": "system",
@@ -547,31 +504,6 @@ NO explanations, NO additional text, JUST the JSON array.
             logger.error(f"Traceback: {traceback.format_exc()}")
             return []
 
-
-def _get_default_event_structure(
-    source_image_url: str | None = None,
-) -> dict[str, str | bool | float | None]:
-    """Helper function to create default event structure"""
-    return {
-        "title": "",
-        "dtstart": "",
-        "dtend": "",
-        "dtstart_utc": "",
-        "dtend_utc": "",
-        "all_day": False,
-        "location": "",
-        "latitude": None,
-        "longitude": None,
-        "tz": "America/Toronto",
-        "price": None,
-        "food": "",
-        "registration": False,
-        "rrule": "",
-        "rdate": "",
-        "school": "University of Waterloo",
-        "source_image_url": source_image_url or "",
-        "description": "",
-    }
 
 
 # Singleton instance
