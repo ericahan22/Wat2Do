@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-02T22:25:24.202221+00:00";
+export const LAST_UPDATED = "2025-11-03T04:04:41.028008+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["Activity", "Video%20Game", "game night"],
-  ["Activity", "Ticket", "conference"],
+  ["Activity", "Ticket", "info session"],
+  ["Activity", "Trophy", "meeting"],
+  ["Activity", "Sparkles", "night"],
+  ["Activity", "Fireworks", "event"],
   ["People", "Clapping%20Hands", "community"],
-  ["Food%20and%20Drink", "Cookie", "cookie sale"],
-  ["Activity", "Sparkler", "night"],
-  ["Activity", "Trophy", "league"],
-  ["Activity", "Confetti%20Ball", "afterparty"],
-  ["Activity", "Party%20Popper", "event"],
-  ["People", "Waving%20Hand", "network"],
-  ["Activity", "Balloon", "workshop"],
-  ["Activity", "Basketball", "volleyball"],
-  ["Activity", "Magic%20Wand", "slime"],
-  ["Activity", "Sparkles", "nightmare"],
-  ["Activity", "Performing%20Arts", "talk"],
-  ["Activity", "Fireworks", "celebration"]
+  ["People", "Raised%20Hand", "talk"],
+  ["People", "Waving%20Hand", "meetup"],
+  ["Objects", "Open%20Book", "workshop"],
+  ["Objects", "Microphone", "talk"],
+  ["Objects", "Graduation%20Cap", "session"],
+  ["Objects", "Gem%20Stone", "spotlight"],
+  ["Symbols", "Check%20Mark", "info"],
+  ["Symbols", "Exclamation%20Mark", "perspective"],
+  ["Smileys", "Smiling%20Face", "social"],
+  ["Smileys", "Face%20With%20Open%20Mouth", "perspective"]
 ];
