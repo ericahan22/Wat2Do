@@ -92,7 +92,7 @@ def is_duplicate_event(event_data):
                         f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
                     )
                     return True
-                if (title_sim > 0.4) or (loc_sim > 0.5 and desc_sim > 0.3):
+                if (title_sim > 0.7 and loc_sim > 0.5) or (loc_sim > 0.5 and desc_sim > 0.3):
                     logger.warning(
                         f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
                         f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
@@ -225,9 +225,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     school = event_data.get("school", "")
 
     if is_duplicate_event(event_data):
-        logger.warning(
-            f"Duplicate event detected, skipping {title} on {date} at {location}"
-        )
         try:
             append_event_to_csv(
                 event_data,
@@ -316,7 +313,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
             embedding=embedding,
             club_type=club_type,
         )
-        logger.info("Event added successfully")
         return True
     except Exception as e:
         logger.error(f"Error inserting event to DB: {e}")
@@ -459,7 +455,7 @@ def process_recent_feed(
                 for idx, event_data in enumerate(extracted_list):
                     try:
                         logger.debug(
-                            f"[{post.shortcode}] [{post.owner_username}] Event {idx+1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
+                            f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
                         )
 
                         if not (
