@@ -17,12 +17,21 @@ class Migration(migrations.Migration):
             model_name="events",
             name="events_school_status_dtstart_utc_dtend_utc_added_at_idx",
         ),
+        # Ensure idempotency: drop indexes if they already exist before (re)creating
+        migrations.RunSQL(
+            sql="DROP INDEX IF EXISTS events_school_status_dtend_idx;",
+            reverse_sql="",
+        ),
         migrations.AddIndex(
             model_name="events",
             index=models.Index(
                 fields=["school", "status", "dtend_utc"],
                 name="events_school_status_dtend_idx",
             ),
+        ),
+        migrations.RunSQL(
+            sql="DROP INDEX IF EXISTS events_school_status_dtstart_nullend_idx;",
+            reverse_sql="",
         ),
         migrations.AddIndex(
             model_name="events",
