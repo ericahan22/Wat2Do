@@ -27,6 +27,37 @@ export const formatPrettyDate = (dateString: string): string => {
 }
 
 /**
+ * Format event date(s) in short format
+ * Single day: "Friday Oct 31"
+ * Multiple days: "Fri Oct 31 to Mon Nov 3"
+ */
+export const formatEventDate = (startDateString: string, endDateString?: string | null): string => {
+  try {
+    const startDate = new Date(removeTimezoneInfo(startDateString));
+    
+    // If no end date or end date is the same day as start date
+    if (!endDateString) {
+      return format(startDate, "EEEE MMM d");
+    }
+    
+    const endDate = new Date(removeTimezoneInfo(endDateString));
+    
+    // Check if events are on the same day (ignoring time)
+    const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    
+    if (startDateOnly.getTime() === endDateOnly.getTime()) {
+      return format(startDate, "EEEE MMM d");
+    }
+    
+    // Multi-day event
+    return `${format(startDate, "EEE MMM d")} to ${format(endDate, "EEE MMM d")}`;
+  } catch {
+    return startDateString; // Return original string if parsing fails
+  }
+}
+
+/**
  * Format a time string to a prettier format (e.g., "3pm" or "3:30pm")
  */
 export const formatPrettyTime = (timeString: string): string => {
@@ -94,10 +125,13 @@ export const formatDtstartToMidnight = (dtstart: string): string => {
 
 /**
  * Get date category for event grouping (today, tomorrow, later this week, later this month, later, past)
+ * For multi-day events, checks if today falls within the event's date range
  */
-export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'later this week' | 'later this month' | 'later' | 'past' => {
+export const getDateCategory = (startDateString: string, endDateString?: string | null): 'today' | 'tomorrow' | 'later this week' | 'later this month' | 'later' | 'past' => {
   try {
-    const eventDate = new Date(removeTimezoneInfo(dateString));
+    const eventStartDate = new Date(removeTimezoneInfo(startDateString));
+    const eventEndDate = endDateString ? new Date(removeTimezoneInfo(endDateString)) : null;
+    
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
@@ -111,21 +145,28 @@ export const getDateCategory = (dateString: string): 'today' | 'tomorrow' | 'lat
     const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     
     // Reset time to start of day for comparison
-    const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+    const eventStartDateOnly = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
+    const eventEndDateOnly = eventEndDate ? new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate()) : eventStartDateOnly;
     const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
     const endOfWeekOnly = new Date(endOfWeek.getFullYear(), endOfWeek.getMonth(), endOfWeek.getDate());
     const endOfMonthOnly = new Date(endOfMonth.getFullYear(), endOfMonth.getMonth(), endOfMonth.getDate());
     
-    if (eventDateOnly.getTime() === todayOnly.getTime()) {
+    // Check if today falls within the event's date range (for multi-day events)
+    const todayTime = todayOnly.getTime();
+    const isHappeningToday = todayTime >= eventStartDateOnly.getTime() && todayTime <= eventEndDateOnly.getTime();
+    const isHappeningTomorrow = tomorrowOnly.getTime() >= eventStartDateOnly.getTime() && tomorrowOnly.getTime() <= eventEndDateOnly.getTime();
+    
+    if (isHappeningToday) {
       return 'today';
-    } else if (eventDateOnly.getTime() === tomorrowOnly.getTime()) {
+    } else if (isHappeningTomorrow || eventStartDateOnly.getTime() === tomorrowOnly.getTime()) {
       return 'tomorrow';
-    } else if (eventDateOnly.getTime() < todayOnly.getTime()) {
+    } else if (eventEndDateOnly.getTime() < todayOnly.getTime()) {
+      // Event has completely ended
       return 'past';
-    } else if (eventDateOnly.getTime() <= endOfWeekOnly.getTime()) {
+    } else if (eventStartDateOnly.getTime() <= endOfWeekOnly.getTime()) {
       return 'later this week';
-    } else if (eventDateOnly.getTime() <= endOfMonthOnly.getTime()) {
+    } else if (eventStartDateOnly.getTime() <= endOfMonthOnly.getTime()) {
       return 'later this month';
     } else {
       return 'later';
