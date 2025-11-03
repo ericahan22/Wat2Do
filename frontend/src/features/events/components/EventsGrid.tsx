@@ -29,7 +29,7 @@ import { Event, EVENTS_PER_PAGE } from "@/features/events";
 import { memo, useState, useMemo, useEffect } from "react";
 import {
   formatEventTimeRange,
-  formatPrettyDate,
+  formatEventDate,
   getDateCategory,
 } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
@@ -221,7 +221,7 @@ const EventsGrid = memo(
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatPrettyDate(event.dtstart_utc)}
+                  {formatEventDate(event.dtstart_utc, event.dtend_utc)}
                 </span>
               </div>
 

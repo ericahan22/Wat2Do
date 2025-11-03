@@ -18,20 +18,17 @@ _clerk_client = Clerk(bearer_auth=CLERK_SECRET_KEY)
 class JwtAuthBackend(BaseBackend):
     def authenticate(self, request, **kwargs):
         if 'Authorization' not in request.headers:
-            logger.warning("JWT auth: Missing Authorization header on %s %s", request.method, request.path)
+            logger.warning(f"JWT auth: Missing Authorization header on {request.method} {request.path}")
             return None
 
         try:
             auth_header = request.headers.get('Authorization')
             if not auth_header.startswith('Bearer '):
-                logger.warning("JWT auth: Authorization header not Bearer on %s %s", request.method, request.path)
+                logger.warning(f"JWT auth: Authorization header not Bearer on {request.method} {request.path}")
                 return None
 
             logger.debug(
-                "JWT auth: attempting Clerk auth (aud=%s) on %s %s",
-                CLERK_AUTHORIZED_PARTIES,
-                request.method,
-                request.path,
+                f"JWT auth: attempting Clerk auth (aud={CLERK_AUTHORIZED_PARTIES}) on {request.method} {request.path}"
             )
             request_state = authenticate_request(
                 request,
@@ -42,7 +39,7 @@ class JwtAuthBackend(BaseBackend):
             )
             if not request_state.is_signed_in:
                 request.error_message = request_state.message
-                logger.warning("JWT auth: Clerk rejected token: %s", request_state.message)
+                logger.warning(f"JWT auth: Clerk rejected token: {request_state.message}")
                 return None
             print(request_state.payload, 'request_state.payload')
             # Ideally at this point user object must be fetched from DB and returned, but we will just return a dummy

@@ -27,6 +27,37 @@ export const formatPrettyDate = (dateString: string): string => {
 }
 
 /**
+ * Format event date(s) in short format
+ * Single day: "Friday Oct 31"
+ * Multiple days: "Fri Oct 31 to Mon Nov 3"
+ */
+export const formatEventDate = (startDateString: string, endDateString?: string | null): string => {
+  try {
+    const startDate = new Date(removeTimezoneInfo(startDateString));
+    
+    // If no end date or end date is the same day as start date
+    if (!endDateString) {
+      return format(startDate, "EEEE MMM d");
+    }
+    
+    const endDate = new Date(removeTimezoneInfo(endDateString));
+    
+    // Check if events are on the same day (ignoring time)
+    const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    
+    if (startDateOnly.getTime() === endDateOnly.getTime()) {
+      return format(startDate, "EEEE MMM d");
+    }
+    
+    // Multi-day event
+    return `${format(startDate, "EEE MMM d")} to ${format(endDate, "EEE MMM d")}`;
+  } catch {
+    return startDateString; // Return original string if parsing fails
+  }
+}
+
+/**
  * Format a time string to a prettier format (e.g., "3pm" or "3:30pm")
  */
 export const formatPrettyTime = (timeString: string): string => {

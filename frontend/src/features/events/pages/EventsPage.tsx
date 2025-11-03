@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   useEvents,
@@ -19,12 +19,16 @@ import {
 import { Calendar, History, LayoutGrid, Sparkles } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
-import { LAST_UPDATED } from "@/data/staticData";
+import { LAST_UPDATED, RECOMMENDED_FILTERS } from "@/data/staticData";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
-  const placeholder = searchParams.get("placeholder") || "Free food";
+  const randomFilter = useMemo(() => 
+    RECOMMENDED_FILTERS[Math.floor(Math.random() * RECOMMENDED_FILTERS.length)][2],
+    []
+  );
+  const placeholder = searchParams.get("placeholder") || randomFilter;
 
   const handleViewChange = useCallback(
     (newView: "grid" | "calendar") => {
@@ -90,7 +94,7 @@ function EventsPage() {
             suffix={` ${getEventTypeText()} events`}
           />
         </h1>
-        <p>Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
+        <p className="text-gray-600 dark:text-gray-400">Updated {formatRelativeDateTime(LAST_UPDATED)}</p>
       </div>
 
       <div className="flex flex-col gap-4">

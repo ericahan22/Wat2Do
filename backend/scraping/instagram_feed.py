@@ -536,10 +536,7 @@ def process_recent_feed(
         logger.error(f"Traceback: {traceback.format_exc()}")
 
     logger.debug(
-        "Feed processing completed. reason=%s, posts_processed=%d, events_added=%d",
-        termination_reason,
-        posts_processed,
-        events_added,
+        f"Feed processing completed. reason={termination_reason}, posts_processed={posts_processed}, events_added={events_added}"
     )
     logger.info("\n------------------------- Summary -------------------------")
     logger.info(f"Added {events_added} event(s) to Supabase")
