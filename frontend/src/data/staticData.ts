@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-04T13:03:22.161372+00:00";
+export const LAST_UPDATED = "2025-11-04T17:30:37.157134+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
   ["Objects", "Books", "workshop"],
   ["Activity", "Video%20Game", "gaming"],
-  ["People", "Raised%20Hand", "career fair"],
-  ["Smileys", "Smiling%20Face", "networking"],
-  ["Smileys", "Hugging%20Face", "community"],
-  ["Smileys", "Beaming%20Face%20With%20Smiling%20Eyes", "smiles"],
+  ["People", "Clapping%20Hands", "community"],
+  ["Smileys", "Smiling%20Face", "smiles"],
+  ["Objects", "Graduation%20Cap", "career"],
   ["Activity", "Ticket", "event"],
-  ["Objects", "Graduation%20Cap", "thesis"],
-  ["Objects", "Microphone", "talk"],
-  ["Activity", "Party%20Popper", "celebration"],
-  ["People", "Clapping%20Hands", "applause"],
-  ["Smileys", "Worried%20Face", "mental health"],
-  ["Smileys", "Face%20With%20Medical%20Mask", "health"],
-  ["Smileys", "Thinking%20Face", "balance"],
-  ["Activity", "Trophy", "achievement"]
+  ["Smileys", "Beaming%20Face%20With%20Smiling%20Eyes", "fun"],
+  ["Food%20and%20Drink", "Cupcake", "snacks"],
+  ["People", "Raised%20Hand", "questions"],
+  ["Smileys", "Thinking%20Face", "thesis"],
+  ["Activity", "Trophy", "competition"],
+  ["People", "People%20Hugging", "support"],
+  ["Smileys", "Worried%20Face", "concerns"],
+  ["People", "Victory%20Hand", "success"],
+  ["Smileys", "Hugging%20Face", "wellness"]
 ];
