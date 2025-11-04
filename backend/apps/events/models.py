@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from pgvector.django import VectorField
 
 
 class Events(models.Model):
@@ -40,8 +39,9 @@ class Events(models.Model):
     # Event categorization
     categories = models.JSONField(
         default=list,
+        null=True,
         blank=True,
-        help_text="List of event categories (e.g. ['Academic', 'Cultural'])",
+        help_text="['Career', 'Networking']",
     )
 
     # Timezone information
@@ -85,9 +85,6 @@ class Events(models.Model):
         default=dict,
         blank=True,
         help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}",
-    )
-    embedding = VectorField(
-        dimensions=1536, blank=True, null=True, help_text="[0.1, -0.2, 0.3, ...]"
     )
     food = models.CharField(
         max_length=255, blank=True, null=True, help_text="'Free pizza and drinks'"
@@ -190,3 +187,52 @@ class EventSubmission(models.Model):
 
     def __str__(self):
         return f"Submission {self.id} - {self.status}"
+
+
+class EventDates(models.Model):
+    """
+    Stores individual occurrence dates for events.
+    For events with rrule or rdate, this table contains all computed dates.
+    For simple events without recurrence, contains a single date entry.
+    This enables efficient querying of upcoming events without calculating rrule/rdate.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    event = models.ForeignKey(
+        Events,
+        on_delete=models.CASCADE,
+        related_name="event_dates",
+        db_index=True,
+        help_text="Reference to the parent event",
+    )
+    dtstart = models.DateTimeField(
+        help_text="Local start time for this occurrence"
+    )
+    dtend = models.DateTimeField(
+        blank=True, null=True, help_text="Local end time for this occurrence"
+    )
+    dtstart_utc = models.DateTimeField(
+        db_index=True, help_text="UTC start time for this occurrence"
+    )
+    dtend_utc = models.DateTimeField(
+        blank=True, null=True, help_text="UTC end time for this occurrence"
+    )
+    duration = models.DurationField(
+        blank=True, null=True, help_text="Duration of this occurrence"
+    )
+    tz = models.CharField(
+        max_length=64, null=True, blank=True, help_text="'America/New_York'"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "event_dates"
+        indexes = [
+            models.Index(fields=["dtstart_utc"], name="eventdates_dtstart_utc_idx"),
+            models.Index(fields=["dtend_utc"], name="eventdates_dtend_utc_idx"),
+            models.Index(fields=["event", "dtstart_utc"], name="eventdates_event_dtstart_idx"),
+        ]
+        ordering = ["dtstart_utc"]
+
+    def __str__(self):
+        return f"{self.event.title[:30] if self.event.title else 'untitled'} @ {self.dtstart_utc}"

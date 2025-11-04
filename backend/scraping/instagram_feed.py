@@ -33,6 +33,7 @@ from services.openai_service import (
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
 from utils.embedding_utils import find_similar_events
+from utils.event_dates_utils import create_event_dates_from_event_data
 from utils.events_utils import clean_datetime, clean_duration
 from utils.scraping_utils import (
     normalize,
@@ -314,7 +315,19 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     }
 
     try:
-        Events.objects.create(**create_kwargs)
+        event = Events.objects.create(**create_kwargs)
+        
+        # Create EventDates entries for this event
+        try:
+            event_dates = create_event_dates_from_event_data(event)
+            if event_dates:
+                from apps.events.models import EventDates
+                EventDates.objects.bulk_create(event_dates)
+                logger.debug(f"Created {len(event_dates)} EventDates entries for event {event.id}")
+        except Exception as ed_e:
+            logger.error(f"Error creating EventDates for event {event.id}: {ed_e}")
+            # Don't fail the whole operation if EventDates creation fails
+        
         append_event_to_csv(
             event_data,
             ig_handle,
