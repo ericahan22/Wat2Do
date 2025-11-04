@@ -8,6 +8,7 @@ export type { Event, EventSubmission, SubmissionFormData };
 
 export interface EventsQueryParams {
   search?: string;
+  categories?: string;
   dtstart_utc?: string;
   added_at?: string;
   limit?: number;

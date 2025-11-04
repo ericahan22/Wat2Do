@@ -9,16 +9,21 @@ export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { eventsAPIClient } = useApi();
   const searchTerm = searchParams.get("search") || "";
+  const categories = searchParams.get("categories") || "";
   const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
 
   const { data: events = [], isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, dtstart_utc, addedAt],
+    queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt],
     queryFn: async () => {
       const queryParams: Record<string, string> = {};
       
       if (searchTerm) {
         queryParams.search = searchTerm;
+      }
+      
+      if (categories) {
+        queryParams.categories = categories;
       }
       
       if (dtstart_utc) {
@@ -40,7 +45,7 @@ export function useEvents() {
   const documentTitle = useMemo(() => {
     let title: string;
 
-    if (searchTerm) {
+    if (searchTerm || categories) {
       title = `${events.length} Found Events - Wat2Do`;
     } else if (dtstart_utc) {
       title = `${events.length} Total Events - Wat2Do`;
@@ -55,7 +60,7 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, dtstart_utc, addedAt]);
+  }, [events.length, isLoading, searchTerm, categories, dtstart_utc, addedAt]);
 
   useDocumentTitle(documentTitle);
 
@@ -104,6 +109,7 @@ export function useEvents() {
     isLoading,
     error,
     searchTerm,
+    categories,
     dtstart_utc,
     addedAt,
     handleViewChange,

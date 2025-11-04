@@ -1,9 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { RECOMMENDED_FILTERS } from "@/data/staticData";
-import { FilterWithEmoji } from "@/shared/lib/emojiUtils";
+import { EVENT_CATEGORIES } from "@/data/staticData";
 
-// Use recommended filters directly
+// Use event categories directly
 
 export const useQuickFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,7 +12,7 @@ export const useQuickFilters = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [hasDragged, setHasDragged] = useState(false);
 
-  const currentSearch = searchParams.get("search") || "";
+  const currentCategories = searchParams.get("categories") || "";
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -62,43 +61,41 @@ export const useQuickFilters = () => {
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleFilterClick = useCallback(
-    (filter: FilterWithEmoji) => {
+    (category: string) => {
       // Don't trigger click if user was dragging
       if (hasDragged) {
         return;
       }
 
-      const filterName = filter[2]; // Extract filter name from 3D array
-
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
-        const currentSearchValue = nextParams.get("search") || "";
+        const currentCategoriesValue = nextParams.get("categories") || "";
 
-        // Parse semicolon-separated filters
-        const filters = currentSearchValue
-          ? currentSearchValue.split(";").map((f) => f.trim()).filter((f) => f)
+        // Parse semicolon-separated categories
+        const categories = currentCategoriesValue
+          ? currentCategoriesValue.split(";").map((c) => c.trim()).filter((c) => c)
           : [];
 
-        // Check if filter is already active (case-insensitive)
-        const isActive = filters.some(
-          (f) => f.toLowerCase() === filterName.toLowerCase()
+        // Check if category is already active (case-insensitive)
+        const isActive = categories.some(
+          (c) => c.toLowerCase() === category.toLowerCase()
         );
 
         if (isActive) {
-          // Remove the filter
-          const updatedFilters = filters.filter(
-            (f) => f.toLowerCase() !== filterName.toLowerCase()
+          // Remove the category
+          const updatedCategories = categories.filter(
+            (c) => c.toLowerCase() !== category.toLowerCase()
           );
 
-          if (updatedFilters.length > 0) {
-            nextParams.set("search", updatedFilters.join(";"));
+          if (updatedCategories.length > 0) {
+            nextParams.set("categories", updatedCategories.join(";"));
           } else {
-            nextParams.delete("search");
+            nextParams.delete("categories");
           }
         } else {
-          // Add the filter
-          filters.push(filterName);
-          nextParams.set("search", filters.join(";"));
+          // Add the category
+          categories.push(category);
+          nextParams.set("categories", categories.join(";"));
         }
 
         return nextParams;
@@ -108,25 +105,24 @@ export const useQuickFilters = () => {
   );
 
   const isFilterActive = useCallback(
-    (filter: FilterWithEmoji) => {
-      const filterName = filter[2];
-      // Parse semicolon-separated filters and check if this filter is active
-      if (!currentSearch) return false;
-      const filters = currentSearch
+    (category: string) => {
+      // Parse semicolon-separated categories and check if this category is active
+      if (!currentCategories) return false;
+      const categories = currentCategories
         .split(";")
-        .map((f) => f.trim())
-        .filter((f) => f);
-      return filters.some(
-        (f) => f.toLowerCase() === filterName.toLowerCase()
+        .map((c) => c.trim())
+        .filter((c) => c);
+      return categories.some(
+        (c) => c.toLowerCase() === category.toLowerCase()
       );
     },
-    [currentSearch]
+    [currentCategories]
   );
 
   return {
     // Data
-    filterOptions: RECOMMENDED_FILTERS,
-    currentSearch,
+    filterOptions: EVENT_CATEGORIES,
+    currentCategories,
 
     // Refs
     scrollContainerRef,

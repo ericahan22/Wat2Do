@@ -232,19 +232,19 @@ RATELIMIT_GROUP = {
 }
 
 # Database query logging (only in DEBUG mode)
-# if DEBUG:
-#     LOGGING = {
-#         "version": 1,
-#         "disable_existing_loggers": False,
-#         "handlers": {
-#             "console": {
-#                 "class": "logging.StreamHandler",
-#             },
-#         },
-#         "loggers": {
-#             "django.db.backends": {
-#                 "handlers": ["console"],
-#                 "level": "DEBUG",  # Shows all SQL queries
-#             },
-#         },
-#     }
+if DEBUG:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "django.db.backends": {
+                "handlers": ["console"],
+                "level": "DEBUG",  # Shows all SQL queries
+            },
+        },
+    }

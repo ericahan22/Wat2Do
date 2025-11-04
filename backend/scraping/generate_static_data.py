@@ -89,35 +89,11 @@ def fetch_events():
         return []
 
 
-def generate_recommended_filters(events_data):
-    """Generate recommended filters using OpenAI service"""
-    try:
-        from services.openai_service import generate_recommended_filters
-
-        logger.info("Generating recommended filters using OpenAI...")
-        recommended_filters = generate_recommended_filters(events_data)
-
-        if not recommended_filters:
-            logger.warning("Failed to generate recommended filters")
-            return []
-
-        logger.info(
-            f"Generated {len(recommended_filters)} filters: {recommended_filters}"
-        )
-        return recommended_filters
-    except Exception as e:
-        logger.error(f"Error generating recommended filters: {e}")
-        return []
-
-
 def main():
-    """Fetches events, generates filters, and writes to staticData.ts"""
+    """Fetches events and writes static data files"""
     try:
         # Fetch upcoming events
         events = fetch_events()
-
-        # Generate recommended filters
-        recommended_filters = generate_recommended_filters(events)
 
         # Write to staticData.ts
         output_path = (
@@ -133,30 +109,27 @@ def main():
             current_time = datetime.now(timezone.utc).isoformat()
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
 
-            # Write recommended filters (now 3D array format)
-            if recommended_filters:
-                f.write(
-                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [\n"
-                )
-                for i, filter_item in enumerate(recommended_filters):
-                    if len(filter_item) == 3:
-                        category, emoji_string, filter_name = filter_item
-                        category_escaped = category.replace('"', '\\"')
-                        emoji_escaped = emoji_string.replace('"', '\\"')
-                        filter_escaped = filter_name.replace('"', '\\"')
-                        f.write(
-                            f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]'
-                        )
-                        if i < len(recommended_filters) - 1:
-                            f.write(",")
-                        f.write("\n")
-                f.write("];\n")
-            else:
-                f.write(
-                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n"
-                )
+            # Write event categories
+            f.write("export const EVENT_CATEGORIES = [\n")
+            categories = [
+                "Academic",
+                "Career & Networking",
+                "Social & Games",
+                "Athletics",
+                "Creative Arts",
+                "Cultural",
+                "Religious",
+                "Advocacy & Causes",
+                "Sales & Fundraising"
+            ]
+            for i, category in enumerate(categories):
+                f.write(f'  "{category}"')
+                if i < len(categories) - 1:
+                    f.write(",")
+                f.write("\n")
+            f.write("];\n")
 
-        logger.info("Successfully updated staticData.ts with recommended filters")
+        logger.info("Successfully updated staticData.ts")
 
         # --- Static RSS file ---
         try:

@@ -19,19 +19,19 @@ import {
 import { Calendar, History, LayoutGrid, Sparkles } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
-import { LAST_UPDATED, RECOMMENDED_FILTERS } from "@/data/staticData";
+import { LAST_UPDATED, EVENT_CATEGORIES } from "@/data/staticData";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
-  const randomFilter = useMemo(
+  const randomCategory = useMemo(
     () =>
-      RECOMMENDED_FILTERS[
-        Math.floor(Math.random() * RECOMMENDED_FILTERS.length)
-      ][2],
+      EVENT_CATEGORIES[
+        Math.floor(Math.random() * EVENT_CATEGORIES.length)
+      ],
     []
   );
-  const placeholder = searchParams.get("placeholder") || randomFilter;
+  const placeholder = searchParams.get("placeholder") || randomCategory;
 
   const handleViewChange = useCallback(
     (newView: "grid" | "calendar") => {
@@ -49,6 +49,7 @@ function EventsPage() {
     dtstart_utc,
     addedAt,
     searchTerm,
+    categories,
     handleToggleStartDate,
     handleToggleNewEvents,
   } = useEvents();
@@ -69,7 +70,7 @@ function EventsPage() {
   const isShowingNewEvents = Boolean(addedAt);
 
   const getEventTypeText = () => {
-    if (searchTerm) return "Found";
+    if (searchTerm || categories) return "Found";
     if (addedAt) return "New";
     if (isShowingPastEvents) return "Past";
     return "Upcoming";
