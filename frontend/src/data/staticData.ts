@@ -1,19 +1,19 @@
-export const LAST_UPDATED = "2025-11-03T22:38:42.197509+00:00";
+export const LAST_UPDATED = "2025-11-04T03:59:53.640153+00:00";
 
 export const RECOMMENDED_FILTERS: [string, string, string][] = [
-  ["Activity", "Ticket", "info session"],
-  ["Activity", "Sparkles", "social night"],
-  ["Activity", "Trophy", "career fair"],
-  ["Activity", "Sports%20Medal", "clinics"],
-  ["Smileys", "Smiling%20Face%20With%20Hearts", "support"],
-  ["Smileys", "Grinning%20Face", "meetup"],
-  ["Smileys", "Hushed%20Face", "talk"],
-  ["Objects", "Microphone", "talk"],
-  ["Objects", "Open%20Book", "workshop"],
-  ["Objects", "Gem%20Stone", "art sale"],
+  ["Objects", "Books", "workshop"],
+  ["Activity", "Video%20Game", "gaming"],
+  ["People", "Clapping%20Hands", "careers"],
+  ["Smileys", "Smiling%20Face", "free"],
+  ["Activity", "Ticket", "event"],
   ["Objects", "Graduation%20Cap", "thesis"],
-  ["People", "Raised%20Hand", "meeting"],
-  ["People", "People%20Hugging", "community"],
-  ["People", "Flexed%20Biceps", "support"],
-  ["Activity", "Fireworks", "celebration"]
+  ["People", "Raised%20Hand", "questions"],
+  ["Activity", "Party%20Popper", "celebration"],
+  ["Smileys", "Beaming%20Face%20With%20Smiling%20Eyes", "art"],
+  ["Smileys", "Hugging%20Face", "community"],
+  ["Activity", "Soccer%20Ball", "sports"],
+  ["Food%20and%20Drink", "Cupcake", "snacks"],
+  ["Smileys", "Winking%20Face", "fun"],
+  ["People", "Victory%20Hand", "success"],
+  ["Activity", "Confetti%20Ball", "celebrate"]
 ];
