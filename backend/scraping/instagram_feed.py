@@ -28,11 +28,9 @@ from scraping.logging_config import logger
 from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
     extract_events_from_caption,
-    generate_event_embedding,
 )
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
-from utils.embedding_utils import find_similar_events
 from utils.event_dates_utils import create_event_dates_from_event_data
 from utils.events_utils import clean_datetime, clean_duration
 from utils.scraping_utils import (
@@ -109,7 +107,6 @@ def append_event_to_csv(
     ig_handle,
     source_url,
     added_to_db="success",
-    embedding=None,
     club_type=None,
 ):
     csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
@@ -164,7 +161,6 @@ def append_event_to_csv(
         "raw_json",
         "added_to_db",
         "status",
-        "embedding",
     ]
 
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
@@ -198,7 +194,6 @@ def append_event_to_csv(
                 "raw_json": json.dumps(event_data, ensure_ascii=False),
                 "added_to_db": added_to_db,
                 "status": "CONFIRMED",
-                "embedding": embedding or "",
             }
         )
         logger.info(f"Event written to CSV with status: {added_to_db}")
@@ -221,8 +216,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     price = event_data.get("price", None)
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
-    embedding = event_data.get("embedding") or ""
-    date = dtstart.date()
     tz = event_data.get("tz", "")
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
@@ -234,17 +227,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         categories = ["Uncategorized"]
 
     if is_duplicate_event(event_data):
-        try:
-            append_event_to_csv(
-                event_data,
-                ig_handle,
-                source_url,
-                added_to_db="duplicate",
-                embedding=event_data.get("embedding"),
-                club_type=None,
-            )
-        except Exception as csv_e:
-            logger.error(f"Error writing duplicate event to CSV: {csv_e}")
         return "duplicate"
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
@@ -256,33 +238,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         logger.warning(
             f"Club with handle {ig_handle} not found, inserting event with club_type NULL"
         )
-
-    if not embedding:
-        try:
-            embedding = generate_event_embedding(event_data)
-        except Exception as e:
-            logger.warning(f"Embedding generation failed: {e!s}")
-
-    # Similarlity check deduplication
-    try:
-        similar_events = find_similar_events(
-            embedding, threshold=0.90, limit=10, min_date=date
-        )
-        candidate_ids = [row["id"] for row in similar_events]
-        if candidate_ids:
-            qs = Events.objects.filter(id__in=candidate_ids, dtstart__date=date)
-            for existing in qs:
-                # Only replace if new event has image but existing doesn't,
-                # or if new description is longer (more info)
-                new_img = source_image_url
-                old_img = getattr(existing, "source_image_url", None)
-                new_desc = description or ""
-                old_desc = existing.description or ""
-                if (not old_img and new_img) or (len(new_desc) > len(old_desc) + 10):
-                    logger.info(f"Replacing older event #{existing.id} with newer one")
-                    existing.delete()
-    except Exception as e:
-        logger.error(f"Unexpected error finding duplicates by similarity check: {e}")
 
     create_kwargs = {
         "ig_handle": ig_handle,
@@ -301,7 +256,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "registration": registration,
         "description": description or None,
         "reactions": {},
-        "embedding": embedding or None,
         "source_image_url": source_image_url or None,
         "raw_json": event_data,
         "status": "CONFIRMED",
@@ -316,7 +270,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
 
     try:
         event = Events.objects.create(**create_kwargs)
-        
         # Create EventDates entries for this event
         try:
             event_dates = create_event_dates_from_event_data(event)
@@ -327,29 +280,9 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         except Exception as ed_e:
             logger.error(f"Error creating EventDates for event {event.id}: {ed_e}")
             # Don't fail the whole operation if EventDates creation fails
-        
-        append_event_to_csv(
-            event_data,
-            ig_handle,
-            source_url,
-            added_to_db="success",
-            embedding=embedding,
-            club_type=club_type,
-        )
         return True
     except Exception as e:
         logger.error(f"Error inserting event to DB: {e}")
-        try:
-            append_event_to_csv(
-                event_data,
-                ig_handle,
-                source_url,
-                added_to_db="failed",
-                embedding=embedding,
-                club_type=club_type,
-            )
-        except Exception as csv_e:
-            logger.error(f"Error writing event to CSV after DB failure: {csv_e}")
         return False
 
 
@@ -476,6 +409,7 @@ def process_recent_feed(
 
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
                 for idx, event_data in enumerate(extracted_list):
+                    added_to_db = None
                     try:
                         logger.debug(
                             f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
@@ -494,14 +428,7 @@ def process_recent_feed(
                             logger.warning(
                                 f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
                             )
-                            embedding = generate_event_embedding(event_data)
-                            append_event_to_csv(
-                                event_data,
-                                post.owner_username,
-                                source_url,
-                                added_to_db="missing_fields",
-                                embedding=embedding,
-                            )
+                            added_to_db = "missing_fields"
                             continue
 
                         dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
@@ -510,6 +437,7 @@ def process_recent_feed(
                             logger.info(
                                 f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
                             )
+                            added_to_db = "past_date"
                             continue
 
                         result = insert_event_to_db(event_data, post.owner_username, source_url)
@@ -518,17 +446,28 @@ def process_recent_feed(
                             logger.info(
                                 f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
                             )
+                            added_to_db = "success"
                         elif result == "duplicate":
                             logger.warning(
                                 f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
                             )
+                            added_to_db = "duplicate"
                         else:
                             logger.error(
                                 f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
                             )
+                            added_to_db = "failed"
                     except Exception as inner_e:
                         logger.error(
                             f"[{post.shortcode}] [{post.owner_username}] Error handling extracted event index {idx}: {inner_e!s}"
+                        )
+                        added_to_db = "error"
+                    finally:
+                        append_event_to_csv(
+                            event_data,
+                            post.owner_username,
+                            source_url,
+                            added_to_db=added_to_db or "unknown",
                         )
 
                 if check_post_limit():
