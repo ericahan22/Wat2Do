@@ -282,7 +282,7 @@ class OpenAIService:
                 messages[1]["content"].append(
                     {"type": "image_url", "image_url": {"url": source_image_url}}
                 )
-            model = "gpt-5-mini"
+            model = "gpt-4o-mini"
 
             try:
                 response = self.client.chat.completions.create(
