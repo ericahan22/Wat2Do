@@ -2,7 +2,7 @@ name: Scrape Instagram, Update Events DB, Send Newsletter, Update Static Data
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # Once daily at noon UTC (8am EST)
+    - cron: '0 3,12,17,22 * * *'  # 11pm, 8am, 1pm, 6pm EST
   workflow_dispatch:      # Optional manual trigger
     inputs:
       run_scraper:
@@ -16,7 +16,7 @@ on:
       MAX_POSTS:
         required: false
         type: number
-        default: 100
+        default: 25
       CUTOFF_DAYS:
         required: false
         type: number
@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: write
     env:
-      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '100' }}
+      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '25' }}
       CUTOFF_DAYS: ${{ github.event.inputs.CUTOFF_DAYS || '2' }}
       PRODUCTION: '1'
       DJANGO_SETTINGS_MODULE: 'config.settings.development'
@@ -59,6 +59,8 @@ jobs:
       ZYTE_PROXY: ${{ secrets.ZYTE_PROXY }}
       EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
       
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +120,7 @@ jobs:
         id: generate_static
         working-directory: backend/scraping
         run: python generate_static_data.py
-      
+
       - name: Commit and push changes
         if: steps.generate_static.outcome == 'success'
         run: |

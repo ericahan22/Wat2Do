@@ -14,13 +14,13 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { SEOHead } from "@/shared/components/SEOHead";
 import { API_BASE_URL } from "@/shared/constants/api";
-import { formatEventTimeRange, formatPrettyDate } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, formatEventDate } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import { Event } from "@/features/events/types/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 
 const fetchEvent = async (eventId: string): Promise<Event> => {
-  const response = await fetch(`${API_BASE_URL}/api/events/${eventId}`);
+  const response = await fetch(`${API_BASE_URL}/events/${eventId}`);
   if (!response.ok) {
     throw new Error("Event not found");
   }
@@ -131,7 +131,7 @@ function EventDetailPage() {
         title={`${event.title} - Event Details`}
         description={
           event.description ||
-          `Join us for ${event.title} on ${formatPrettyDate(event.dtstart)}`
+          `Join us for ${event.title} on ${formatEventDate(event.dtstart_utc, event.dtend_utc)}`
         }
         url={`/event/${event.id}`}
         keywords={[
@@ -207,10 +207,10 @@ function EventDetailPage() {
                 <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {formatPrettyDate(event.dtstart)}
+                    {formatEventDate(event.dtstart_utc, event.dtend_utc)}
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {formatEventTimeRange(event.dtstart, event.dtend)}
+                    {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
                   </p>
                 </div>
               </div>

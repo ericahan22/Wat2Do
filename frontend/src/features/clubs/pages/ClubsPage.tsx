@@ -1,4 +1,5 @@
 import { useMemo, useRef } from "react";
+import NumberFlow from "@number-flow/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead } from "@/shared";
 import { useClubs, ClubsGrid } from "@/features/clubs";
 import SearchInput from "@/features/search/components/SearchInput";
@@ -44,14 +45,11 @@ function ClubsPage() {
           'campus groups'
         ]}
       />
-      {/* Header */}
       <div className="sm:text-left">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Clubs
+        <h1 className="sm:text-3xl text-2xl font-bold mb-2">
+          <NumberFlow value={data.length} suffix={" clubs"} />
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Explore student clubs and organizations
-        </p>
+        <p className="text-gray-600 dark:text-gray-400">Explore student clubs and organizations</p>
       </div>
 
       {/* Filters */}

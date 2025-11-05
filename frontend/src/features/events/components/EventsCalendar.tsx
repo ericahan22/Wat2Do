@@ -20,7 +20,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import "@/shared/styles/calendar.css";
-import { formatEventTimeRange, removeTimezoneInfo, formatPrettyDate } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, removeTimezoneInfo, formatEventDate } from "@/shared/lib/dateUtils";
 import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
 import { Event } from "@/features/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -103,13 +103,13 @@ const EventPopup: React.FC<{
     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
       <div className="flex items-center gap-2">
         <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-        <span>{formatPrettyDate(event.dtstart)}</span>
+        <span>{formatEventDate(event.dtstart_utc, event.dtend_utc)}</span>
       </div>
       
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 flex-shrink-0" />
         <span>
-          {formatEventTimeRange(event.dtstart, event.dtend)}
+          {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
         </span>
       </div>
       
@@ -234,9 +234,9 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   }, [currentView, currentDate]); 
 
   const calendarEvents = events.map((event) => {
-    const start = new Date(removeTimezoneInfo(event.dtstart));
-    const end = event.dtend
-      ? new Date(removeTimezoneInfo(event.dtend))
+    const start = new Date(removeTimezoneInfo(event.dtstart_utc));
+    const end = event.dtend_utc
+      ? new Date(removeTimezoneInfo(event.dtend_utc))
       : new Date(start.getTime() + 60 * 60 * 1000); // Default end time = 1 hour after start
     return {
       ...event,

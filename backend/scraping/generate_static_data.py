@@ -89,35 +89,11 @@ def fetch_events():
         return []
 
 
-def generate_recommended_filters(events_data):
-    """Generate recommended filters using OpenAI service"""
-    try:
-        from services.openai_service import generate_recommended_filters
-
-        logger.info("Generating recommended filters using OpenAI...")
-        recommended_filters = generate_recommended_filters(events_data)
-
-        if not recommended_filters:
-            logger.warning("Failed to generate recommended filters")
-            return []
-
-        logger.info(
-            f"Generated {len(recommended_filters)} filters: {recommended_filters}"
-        )
-        return recommended_filters
-    except Exception as e:
-        logger.error(f"Error generating recommended filters: {e}")
-        return []
-
-
 def main():
-    """Fetches events, generates filters, and writes to staticData.ts"""
+    """Fetches events and writes static data files"""
     try:
         # Fetch upcoming events
         events = fetch_events()
-
-        # Generate recommended filters
-        recommended_filters = generate_recommended_filters(events)
 
         # Write to staticData.ts
         output_path = (
@@ -131,72 +107,29 @@ def main():
         with output_path.open("w", encoding="utf-8") as f:
             # Write the last updated timestamp in UTC
             current_time = datetime.now(timezone.utc).isoformat()
-            f.write('import { Event } from "@/features/events/types/events";\n\n')
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
 
-            # Write static events data as an array of Event objects
-            f.write("export const staticEventsData: Event[] = [\n")
-            for i, event in enumerate(events):
-                event_id = event["id"]
-                f.write("  {\n")
-                f.write(f"    id: {format_value(event_id)},\n")
-                f.write(f'    ig_handle: {format_value(event["ig_handle"])},\n')
-                f.write(f'    source_url: {format_value(event["source_url"])},\n')
-                f.write(f'    title: {format_value(event["title"])},\n')
-                f.write(f'    dtstart: {format_value(event["dtstart"])},\n')
-                f.write(f'    dtend: {format_value(event["dtend"])},\n')
-                f.write(f'    location: {format_value(event["location"])},\n')
-                f.write(f'    price: {format_value(event["price"])},\n')
-                f.write(f'    food: {format_value(event["food"])},\n')
-                f.write(f'    registration: {format_value(event["registration"])},\n')
-                f.write(
-                    f'    source_image_url: {format_value(event["source_image_url"])},\n'
-                )
-                f.write(f'    club_type: {format_value(event["club_type"])},\n')
-                f.write(f'    added_at: {format_value(event["added_at"])},\n')
-                f.write(f'    description: {format_value(event["description"])},\n')
-                f.write(f'    school: {format_value(event["school"])},\n')
-                f.write(
-                    f'    discord_handle: {format_value(event["discord_handle"])},\n'
-                )
-                f.write(f'    x_handle: {format_value(event["x_handle"])},\n')
-                f.write(f'    tiktok_handle: {format_value(event["tiktok_handle"])},\n')
-                f.write(f'    fb_handle: {format_value(event["fb_handle"])},\n')
-                f.write(
-                    f'    display_handle: {format_value(event["display_handle"])},\n'
-                )
-                f.write("  }")
-                if i < len(events) - 1:
+            # Write event categories
+            f.write("export const EVENT_CATEGORIES = [\n")
+            categories = [
+                "Academic",
+                "Career & Networking",
+                "Social & Games",
+                "Athletics",
+                "Creative Arts",
+                "Cultural",
+                "Religious",
+                "Advocacy & Causes",
+                "Sales & Fundraising"
+            ]
+            for i, category in enumerate(categories):
+                f.write(f'  "{category}"')
+                if i < len(categories) - 1:
                     f.write(",")
                 f.write("\n")
-            f.write("];\n\n")
+            f.write("];\n")
 
-            # Write recommended filters (now 3D array format)
-            if recommended_filters:
-                f.write(
-                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [\n"
-                )
-                for i, filter_item in enumerate(recommended_filters):
-                    if len(filter_item) == 3:
-                        category, emoji_string, filter_name = filter_item
-                        category_escaped = category.replace('"', '\\"')
-                        emoji_escaped = emoji_string.replace('"', '\\"')
-                        filter_escaped = filter_name.replace('"', '\\"')
-                        f.write(
-                            f'  ["{category_escaped}", "{emoji_escaped}", "{filter_escaped}"]'
-                        )
-                        if i < len(recommended_filters) - 1:
-                            f.write(",")
-                        f.write("\n")
-                f.write("];\n")
-            else:
-                f.write(
-                    "export const RECOMMENDED_FILTERS: [string, string, string][] = [];\n"
-                )
-
-        logger.info(
-            "Successfully updated staticData.ts with events and recommended filters"
-        )
+        logger.info("Successfully updated staticData.ts")
 
         # --- Static RSS file ---
         try:

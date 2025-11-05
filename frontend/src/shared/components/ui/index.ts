@@ -1,5 +1,6 @@
 export { Badge } from './badge';
 export { Button } from './button';
+export { FilterButton } from './filter-button';
 export { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
 export { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './form';
 export { IconButton } from './icon-button';

@@ -1,9 +1,8 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { RECOMMENDED_FILTERS } from "@/data/staticData";
-import { FilterWithEmoji } from "@/shared/lib/emojiUtils";
+import { EVENT_CATEGORIES } from "@/data/staticData";
 
-// Use recommended filters directly
+// Use event categories directly
 
 export const useQuickFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,7 +12,7 @@ export const useQuickFilters = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [hasDragged, setHasDragged] = useState(false);
 
-  const currentSearch = searchParams.get("search") || "";
+  const currentCategories = searchParams.get("categories") || "";
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!scrollContainerRef.current) return;
@@ -62,41 +61,41 @@ export const useQuickFilters = () => {
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const handleFilterClick = useCallback(
-    (filter: FilterWithEmoji) => {
+    (category: string) => {
       // Don't trigger click if user was dragging
       if (hasDragged) {
         return;
       }
 
-      const filterName = filter[2]; // Extract filter name from 3D array
-
       setSearchParams((prev) => {
         const nextParams = new URLSearchParams(prev);
-        const currentSearchValue = nextParams.get("search") || "";
+        const currentCategoriesValue = nextParams.get("categories") || "";
 
-        // Use word boundaries for single words, or exact phrase matching for multi-word
-        const filterRegex = new RegExp(
-          `(^|\\s)${filterName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`,
-          "i"
+        // Parse semicolon-separated categories
+        const categories = currentCategoriesValue
+          ? currentCategoriesValue.split(";").map((c) => c.trim()).filter((c) => c)
+          : [];
+
+        // Check if category is already active (case-insensitive)
+        const isActive = categories.some(
+          (c) => c.toLowerCase() === category.toLowerCase()
         );
-        const isActive = filterRegex.test(currentSearchValue);
 
         if (isActive) {
-          const updatedSearch = currentSearchValue
-            .replace(filterRegex, " ")
-            .replace(/\s+/g, " ") // Replace multiple spaces with single space
-            .trim();
+          // Remove the category
+          const updatedCategories = categories.filter(
+            (c) => c.toLowerCase() !== category.toLowerCase()
+          );
 
-          if (updatedSearch) {
-            nextParams.set("search", updatedSearch);
+          if (updatedCategories.length > 0) {
+            nextParams.set("categories", updatedCategories.join(";"));
           } else {
-            nextParams.delete("search");
+            nextParams.delete("categories");
           }
         } else {
-          const newSearchValue = currentSearchValue
-            ? `${currentSearchValue} ${filterName}`
-            : filterName;
-          nextParams.set("search", newSearchValue);
+          // Add the category
+          categories.push(category);
+          nextParams.set("categories", categories.join(";"));
         }
 
         return nextParams;
@@ -105,40 +104,25 @@ export const useQuickFilters = () => {
     [hasDragged, setSearchParams]
   );
 
-  const handleFilterRemove = useCallback(() => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      nextParams.delete("search");
-      return nextParams;
-    });
-  }, [setSearchParams]);
-
   const isFilterActive = useCallback(
-    (filter: FilterWithEmoji) => {
-      const filterName = filter[2]; // Extract filter name from 3D array
-      // Direct match: check if filter exists as a complete phrase in the search
-      // Use word boundaries for single words, or exact phrase matching for multi-word
-      const filterRegex = new RegExp(
-        `(^|\\s)${filterName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`,
-        "i"
+    (category: string) => {
+      // Parse semicolon-separated categories and check if this category is active
+      if (!currentCategories) return false;
+      const categories = currentCategories
+        .split(";")
+        .map((c) => c.trim())
+        .filter((c) => c);
+      return categories.some(
+        (c) => c.toLowerCase() === category.toLowerCase()
       );
-      return filterRegex.test(currentSearch);
     },
-    [currentSearch]
-  );
-
-  const handleFilterRemoveClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent triggering the filter click
-      handleFilterRemove();
-    },
-    [handleFilterRemove]
+    [currentCategories]
   );
 
   return {
     // Data
-    filterOptions: RECOMMENDED_FILTERS,
-    currentSearch,
+    filterOptions: EVENT_CATEGORIES,
+    currentCategories,
 
     // Refs
     scrollContainerRef,
@@ -150,7 +134,6 @@ export const useQuickFilters = () => {
     // Event handlers
     handleMouseDown,
     handleFilterClick,
-    handleFilterRemoveClick,
 
     // Utilities
     isFilterActive,

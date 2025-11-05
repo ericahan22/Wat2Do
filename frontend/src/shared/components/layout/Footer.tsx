@@ -4,6 +4,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Mail, Check, X, Rss } from "lucide-react";
 import { useNewsletterSubscribe } from "@/features/newsletter/hooks/useNewsletterSubscribe";
 import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "@/shared/utils/errorUtils";
 
 function Footer() {
   const [email, setEmail] = useState("");
@@ -25,7 +26,7 @@ function Footer() {
       return;
     }
 
-    subscribe(email, {
+    subscribe({ email }, {
       onSuccess: () => {
         setEmail("");
         setTimeout(() => {
@@ -59,12 +60,12 @@ function Footer() {
                 placeholder="your.email@uwaterloo.ca"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isPending || isSuccess}
+                disabled={isPending}
               />
               <Button
                 variant="outline"
                 type="submit"
-                disabled={isPending || isSuccess}
+                disabled={isPending}
                 className="whitespace-nowrap h-9"
               >
                 {isPending ? (
@@ -87,10 +88,10 @@ function Footer() {
               </div>
             )}
 
-            {isError && error && (
+            {isError && !!error && (
               <div className="mt-2 text-sm flex items-center gap-1 text-red-600 dark:text-red-400">
                 <X className="h-4 w-4" />
-                {error.message}
+                {getErrorMessage(error)}
               </div>
             )}
           </div>
@@ -143,19 +144,18 @@ function Footer() {
             <Button
               variant="link"
               onMouseDown={() => navigate("/contact")}
-              className="mr-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               Contact
             </Button>
-            <a
-              href="/rss.xml"
-              download="rss.xml"
-              rel="noopener noreferrer"
-              className="dark:text-gray-200 flex items-center gap-2"
+            <Button
+              variant="link"
+              onMouseDown={() => (window.location.href = "/rss.xml")}
+              className="inline-flex items-center gap-0.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               <Rss className="h-4 w-4" />
-              <span className="text-sm">RSS</span>
-            </a>
+              RSS
+            </Button>
           </div>
         </div>
       </div>

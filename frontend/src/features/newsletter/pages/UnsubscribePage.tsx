@@ -67,7 +67,7 @@ const UnsubscribePage: React.FC = () => {
           <h1 className="text-xl font-bold ">
             Error
           </h1>
-          <p className="">
+          <p className="text-red-600 dark:text-red-400">
             {error.message}
           </p>
           <Button onClick={() => navigate("/")} variant="outline">

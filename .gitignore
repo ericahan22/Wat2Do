@@ -26,6 +26,7 @@ node_modules/
 # IDE/editor settings
 .vscode/
 chrome_profile/
+.flake8
 
 # SQLite database (for local dev only)
 db.sqlite3
@@ -35,6 +36,7 @@ backend/db.sqlite3
 frontend/dist/
 backend/staticfiles/
 backend/config/static/
+frontend/tsconfig.tsbuildinfo
 
 # OS-specific files
 .DS_Store

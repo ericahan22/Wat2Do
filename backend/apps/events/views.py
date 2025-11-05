@@ -1,3 +1,7 @@
+import uuid
+from datetime import timedelta
+
+from apps.core.auth import jwt_required, admin_required
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
@@ -7,15 +11,16 @@ from django.utils.html import escape
 from ratelimit.decorators import ratelimit
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 
-from services.openai_service import generate_embedding
+from services.openai_service import extract_events_from_caption, generate_embedding
+from services.storage_service import storage_service
 from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 
-from .models import Events
+from .models import Events, EventSubmission
 
 
 @api_view(["GET"])
@@ -25,8 +30,23 @@ def get_events(request):
     """Get all events from database with optional filtering"""
     try:
         search_term = request.GET.get("search", "").strip()
+        dtstart_utc_param = request.GET.get("dtstart_utc", "").strip()
 
-        queryset = Events.objects.all().order_by("dtstart")
+        queryset = Events.objects.filter(
+            status="CONFIRMED",
+            school="University of Waterloo"
+        )
+        
+        # Apply default upcoming events filter only if not provided in request
+        if not dtstart_utc_param:
+            now = timezone.now()
+            one_hour_ago = now - timedelta(hours=1)
+            queryset = queryset.filter(
+                Q(dtend_utc__gte=now) | (Q(dtend_utc__isnull=True) & Q(dtstart_utc__gte=one_hour_ago))
+            )
+        
+        queryset = queryset.order_by("dtstart_utc")
+        
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
             return Response(
@@ -36,30 +56,30 @@ def get_events(request):
         filtered_queryset = filterset.qs
 
         if search_term:
-            event_ids = set()
+            # Parse semicolon-separated filters (for OR query)
+            search_terms = [
+                term.strip() for term in search_term.split(";") if term.strip()
+            ]
 
-            # Special handling for "free food" search
-            if search_term.lower() == "free food":
-                keyword_events = filtered_queryset.filter(
-                    Q(price__isnull=True) | Q(price=0) | Q(price__icontains="free"),
-                    Q(food__isnull=False) & ~Q(food=""),
+            # Build OR query: match any of the search terms in any field
+            or_queries = Q()
+            for term in search_terms:
+                term_query = (
+                    Q(title__icontains=term)
+                    | Q(location__icontains=term)
+                    | Q(description__icontains=term)
+                    | Q(food__icontains=term)
+                    | Q(club_type__icontains=term)
+                    | Q(school__icontains=term)
+                    | Q(ig_handle__icontains=term)
+                    | Q(discord_handle__icontains=term)
+                    | Q(x_handle__icontains=term)
+                    | Q(tiktok_handle__icontains=term)
+                    | Q(fb_handle__icontains=term)
                 )
-            else:
-                keyword_events = filtered_queryset.filter(
-                    Q(title__icontains=search_term)
-                    | Q(location__icontains=search_term)
-                    | Q(description__icontains=search_term)
-                    | Q(food__icontains=search_term)
-                    | Q(club_type__icontains=search_term)
-                    | Q(school__icontains=search_term)
-                    | Q(ig_handle__icontains=search_term)
-                    | Q(discord_handle__icontains=search_term)
-                    | Q(x_handle__icontains=search_term)
-                    | Q(tiktok_handle__icontains=search_term)
-                    | Q(fb_handle__icontains=search_term)
-                )
+                or_queries |= term_query
 
-            event_ids.update(keyword_events.values_list("id", flat=True))
+            filtered_queryset = filtered_queryset.filter(or_queries)
 
             # search_embedding = generate_embedding(search_term)
             # dtstart = request.GET.get("dtstart")
@@ -71,18 +91,13 @@ def get_events(request):
             # similar_event_ids = [event["id"] for event in similar_events]
             # event_ids.update(similar_event_ids)
 
-            if event_ids:
-                filtered_queryset = filtered_queryset.filter(id__in=event_ids)
-            else:
-                filtered_queryset = filtered_queryset.none()
-
         fields = [
             "id",
             "title",
             "description",
             "location",
-            "dtstart",
-            "dtend",
+            "dtstart_utc",
+            "dtend_utc",
             "price",
             "food",
             "registration",
@@ -96,6 +111,7 @@ def get_events(request):
             "x_handle",
             "tiktok_handle",
             "fb_handle",
+            "other_handle",
         ]
         results = list(filtered_queryset.values(*fields))
 
@@ -121,8 +137,8 @@ def get_event(request, event_id):
             "title",
             "description",
             "location",
-            "dtstart",
-            "dtend",
+            "dtstart_utc",
+            "dtend_utc",
             "price",
             "food",
             "registration",
@@ -210,7 +226,7 @@ def export_events_ics(request):
             id_list = [int(x) for x in ids_param.split(",") if x]
         except ValueError:
             return Response(
-                {"error": "ids must be a comma-separated list of integers"},
+                {"error": "IDs must be a comma-separated list of integers"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -267,13 +283,13 @@ def _generate_ics_content(events):
     dtstamp = now.strftime("%Y%m%dT%H%M%SZ")
 
     for event in events:
-        start_date = event.dtstart.strftime("%Y%m%d")
-        start_time = event.dtstart.strftime("%H%M%S")
-        end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
+        start_date = event.dtstart_utc.strftime("%Y%m%d")
+        start_time = event.dtstart_utc.strftime("%H%M%S")
+        end_time = event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
 
         lines.append("BEGIN:VEVENT")
-        lines.append(f"DTSTART:{start_date}T{start_time}")
-        lines.append(f"DTEND:{start_date}T{end_time}")
+        lines.append(f"DTSTART:{start_date}T{start_time}Z")
+        lines.append(f"DTEND:{start_date}T{end_time}Z")
         lines.append(f"DTSTAMP:{dtstamp}")
         lines.append(f"SUMMARY:{escape_text(event.title)}")
 
@@ -319,7 +335,7 @@ def get_google_calendar_urls(request):
             id_list = [int(x) for x in ids_param.split(",") if x]
         except ValueError:
             return Response(
-                {"error": "ids must be a comma-separated list of integers"},
+                {"error": "IDs must be a comma-separated list of integers"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -343,13 +359,15 @@ def get_google_calendar_urls(request):
         from urllib.parse import urlencode
 
         for event in events:
-            # Format dates for Google Calendar (YYYYMMDDTHHMMSS)
-            start_date = event.dtstart.strftime("%Y%m%d")
-            start_time = event.dtstart.strftime("%H%M%S")
-            end_time = event.dtend.strftime("%H%M%S") if event.dtend else start_time
+            # Format dates for Google Calendar (YYYYMMDDTHHMMSSZ for UTC)
+            start_date = event.dtstart_utc.strftime("%Y%m%d")
+            start_time = event.dtstart_utc.strftime("%H%M%S")
+            end_time = (
+                event.dtend_utc.strftime("%H%M%S") if event.dtend_utc else start_time
+            )
 
-            start_datetime = f"{start_date}T{start_time}"
-            end_datetime = f"{start_date}T{end_time}"
+            start_datetime = f"{start_date}T{start_time}Z"
+            end_datetime = f"{start_date}T{end_time}Z"
 
             # Build details field
             details_parts = []
@@ -387,7 +405,7 @@ def rss_feed(request):
     Simple RSS feed of upcoming events (returns application/rss+xml).
     """
     now = timezone.now()
-    items = Events.objects.filter(dtstart__gte=now).order_by("dtstart")[:50]
+    items = Events.objects.filter(dtstart_utc__gte=now).order_by("dtstart_utc")[:50]
 
     site_url = getattr(settings, "SITE_URL", "https://wat2do.ca")
     rss_items = []
@@ -429,3 +447,262 @@ def rss_feed(request):
   </channel>
 </rss>"""
     return HttpResponse(rss, content_type="application/rss+xml")
+
+
+@api_view(["POST"])
+@ratelimit(key="ip", rate="5/hr", block=True)
+@jwt_required
+def submit_event(request):
+    """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
+    try:
+        screenshot = request.FILES.get("screenshot")
+        source_url = request.data.get("source_url")
+        other_handle = request.data.get("other_handle")
+
+        if not screenshot or not source_url:
+            return Response(
+                {"error": "Screenshot and source URL are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Upload to S3
+        filename = f"submissions/{uuid.uuid4()}.{screenshot.name.split('.')[-1]}"
+        screenshot_url = storage_service.upload_image_data(screenshot.read(), filename)
+
+        if not screenshot_url:
+            return Response(
+                {"error": "Failed to upload screenshot"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Run OpenAI extraction to build event data (returns a list of events)
+        extracted_list = extract_events_from_caption(
+            caption_text=f"Event source: {source_url}",
+            source_image_url=screenshot_url,
+        )
+
+        # Choose the first event to create; store the full extracted list on submission
+        event_data = (extracted_list or [])[:1][0] if extracted_list else {}
+        # Ensure provenance
+        event_data["source_url"] = source_url
+        event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
+        if other_handle:
+            event_data["other_handle"] = other_handle
+
+        # Create Event immediately and link submission
+        allowed_fields = {f.name for f in Events._meta.get_fields()}
+        cleaned = {
+            k: v
+            for k, v in (event_data or {}).items()
+            if k in allowed_fields
+            and not (isinstance(v, str) and v.strip() in {"", "\"\"", "''", "“”"})
+        }
+
+        # Basic guard: require at least a title and a start datetime to consider it an event
+        if not cleaned.get("title") or not cleaned.get("dtstart"):
+            return Response(
+                {"error": "Submission does not appear to be an event."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create event with pending status by default
+        if "status" not in cleaned or not cleaned.get("status"):
+            cleaned["status"] = "PENDING"
+        event = Events.objects.create(**cleaned)
+
+        user_info = getattr(request, "auth_payload", {})
+        clerk_user_id = user_info.get("sub")
+        if not clerk_user_id:
+            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        submission = EventSubmission.objects.create(
+            screenshot_url=screenshot_url,
+            source_url=source_url,
+            status="pending",
+            submitted_by=clerk_user_id,
+            created_event=event,
+            extracted_data=extracted_list or [],
+        )
+
+        return Response(
+            {"id": submission.id, "message": "Event submitted successfully", "event_id": event.id},
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
+@admin_required
+def get_submissions(request):
+    try:
+        user_info = getattr(request, "auth_payload", {})
+        email_from_request = user_info.get("email_addresses", [{}])[0].get("email_address", None)
+        
+        submissions = EventSubmission.objects.select_related("created_event").all().order_by("-submitted_at")
+        data = []
+        for s in submissions:
+            data.append({
+                "id": s.id,
+                "screenshot_url": s.screenshot_url,
+                "source_url": s.source_url,
+                "status": s.status,
+                "submitted_by": s.submitted_by,
+                "submitted_by_email": email_from_request,
+                "submitted_at": s.submitted_at,
+                "extracted_data": s.extracted_data,
+                "event_id": s.created_event_id,
+                "event_title": s.created_event.title if s.created_event else None,
+                "admin_notes": s.admin_notes,
+            })
+        return Response(data)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+@admin_required
+@ratelimit(key="ip", rate="100/hr", block=True)
+def process_submission(request, submission_id):
+    """Re-run extraction and update linked Event/extracted_data"""
+    try:
+        submission = get_object_or_404(EventSubmission, id=submission_id)
+
+        extracted_list = extract_events_from_caption(
+            caption_text=f"Event source: {submission.source_url}",
+            source_image_url=submission.screenshot_url,
+        )
+
+        if extracted_list:
+            submission.extracted_data = extracted_list
+            submission.save()
+
+            event = submission.created_event
+            if event and extracted_list:
+                first_item = extracted_list[0]
+                for field in [f.name for f in Events._meta.get_fields()]:
+                    if field in first_item:
+                        setattr(event, field, first_item[field])
+                event.save()
+
+            return Response(
+                {"id": submission.id, "extracted_data": submission.extracted_data, "event_id": submission.created_event_id}
+            )
+
+        return Response(
+            {"error": "Failed to extract event data"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+@admin_required
+@ratelimit(key="ip", rate="100/hr", block=True)
+def review_submission(request, submission_id):
+    """Approve or reject submission."""
+    submission = get_object_or_404(EventSubmission, id=submission_id)
+    action = request.data.get("action")
+    reviewer_id = getattr(request, "auth_payload", {}).get("sub")
+
+    if action == "approve":
+        if not submission.created_event:
+            return Response({"error": "No linked event to approve"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Get edited extracted_data if provided, otherwise use existing
+        edited_data = request.data.get("extracted_data")
+        if edited_data:
+            submission.extracted_data = edited_data
+            
+            # Update the linked event with the edited data
+            event = submission.created_event
+            if event and isinstance(edited_data, dict):
+                for field in [f.name for f in Events._meta.get_fields()]:
+                    if field in edited_data:
+                        setattr(event, field, edited_data[field])
+                event.save()
+        
+        submission.status = "approved"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = reviewer_id
+        submission.save()
+        return Response({"message": "Event approved", "event_id": submission.created_event.id})
+
+    elif action == "reject":
+        submission.status = "rejected"
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = reviewer_id
+        submission.admin_notes = request.data.get("admin_notes", "")
+        submission.save()
+        return Response({"message": "Event rejected"})
+
+    return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+@ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
+def get_user_submissions(request):
+    """Get submissions for the authenticated user"""
+    try:
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        user_id_source = 'auth_payload'
+        if not user_id:
+            logger.warning("events.get_user_submissions: no user_id resolved; returning 401-like response context")
+        submissions = EventSubmission.objects.filter(submitted_by=user_id).order_by("-submitted_at")
+
+        count = submissions.count()
+
+        data = [
+            {
+                "id": s.id,
+                "screenshot_url": s.screenshot_url,
+                "source_url": s.source_url,
+                "status": s.status,
+                "submitted_at": s.submitted_at,
+                "reviewed_at": s.reviewed_at,
+                "admin_notes": s.admin_notes,
+                "created_event_id": s.created_event.id if s.created_event else None,
+            }
+            for s in submissions
+        ]
+
+        return Response(data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["DELETE"])
+@ratelimit(key="ip", rate="30/hr", block=True)
+@jwt_required
+def delete_submission(request, submission_id): 
+    try:
+        submission = get_object_or_404(EventSubmission, id=submission_id)
+
+        current_user_id = (getattr(request, "user", None) or {}).get("id")
+        if not current_user_id or submission.submitted_by != current_user_id:
+            return Response({"error": "Not authorized to delete this submission"}, status=status.HTTP_403_FORBIDDEN)
+
+        if submission.status == "approved":
+            return Response({
+                "error": "Approved submissions cannot be removed. Contact support if needed."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Delete linked event first (cascades to submission)
+        event = submission.created_event
+        if event:
+            event.delete()
+            return Response({"message": "Submission and linked event removed"}, status=status.HTTP_200_OK)
+
+        # Fallback: if no linked event, delete submission directly
+        submission.delete()
+        return Response({"message": "Submission removed"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

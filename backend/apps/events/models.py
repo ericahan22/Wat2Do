@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from pgvector.django import VectorField
 
 
 class Events(models.Model):
@@ -20,7 +19,7 @@ class Events(models.Model):
 
     # iCalendar datetime fields (RFC 5545 standard)
     dtstamp = models.DateTimeField(
-        default=timezone.now, help_text="'2024-03-15T10:30:00Z'"
+        default=timezone.now, help_text="'time created in UTC, 2024-03-15T10:30:00Z'"
     )
     dtstart = models.DateTimeField(
         default=timezone.now, help_text="'2024-03-20T09:00:00'"
@@ -38,11 +37,11 @@ class Events(models.Model):
     duration = models.DurationField(blank=True, null=True, help_text="'8:00:00'")
 
     # Event categorization
-    categories = models.CharField(
-        max_length=255,
+    categories = models.JSONField(
+        default=list,
         null=True,
         blank=True,
-        help_text="'Career, Networking, Professional Development'",
+        help_text="['Career', 'Networking']",
     )
 
     # Timezone information
@@ -87,9 +86,6 @@ class Events(models.Model):
         blank=True,
         help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}",
     )
-    embedding = VectorField(
-        dimensions=1536, blank=True, null=True, help_text="[0.1, -0.2, 0.3, ...]"
-    )
     food = models.CharField(
         max_length=255, blank=True, null=True, help_text="'Free pizza and drinks'"
     )
@@ -124,12 +120,119 @@ class Events(models.Model):
     fb_handle = models.CharField(
         max_length=100, blank=True, null=True, help_text="'uwcareercenter'"
     )
+    other_handle = models.CharField(
+        max_length=100, blank=True, null=True, help_text="Other social media handle"
+    )
 
     class Meta:
         db_table = "events"
         indexes = [
-            models.Index(fields=["dtstart_utc"]),
+            models.Index(fields=["school", "status", "dtend_utc"], name="events_school_status_dtend_idx"),
+            models.Index(
+                fields=["school", "status", "dtstart_utc"],
+                condition=models.Q(dtend_utc__isnull=True),
+                name="events_school_status_dtstart_nullend_idx",
+            ),
         ]
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"
+
+
+class EventSubmission(models.Model):
+    """User-submitted events pending admin review"""
+
+    STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    # Submission details
+    id = models.BigAutoField(primary_key=True)
+    screenshot_url = models.URLField(help_text="S3 URL of uploaded screenshot")
+    source_url = models.URLField(help_text="URL to original event source")
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True
+    )
+    submitted_by = models.CharField(
+        max_length=255, help_text="Clerk user ID who submitted this event"
+    )
+
+    # Timestamps
+    submitted_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=255, null=True, blank=True)
+
+    # Extracted event data (populated after OpenAI processing)
+    extracted_data = models.JSONField(
+        null=True, blank=True, help_text="Event data extracted by OpenAI"
+    )
+
+    # Required link to created event
+    created_event = models.ForeignKey(
+        Events,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="submission",
+    )
+
+    # Admin notes
+    admin_notes = models.TextField(blank=True)
+
+    class Meta:
+        db_table = "event_submissions"
+        ordering = ["-submitted_at"]
+
+    def __str__(self):
+        return f"Submission {self.id} - {self.status}"
+
+
+class EventDates(models.Model):
+    """
+    Stores individual occurrence dates for events.
+    For events with rrule or rdate, this table contains all computed dates.
+    For simple events without recurrence, contains a single date entry.
+    This enables efficient querying of upcoming events without calculating rrule/rdate.
+    """
+
+    id = models.BigAutoField(primary_key=True)
+    event = models.ForeignKey(
+        Events,
+        on_delete=models.CASCADE,
+        related_name="event_dates",
+        db_index=True,
+        help_text="Reference to the parent event",
+    )
+    dtstart = models.DateTimeField(
+        help_text="Local start time for this occurrence"
+    )
+    dtend = models.DateTimeField(
+        blank=True, null=True, help_text="Local end time for this occurrence"
+    )
+    dtstart_utc = models.DateTimeField(
+        db_index=True, help_text="UTC start time for this occurrence"
+    )
+    dtend_utc = models.DateTimeField(
+        blank=True, null=True, help_text="UTC end time for this occurrence"
+    )
+    duration = models.DurationField(
+        blank=True, null=True, help_text="Duration of this occurrence"
+    )
+    tz = models.CharField(
+        max_length=64, null=True, blank=True, help_text="'America/New_York'"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "event_dates"
+        indexes = [
+            models.Index(fields=["dtstart_utc"], name="eventdates_dtstart_utc_idx"),
+            models.Index(fields=["dtend_utc"], name="eventdates_dtend_utc_idx"),
+            models.Index(fields=["event", "dtstart_utc"], name="eventdates_event_dtstart_idx"),
+        ]
+        ordering = ["dtstart_utc"]
+
+    def __str__(self):
+        return f"{self.event.title[:30] if self.event.title else 'untitled'} @ {self.dtstart_utc}"

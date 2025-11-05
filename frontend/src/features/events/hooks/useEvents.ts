@@ -1,91 +1,53 @@
 import { useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { staticEventsData } from "@/data/staticData";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
-import { API_BASE_URL } from "@/shared/constants/api";
+import { useApi } from "@/shared/hooks/useApi";
 import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
-import { isEventOngoing } from "@/shared/lib/eventUtils";
-import { Event } from "@/features/events";
-
-// Format the last updated timestamp into a human-readable format (in local time)
-const fetchEvents = async ({
-  queryKey,
-}: {
-  queryKey: string[];
-}): Promise<Event[]> => {
-  const searchTerm = queryKey[1] || "";
-  const dtstart = queryKey[2] || "";
-  const addedAt = queryKey[3] || "";
-
-  const params = new URLSearchParams();
-
-  if (searchTerm) {
-    params.append("search", searchTerm);
-  }
-
-  if (dtstart) {
-    params.append("dtstart", formatDtstartToMidnight(dtstart));
-  }
-
-  if (addedAt) {
-    params.append("added_at", addedAt);
-  }
-
-  const queryString = params.toString() ? `?${params.toString()}` : "";
-  const response = await fetch(`${API_BASE_URL}/api/events/${queryString}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch events");
-  }
-  const data: Event[] = await response.json();
-  return data;
-};
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { eventsAPIClient } = useApi();
   const searchTerm = searchParams.get("search") || "";
-  const dtstart = searchParams.get("dtstart") || "";
+  const categories = searchParams.get("categories") || "";
+  const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
 
-  const hasActiveFilters = searchTerm !== "" || dtstart !== "" || addedAt !== "";
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["events", searchTerm, dtstart, addedAt],
-    queryFn: fetchEvents,
-    refetchOnWindowFocus: false,
-    enabled: hasActiveFilters,
-  });
-
-  const events = useMemo(() => {
-    const rawEvents = hasActiveFilters && data ? data : staticEventsData;
-    
-    if (dtstart) {
-      return rawEvents.filter((event) => {
-        return event.dtstart.split('T')[0] >= dtstart;
-      });
-    }
-
-    const todayStr = getTodayString();
-    return rawEvents.filter((event) => {
-      const eventDate = event.dtstart.split('T')[0];
-      if (eventDate > todayStr) return true;
-      if (eventDate === todayStr) {
-        return isEventOngoing(event);
+  const { data: events = [], isLoading, error } = useQuery({
+    queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt],
+    queryFn: async () => {
+      const queryParams: Record<string, string> = {};
+      
+      if (searchTerm) {
+        queryParams.search = searchTerm;
       }
-      return false;
-    });
-  }, [hasActiveFilters, data, dtstart]);
+      
+      if (categories) {
+        queryParams.categories = categories;
+      }
+      
+      if (dtstart_utc) {
+        queryParams.dtstart_utc = formatDtstartToMidnight(dtstart_utc);
+      }
+      
+      if (addedAt) {
+        queryParams.added_at = addedAt;
+      }
+
+      return eventsAPIClient.getEvents(queryParams);
+    },
+    refetchOnWindowFocus: false,
+    enabled: true,  
+  });
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
   const documentTitle = useMemo(() => {
-    const isLoadingData = hasActiveFilters ? isLoading : false;
-
     let title: string;
 
-    if (searchTerm) {
+    if (searchTerm || categories) {
       title = `${events.length} Found Events - Wat2Do`;
-    } else if (dtstart) {
+    } else if (dtstart_utc) {
       title = `${events.length} Total Events - Wat2Do`;
     } else if (addedAt) {
       title = `${events.length} New Events - Wat2Do`;
@@ -93,12 +55,12 @@ export function useEvents() {
       title = `${events.length} Upcoming Events - Wat2Do`;
     }
 
-    if (!isLoadingData) {
+    if (!isLoading) {
       previousTitleRef.current = title;
     }
 
     return previousTitleRef.current;
-  }, [events.length, isLoading, searchTerm, hasActiveFilters, dtstart, addedAt]);
+  }, [events.length, isLoading, searchTerm, categories, dtstart_utc, addedAt]);
 
   useDocumentTitle(documentTitle);
 
@@ -116,10 +78,10 @@ export function useEvents() {
 
       const todayStr = getTodayString();
 
-      if (dtstart && dtstart !== todayStr) {
-        nextParams.delete("dtstart");
+      if (dtstart_utc && dtstart_utc !== todayStr) {
+        nextParams.delete("dtstart_utc");
       } else {
-        nextParams.set("dtstart", formatDtstartToMidnight("2025-01-01"));
+        nextParams.set("dtstart_utc", formatDtstartToMidnight("2025-01-01"));
       }
       return nextParams;
     });
@@ -133,24 +95,22 @@ export function useEvents() {
         nextParams.delete("added_at");
       } else {
         const now = new Date();
-        const todayAt7am = new Date();
-        todayAt7am.setHours(7, 0, 0, 0);
-        
-        const cutoffDate = now >= todayAt7am ? todayAt7am : new Date(todayAt7am.getTime() - 24 * 60 * 60 * 1000);
+        const cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // past 24 hours
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
-        nextParams.delete("dtstart");
+        nextParams.delete("dtstart_utc");
       }
       return nextParams;
     });
   };
 
   return {
-    data: events,
+    events,
     isLoading,
     error,
     searchTerm,
-    dtstart,
+    categories,
+    dtstart_utc,
     addedAt,
     handleViewChange,
     handleToggleStartDate,

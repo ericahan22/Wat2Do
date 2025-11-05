@@ -6,20 +6,29 @@ LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "scraping.log"
 
-root_logger = logging.getLogger()
-if not root_logger.handlers:
+
+def setup_logging():
+    root_logger = logging.getLogger()
+    if getattr(root_logger, "_wat2do_configured", False):
+        return
+    for handler in list(root_logger.handlers):
+        root_logger.removeHandler(handler)
+
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("PIL").setLevel(logging.INFO)
 
-    fmt = "%(asctime)s - pid=%(process)d - thread=%(threadName)s - %(name)s - %(levelname)s - %(message)s"
+    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
     ]
     logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
-else:
-    root_logger.setLevel(root_logger.level or logging.DEBUG)
+    root_logger._wat2do_configured = True
 
+
+setup_logging()
 logger = logging.getLogger(__name__)

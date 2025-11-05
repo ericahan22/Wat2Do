@@ -23,10 +23,10 @@ greenlet==3.0.1
 pyee==11.0.1
 
 # Email service
-resend==0.8.0
 
 # Encryption
-cryptography==41.0.7
+cryptography>=45.0.0
+clerk-backend-api
 
 # AWS S3 for image storage
 boto3==1.34.0

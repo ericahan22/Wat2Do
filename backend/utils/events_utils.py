@@ -1,8 +1,28 @@
-from datetime import timezone
-
 from dateutil import parser as dateutil_parser
+from datetime import timedelta
+import re
 
-from scraping.logging_config import logger
+
+def clean_datetime(val):
+    if not val or not isinstance(val, str) or not val.strip():
+        return None
+    try:
+        return dateutil_parser.parse(val)
+    except Exception:
+        return None
+
+
+def clean_duration(val):
+    if not val or str(val).strip() == "":
+        return None
+    if isinstance(val, timedelta):
+        return val
+    if isinstance(val, str):
+        match = re.match(r"^(\d{1,2}):(\d{2}):(\d{2})$", val)
+        if match:
+            hours, minutes, seconds = map(int, match.groups())
+            return timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    return None
 
 
 def determine_display_handle(event):
@@ -35,44 +55,3 @@ def determine_display_handle(event):
         return handle_str
     school = _get("school")
     return school or "Wat2Do Event"
-
-
-def tz_compute(dtstart, dtend):
-    """Compute dtstart_utc, dtend_utc, duration, all_day fields"""
-    duration = None
-    dtend_utc = None
-    dtstart_utc = None
-    all_day = False
-
-    def _to_utc(dt):
-        if not dt:
-            return None
-        if dt.tzinfo:
-            return dt.astimezone(timezone.utc)
-        return dt.replace(tzinfo=timezone.utc)
-
-    def _ensure_dt(obj):
-        """Accept datetime or ISO string, return datetime or None."""
-        if not obj:
-            return None
-        if isinstance(obj, str):
-            try:
-                return dateutil_parser.parse(obj)
-            except Exception as e:
-                logger.warning(f"Failed to parse datetime string {obj!r}: {e!s}")
-                return None
-        return obj
-
-    try:
-        dtstart_dt = _ensure_dt(dtstart)
-        dtend_dt = _ensure_dt(dtend)
-
-        if dtstart_dt:
-            dtstart_utc = _to_utc(dtstart_dt)
-        if dtstart_dt and dtend_dt:
-            duration = dtend_dt - dtstart_dt
-            dtend_utc = _to_utc(dtend_dt)
-    except Exception as e:
-        logger.warning(f"Failed to compute duration/dtstart_utc/dtend_utc: {e!s}")
-
-    return dtstart_utc, dtend_utc, duration, all_day

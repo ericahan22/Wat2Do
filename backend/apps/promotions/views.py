@@ -7,10 +7,11 @@ from rest_framework.response import Response
 from apps.events.models import Events
 
 from .models import EventPromotion
+from apps.core.auth import jwt_required, admin_required
 
 
 @api_view(["POST"])
-@permission_classes([IsAdminUser])
+@admin_required
 def promote_event(request, event_id):
     """
     Promote an event by creating an EventPromotion record.
@@ -120,7 +121,7 @@ def _parse_expires_at(expires_at):
 
 
 @api_view(["POST"])
-@permission_classes([IsAdminUser])
+@admin_required
 def unpromote_event(request, event_id):
     """
     Deactivate an event promotion.
@@ -186,8 +187,8 @@ def get_promoted_events(request):
                 {
                     "id": event.id,
                     "title": event.title,
-                    "dtstart": event.dtstart.isoformat(),
-                    "dtend": event.dtend.isoformat() if event.dtend else None,
+                    "dtstart": event.dtstart_utc.isoformat(),
+                    "dtend": event.dtend_utc.isoformat() if event.dtend_utc else None,
                     "location": event.location,
                     "description": event.description,
                     "source_image_url": event.source_image_url,
@@ -219,7 +220,7 @@ def get_promoted_events(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAdminUser])
+@admin_required
 def get_promotion_status(request, event_id):
     """
     Get promotion status for a specific event.

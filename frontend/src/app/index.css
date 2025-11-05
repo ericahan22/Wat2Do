@@ -59,45 +59,11 @@ strong,
 b {
   font-family: "Satoshi", system-ui, sans-serif;
   font-weight: 800;
-  @apply text-gray-900 dark:text-white;
 }
 
 strong,
 b {
   font-weight: 600;
-}
-
-/* Secondary text - body content and emphasis */
-p,
-span,
-article,
-ul,
-ol,
-li,
-label,
-em,
-i,
-a {
-  @apply text-gray-700 dark:text-gray-300;
-}
-
-/* Form inputs */
-input,
-textarea,
-select {
-  @apply text-gray-900 dark:text-white;
-}
-
-/* Code elements */
-code,
-pre {
-  @apply text-gray-800 dark:text-gray-200;
-}
-
-/* Muted text */
-blockquote,
-small {
-  @apply text-gray-500 dark:text-gray-400;
 }
 
 /* Shadow utility classes - Light mode */

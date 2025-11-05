@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { API_BASE_URL } from '@/shared/constants/api';
+import { useApi } from '@/shared/hooks/useApi';
+import NewsletterAPIClient from '@/shared/api/NewsletterAPIClient';
 
 interface UnsubscribeData {
   already_unsubscribed: boolean;
@@ -20,59 +21,21 @@ interface UnsubscribeResponse {
 }
 
 
-const fetchUnsubscribeInfo = async (token: string): Promise<UnsubscribeData> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`);
-  
-  if (!response.ok) {
-    // Check if response is JSON before trying to parse
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to load unsubscribe information');
-    } else {
-      // Handle non-JSON responses (like HTML 404 pages)
-      if (response.status === 404) {
-        throw new Error('Invalid unsubscribe token');
-      }
-      throw new Error(`Server error: ${response.status}`);
-    }
-  }
-  
-  return response.json();
+const fetchUnsubscribeInfo = async (token: string, newsletterAPI: NewsletterAPIClient): Promise<UnsubscribeData> => {
+  return newsletterAPI.getUnsubscribeInfo(token);
 };
 
 const submitUnsubscribe = async (
   token: string, 
-  data: UnsubscribeRequest
+  data: UnsubscribeRequest,
+  newsletterAPI: NewsletterAPIClient
 ): Promise<UnsubscribeResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/newsletter/unsubscribe/${token}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    // Check if response is JSON before trying to parse
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to unsubscribe');
-    } else {
-      // Handle non-JSON responses
-      if (response.status === 404) {
-        throw new Error('Invalid unsubscribe token');
-      }
-      throw new Error(`Server error: ${response.status}`);
-    }
-  }
-
-  return response.json();
+  return newsletterAPI.submitUnsubscribe(token, data);
 };
 
 export const useUnsubscribe = (token: string | undefined) => {
   const queryClient = useQueryClient();
+  const { newsletterAPIClient } = useApi();
 
   // Query to fetch unsubscribe info
   const {
@@ -82,7 +45,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     isError: isFetchError,
   } = useQuery({
     queryKey: ['unsubscribe', token],
-    queryFn: () => fetchUnsubscribeInfo(token!),
+    queryFn: () => fetchUnsubscribeInfo(token!, newsletterAPIClient),
     enabled: !!token,
     retry: false,
   });
@@ -97,7 +60,7 @@ export const useUnsubscribe = (token: string | undefined) => {
     data: submitData,
     reset: resetSubmit,
   } = useMutation({
-    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data),
+    mutationFn: (data: UnsubscribeRequest) => submitUnsubscribe(token!, data, newsletterAPIClient),
     onSuccess: () => {
       // Invalidate and refetch the unsubscribe info
       queryClient.invalidateQueries({ queryKey: ['unsubscribe', token] });

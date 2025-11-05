@@ -11,37 +11,37 @@ django.setup()
 import csv
 import json
 import random
-import re
 import time
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone as pytimezone
 from pathlib import Path
 
 import requests
+from requests.exceptions import ReadTimeout, ConnectionError
+from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
-from logging_config import logger
-from zyte_setup import setup_zyte
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
+from scraping.logging_config import logger
+from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
     extract_events_from_caption,
-    generate_event_embedding,
 )
 from services.storage_service import upload_image_from_url
-from utils.embedding_utils import find_similar_events
-from utils.events_utils import tz_compute
+from shared.constants.user_agents import USER_AGENTS
+from utils.event_dates_utils import create_event_dates_from_event_data
+from utils.events_utils import clean_datetime, clean_duration
+from utils.scraping_utils import (
+    normalize,
+    jaccard_similarity,
+    sequence_similarity,
+    get_post_image_url,
+)
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
-]
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "100"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "25"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
@@ -59,52 +59,44 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
-def get_post_image_url(post):
-    try:
-        if post._node.get("image_versions2"):
-            return post._node["image_versions2"]["candidates"][0]["url"]
-
-        if post._node.get("carousel_media"):
-            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0][
-                "url"
-            ]
-
-        if post._node.get("display_url"):
-            return post._node["display_url"]
-        return None
-    except (KeyError, AttributeError) as e:
-        logger.error(
-            f"Error accessing image URL for post {getattr(post, 'shortcode', 'unknown')}: {e!s}"
-        )
-        return None
-
-
-def extract_s3_filename_from_url(image_url: str) -> str:
-    if not image_url:
-        return None
-    filename = image_url.split("/")[-1]
-    return f"events/{filename}"
-
-
-def normalize_string(s):
-    if not s:
-        return ""
-    return re.sub(r"\W+", "", s).lower().strip()
-
-
 def is_duplicate_event(event_data):
-    """Check for duplicate events (same name, date, location, time)"""
-    title = normalize_string(event_data.get("title"))
-    location = normalize_string(event_data.get("location"))
-    date = datetime.fromisoformat(event_data.get("dtstart")).date()
+    """Check for duplicate events using title, datetime, location, and description."""
+    title = event_data.get("title") or ""
+    location = event_data.get("location") or ""
+    description = event_data.get("description") or ""
+    dtstart_utc = event_data.get("dtstart_utc")
+    if not dtstart_utc:
+        return False
 
     try:
-        candidates = Events.objects.filter(dtstart__date=date)
+        date = datetime.fromisoformat(dtstart_utc)
+        candidates = Events.objects.filter(dtstart_utc__date=date.date())
         for c in candidates:
-            c_title = normalize_string(getattr(c, "title", ""))
-            c_loc = normalize_string(getattr(c, "location", ""))
-            if c_title == title and c_loc == location:
-                return True
+            c_title = getattr(c, "title", "") or ""
+            c_loc = getattr(c, "location", "") or ""
+            c_desc = getattr(c, "description", "") or ""
+            c_dtstart_utc = getattr(c, "dtstart_utc", None)
+            if c_dtstart_utc and c_dtstart_utc.date() == date.date():
+                norm_title = normalize(title)
+                norm_c_title = normalize(c_title)
+                substring_match = norm_c_title in norm_title or norm_title in norm_c_title
+                title_sim = max(
+                    jaccard_similarity(c_title, title),
+                    sequence_similarity(c_title, title),
+                )
+                loc_sim = jaccard_similarity(c_loc, location)
+                desc_sim = jaccard_similarity(c_desc, description)
+                if substring_match:
+                    logger.warning(
+                        f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
+                    )
+                    return True
+                if (title_sim > 0.7 and loc_sim > 0.5) or (loc_sim > 0.5 and desc_sim > 0.3):
+                    logger.warning(
+                        f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
+                        f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
+                    )
+                    return True
     except Exception as e:
         logger.error(f"Error during duplicate check: {e!s}")
     return False
@@ -115,89 +107,127 @@ def append_event_to_csv(
     ig_handle,
     source_url,
     added_to_db="success",
-    embedding=None,
     club_type=None,
 ):
     csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
 
-    dtstart = event_data.get("dtstart", "")
-    dtend = event_data.get("dtend", "")
-    dtstart_utc, dtend_utc, duration, all_day = tz_compute(dtstart, dtend)
+    dtstart = clean_datetime(event_data.get("dtstart"))
+    dtend = clean_datetime(event_data.get("dtend"))
+    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
+    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
+    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
+    duration = clean_duration(event_data.get("duration"))
+    all_day = event_data.get("all_day")
+    location = event_data.get("location", "")
+    food = event_data.get("food", "")
+    price = event_data.get("price", "")
+    registration = bool(event_data.get("registration", False))
+    description = event_data.get("description", "")
+    rrule = event_data.get("rrule", "")
+    latitude = event_data.get("latitude", None)
+    longitude = event_data.get("longitude", None)
+    tz = event_data.get("tz", "")
+    school = event_data.get("school", "")
+    source_image_url = event_data.get("source_image_url", "")
+    title = event_data.get("title", "")
+    categories = event_data.get("categories", [])
+
+    fieldnames = [
+        "ig_handle",
+        "title",
+        "source_url",
+        "dtstart",
+        "dtstart_utc",
+        "dtend",
+        "dtend_utc",
+        "duration",
+        "location",
+        "food",
+        "price",
+        "registration",
+        "description",
+        "rrule",
+        "latitude",
+        "longitude",
+        "tz",
+        "school",
+        "source_image_url",
+        "all_day",
+        "club_type",
+        "categories",
+        "raw_json",
+        "added_to_db",
+        "status",
+    ]
 
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
-        fieldnames = [
-            "ig_handle",
-            "title",
-            "source_url",
-            "dtstart",
-            "dtstart_utc",
-            "dtend",
-            "dtend_utc",
-            "duration",
-            "location",
-            "food",
-            "price",
-            "registration",
-            "description",
-            "reactions",
-            "embedding",
-            "source_image_url",
-            "all_day",
-            "club_type",
-            "raw_json",
-            "added_to_db",
-        ]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, lineterminator="\n")
         if not file_exists:
             writer.writeheader()
         writer.writerow(
             {
                 "ig_handle": ig_handle,
-                "title": event_data.get("title"),
+                "title": title,
                 "source_url": source_url,
                 "dtstart": dtstart,
                 "dtstart_utc": dtstart_utc,
                 "dtend": dtend,
                 "dtend_utc": dtend_utc,
                 "duration": duration,
-                "location": event_data.get("location"),
-                "food": event_data.get("food", ""),
-                "price": event_data.get("price", ""),
-                "registration": bool(event_data.get("registration", False)),
-                "description": event_data.get("description", ""),
-                "reactions": json.dumps(event_data.get("reactions") or {}),
-                "embedding": embedding or "",
-                "source_image_url": event_data.get("source_image_url") or "",
+                "location": location,
+                "food": food,
+                "price": price,
+                "registration": registration,
+                "description": description,
+                "rrule": rrule,
+                "latitude": latitude,
+                "longitude": longitude,
+                "tz": tz,
+                "school": school,
+                "source_image_url": source_image_url,
                 "all_day": all_day,
                 "club_type": club_type or event_data.get("club_type") or "",
+                "categories": json.dumps(categories, ensure_ascii=False),
                 "raw_json": json.dumps(event_data, ensure_ascii=False),
                 "added_to_db": added_to_db,
+                "status": "CONFIRMED",
             }
         )
+        logger.info(f"Event written to CSV with status: {added_to_db}")
 
 
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
-    title = event_data.get("title")
-    dtstart = event_data.get("dtstart")
-    dtend = event_data.get("dtend") or None
+    title = event_data.get("title", "")
+    dtstart = clean_datetime(event_data.get("dtstart"))
+    dtend = clean_datetime(event_data.get("dtend"))
+    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
+    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
+    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
+    duration = clean_duration(event_data.get("duration"))
+    all_day = event_data.get("all_day")
     source_image_url = event_data.get("source_image_url") or ""
-    description = event_data.get("description") or ""
+    description = event_data.get("description", "") or ""
     location = event_data.get("location")
     price = event_data.get("price", None)
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
-    embedding = event_data.get("embedding") or ""
-    date = datetime.fromisoformat(dtstart).date()
-    dtstart_utc, dtend_utc, duration, all_day = tz_compute(dtstart, dtend)
+    tz = event_data.get("tz", "")
+    latitude = event_data.get("latitude", None)
+    longitude = event_data.get("longitude", None)
+    school = event_data.get("school", "")
+    categories = event_data.get("categories", [])
+
+    if not categories or not isinstance(categories, list):
+        logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
+        categories = ["Uncategorized"]
 
     if is_duplicate_event(event_data):
-        logger.info(
-            f"Duplicate event detected, skipping {title} on {date} at {location}"
-        )
-        return False
+        return "duplicate"
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
     try:
@@ -209,37 +239,11 @@ def insert_event_to_db(event_data, ig_handle, source_url):
             f"Club with handle {ig_handle} not found, inserting event with club_type NULL"
         )
 
-    if not embedding:
-        try:
-            embedding = generate_event_embedding(event_data)
-        except Exception as e:
-            logger.warning(f"Embedding generation failed: {e!s}")
-
-    # Similarlity check deduplication
-    try:
-        similar_events = find_similar_events(
-            embedding, threshold=0.90, limit=10, min_date=date
-        )
-        candidate_ids = [row["id"] for row in similar_events]
-        if candidate_ids:
-            qs = Events.objects.filter(id__in=candidate_ids, dtstart__date=date)
-            for existing in qs:
-                # Only replace if new event has image but existing doesn't,
-                # or if new description is longer (more info)
-                new_img = source_image_url
-                old_img = getattr(existing, "source_image_url", None)
-                new_desc = description or ""
-                old_desc = existing.description or ""
-                if (not old_img and new_img) or (len(new_desc) > len(old_desc) + 10):
-                    logger.info(f"Replacing older event #{existing.id} with newer one")
-                    existing.delete()
-    except Exception as e:
-        logger.error(f"Unexpected error finding duplicates by similarity check: {e}")
-
     create_kwargs = {
         "ig_handle": ig_handle,
         "title": title,
         "source_url": source_url,
+        "dtstamp": timezone.now(),
         "dtstart": dtstart,
         "dtstart_utc": dtstart_utc,
         "dtend": dtend or None,
@@ -252,35 +256,33 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "registration": registration,
         "description": description or None,
         "reactions": {},
-        "embedding": embedding or None,
         "source_image_url": source_image_url or None,
         "raw_json": event_data,
         "status": "CONFIRMED",
-        "tz": "UTC",
+        "tz": tz,
         "all_day": all_day,
+        "latitude": latitude,
+        "longitude": longitude,
+        "school": school,
+        "rrule": event_data.get("rrule", ""),
+        "categories": categories,
     }
 
     try:
-        Events.objects.create(**create_kwargs)
-        append_event_to_csv(
-            event_data,
-            ig_handle,
-            source_url,
-            added_to_db="success",
-            embedding=embedding,
-            club_type=club_type,
-        )
+        event = Events.objects.create(**create_kwargs)
+        # Create EventDates entries for this event
+        try:
+            event_dates = create_event_dates_from_event_data(event)
+            if event_dates:
+                from apps.events.models import EventDates
+                EventDates.objects.bulk_create(event_dates)
+                logger.debug(f"Created {len(event_dates)} EventDates entries for event {event.id}")
+        except Exception as ed_e:
+            logger.error(f"Error creating EventDates for event {event.id}: {ed_e}")
+            # Don't fail the whole operation if EventDates creation fails
         return True
     except Exception as e:
-        logger.error(f"Error inserting event to db: {e}")
-        append_event_to_csv(
-            event_data,
-            ig_handle,
-            source_url,
-            added_to_db="failed",
-            embedding=embedding,
-            club_type=club_type,
-        )
+        logger.error(f"Error inserting event to DB: {e}")
         return False
 
 
@@ -298,6 +300,37 @@ def get_seen_shortcodes():
         return set()
 
 
+def safe_feed_posts(loader, retries=3, backoff=60):
+    """
+    Yield posts from loader.get_feed_posts(), retrying on network errors.
+    On error, re-instantiate the session and skip already-yielded posts.
+    """
+    seen_shortcodes = set()
+    attempts = 0
+    while attempts < retries:
+        try:
+            for post in loader.get_feed_posts():
+                if hasattr(post, "shortcode"):
+                    if post.shortcode in seen_shortcodes:
+                        continue
+                    seen_shortcodes.add(post.shortcode)
+                yield post
+            break  # Finished all posts
+        except (ReadTimeout, ConnectionError) as e:
+            attempts += 1
+            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})...")
+            time.sleep(backoff)
+            try:
+                new_loader = session()
+                loader.__dict__.update(new_loader.__dict__)
+                logger.info("Session re-instantiated successfully. Continuing feed scrape.")
+            except Exception as session_e:
+                logger.error(f"Failed to re-instantiate session: {session_e}")
+                break
+    if attempts >= retries:
+        logger.error("Too many consecutive network errors. Aborting feed scrape.")
+
+
 def process_recent_feed(
     loader,
     cutoff=None,
@@ -309,7 +342,7 @@ def process_recent_feed(
     Stops scraping once posts become older than cutoff.
     """
     if not cutoff:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS)
+        cutoff = timezone.now() - timedelta(days=CUTOFF_DAYS)
 
     events_added = 0
     posts_processed = 0
@@ -319,14 +352,22 @@ def process_recent_feed(
 
     seen_shortcodes = get_seen_shortcodes()
 
+    def check_post_limit():
+        nonlocal termination_reason
+        if posts_processed >= max_posts:
+            termination_reason = f"reached_max_posts={max_posts}"
+            logger.info(f"Reached max post limit of {max_posts}, stopping")
+            return True
+        return False
+
     try:
-        for post in loader.get_feed_posts():
+        for post in safe_feed_posts(loader):
             try:
-                post_time = post.date_utc.replace(tzinfo=timezone.utc)
+                post_time = timezone.make_aware(post.date_utc) if timezone.is_naive(post.date_utc) else post.date_utc
                 if post.shortcode in seen_shortcodes or post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
-                        f"Skipping post {post.shortcode}; consec_old_posts={consec_old_posts}"
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping post; consec_old_posts={consec_old_posts}"
                     )
                     if consec_old_posts >= max_consec_old_posts:
                         termination_reason = (
@@ -339,95 +380,107 @@ def process_recent_feed(
                     continue
 
                 consec_old_posts = 0
-                posts_processed += 1
                 logger.info("-" * 100)
-                logger.info(
-                    f"Processing post: {post.shortcode} by {post.owner_username}"
-                )
+                logger.info(f"[{post.shortcode}] [{post.owner_username}] Processing post")
 
                 # Safely get image URL and upload to S3
                 raw_image_url = get_post_image_url(post)
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
                     source_image_url = upload_image_from_url(raw_image_url)
-                    logger.info(f"Uploaded image to S3: {source_image_url}")
+                    logger.debug(f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}")
                 else:
                     logger.warning(
-                        f"No image URL found for post {post.shortcode}, skipping image upload"
+                        f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
                     )
                     source_image_url = None
 
-                events_data = extract_events_from_caption(
-                    post.caption, source_image_url
+                posts_processed += 1
+                extracted_list = extract_events_from_caption(
+                    post.caption, source_image_url, post.date_utc
                 )
-                if not events_data or len(events_data) == 0:
+                if not extracted_list:
                     logger.warning(
-                        f"AI client returned no events for post {post.shortcode}"
+                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
                     )
-                    if posts_processed >= max_posts:
-                        termination_reason = f"reached_max_posts={max_posts}"
-                        logger.info(f"Reached max post limit of {max_posts}, stopping")
+                    if check_post_limit():
                         break
                     continue
 
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                today = datetime.now(timezone.utc).date()
-
-                # Process each event returned by the AI
-                for event_data in events_data:
-                    # If missing fields
-                    if not (
-                        event_data.get("title")
-                        and event_data.get("dtstart")
-                        and event_data.get("location")
-                    ):
-                        missing_fields = [
-                            key
-                            for key in ["title", "dtstart", "location"]
-                            if not event_data.get(key)
-                        ]
-                        logger.warning(
-                            f"Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping event"
+                for idx, event_data in enumerate(extracted_list):
+                    added_to_db = None
+                    try:
+                        logger.debug(
+                            f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
                         )
-                        embedding = generate_event_embedding(event_data)
+
+                        if not (
+                            event_data.get("title")
+                            and event_data.get("dtstart")
+                            and event_data.get("location")
+                        ):
+                            missing_fields = [
+                                key
+                                for key in ["title", "dtstart", "location"]
+                                if not event_data.get(key)
+                            ]
+                            logger.warning(
+                                f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
+                            )
+                            added_to_db = "missing_fields"
+                            continue
+
+                        dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+                        now = timezone.now()
+                        if dtstart_utc < now:
+                            logger.info(
+                                f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
+                            )
+                            added_to_db = "past_date"
+                            continue
+
+                        result = insert_event_to_db(event_data, post.owner_username, source_url)
+                        if result is True:
+                            events_added += 1
+                            logger.info(
+                                f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
+                            )
+                            added_to_db = "success"
+                        elif result == "duplicate":
+                            logger.warning(
+                                f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
+                            )
+                            added_to_db = "duplicate"
+                        else:
+                            logger.error(
+                                f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
+                            )
+                            added_to_db = "failed"
+                    except Exception as inner_e:
+                        logger.error(
+                            f"[{post.shortcode}] [{post.owner_username}] Error handling extracted event index {idx}: {inner_e!s}"
+                        )
+                        added_to_db = "error"
+                    finally:
                         append_event_to_csv(
                             event_data,
                             post.owner_username,
                             source_url,
-                            added_to_db="missing_fields",
-                            embedding=embedding,
-                        )
-                        continue
-
-                    date = datetime.fromisoformat(event_data.get("dtstart")).date()
-                    if date < today:
-                        logger.info(
-                            f"Skipping event '{event_data.get('title')}' with past date {date}"
-                        )
-                        continue
-
-                    if insert_event_to_db(event_data, post.owner_username, source_url):
-                        events_added += 1
-                        logger.info(
-                            f"Successfully added event '{event_data.get('title')}' from {post.owner_username}"
-                        )
-                    else:
-                        logger.error(
-                            f"Failed to add event '{event_data.get('title')}' from {post.owner_username}"
+                            added_to_db=added_to_db or "unknown",
                         )
 
-                if posts_processed >= max_posts:
-                    termination_reason = f"reached_max_posts={max_posts}"
-                    logger.info(f"Reached max post limit of {max_posts}, stopping")
+                if check_post_limit():
                     break
 
-                time.sleep(random.uniform(15, 45))
+                seen_shortcodes.add(post.shortcode)
+                time.sleep(random.uniform(30, 60))
 
             except Exception as e:
                 logger.error(
-                    f"Error processing post {post.shortcode} by {post.owner_username}: {e!s}"
+                    f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
                 )
-                logger.error(f"Traceback: {traceback.format_exc()}")
+                logger.error(f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}")
                 time.sleep(random.uniform(3, 8))
                 continue
 
@@ -440,11 +493,8 @@ def process_recent_feed(
         logger.error(f"Feed processing aborted due to error: {e!s}")
         logger.error(f"Traceback: {traceback.format_exc()}")
 
-    logger.info(
-        "Feed processing completed. reason=%s, posts_processed=%d, events_added=%d",
-        termination_reason,
-        posts_processed,
-        events_added,
+    logger.debug(
+        f"Feed processing completed. reason={termination_reason}, posts_processed={posts_processed}, events_added={events_added}"
     )
     logger.info("\n------------------------- Summary -------------------------")
     logger.info(f"Added {events_added} event(s) to Supabase")
@@ -541,6 +591,7 @@ if __name__ == "__main__":
     test_zyte_proxy("CA")
     logger.info("Attemping to load Instagram session...")
     L = session()
+    L.context.request_timeout = 120
     if L:
         logger.info("Session created successfully!")
         process_recent_feed(L)

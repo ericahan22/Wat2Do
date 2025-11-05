@@ -26,8 +26,8 @@ def find_similar_events(
                 title,
                 description,
                 location,
-                dtstart,
-                dtend,
+                dtstart_utc,
+                dtend_utc,
                 club_type,
                 1 - (embedding <=> %s::vector) as similarity
             FROM events 
@@ -38,7 +38,7 @@ def find_similar_events(
 
         # Add date filter if provided
         if min_date:
-            base_query += " AND dtstart >= %s"
+            base_query += " AND dtstart_utc >= %s"
             params.append(min_date)
 
         # Add similarity threshold

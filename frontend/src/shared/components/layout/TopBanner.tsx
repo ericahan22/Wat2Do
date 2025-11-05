@@ -10,7 +10,7 @@ function TopBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="w-full !bg-blue-[#0056D6]">
+    <div className="w-full !bg-[#0056D6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 relative flex items-center justify-center">
         <a
           href="https://wat2do.instatus.com/"
@@ -19,7 +19,7 @@ function TopBanner() {
           className="hover:text-gray-200"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatPrettyDate("2025-10-19")} - App is no longer broken!
+            {formatPrettyDate("2025-10-28")} - Submit events now available!
           </span>
         </a>
         <IconButton

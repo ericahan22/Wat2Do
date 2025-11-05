@@ -3,8 +3,8 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  dtstart: string; // ISO datetime string
-  dtend: string | null; // ISO datetime string
+  dtstart_utc: string; // ISO datetime string
+  dtend_utc: string | null; // ISO datetime string
   price: number | null;
   food: string | null;
   registration: boolean;

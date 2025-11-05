@@ -21,20 +21,18 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Credentials
-SECRET_KEY = os.getenv(
-    "SECRET_KEY",
-    "django-insecure-dev-key-for-local-development-only-please-change-in-production",
-)
-DEBUG = os.getenv("PRODUCTION") != "1"  # Fixed the DEBUG logic
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    if os.getenv("PRODUCTION") == "1":
+        raise ValueError("SECRET_KEY environment variable must be set in production!")
+    # Only allow insecure default in development
+    SECRET_KEY = "django-insecure-dev-key-for-local-development-only-please-change-in-production"
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    ".vercel.app",
-    ".elasticbeanstalk.com",
-    ".elb.amazonaws.com",
-    "*",
-]
+DEBUG = os.getenv("PRODUCTION") != "1"
+
+ALLOWED_PARTIES = os.getenv("ALLOWED_PARTIES").split(",") if os.getenv('ALLOWED_PARTIES') else []
+CLERK_ALLOWED_PARTIES = ALLOWED_PARTIES
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",") if os.getenv('ALLOWED_HOSTS') else []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -56,6 +54,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.core.middleware.HealthCheckMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -65,25 +64,40 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "ratelimit.middleware.RatelimitMiddleware",
-    "ratelimit.middleware.RatelimitMiddleware",
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'apps.core.auth.JwtAuthBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]
+
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = ALLOWED_PARTIES
+    
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF settings for development
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "https://wat2do.ca",
-    "https://www.wat2do.ca",
-]
+CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
+CLERK_AUTHORIZED_PARTIES = ALLOWED_PARTIES
 
+
+# CSRF settings for development
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8000",
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = ALLOWED_PARTIES
+    
 # CSRF settings for SPA frontend
-CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1"  # True in production (HTTPS)
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie for SPA
-CSRF_COOKIE_SAMESITE = "Lax"  # Allow cross-site requests
-CSRF_USE_SESSIONS = True  # Use sessions for CSRF tokens
+CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1" 
+CSRF_COOKIE_HTTPONLY = False 
+CSRF_COOKIE_SAMESITE = "Lax" 
+CSRF_USE_SESSIONS = True 
 
 ROOT_URLCONF = "config.urls"
 
@@ -112,10 +126,10 @@ if os.getenv("PRODUCTION") == "1":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("POSTGRES_DB", "postgres"),
-            "USER": os.getenv("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "your-supabase-password"),
-            "HOST": os.getenv("POSTGRES_HOST", "your-project.supabase.co"),
+            "NAME": os.getenv("POSTGRES_DB"),
+            "USER": os.getenv("POSTGRES_USER"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+            "HOST": os.getenv("POSTGRES_HOST"),
             "PORT": os.getenv("POSTGRES_PORT", "6543"),
             "OPTIONS": {
                 "options": "-c pool_mode=session",
@@ -166,14 +180,10 @@ USE_TZ = True
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
 }
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -184,10 +194,21 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+# Clerk configuration
+CLERK_ISSUER = os.getenv("CLERK_ISSUER", "https://clerk.wat2do.ca")
+CLERK_JWKS_URL = os.getenv(
+    "CLERK_JWKS_URL",
+    "https://clerk.wat2do.ca/.well-known/jwks.json",
+)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Silenced system checks
+# Allow longer index names (models.E034 - index name length > 30 characters)
+SILENCED_SYSTEM_CHECKS = ["models.E034"]
 
 # Email confirmation settings
 BASE_URL = (
@@ -209,3 +230,21 @@ RATELIMIT_GLOBAL = "200/h"  # 1000 requests per hour per IP globally
 RATELIMIT_GROUP = {
     "api": "100/h",  # 100 requests per hour for API endpoints
 }
+
+# Database query logging (only in DEBUG mode)
+if DEBUG:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+            },
+        },
+        "loggers": {
+            "django.db.backends": {
+                "handlers": ["console"],
+                "level": "DEBUG",  # Shows all SQL queries
+            },
+        },
+    }

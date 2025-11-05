@@ -35,7 +35,7 @@ const SearchInput = memo(
 
     return (
       <div
-        className={`relative ${className} border border-gray-300 h-9 shadow-s dark:border-gray-700 overflow-hidden rounded-xl`}
+        className={`relative ${className} border border-gray-300 h-9 dark:border-gray-700 overflow-hidden rounded-xl`}
       >
         <Input
           ref={inputRef}

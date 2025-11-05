@@ -6,6 +6,7 @@ specifically AWS S3. It handles image validation, optimization, and upload.
 """
 
 import os
+import random
 import uuid
 from io import BytesIO
 
@@ -16,6 +17,7 @@ from dotenv import load_dotenv
 from PIL import Image
 
 from scraping.logging_config import logger
+from shared.constants.user_agents import USER_AGENTS
 
 
 class StorageService:
@@ -55,12 +57,10 @@ class StorageService:
         """Download image from URL"""
         try:
             headers = {
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                    "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-                )
+                "User-Agent": random.choice(USER_AGENTS),
+                "Referer": "https://www.instagram.com/",
             }
-            response = requests.get(image_url, headers=headers, timeout=30)
+            response = requests.get(image_url, headers=headers, timeout=60)
             response.raise_for_status()
 
             return response.content
