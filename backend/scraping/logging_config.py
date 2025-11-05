@@ -20,6 +20,9 @@ def setup_logging():
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.INFO)
+    logging.getLogger("openai._base_client").setLevel(logging.WARNING)
+    logging.getLogger("django").setLevel(logging.WARNING)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
 
     fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
