@@ -9,9 +9,7 @@ This module provides methods for interacting with OpenAI's API, including:
 
 import json
 import os
-import time
 import traceback
-from copy import deepcopy
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -505,9 +503,9 @@ NO explanations, NO additional text, JUST the JSON array.
             return []
 
 
-
 # Singleton instance
 openai_service = OpenAIService()
+
 
 # Backward compatibility - export functions that use the singleton
 generate_embedding = openai_service.generate_embedding

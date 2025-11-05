@@ -91,11 +91,14 @@ const OrganizationBadge = ({
 }) => {
   if (!event.display_handle) return null;
 
+  // Only link if display_handle is an ig_handle
+  const isInstagram = !!event.ig_handle && event.display_handle === event.ig_handle;
+
   return (
     <BadgeMask variant="bottom-left">
       <Badge
         onMouseDown={() => {
-          if (!isSelectMode) {
+          if (!isSelectMode && isInstagram) {
             window.open(
               `https://www.instagram.com/${event.display_handle}/`,
               "_blank"
@@ -103,9 +106,9 @@ const OrganizationBadge = ({
           }
         }}
         variant="outline"
-        className="font-extrabold cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+        className={`font-extrabold${isInstagram ? " cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" : ""}`}
       >
-        @{event.display_handle}
+        {isInstagram ? `@${event.display_handle}` : event.display_handle}
       </Badge>
     </BadgeMask>
   );
