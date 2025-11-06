@@ -323,7 +323,7 @@ const EventsGrid = memo(
                 </p>
                 <motion.div
                   key={`events-grid-${category}-${data.length}-${currentPage}`}
-                  className="grid sm:grid-cols-[repeat(auto-fit,_minmax(175px,_1fr))] grid-cols-2 gap-2 sm:gap-2.5"
+                  className="grid xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5"
                   initial="hidden"
                   animate="visible"
                   variants={{
