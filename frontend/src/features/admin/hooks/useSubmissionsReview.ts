@@ -19,13 +19,6 @@ export function useSubmissionsReview() {
 
   const selectedSubmission = submissionsQuery.data?.find((s) => s.id === selectedSubmissionId) ?? null;
 
-  const processMutation = useMutation({
-    mutationFn: (submissionId: number) => eventsAPIClient.processSubmission(submissionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "submissions"] });
-    },
-  });
-
   const reviewMutation = useMutation({
     mutationFn: ({
       submissionId,
@@ -90,9 +83,6 @@ export function useSubmissionsReview() {
     submissions: submissionsQuery.data ?? [],
     submissionsLoading: submissionsQuery.isLoading,
     refetchSubmissions: submissionsQuery.refetch,
-
-    processSubmission: processMutation.mutateAsync,
-    isProcessing: processMutation.isPending,
 
     reviewSubmission: reviewMutation.mutateAsync,
     handleReview,

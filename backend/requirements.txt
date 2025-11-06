@@ -15,8 +15,10 @@ instaloader==4.14.2+custom1
 python-dotenv
 python-dateutil==2.9.0.post0
 requests==2.31.0
+aiohttp>=3.9.0
 beautifulsoup4
 openai
+geopy==2.4.0
 
 # Email service
 

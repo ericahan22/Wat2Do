@@ -1,6 +1,11 @@
 import { useSubmissionsReview } from "@/features/admin/hooks/useSubmissionsReview";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Textarea } from "@/shared/components/ui/textarea";
 
@@ -15,7 +20,6 @@ export function SubmissionsReview() {
     submissions,
     submissionsLoading,
     refetchSubmissions,
-    processSubmission,
     handleReview,
     selectedSubmission,
     setSelectedSubmission,
@@ -30,16 +34,24 @@ export function SubmissionsReview() {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Event Submissions</CardTitle>
-            <Button onClick={() => refetchSubmissions()} size="sm" disabled={submissionsLoading}>
+            <Button
+              onClick={() => refetchSubmissions()}
+              size="sm"
+              disabled={submissionsLoading}
+            >
               {submissionsLoading ? "Loading..." : "Refresh"}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {submissionsLoading ? (
-            <p className="text-center py-8 text-gray-500">Loading submissions...</p>
+            <p className="text-center py-8 text-gray-500">
+              Loading submissions...
+            </p>
           ) : submissions.length === 0 ? (
-            <p className="text-center py-8 text-gray-500">No submissions found</p>
+            <p className="text-center py-8 text-gray-500">
+              No submissions found
+            </p>
           ) : (
             <div className="space-y-3">
               {submissions.map((submission) => {
@@ -57,14 +69,24 @@ export function SubmissionsReview() {
                     <CardContent className="pt-6">
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium mb-1">{submission.event_title}</h3>
+                          <h3 className="font-medium mb-1">
+                            {submission.event_title}
+                          </h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                            {submission.submitted_by_email && `By ${submission.submitted_by_email} • `}
-                            {new Date(submission.submitted_at).toLocaleDateString()}
+                            {submission.submitted_by_email &&
+                              `By ${submission.submitted_by_email} • `}
+                            {new Date(
+                              submission.submitted_at
+                            ).toLocaleDateString()}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">{submission.source_url}</p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {submission.source_url}
+                          </p>
                         </div>
-                        <Badge variant={getStatusVariant(submission.status)} className="shrink-0">
+                        <Badge
+                          variant={getStatusVariant(submission.status)}
+                          className="shrink-0"
+                        >
                           {submission.status}
                         </Badge>
                       </div>
@@ -105,39 +127,37 @@ export function SubmissionsReview() {
                 </a>
               </div>
 
-              {selectedSubmission.extracted_data ? (
-                <>
-                  <div>
-                    <h3 className="font-medium mb-2">Extracted Event Data</h3>
-                    <Textarea
-                      value={editedExtractedData}
-                      onChange={(e) => handleExtractedDataChange(e.target.value)}
-                      className={`min-h-32 font-mono text-sm ${parseError ? "border-red-500" : ""}`}
-                    />
-                    {parseError && (
-                      <p className="text-sm text-red-500 mt-1">{parseError}</p>
-                    )}
-                  </div>
+              <div>
+                <h3 className="font-medium mb-2">Extracted Event Data</h3>
+                <Textarea
+                  value={editedExtractedData}
+                  onChange={(e) => handleExtractedDataChange(e.target.value)}
+                  className={`min-h-32 font-mono text-sm ${
+                    parseError ? "border-red-500" : ""
+                  }`}
+                />
+                {parseError && (
+                  <p className="text-sm text-red-500 mt-1">{parseError}</p>
+                )}
+              </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <Button
-                      onClick={() => handleReview("approve")}
-                      variant="default"
-                      className="flex-1"
-                      disabled={!!parseError}
-                    >
-                      Approve
-                    </Button>
-                    <Button onClick={() => handleReview("reject")} variant="destructive" className="flex-1">
-                      Reject
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <Button onClick={() => processSubmission(selectedSubmission.id)} className="w-full">
-                  Extract Event Data
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={() => handleReview("approve")}
+                  variant="default"
+                  className="flex-1"
+                  disabled={!!parseError}
+                >
+                  Approve
                 </Button>
-              )}
+                <Button
+                  onClick={() => handleReview("reject")}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Reject
+                </Button>
+              </div>
 
               {selectedSubmission.admin_notes && (
                 <div>
@@ -158,6 +178,3 @@ export function SubmissionsReview() {
     </div>
   );
 }
-
-
-

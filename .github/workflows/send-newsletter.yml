@@ -1,0 +1,67 @@
+name: Send Newsletter
+
+on:
+  schedule:
+    - cron: '0 19 * * *'  # 2pm EST (7pm UTC)
+  workflow_dispatch:      # Optional manual trigger
+
+jobs:
+  send_newsletter:
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTION: '1'
+      DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+      EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
+      EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install --prefer-binary -r requirements.txt
+
+      - name: Send newsletter to subscribers
+        working-directory: backend/scripts
+        run: python send_newsletter.py
+        continue-on-error: true
+
+      - name: Upload logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newsletter-logs-${{ github.run_number }}
+          path: |
+            backend/scripts/logs/
+            backend/scripts/*.log
+          retention-days: 30
+

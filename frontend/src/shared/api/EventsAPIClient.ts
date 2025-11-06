@@ -12,7 +12,8 @@ export interface EventsQueryParams {
   dtstart_utc?: string;
   added_at?: string;
   limit?: number;
-  offset?: number;
+  cursor?: string;
+  all?: boolean; // For calendar view - returns all events without pagination
 }
 
 export interface EventSubmissionResponse {
@@ -22,6 +23,13 @@ export interface EventSubmissionResponse {
 
 export interface EventSubmissionsResponse {
   submissions: EventSubmission[];
+}
+
+export interface EventsResponse {
+  results: Event[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  totalCount: number;
 }
 
 // Helper function to build query string (DRY principle)
@@ -46,10 +54,10 @@ class EventsAPIClient {
   constructor(private apiClient: BaseAPIClient) {}
 
   /**
-   * Fetches all events from the backend.
+   * Fetches events from the backend with cursor-based pagination.
    * Corresponds to a GET request to /api/events/
    */
-  async getEvents(params: EventsQueryParams = {}): Promise<Event[]> {
+  async getEvents(params: EventsQueryParams = {}): Promise<EventsResponse> {
     const queryString = buildQueryString(params);
     const endpoint = queryString ? `events/?${queryString}` : 'events/';
     return this.apiClient.get(endpoint);
@@ -84,17 +92,49 @@ class EventsAPIClient {
    * Corresponds to a POST request to /api/events/submit/
    * Special handling for FormData (file uploads)
    */
-  async submitEvent(formData: SubmissionFormData): Promise<EventSubmissionResponse> {
+  /**
+   * Extract event data from screenshot.
+   * Corresponds to a POST request to /api/events/extract/
+   */
+  async extractEventFromScreenshot(screenshot: File): Promise<{
+    screenshot_url: string;
+    extracted_data: any;
+    all_extracted: any[];
+  }> {
     const dataForm = new FormData();
-    dataForm.append('screenshot', formData.screenshot);
-    dataForm.append('source_url', formData.source_url);
-    if (formData.other_handle) {
-      dataForm.append('other_handle', formData.other_handle);
-    }
+    dataForm.append('screenshot', screenshot);
     
-    // For FormData, we need to handle it differently
     const token = await this.apiClient.getAuthToken();
     const headers: HeadersInit = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/extract/`, {
+      method: 'POST',
+      headers,
+      body: dataForm,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to extract event data');
+    }
+    
+    return response.json();
+  }
+
+  async submitEvent(formData: SubmissionFormData): Promise<EventSubmissionResponse> {
+    const payload = {
+      screenshot_url: formData.screenshot_url,
+      extracted_data: formData.extracted_data,
+    };
+    
+    // For JSON payload
+    const token = await this.apiClient.getAuthToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
@@ -102,7 +142,7 @@ class EventsAPIClient {
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/submit/`, {
       method: 'POST',
       headers,
-      body: dataForm,
+      body: JSON.stringify(payload),
     });
     
     if (!response.ok) {
@@ -121,14 +161,6 @@ class EventsAPIClient {
     }
     
     return response.json();
-  }
-
-  /**
-   * Processes a submission (admin).
-   * Corresponds to a POST request to /api/events/submissions/{id}/process/
-   */
-  async processSubmission(submissionId: number): Promise<{ message: string }> {
-    return this.apiClient.post(`events/submissions/${submissionId}/process/`);
   }
 
   /**
@@ -222,6 +254,38 @@ class EventsAPIClient {
    */
   async getPromotedEvents(): Promise<Event[]> {
     return this.apiClient.get('events/promoted/');
+  }
+
+  /**
+   * Gets the current user's interested event IDs.
+   * Corresponds to a GET request to /api/events/my-interests/
+   */
+  async getMyInterestedEventIds(): Promise<{ event_ids: number[] }> {
+    return this.apiClient.get('events/my-interests/');
+  }
+
+  /**
+   * Mark interest in an event.
+   * Corresponds to a POST request to /api/events/{id}/interest/mark/
+   */
+  async markEventInterest(eventId: number): Promise<{ message: string; interested: boolean; interest_count: number }> {
+    return this.apiClient.post(`events/${eventId}/interest/mark/`);
+  }
+
+  /**
+   * Unmark interest in an event.
+   * Corresponds to a DELETE request to /api/events/{id}/interest/unmark/
+   */
+  async unmarkEventInterest(eventId: number): Promise<{ message: string; interested: boolean; interest_count: number }> {
+    return this.apiClient.delete(`events/${eventId}/interest/unmark/`);
+  }
+
+  /**
+   * Deletes an event and all its related data (admin only).
+   * Corresponds to a DELETE request to /api/events/{id}/delete/
+   */
+  async deleteEvent(eventId: number): Promise<{ message: string }> {
+    return this.apiClient.delete(`events/${eventId}/delete/`);
   }
 }
 

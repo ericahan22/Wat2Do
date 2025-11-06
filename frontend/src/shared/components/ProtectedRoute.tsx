@@ -5,9 +5,10 @@ import { Navigate } from 'react-router-dom';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   redirectTo?: string;
+  allowAdmins?: boolean;
 }
 
-function ProtectedRoute({ children, redirectTo = '/auth/sign-in' }: ProtectedRouteProps) {
+function ProtectedRoute({ children, redirectTo = '/auth/sign-in', allowAdmins = false }: ProtectedRouteProps) {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
 
@@ -16,10 +17,10 @@ function ProtectedRoute({ children, redirectTo = '/auth/sign-in' }: ProtectedRou
     return <div>Loading...</div>;
   }
 
-  // If the user is signed in and is an admin, redirect to /admin
+  // If the user is signed in and is an admin, redirect to /admin (unless allowAdmins is true)
   if (isSignedIn) {
     const isAdmin = user?.publicMetadata?.role === 'admin';
-    if (isAdmin) {
+    if (isAdmin && !allowAdmins) {
       return <Navigate to="/admin" replace />;
     }
     // Otherwise render the children

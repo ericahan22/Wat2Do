@@ -1,8 +1,10 @@
 import uuid
 from datetime import timedelta
+import pytz
 
 from apps.core.auth import jwt_required, admin_required
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -19,18 +21,31 @@ from services.storage_service import storage_service
 from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
+from utils.submission_utils import compute_event_fields
+from utils.validation import (
+    validate_and_sanitize_event_data,
+    validate_required_fields,
+    USER_EDITABLE_FIELDS,
+)
 
-from .models import Events, EventSubmission
+from .models import Events, EventSubmission, EventInterest, EventDates
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
-@ratelimit(key="ip", rate="60/hr", block=True)
+@ratelimit(key="ip", rate="600/hr", block=True)
 def get_events(request):
-    """Get all events from database with optional filtering"""
+    """Get events with cursor-based pagination for infinite scroll"""
     try:
         search_term = request.GET.get("search", "").strip()
         dtstart_utc_param = request.GET.get("dtstart_utc", "").strip()
+        cursor = request.GET.get("cursor", "").strip()
+        limit = int(request.GET.get("limit", "20"))
+        all_events = request.GET.get("all", "").lower() == "true"  # For calendar view
+        
+        # Limit boundary check
+        if limit > 100:
+            limit = 100
 
         queryset = Events.objects.filter(
             status="CONFIRMED",
@@ -40,12 +55,12 @@ def get_events(request):
         # Apply default upcoming events filter only if not provided in request
         if not dtstart_utc_param:
             now = timezone.now()
-            one_hour_ago = now - timedelta(hours=1)
+            two_half_hours_ago = now - timedelta(hours=2.5)
             queryset = queryset.filter(
-                Q(dtend_utc__gte=now) | (Q(dtend_utc__isnull=True) & Q(dtstart_utc__gte=one_hour_ago))
+                Q(dtend_utc__gte=now) | (Q(dtend_utc__isnull=True) & Q(dtstart_utc__gte=two_half_hours_ago))
             )
         
-        queryset = queryset.order_by("dtstart_utc")
+        queryset = queryset.order_by("dtstart_utc", "id")
         
         filterset = EventFilter(request.GET, queryset=queryset)
         if not filterset.is_valid():
@@ -81,15 +96,24 @@ def get_events(request):
 
             filtered_queryset = filtered_queryset.filter(or_queries)
 
-            # search_embedding = generate_embedding(search_term)
-            # dtstart = request.GET.get("dtstart")
-            # similar_events = find_similar_events(
-            #     embedding=search_embedding, min_date=dtstart
-            # )
-            # for event in similar_events:
-            #     print(event["title"], event["similarity"])
-            # similar_event_ids = [event["id"] for event in similar_events]
-            # event_ids.update(similar_event_ids)
+        # Handle cursor-based pagination
+        if cursor and not all_events:
+            # Cursor format: "{dtstart_utc_iso}_{event_id}"
+            try:
+                cursor_parts = cursor.split("_")
+                cursor_dtstart = cursor_parts[0]
+                cursor_id = int(cursor_parts[1])
+                
+                # Filter events after cursor position
+                filtered_queryset = filtered_queryset.filter(
+                    Q(dtstart_utc__gt=cursor_dtstart) |
+                    (Q(dtstart_utc=cursor_dtstart) & Q(id__gt=cursor_id))
+                )
+            except (ValueError, IndexError):
+                return Response(
+                    {"error": "Invalid cursor format"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         fields = [
             "id",
@@ -113,12 +137,50 @@ def get_events(request):
             "fb_handle",
             "other_handle",
         ]
-        results = list(filtered_queryset.values(*fields))
+        
+        # Get total count for the filtered queryset
+        total_count = filtered_queryset.count()
+        
+        # Fetch one more than limit to check if there are more results
+        if all_events:
+            # Return all events for calendar view
+            results = list(filtered_queryset.values(*fields))
+            next_cursor = None
+        else:
+            # Paginated results
+            results = list(filtered_queryset.values(*fields)[: limit + 1])
+            
+            # Determine if there's a next page
+            has_more = len(results) > limit
+            if has_more:
+                results = results[:limit]  # Remove the extra item
+                
+                # Generate next cursor from last item
+                last_event = results[-1]
+                next_cursor = f"{last_event['dtstart_utc'].isoformat()}_{last_event['id']}"
+            else:
+                next_cursor = None
+
+        # Get event IDs for bulk interest query
+        event_ids = [event['id'] for event in results]
+        
+        # Get interest counts for all events in one query
+        from django.db.models import Count
+        interest_counts = EventInterest.objects.filter(
+            event_id__in=event_ids
+        ).values('event_id').annotate(count=Count('id'))
+        interest_count_map = {item['event_id']: item['count'] for item in interest_counts}
 
         for event in results:
             event["display_handle"] = events_utils.determine_display_handle(event)
+            event["interest_count"] = interest_count_map.get(event['id'], 0)
 
-        return Response(results)
+        return Response({
+            "results": results,
+            "nextCursor": next_cursor,
+            "hasMore": next_cursor is not None,
+            "totalCount": total_count
+        })
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -128,34 +190,28 @@ def get_events(request):
 @permission_classes([AllowAny])
 @ratelimit(key="ip", rate="60/hr", block=True)
 def get_event(request, event_id):
-    """Get a single event by ID"""
+    """Get a single event by ID with upcoming dates"""
     try:
-        event = get_object_or_404(Events, id=event_id)
-
         fields = [
-            "id",
-            "title",
-            "description",
-            "location",
-            "dtstart_utc",
-            "dtend_utc",
-            "price",
-            "food",
-            "registration",
-            "source_image_url",
-            "club_type",
-            "added_at",
-            "school",
-            "source_url",
-            "ig_handle",
-            "discord_handle",
-            "x_handle",
-            "tiktok_handle",
-            "fb_handle",
+            "id", "title", "description", "location", "dtstart", "dtend",
+            "dtstart_utc", "dtend_utc", "all_day", "price", "food", "registration",
+            "source_image_url", "club_type", "added_at", "school", "status",
+            "source_url", "ig_handle", "discord_handle", "x_handle",
+            "tiktok_handle", "fb_handle", "other_handle"
         ]
-
-        event_data = {field: getattr(event, field) for field in fields}
+        
+        event_data = Events.objects.filter(id=event_id).values(*fields).first()
+        if not event_data:
+            return Response({"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND)
+        
         event_data["display_handle"] = events_utils.determine_display_handle(event_data)
+        
+        # Get upcoming event dates
+        upcoming_dates = EventDates.objects.filter(
+            event_id=event_id, dtstart_utc__gte=timezone.now()
+        ).order_by('dtstart_utc')[:10].values("dtstart_utc", "dtend_utc")
+        
+        event_data["upcoming_dates"] = list(upcoming_dates)
 
         return Response(event_data)
 
@@ -450,18 +506,16 @@ def rss_feed(request):
 
 
 @api_view(["POST"])
-@ratelimit(key="ip", rate="5/hr", block=True)
+@ratelimit(key="ip", rate="10/hr", block=True)
 @jwt_required
-def submit_event(request):
-    """Submit event for review - accepts screenshot file and source URL, runs extraction, creates Event and links submission"""
+def extract_event_from_screenshot(request):
+    """Extract event data from screenshot without creating event - returns JSON for user to edit"""
     try:
         screenshot = request.FILES.get("screenshot")
-        source_url = request.data.get("source_url")
-        other_handle = request.data.get("other_handle")
-
-        if not screenshot or not source_url:
+        
+        if not screenshot:
             return Response(
-                {"error": "Screenshot and source URL are required"},
+                {"error": "Screenshot is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -475,67 +529,153 @@ def submit_event(request):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # Run OpenAI extraction to build event data (returns a list of events)
+        # Run OpenAI extraction to get event data
         extracted_list = extract_events_from_caption(
-            caption_text=f"Event source: {source_url}",
             source_image_url=screenshot_url,
+            model="gpt-4o-mini",
         )
-
-        # Choose the first event to create; store the full extracted list on submission
-        event_data = (extracted_list or [])[:1][0] if extracted_list else {}
-        # Ensure provenance
-        event_data["source_url"] = source_url
-        event_data["source_image_url"] = event_data.get("source_image_url") or screenshot_url
-        if other_handle:
-            event_data["other_handle"] = other_handle
-
-        # Create Event immediately and link submission
-        allowed_fields = {f.name for f in Events._meta.get_fields()}
-        cleaned = {
-            k: v
-            for k, v in (event_data or {}).items()
-            if k in allowed_fields
-            and not (isinstance(v, str) and v.strip() in {"", "\"\"", "''", "“”"})
-        }
-
-        # Basic guard: require at least a title and a start datetime to consider it an event
-        if not cleaned.get("title") or not cleaned.get("dtstart"):
+        
+        if not extracted_list or len(extracted_list) == 0:
             return Response(
-                {"error": "Submission does not appear to be an event."},
+                {"error": "Could not extract event data from image. Please ensure the image contains clear event information."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Create event with pending status by default
-        if "status" not in cleaned or not cleaned.get("status"):
-            cleaned["status"] = "PENDING"
-        event = Events.objects.create(**cleaned)
+        # Filter to only return user-editable fields for the UI
+        # This ensures the frontend only shows fields that users should edit
+        first_extracted = extracted_list[0] if extracted_list else {}
+        allowed_fields = {
+            'title', 'dtstart', 'dtend', 'all_day', 'location', 
+            'price', 'food', 'registration', 'description'
+        }
+        
+        filtered_data = {
+            key: value 
+            for key, value in first_extracted.items() 
+            if key in allowed_fields
+        }
+        
+        # Ensure all expected fields are present (even if None/empty)
+        # This helps the frontend render consistent input fields
+        for field in allowed_fields:
+            if field not in filtered_data:
+                if field == 'all_day':
+                    filtered_data[field] = False
+                elif field == 'registration':
+                    filtered_data[field] = False
+                elif field == 'price':
+                    filtered_data[field] = None
+                else:
+                    filtered_data[field] = ""
 
-        user_info = getattr(request, "auth_payload", {})
-        clerk_user_id = user_info.get("sub")
-        if not clerk_user_id:
-            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        submission = EventSubmission.objects.create(
-            screenshot_url=screenshot_url,
-            source_url=source_url,
-            status="pending",
-            submitted_by=clerk_user_id,
-            created_event=event,
-            extracted_data=extracted_list or [],
-        )
-
-        return Response(
-            {"id": submission.id, "message": "Event submitted successfully", "event_id": event.id},
-            status=status.HTTP_201_CREATED,
-        )
+        # Return first extracted event and the screenshot URL
+        return Response({
+            "screenshot_url": screenshot_url,
+            "extracted_data": filtered_data,
+            "all_extracted": extracted_list
+        }, status=status.HTTP_200_OK)
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@api_view(["POST"])
+@ratelimit(key="ip", rate="5/hr", block=True)
+@jwt_required
+def submit_event(request):
+    """Submit event for review - accepts screenshot URL and basic event data, computes derived fields automatically"""
+    try:
+        # Get user info first to validate authentication
+        user_info = getattr(request, "auth_payload", {})
+        clerk_user_id = user_info.get("sub")
+        if not clerk_user_id:
+            return Response(
+                {"error": "User authentication required"}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        screenshot_url = request.data.get("screenshot_url")
+        extracted_data = request.data.get("extracted_data")
+
+        if not screenshot_url or not extracted_data:
+            return Response(
+                {"error": "Screenshot URL and extracted data are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate and sanitize user input - CRITICAL SECURITY STEP
+        # This prevents mass assignment and injection attacks
+        try:
+            sanitized_data = validate_and_sanitize_event_data(
+                extracted_data, 
+                allowed_fields=USER_EDITABLE_FIELDS,
+                is_admin=False  # Users are never admin in submit flow
+            )
+            validate_required_fields(sanitized_data)
+        except ValueError as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        # Compute derived fields (dtstart_utc, dtend_utc, duration, tz, latitude, longitude, source_image_url)
+        computed_data = compute_event_fields(sanitized_data, screenshot_url)
+
+        # Filter to only model fields
+        allowed_model_fields = {f.name for f in Events._meta.get_fields()}
+        cleaned = {
+            k: v
+            for k, v in computed_data.items()
+            if k in allowed_model_fields
+            and v is not None
+            and not (isinstance(v, str) and v.strip() in {"", '""', "''", '""'})
+        }
+
+        # CRITICAL: Force status to PENDING regardless of user input
+        # This prevents users from bypassing the approval process
+        cleaned["status"] = "PENDING"
+        
+        # CRITICAL: Force school to University of Waterloo for user submissions
+        cleaned["school"] = "University of Waterloo"
+
+        # Use atomic transaction to prevent orphaned records
+        with transaction.atomic():
+            # Create event
+            event = Events.objects.create(**cleaned)
+            
+            # Set source_url to the event detail page
+            source_url = f"https://wat2do.ca/events/{event.id}"
+            event.source_url = source_url
+            event.save()
+
+            # Create linked submission
+            submission = EventSubmission.objects.create(
+                screenshot_url=screenshot_url,
+                source_url=source_url,
+                status="pending",
+                submitted_by=clerk_user_id,
+                created_event=event,
+                extracted_data=[sanitized_data] if sanitized_data else [],
+            )
+
+        return Response(
+            {
+                "id": submission.id, 
+                "message": "Event submitted successfully", 
+                "event_id": event.id
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
 @api_view(["GET"])
 @ratelimit(key="ip", rate="100/hr", block=True)
-@jwt_required
 @admin_required
 def get_submissions(request):
     try:
@@ -564,42 +704,6 @@ def get_submissions(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(["POST"])
-@admin_required
-@ratelimit(key="ip", rate="100/hr", block=True)
-def process_submission(request, submission_id):
-    """Re-run extraction and update linked Event/extracted_data"""
-    try:
-        submission = get_object_or_404(EventSubmission, id=submission_id)
-
-        extracted_list = extract_events_from_caption(
-            caption_text=f"Event source: {submission.source_url}",
-            source_image_url=submission.screenshot_url,
-        )
-
-        if extracted_list:
-            submission.extracted_data = extracted_list
-            submission.save()
-
-            event = submission.created_event
-            if event and extracted_list:
-                first_item = extracted_list[0]
-                for field in [f.name for f in Events._meta.get_fields()]:
-                    if field in first_item:
-                        setattr(event, field, first_item[field])
-                event.save()
-
-            return Response(
-                {"id": submission.id, "extracted_data": submission.extracted_data, "event_id": submission.created_event_id}
-            )
-
-        return Response(
-            {"error": "Failed to extract event data"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["POST"])
@@ -613,26 +717,67 @@ def review_submission(request, submission_id):
 
     if action == "approve":
         if not submission.created_event:
-            return Response({"error": "No linked event to approve"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "No linked event to approve"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Get edited extracted_data if provided, otherwise use existing
         edited_data = request.data.get("extracted_data")
         if edited_data:
-            submission.extracted_data = edited_data
+            # Validate and sanitize admin edits - CRITICAL SECURITY STEP
+            try:
+                sanitized_data = validate_and_sanitize_event_data(
+                    edited_data, 
+                    is_admin=True  # Admins can edit additional fields
+                )
+                validate_required_fields(sanitized_data)
+            except ValueError as e:
+                return Response(
+                    {"error": f"Invalid event data: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             
-            # Update the linked event with the edited data
+            # Store sanitized data in submission
+            submission.extracted_data = sanitized_data
+            
+            # Update the linked event with sanitized data
             event = submission.created_event
-            if event and isinstance(edited_data, dict):
-                for field in [f.name for f in Events._meta.get_fields()]:
-                    if field in edited_data:
-                        setattr(event, field, edited_data[field])
+            if event:
+                # Compute derived fields from sanitized data
+                computed_data = compute_event_fields(
+                    sanitized_data, 
+                    event.source_image_url
+                )
+                
+                # Get allowed model fields
+                allowed_model_fields = {f.name for f in Events._meta.get_fields()}
+                
+                # Update only the fields present in the sanitized data
+                for field, value in computed_data.items():
+                    if field in allowed_model_fields and value is not None:
+                        # Skip protected fields that shouldn't be manually set
+                        if field not in {'id', 'added_at', 'dtstamp'}:
+                            setattr(event, field, value)
+                
+                # When approving, set status to CONFIRMED
+                event.status = "CONFIRMED"
                 event.save()
+        else:
+            # No edited data, just approve with existing data
+            event = submission.created_event
+            event.status = "CONFIRMED"
+            event.save()
         
         submission.status = "approved"
         submission.reviewed_at = timezone.now()
         submission.reviewed_by = reviewer_id
         submission.save()
-        return Response({"message": "Event approved", "event_id": submission.created_event.id})
+        
+        return Response({
+            "message": "Event approved", 
+            "event_id": submission.created_event.id
+        })
 
     elif action == "reject":
         submission.status = "rejected"
@@ -640,9 +785,18 @@ def review_submission(request, submission_id):
         submission.reviewed_by = reviewer_id
         submission.admin_notes = request.data.get("admin_notes", "")
         submission.save()
+        
+        # When rejecting, set the linked event status to CANCELLED
+        if submission.created_event:
+            submission.created_event.status = "CANCELLED"
+            submission.created_event.save()
+        
         return Response({"message": "Event rejected"})
 
-    return Response({"error": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        {"error": "Invalid action. Use 'approve' or 'reject'"}, 
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 @api_view(["GET"])
@@ -685,9 +839,22 @@ def delete_submission(request, submission_id):
     try:
         submission = get_object_or_404(EventSubmission, id=submission_id)
 
-        current_user_id = (getattr(request, "user", None) or {}).get("id")
-        if not current_user_id or submission.submitted_by != current_user_id:
-            return Response({"error": "Not authorized to delete this submission"}, status=status.HTTP_403_FORBIDDEN)
+        # Get user ID from auth_payload (set by jwt_required decorator)
+        user_info = getattr(request, "auth_payload", {})
+        current_user_id = user_info.get('sub') or user_info.get('id')
+        
+        if not current_user_id:
+            return Response(
+                {"error": "User authentication required"}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Compare as strings to avoid type issues
+        if str(submission.submitted_by) != str(current_user_id):
+            return Response(
+                {"error": "Not authorized to delete this submission"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         if submission.status == "approved":
             return Response({
@@ -704,5 +871,296 @@ def delete_submission(request, submission_id):
         submission.delete()
         return Response({"message": "Submission removed"}, status=status.HTTP_200_OK)
 
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["POST"])
+@ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
+def mark_event_interest(request, event_id):
+    """Mark user interest in an event"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        
+        if not user_id:
+            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Create interest if it doesn't exist
+        interest, created = EventInterest.objects.get_or_create(
+            event=event,
+            user_id=user_id
+        )
+        
+        # Get total interest count for this event
+        interest_count = EventInterest.objects.filter(event=event).count()
+        
+        return Response({
+            "message": "Interest marked" if created else "Already interested",
+            "interested": True,
+            "interest_count": interest_count
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["DELETE"])
+@ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
+def unmark_event_interest(request, event_id):
+    """Remove user interest in an event"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        
+        if not user_id:
+            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Delete interest if it exists
+        deleted_count, _ = EventInterest.objects.filter(
+            event=event,
+            user_id=user_id
+        ).delete()
+        
+        # Get total interest count for this event
+        interest_count = EventInterest.objects.filter(event=event).count()
+        
+        return Response({
+            "message": "Interest removed" if deleted_count > 0 else "Not interested",
+            "interested": False,
+            "interest_count": interest_count
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def get_event_interest(request, event_id):
+    """Get interest count for an event and whether current user is interested"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        
+        # Get total interest count
+        interest_count = EventInterest.objects.filter(event=event).count()
+        
+        # Check if current user is interested (if authenticated)
+        is_interested = False
+        auth_payload = getattr(request, "auth_payload", None)
+        if auth_payload:
+            user_id = auth_payload.get('sub') or auth_payload.get('id')
+            if user_id:
+                is_interested = EventInterest.objects.filter(
+                    event=event,
+                    user_id=user_id
+                ).exists()
+        
+        return Response({
+            "event_id": event_id,
+            "interest_count": interest_count,
+            "is_interested": is_interested
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@ratelimit(key="ip", rate="100/hr", block=True)
+@jwt_required
+def get_my_interested_event_ids(request):
+    """Get list of event IDs that the current user is interested in"""
+    try:
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        
+        if not user_id:
+            return Response({"error": "User authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Get all event IDs the user is interested in
+        interested_event_ids = list(
+            EventInterest.objects.filter(user_id=user_id).values_list('event_id', flat=True)
+        )
+        
+        return Response({
+            "event_ids": interested_event_ids
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="100/hr", block=True)
+def get_event_submission(request, event_id):
+    """Get submission info for an event"""
+    try:
+        from django.contrib.auth import authenticate
+        
+        event = get_object_or_404(Events, id=event_id)
+        
+        # Try to authenticate the user if JWT token is present (optional authentication)
+        user = authenticate(request)
+        auth_payload = getattr(request, "auth_payload", None)
+        
+        # Check if current user is admin
+        is_admin = False
+        current_user_id = None
+        if auth_payload:
+            current_user_id = auth_payload.get('sub') or auth_payload.get('id')
+            is_admin = auth_payload.get("role") == "admin"
+        
+        # Try to find the submission for this event
+        try:
+            submission = EventSubmission.objects.get(created_event=event)
+            
+            # Check if current user is the submitter
+            is_submitter = False
+            if current_user_id and submission.submitted_by:
+                # Compare as strings to avoid type issues
+                is_submitter = str(current_user_id) == str(submission.submitted_by)
+                print(f"DEBUG: current_user_id={current_user_id}, submitted_by={submission.submitted_by}, is_submitter={is_submitter}")
+            
+            return Response({
+                "submission_id": submission.id,
+                "submitted_by": submission.submitted_by,
+                "is_submitter": is_submitter,
+                "is_admin": is_admin,
+                "status": submission.status,
+                "screenshot_url": submission.screenshot_url if (is_submitter or is_admin) else None,
+            }, status=status.HTTP_200_OK)
+        except EventSubmission.DoesNotExist:
+            return Response({
+                "submission_id": None,
+                "is_submitter": False,
+                "is_admin": is_admin,
+            }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["PUT"])
+@ratelimit(key="ip", rate="30/hr", block=True)
+@jwt_required
+def update_event(request, event_id):
+    """Update event data (only by submitter or admin)"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        
+        # Get current user
+        user_id = request.auth_payload.get('sub') or request.auth_payload.get('id')
+        if not user_id:
+            return Response(
+                {"error": "User authentication required"}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Check if user is admin or submitter
+        is_admin = request.auth_payload.get("role") == "admin"
+        is_submitter = False
+        
+        try:
+            submission = EventSubmission.objects.get(created_event=event)
+            is_submitter = str(submission.submitted_by) == str(user_id)
+        except EventSubmission.DoesNotExist:
+            # If no submission exists, only admins can edit
+            if not is_admin:
+                return Response(
+                    {"error": "Event submission not found"}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        # Check authorization
+        if not (is_admin or is_submitter):
+            return Response(
+                {"error": "Not authorized to edit this event"}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Get the updated event data
+        updated_data = request.data.get("event_data")
+        if not updated_data or not isinstance(updated_data, dict):
+            return Response(
+                {"error": "Invalid event data"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate and sanitize input - CRITICAL SECURITY STEP
+        try:
+            sanitized_data = validate_and_sanitize_event_data(
+                updated_data,
+                is_admin=is_admin
+            )
+            validate_required_fields(sanitized_data)
+        except ValueError as e:
+            return Response(
+                {"error": f"Invalid event data: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        # Compute derived fields
+        computed_data = compute_event_fields(
+            sanitized_data,
+            event.source_image_url
+        )
+        
+        # Get allowed model fields
+        allowed_model_fields = {f.name for f in Events._meta.get_fields()}
+        
+        # Update only safe fields
+        for field, value in computed_data.items():
+            if field in allowed_model_fields and value is not None:
+                # Skip protected fields
+                if field not in {'id', 'added_at', 'dtstamp'}:
+                    # Non-admins cannot change status
+                    if field == 'status' and not is_admin:
+                        continue
+                    setattr(event, field, value)
+        
+        event.save()
+        
+        return Response({
+            "message": "Event updated successfully",
+            "event_id": event.id
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"error": str(e)}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["DELETE"])
+@ratelimit(key="ip", rate="30/hr", block=True)
+@admin_required
+def delete_event(request, event_id):
+    """Delete an event and all its related data (admin only)"""
+    try:
+        event = get_object_or_404(Events, id=event_id)
+        
+        with transaction.atomic():
+            # Delete related EventDates
+            deleted_dates_count = EventDates.objects.filter(event=event).delete()[0]
+            
+            # Delete related EventInterest
+            EventInterest.objects.filter(event=event).delete()
+            
+            # Delete related EventSubmission
+            EventSubmission.objects.filter(created_event=event).delete()
+            
+            # Delete the event itself
+            event_title = event.title
+            event.delete()
+        
+        return Response({
+            "message": f"Event '{event_title}' and {deleted_dates_count} related dates deleted successfully"
+        }, status=status.HTTP_200_OK)
+        
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

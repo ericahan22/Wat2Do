@@ -1,0 +1,103 @@
+name: Validate Event Sources
+
+on:
+  schedule:
+    - cron: '0 5,13,17,21 * * *'  # 12am, 8am, 12pm, 4pm EST (5am, 1pm, 5pm, 9pm UTC)
+  workflow_dispatch:      # Manual trigger
+    inputs:
+      limit:
+        description: 'Limit number of events to check (for testing)'
+        required: false
+        type: number
+      school:
+        description: 'Filter by school name'
+        required: false
+        type: string
+        default: 'University of Waterloo'
+      workers:
+        description: 'Max concurrent requests (default: 10)'
+        required: false
+        type: number
+        default: 10
+
+jobs:
+  validate_sources:
+    runs-on: ubuntu-latest
+    env:
+      PRODUCTION: '1'
+      DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create logs directory
+        working-directory: backend/scripts
+        run: mkdir -p logs
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install --prefer-binary -r requirements.txt
+
+      - name: Run validation script (scheduled)
+        if: github.event_name == 'schedule'
+        working-directory: backend/scripts
+        run: |
+          python validate_event_sources.py --school "University of Waterloo" --workers 10 2>&1 | tee logs/validation.log
+        continue-on-error: false
+
+      - name: Run validation script (manual)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: backend/scripts
+        run: |
+          ARGS="--school '${{ github.event.inputs.school }}'"
+          if [ ! -z "${{ github.event.inputs.limit }}" ]; then
+            ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"
+          fi
+          if [ ! -z "${{ github.event.inputs.workers }}" ]; then
+            ARGS="$ARGS --workers ${{ github.event.inputs.workers }}"
+          fi
+          python validate_event_sources.py $ARGS 2>&1 | tee logs/validation.log
+        continue-on-error: false
+
+      - name: Upload logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-logs-${{ github.run_number }}
+          path: |
+            backend/scripts/logs/
+            backend/scripts/*.log
+          retention-days: 30
+
+      - name: Check for deleted events
+        if: always()
+        working-directory: backend/scripts
+        run: |
+          if grep -q "Events deleted:" logs/validation.log; then
+            DELETED=$(grep "Events deleted:" logs/validation.log | awk '{print $NF}')
+            echo "::notice::Deleted $DELETED invalid events"
+          fi
+

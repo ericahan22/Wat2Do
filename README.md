@@ -43,6 +43,7 @@ python manage.py makemigrations
 python manage.py migrate
 # PRODUCTION=1 python manage.py migrate
 python scripts/populate-local-db-with-prod-data.py 
+python manage.py fix_sequences
 python manage.py runserver 8000
 ```
 

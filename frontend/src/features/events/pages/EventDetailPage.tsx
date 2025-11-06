@@ -1,6 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
 import {
   ArrowLeft,
   Calendar,
@@ -9,12 +11,17 @@ import {
   Utensils,
   ExternalLink,
   Users,
+  Save,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import { SEOHead } from "@/shared/components/SEOHead";
 import { API_BASE_URL } from "@/shared/constants/api";
-import { formatEventTimeRange, formatEventDate } from "@/shared/lib/dateUtils";
+import { formatEventTimeRange, formatEventDate, formatRelativeEventDateWithTime } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import { Event } from "@/features/events/types/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
@@ -80,11 +87,93 @@ const OrganizationBadge = ({ event }: { event: Event }) => {
 function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const [editedData, setEditedData] = useState<any>(null);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", eventId],
     queryFn: () => fetchEvent(eventId!),
     enabled: !!eventId,
+  });
+
+  // Fetch submission info to check if user is submitter or admin
+  const { data: submissionInfo, isLoading: isSubmissionLoading } = useQuery({
+    queryKey: ["event-submission", eventId],
+    queryFn: async () => {
+      try {
+        const token = await getToken();
+        const headers: HeadersInit = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(`${API_BASE_URL}/events/${eventId}/submission/`, {
+          headers,
+        });
+        if (!response.ok) throw new Error("Failed to fetch submission info");
+        return response.json();
+      } catch (error) {
+        console.error("Error fetching submission info:", error);
+        return { is_submitter: false, is_admin: false };
+      }
+    },
+    enabled: !!eventId,
+  });
+
+  // Initialize editedData when event loads for pending events or for admins
+  // Filter to only show user-editable fields
+  useEffect(() => {
+    if (event && !editedData && submissionInfo) {
+      const shouldEdit = (event.status === "PENDING" && (submissionInfo.is_submitter || submissionInfo.is_admin)) || submissionInfo.is_admin;
+      if (shouldEdit) {
+        // Filter to only user-editable fields (same as submission form)
+        const allowedFields = new Set([
+          'title', 'dtstart', 'dtend', 'all_day', 'location', 
+          'price', 'food', 'registration', 'description'
+        ]);
+        const filteredData: any = {};
+        for (const field of Object.keys(event)) {
+          if (allowedFields.has(field)) {
+            filteredData[field] = event[field as keyof Event] ?? (field === 'all_day' || field === 'registration' ? false : field === 'price' ? null : "");
+          }
+        }
+        setEditedData(filteredData);
+      }
+    }
+  }, [event, submissionInfo, editedData]);
+
+  // Mutation for updating event
+  const updateEventMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      const token = await getToken();
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/events/${eventId}/update/`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ event_data: eventData }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to update event");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["event", eventId] });
+      setEditError(null);
+    },
+    onError: (error: Error) => {
+      setEditError(error.message);
+    },
   });
 
   const handleBack = () => {
@@ -97,7 +186,28 @@ function EventDetailPage() {
     }
   };
 
-  if (isLoading) {
+  const handleSaveEdit = () => {
+    if (!editedData) {
+      setEditError("No data to save");
+      return;
+    }
+    updateEventMutation.mutate(editedData);
+  };
+
+  const handleFieldChange = (field: string, value: any) => {
+    const updated = { ...editedData, [field]: value };
+    setEditedData(updated);
+    setEditError(null);
+  };
+
+  // Determine if user can edit this event
+  const canEditEvent = submissionInfo?.is_submitter || submissionInfo?.is_admin;
+  
+  // Check if event is pending and user cannot view it (only check after submissionInfo is loaded)
+  const isPendingAndUnauthorized = event?.status === "PENDING" && !canEditEvent && !isSubmissionLoading;
+
+  // Show loading while either query is loading
+  if (isLoading || (event?.status === "PENDING" && isSubmissionLoading)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
@@ -108,7 +218,8 @@ function EventDetailPage() {
     );
   }
 
-  if (error || !event) {
+  // Show "Event Not Found" for actual errors, or if pending and unauthorized
+  if (error || !event || isPendingAndUnauthorized) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
@@ -125,13 +236,232 @@ function EventDetailPage() {
     );
   }
 
+  // Render edit mode for pending events when user has permission, OR for admins regardless of status
+  if ((event.status === "PENDING" && canEditEvent) || submissionInfo?.is_admin) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <SEOHead
+          title={`${event.title} - Edit Event`}
+          description="Edit pending event details"
+          url={`/event/${event.id}`}
+        />
+
+        {/* Back Button */}
+        <div className="mb-6">
+          <Button onMouseDown={handleBack} variant="ghost" className="p-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Events
+          </Button>
+        </div>
+
+        {/* Original Screenshot (if available for submitter/admin) */}
+        {submissionInfo?.screenshot_url && (
+          <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Original Screenshot</h2>
+            <div className="relative w-full max-w-2xl mx-auto">
+              <img
+                src={submissionInfo.screenshot_url}
+                alt="Original event screenshot"
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Edit Mode */}
+        <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Edit Event Data</h2>
+            <div className="flex gap-2">
+              <Button
+                onMouseDown={handleSaveEdit}
+                disabled={updateEventMutation.isPending || !editedData}
+                variant="default"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {updateEventMutation.isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </div>
+          
+          {editError && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-700 dark:text-red-300 text-sm">
+              {editError}
+            </div>
+          )}
+          
+          {editedData && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="title" className="text-sm font-medium">
+                    Title <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="title"
+                    type="text"
+                    value={editedData.title || ''}
+                    onChange={(e) => handleFieldChange('title', e.target.value)}
+                    placeholder="Event title"
+                    disabled={updateEventMutation.isPending}
+                    required
+                  />
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="description" className="text-sm font-medium">
+                    Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    value={editedData.description || ''}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    placeholder="Event description"
+                    disabled={updateEventMutation.isPending}
+                    rows={4}
+                  />
+                </div>
+
+                {/* Location */}
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-sm font-medium">
+                    Location <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="location"
+                    type="text"
+                    value={editedData.location || ''}
+                    onChange={(e) => handleFieldChange('location', e.target.value)}
+                    placeholder="Event location"
+                    disabled={updateEventMutation.isPending}
+                    required
+                  />
+                </div>
+
+                {/* Date and Time */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="dtstart" className="text-sm font-medium">
+                      Start Date & Time <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="dtstart"
+                      type="text"
+                      value={editedData.dtstart || ''}
+                      onChange={(e) => handleFieldChange('dtstart', e.target.value)}
+                      placeholder="2025-11-06 13:30:00-05"
+                      disabled={updateEventMutation.isPending}
+                      required
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Format: YYYY-MM-DD HH:MM:SS-TZ
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dtend" className="text-sm font-medium">
+                      End Date & Time
+                    </Label>
+                    <Input
+                      id="dtend"
+                      type="text"
+                      value={editedData.dtend || ''}
+                      onChange={(e) => handleFieldChange('dtend', e.target.value)}
+                      placeholder="2025-11-06 15:30:00-05"
+                      disabled={updateEventMutation.isPending}
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Leave empty if same as start time
+                    </p>
+                  </div>
+                </div>
+
+                {/* All Day Checkbox */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="all_day"
+                    checked={editedData.all_day || false}
+                    onCheckedChange={(checked) => handleFieldChange('all_day', checked === true)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                  <Label htmlFor="all_day" className="text-sm font-medium cursor-pointer">
+                    All Day Event
+                  </Label>
+                </div>
+
+                {/* Price */}
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-sm font-medium">
+                    Price
+                  </Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editedData.price || ''}
+                    onChange={(e) => handleFieldChange('price', e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="0.00"
+                    disabled={updateEventMutation.isPending}
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Leave empty for free events
+                  </p>
+                </div>
+
+                {/* Food */}
+                <div className="space-y-2">
+                  <Label htmlFor="food" className="text-sm font-medium">
+                    Food & Drinks
+                  </Label>
+                  <Input
+                    id="food"
+                    type="text"
+                    value={editedData.food || ''}
+                    onChange={(e) => handleFieldChange('food', e.target.value)}
+                    placeholder="Free pizza and drinks"
+                    disabled={updateEventMutation.isPending}
+                  />
+                </div>
+
+                {/* Registration Checkbox */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="registration"
+                    checked={editedData.registration || false}
+                    onCheckedChange={(checked) => handleFieldChange('registration', checked === true)}
+                    disabled={updateEventMutation.isPending}
+                  />
+                  <Label htmlFor="registration" className="text-sm font-medium cursor-pointer">
+                    Registration Required
+                  </Label>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 pt-2">
+                <span className="text-red-500">*</span> Required fields: <strong>title</strong>, <strong>dtstart</strong> (start date/time), and <strong>location</strong>.
+                <br />
+                <span className="text-xs mt-1 block text-gray-400 dark:text-gray-500">
+                  Note: Timezone conversions, duration, coordinates, and other derived fields are computed automatically by the server.
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Render normal event details for confirmed events
   return (
     <div className="max-w-4xl mx-auto">
       <SEOHead
         title={`${event.title} - Event Details`}
         description={
           event.description ||
-          `Join us for ${event.title} on ${formatEventDate(event.dtstart_utc, event.dtend_utc)}`
+          `Join us for ${event.title} on ${formatEventDate(event.dtstart || event.dtstart_utc, event.dtend || event.dtend_utc)}`
         }
         url={`/event/${event.id}`}
         keywords={[
@@ -146,7 +476,7 @@ function EventDetailPage() {
 
       {/* Back Button */}
       <div className="mb-6">
-        <Button onClick={handleBack} variant="ghost" className="p-2">
+        <Button onMouseDown={handleBack} variant="ghost" className="p-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Events
         </Button>
@@ -189,8 +519,8 @@ function EventDetailPage() {
           {/* Event Details */}
           <div className="space-y-4">
             {/* Title */}
-            <div className="text-center">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            <div>
+              <h1 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
                 {event.title}
               </h1>
               {event.description && (
@@ -202,30 +532,68 @@ function EventDetailPage() {
 
             {/* Event Info Grid */}
             <div className="grid gap-2">
-              {/* Date & Time */}
-              <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white">
-                    {formatEventDate(event.dtstart_utc, event.dtend_utc)}
-                  </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
-                  </p>
+              {/* Date & Time - Show all upcoming dates if available */}
+              {event.upcoming_dates && event.upcoming_dates.length > 0 ? (
+                <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      Upcoming Dates
+                    </p>
+                  </div>
+                  <div className="ml-8 flex flex-wrap gap-2">
+                    {event.upcoming_dates.map((date) => (
+                      <Badge 
+                        key={date.dtstart_utc}
+                        variant="outline"
+                        className="text-xs py-1 px-2 bg-white dark:bg-gray-800"
+                      >
+                        {formatRelativeEventDateWithTime(date.dtstart_utc, date.dtend_utc)}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">
+                      {formatEventDate(event.dtstart_utc)}
+                    </p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Location */}
               {event.location && (
-                <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <MapPin className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      Location
-                    </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {event.location}
-                    </p>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <MapPin className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        Location
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {event.location}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Google Maps Embed */}
+                  <div className="w-full h-64 rounded-lg overflow-hidden">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps/embed/v1/place?key=${
+                        import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+                      }&q=${encodeURIComponent(`${event.location}, ${event.school || ""}`)}`}
+                    ></iframe>
                   </div>
                 </div>
               )}
@@ -331,13 +699,36 @@ function EventDetailPage() {
               <div className="text-center pt-2">
                 <Button onClick={handleExternalLink}>
                   <ExternalLink className="h-4 w-4" />
-                  View Event Details
+                  View Event Source
                 </Button>
               </div>
             )}
           </div>
         </div>
       </motion.div>
+
+      {/* Original Screenshot (if available for submitter/admin) */}
+      {canEditEvent && submissionInfo?.screenshot_url && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-8 max-w-lg mx-auto"
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 text-center">
+              Original Screenshot
+            </h3>
+            <div className="relative w-full">
+              <img
+                src={submissionInfo.screenshot_url}
+                alt="Original event screenshot"
+                className="w-full h-auto rounded-lg shadow-lg"
+              />
+            </div>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

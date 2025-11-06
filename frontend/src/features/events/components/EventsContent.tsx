@@ -12,6 +12,9 @@ interface EventsContentProps {
   onToggleEvent: (eventId: string) => void;
   isLoading: boolean;
   error: Error | null;
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 }
 
 const EventsContent: React.FC<EventsContentProps> = ({
@@ -22,6 +25,9 @@ const EventsContent: React.FC<EventsContentProps> = ({
   onToggleEvent,
   isLoading,
   error,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
 }) => {
   if (isLoading) {
     return (
@@ -52,6 +58,9 @@ const EventsContent: React.FC<EventsContentProps> = ({
         selectedEvents={selectedEvents}
         onToggleEvent={onToggleEvent}
         isLoading={isLoading}
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
       />
     );
   }

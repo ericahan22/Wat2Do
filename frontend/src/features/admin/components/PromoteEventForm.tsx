@@ -3,6 +3,8 @@ import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { Label } from "@/shared/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/components/ui/form";
 import type { PromotionType, EventPromotion } from "@/features/admin/types/promotion";
@@ -164,9 +166,9 @@ export function PromoteEventForm({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Event Info (Read-only) */}
           <div className="space-y-2">
-            <label htmlFor="event-name" className="block text-sm font-medium ">
+            <Label htmlFor="event-name" className="text-sm font-medium">
               Event Name
-            </label>
+            </Label>
             <Input
               id="event-name"
               type="text"
@@ -177,9 +179,9 @@ export function PromoteEventForm({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="event-id" className="block text-sm font-medium ">
+            <Label htmlFor="event-id" className="text-sm font-medium">
               Event ID
-            </label>
+            </Label>
             <Input
               id="event-id"
               type="text"
@@ -229,16 +231,21 @@ export function PromoteEventForm({
                 <FormItem>
                   <FormLabel>Promotion Type</FormLabel>
                   <FormControl>
-                    <select
+                    <Select
                       disabled={isLoading}
-                      className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 md:text-sm"
-                      {...field}
+                      value={field.value}
+                      onValueChange={field.onChange}
                     >
-                      <option value="standard">Standard</option>
-                      <option value="featured">Featured</option>
-                      <option value="urgent">Urgent</option>
-                      <option value="sponsored">Sponsored</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select promotion type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard</SelectItem>
+                        <SelectItem value="featured">Featured</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                        <SelectItem value="sponsored">Sponsored</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

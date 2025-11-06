@@ -6,6 +6,7 @@ import type { EventPromotion, PromotedEvent } from "@/features/admin/types/promo
 import { Event } from "@/features/events/types/events";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
 import { Button } from "@/shared/components/ui/button";
+import { Label } from "@/shared/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
@@ -65,9 +66,9 @@ export function PromotionsManager() {
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <label htmlFor="event-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <Label htmlFor="event-select" className="text-sm font-medium mb-2">
                 Choose an Event
-              </label>
+              </Label>
               <Select value={selectedEventId || ""} onValueChange={handleEventSelect} disabled={eventsLoading}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an event..." />

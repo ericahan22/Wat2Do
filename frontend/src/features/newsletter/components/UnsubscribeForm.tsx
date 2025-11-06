@@ -1,6 +1,7 @@
 import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/shared/components/ui/button";
+import { Label } from "@/shared/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -84,9 +85,9 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
         className="flex flex-col gap-4"
       >
         <div className="flex flex-col gap-2">
-          <label className="text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label className="text-left text-sm font-medium">
             Reason for unsubscribing: <span className="text-red-500">*</span>
-          </label>
+          </Label>
           <Controller
             name="reason"
             control={control}
@@ -109,9 +110,9 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Label className="text-left text-sm font-medium">
             Additional feedback (optional):
-          </label>
+          </Label>
           <Textarea
             {...register("feedback")}
             placeholder="Any additional comments or suggestions..."
@@ -128,7 +129,7 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               Unsubscribing...
             </>
           ) : (

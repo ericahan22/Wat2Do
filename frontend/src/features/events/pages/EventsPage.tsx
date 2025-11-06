@@ -16,7 +16,7 @@ import {
   formatRelativeDateTime,
   FilterButton,
 } from "@/shared";
-import { Calendar, History, LayoutGrid, Sparkles } from "lucide-react";
+import { Calendar, History, LayoutGrid, Sparkles, Heart } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
 import { LAST_UPDATED, EVENT_CATEGORIES } from "@/data/staticData";
@@ -44,14 +44,20 @@ function EventsPage() {
 
   const {
     events,
+    totalCount,
     isLoading,
     error,
     dtstart_utc,
     addedAt,
+    showInterested,
     searchTerm,
     categories,
     handleToggleStartDate,
     handleToggleNewEvents,
+    handleToggleInterested,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useEvents();
 
   const {
@@ -71,10 +77,14 @@ function EventsPage() {
 
   const getEventTypeText = () => {
     if (searchTerm || categories) return "Found";
+    if (showInterested) return "Interested";
     if (addedAt) return "New";
-    if (isShowingPastEvents) return "Past";
+    if (isShowingPastEvents) return "Total";
     return "Upcoming";
   };
+
+  // Use totalCount when available, except for interested filter which filters client-side
+  const displayCount = showInterested ? events.length : totalCount || events.length;
 
   return (
     <>
@@ -97,7 +107,7 @@ function EventsPage() {
         <div className="sm:text-left">
           <h1 className="sm:text-3xl text-2xl font-bold mb-2 -mt-3 sm:mt-0">
             <NumberFlow
-              value={events.length}
+              value={displayCount}
               suffix={` ${getEventTypeText()} events`}
             />
           </h1>
@@ -144,11 +154,20 @@ function EventsPage() {
               </FilterButton>
               {!isShowingNewEvents && (
                 <FilterButton
+                  isActive={showInterested}
+                  onToggle={handleToggleInterested}
+                  icon={<Heart className="h-4 w-4" />}
+                >
+                  Interested
+                </FilterButton>
+              )}
+              {!isShowingNewEvents && !showInterested && (
+                <FilterButton
                   isActive={isShowingPastEvents}
                   onToggle={handleToggleStartDate}
                   icon={<History className="h-4 w-4" />}
                 >
-                  Past
+                  All
                 </FilterButton>
               )}
               {view === "grid" && (
@@ -172,6 +191,9 @@ function EventsPage() {
           onToggleEvent={toggleEventSelection}
           isLoading={isLoading}
           error={error}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
         />
 
         <FloatingEventExportBar

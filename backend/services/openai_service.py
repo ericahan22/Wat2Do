@@ -98,10 +98,11 @@ class OpenAIService:
 
     def extract_events_from_caption(
         self,
-        caption_text: str,
+        caption_text: str | None = None,
         source_image_url: str | None = None,
         post_created_at: datetime | None = None,
         school: str = "University of Waterloo",
+        model: str = "gpt-5-mini",
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract ZERO OR MORE events from caption text/image.
 
@@ -250,7 +251,7 @@ class OpenAIService:
     - For food: Only set this field if the post says food or drinks will be served, provided, or available for attendees. If specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize ONLY the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
     - For rrule and rdate: they are MUTUALLY EXCLUSIVE. Use EITHER rrule (for recurring patterns) OR rdate (for specific dates without a pattern), NEVER both. If using rrule, set rdate to "". If using rdate, set rrule to "".
-    - For description: start with the caption text word-for-word, then append any additional insights about the event extracted from the image that are not already mentioned in the caption.
+    - For description: Make this the caption text word-for-word. If there is no caption text, use the image text.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON array text, no extra commentary.
         {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
@@ -278,7 +279,6 @@ class OpenAIService:
                 messages[1]["content"].append(
                     {"type": "image_url", "image_url": {"url": source_image_url}}
                 )
-            model = "gpt-5-mini"
 
             try:
                 response = self.client.chat.completions.create(
@@ -370,139 +370,6 @@ class OpenAIService:
             # Return empty list if API call fails
             return []
 
-    def generate_recommended_filters(self, events_data: list[dict]) -> list[list[str]]:
-        """Generate recommended filter keywords with emojis from upcoming events data using GPT
-
-        Returns a list of 3-element arrays: [category, emoji_string, filter_name]
-        """
-        if not events_data:
-            logger.warning("No events data provided for filter generation")
-            return []
-
-        # Prepare event summaries for the prompt
-        event_summaries = []
-        for event in events_data[:20]:
-            title = event.get("title")
-            summary = f"- {title}"
-            event_summaries.append(summary)
-
-        # Get the categorized emoji list for the prompt
-        emoji_categories = EMOJI_CATEGORIES
-        emoji_list_str = ""
-        for category, emojis in emoji_categories.items():
-            emoji_list_str += f"\n{category}:\n"
-            emoji_list_str += ", ".join(emojis) + "\n"
-
-        prompt = f"""
-Analyze the following list of {len(event_summaries)} upcoming student event titles and generate 20-25 search filter keywords with matching emojis.
-
-Event titles:
-{chr(10).join(event_summaries)}
-
-Available emojis organized by category (select the most fitting one for each filter):
-{emoji_list_str}
-
-IMPORTANT: You MUST use ONLY the emoji categories listed above (Smileys, People, Animals and Nature, Food and Drink, Activity, Travel and Places, Objects, Symbols, Flags). Do NOT use club types like "WUSA", "Student Society", or "Athletics" as categories - these are not emoji categories.
-
-Generate filter keywords that:
-1. Are derived ONLY from words and themes present in the event TITLES above. Ignore captions, descriptions, locations, and food mentions.
-2. Are SHORT (1-3 words max) and SPECIFIC.
-3. Reflect common themes that actually appear in multiple titles.
-4. The filter string MUST exist verbatim in at least 3 event titles above.
-
-For each filter, select the MOST FITTING emoji from the available list above.
-
-Return ONLY a JSON array of arrays, where each inner array has exactly 3 elements:
-- Index 0: The category name (exactly as it appears in the categories above)
-- Index 1: The emoji name (exactly as it appears in the available list above)
-- Index 2: The filter name (string)
-
-Example format:
-[
-  ["Smileys", "Grinning%20Face", "networking"],
-  ["Objects", "Graduation%20Cap", "career fair"],
-  ["Objects", "Musical%20Note", "live music"],
-  ["Objects", "Books", "workshop"]
-]
-
-NO explanations, NO additional text, JUST the JSON array.
-"""
-
-        try:
-            logger.info(
-                f"Generating recommended filters from {len(event_summaries)} events"
-            )
-
-            response = self.client.chat.completions.create(
-                model="gpt-5-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a helpful assistant that generates search keywords with emojis. Always return valid JSON arrays with the exact structure requested.",
-                    },
-                    {"role": "user", "content": prompt},
-                ],
-                temperature=0.3,
-                max_tokens=15000,
-            )
-
-            response_text = response.choices[0].message.content.strip()
-
-            # Remove markdown formatting if present
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]
-
-            filters = json.loads(response_text.strip())
-
-            if not isinstance(filters, list):
-                logger.error("Response is not a list")
-                return []
-
-            # Clean and validate filters
-            cleaned_filters = []
-            for filter_item in filters:
-                if (
-                    isinstance(filter_item, list)
-                    and len(filter_item) == 3
-                    and isinstance(filter_item[0], str)
-                    and isinstance(filter_item[1], str)
-                    and isinstance(filter_item[2], str)
-                    and filter_item[0].strip()
-                    and filter_item[1].strip()
-                    and filter_item[2].strip()
-                ):
-                    category = filter_item[0].strip()
-                    emoji_string = filter_item[1].strip()
-                    filter_name = filter_item[2].strip()
-
-                    # Validate that the category exists and emoji exists in that category
-                    if (
-                        category in EMOJI_CATEGORIES
-                        and emoji_string in EMOJI_CATEGORIES[category]
-                    ):
-                        cleaned_filters.append([category, emoji_string, filter_name])
-                    else:
-                        logger.warning(
-                            f"Invalid filter emoji combination: category='{category}', emoji='{emoji_string}'"
-                        )
-
-            logger.info(
-                f"Generated {len(cleaned_filters)} recommended filters with emojis"
-            )
-            return cleaned_filters[:15]
-
-        except json.JSONDecodeError:
-            logger.exception("Error parsing JSON response for filters")
-            logger.error(f"Response text: {response_text}")
-            return []
-        except Exception:
-            logger.exception("Error generating recommended filters")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            return []
-
-
 # Singleton instance
 openai_service = OpenAIService()
 
@@ -510,5 +377,4 @@ openai_service = OpenAIService()
 # Backward compatibility - export functions that use the singleton
 generate_embedding = openai_service.generate_embedding
 extract_events_from_caption = openai_service.extract_events_from_caption
-generate_recommended_filters = openai_service.generate_recommended_filters
 generate_event_embedding = openai_service.generate_event_embedding

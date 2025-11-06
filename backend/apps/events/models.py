@@ -128,6 +128,7 @@ class Events(models.Model):
         db_table = "events"
         indexes = [
             models.Index(fields=["school", "status", "dtend_utc"], name="events_school_status_dtend_idx"),
+            models.Index(fields=["school", "status", "dtend_utc", "dtstart_utc"], name="events_school_status_dtend_utc_dtstart_utc_idx"),
             models.Index(
                 fields=["school", "status", "dtstart_utc"],
                 condition=models.Q(dtend_utc__isnull=True),
@@ -236,3 +237,32 @@ class EventDates(models.Model):
 
     def __str__(self):
         return f"{self.event.title[:30] if self.event.title else 'untitled'} @ {self.dtstart_utc}"
+
+
+class EventInterest(models.Model):
+    """
+    Tracks user interest in events.
+    Many-to-many relationship between users (Clerk user IDs) and events.
+    """
+    id = models.BigAutoField(primary_key=True)
+    event = models.ForeignKey(
+        Events,
+        on_delete=models.CASCADE,
+        related_name="interests",
+        db_index=True,
+        help_text="Reference to the event"
+    )
+    user_id = models.CharField(
+        max_length=255,
+        db_index=True,
+        help_text="Clerk user ID of the interested user"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "event_interests"
+        unique_together = [["event", "user_id"]]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"User {self.user_id} interested in {self.event.title[:30] if self.event.title else 'untitled'}"

@@ -1,23 +1,19 @@
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { useUser, useClerk } from '@clerk/clerk-react'
+import { useUser } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, FileText, Calendar, User } from 'lucide-react'
+import { Plus, FileText, Calendar, User, Settings } from 'lucide-react'
 import { useUserSubmissions } from '@/features/events/hooks/useUserSubmissions'
 import type { EventSubmission } from '@/features/events/types/submission'
+import { CLERK_ROUTES } from '@/shared/config/clerk'
 
 export const DashboardPage = () => {
   const { user } = useUser()
-  const { signOut } = useClerk()
   const navigate = useNavigate()
 
   // Fetch user's submissions
   const { data: submissions = [] } = useUserSubmissions()
-
-  const handleLogout = () => {
-    signOut()
-  }
 
   const pendingCount = submissions.filter((s: EventSubmission) => s.status === 'pending').length
   const approvedCount = submissions.filter((s: EventSubmission) => s.status === 'approved').length
@@ -36,7 +32,7 @@ export const DashboardPage = () => {
         </div>
 
         {/* Workflow Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Submit Event Card */}
           <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/submit')}>
             <CardHeader className="pb-3">
@@ -103,6 +99,26 @@ export const DashboardPage = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Profile Settings Card */}
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(CLERK_ROUTES.USER_PROFILE)}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                  <Settings className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Profile Settings</CardTitle>
+                  <CardDescription>Manage your account</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" variant="outline">
+                Edit Profile
+              </Button>
+            </CardContent>
+          </Card>
         </div>
 
         {/* User Info Card */}
@@ -121,15 +137,7 @@ export const DashboardPage = () => {
               <p><strong>ID:</strong> {user?.id}</p>
               <p><strong>Email:</strong> {user?.primaryEmailAddress?.emailAddress}</p>
             </div>
-            
-            <Button 
-              onClick={handleLogout} 
-              className="w-full" 
-              variant="destructive"
-              disabled={false}
-            >
-              Logout
-            </Button>
+         
           </CardContent>
         </Card>
       </div>

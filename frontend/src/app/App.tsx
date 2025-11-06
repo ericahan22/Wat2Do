@@ -6,7 +6,7 @@ import { MySubmissionsPage } from "@/features/events/pages/MySubmissionsPage";
 import { ClubsPage } from "@/features/clubs";
 import { AdminPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
-import { SignInPage, SignUpPage } from "@/features/auth/pages";
+import { SignInPage, SignUpPage, UserProfilePage } from "@/features/auth/pages";
 import {
   ProtectedRoute,
   ProtectedAdminRoute,
@@ -53,6 +53,14 @@ function App() {
           {/* Clerk Auth Routes */}
           <Route path={CLERK_ROUTES.SIGN_IN} element={<SignInPage />} />
           <Route path={CLERK_ROUTES.SIGN_UP} element={<SignUpPage />} />
+          <Route 
+            path={`${CLERK_ROUTES.USER_PROFILE}/*`} 
+            element={
+              <ProtectedRoute allowAdmins={true}>
+                <UserProfilePage />
+              </ProtectedRoute>
+            } 
+          />
 
           <Route
             path={CLERK_ROUTES.DASHBOARD}

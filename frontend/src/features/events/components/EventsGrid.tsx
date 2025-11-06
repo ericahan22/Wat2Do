@@ -6,35 +6,38 @@ import {
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/shared/components/ui/pagination";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 import {
   Calendar,
   Clock,
   MapPin,
-  ExternalLink,
   DollarSign,
   Utensils,
   Check,
+  Heart,
+  Loader2,
+  Trash2,
+  ExternalLink,
 } from "lucide-react";
-import { Event, EVENTS_PER_PAGE } from "@/features/events";
-import { memo, useState, useMemo, useEffect } from "react";
+import { Event } from "@/features/events";
+import { memo, useMemo, useEffect, useRef } from "react";
 import {
   formatEventTimeRange,
-  formatEventDate,
+  formatRelativeEventDate,
   getDateCategory,
 } from "@/shared/lib/dateUtils";
 import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useApi } from "@/shared/hooks/useApi";
+import { useAdmin } from "@/shared/hooks/useAdmin";
+import {
+  useMyInterestedEvents,
+  useToggleEventInterest,
+} from "../hooks/useEventInterest";
 
 interface EventsGridProps {
   data: Event[];
@@ -42,6 +45,9 @@ interface EventsGridProps {
   selectedEvents?: Set<string>;
   onToggleEvent?: (eventId: string) => void;
   isLoading?: boolean;
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 }
 
 const EventStatusBadge = ({ event }: { event: Event }) => {
@@ -114,6 +120,47 @@ const OrganizationBadge = ({
   );
 };
 
+const InterestButton = ({ event }: { event: Event }) => {
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
+  const { data: interestedEvents } = useMyInterestedEvents();
+  const toggleInterest = useToggleEventInterest(event.id);
+
+  const viewerHasInterested = interestedEvents?.has(event.id) ?? false;
+
+  const handleClick = () => {
+    if (!isSignedIn) {
+      navigate("/auth/sign-in");
+      return;
+    }
+
+    const nextInterested = !viewerHasInterested;
+    toggleInterest.mutate(nextInterested);
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="flex-1 w-full"
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        handleClick();
+      }}
+      disabled={toggleInterest.isPending}
+    >
+      <Heart
+        className={`h-3.5 w-3.5 ${
+          viewerHasInterested ? "fill-red-500 text-red-500" : ""
+        }`}
+      />
+      {event.interest_count > 0 && (
+        <span>({event.interest_count})</span>
+      )}
+    </Button>
+  );
+};
+
 const EventsGrid = memo(
   ({
     data,
@@ -121,15 +168,56 @@ const EventsGrid = memo(
     selectedEvents = new Set(),
     onToggleEvent,
     isLoading = false,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   }: EventsGridProps) => {
-    const [currentPage, setCurrentPage] = useState(1);
+    const navigate = useNavigate();
+    const loadMoreRef = useRef<HTMLDivElement>(null);
+    const prevEventIdsRef = useRef<Set<number>>(new Set());
+    const { isAdmin } = useAdmin();
+    const { eventsAPIClient } = useApi();
+    const queryClient = useQueryClient();
 
-    const paginatedData = useMemo(() => {
-      const startIndex = (currentPage - 1) * EVENTS_PER_PAGE;
-      const endIndex = startIndex + EVENTS_PER_PAGE;
-      return data.slice(startIndex, endIndex);
-    }, [data, currentPage]);
+    // Delete event mutation (admin only)
+    const deleteEventMutation = useMutation({
+      mutationFn: async (eventId: number) => {
+        return eventsAPIClient.deleteEvent(eventId);
+      },
+      onSuccess: () => {
+        // Invalidate and refetch events
+        queryClient.invalidateQueries({ queryKey: ["events"] });
+      },
+    });
 
+    // Calculate new events and their stagger indices synchronously during render
+    const newEventStagger = useMemo(() => {
+      const previousEventIds = prevEventIdsRef.current;
+
+      // Find newly added events in order they appear in data
+      const newEventsList: number[] = [];
+      data.forEach((event) => {
+        if (!previousEventIds.has(event.id)) {
+          newEventsList.push(event.id);
+        }
+      });
+
+      // Create a map of event ID to its stagger index
+      const staggerMap = new Map<number, number>();
+      newEventsList.forEach((id, index) => {
+        staggerMap.set(id, index);
+      });
+
+      return staggerMap;
+    }, [data]);
+
+    // Update the ref after render
+    useEffect(() => {
+      const currentEventIds = new Set(data.map((e) => e.id));
+      prevEventIdsRef.current = currentEventIds;
+    }, [data]);
+
+    // Group all events without pagination
     const groupedEvents = useMemo(() => {
       const groups: { [key: string]: Event[] } = {
         today: [],
@@ -140,40 +228,59 @@ const EventsGrid = memo(
         past: [],
       };
 
-      paginatedData.forEach((event) => {
+      data.forEach((event) => {
         const category = getDateCategory(event.dtstart_utc, event.dtend_utc);
         groups[category].push(event);
       });
 
       return groups;
-    }, [paginatedData]);
-
-    const totalPages = Math.ceil(data.length / EVENTS_PER_PAGE);
-
-    const handlePageChange = (page: number) => {
-      setCurrentPage(page);
-    };
-
-    useEffect(() => {
-      setCurrentPage(1);
     }, [data]);
+
+    // Infinite scroll using Intersection Observer
+    useEffect(() => {
+      if (!fetchNextPage || !hasNextPage || isFetchingNextPage) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const first = entries[0];
+          if (first.isIntersecting) {
+            fetchNextPage();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      const currentRef = loadMoreRef.current;
+      if (currentRef) {
+        observer.observe(currentRef);
+      }
+
+      return () => {
+        if (currentRef) {
+          observer.unobserve(currentRef);
+        }
+      };
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     const renderEventCard = (event: Event) => {
       const isSelected = selectedEvents.has(event.id.toString());
+      const staggerIndex = newEventStagger.get(event.id);
+
+      // Calculate stagger delay for new events only
+      // If staggerIndex exists, this is a new event
+      const delay = staggerIndex !== undefined ? staggerIndex * 0.033 : 0;
+
       return (
         <motion.div
           key={event.id}
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: {
-                duration: 0.5,
-                ease: [0.18, 0.39, 0.14, 0.9],
-              },
-            },
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            delay: delay,
+            ease: [0.18, 0.39, 0.14, 0.9],
           }}
+          style={{ pointerEvents: 'auto' }}
         >
           <Card
             className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full ${
@@ -205,7 +312,13 @@ const EventsGrid = memo(
                   src={event.source_image_url}
                   alt={event.title}
                   loading="lazy"
-                  className="w-full h-40 object-cover rounded-t-xl"
+                  className="w-full h-40 object-cover rounded-t-xl cursor-pointer"
+                  onMouseDown={(e) => {
+                    if (!isSelectMode) {
+                      e.stopPropagation();
+                      navigate(`/events/${event.id}`);
+                    }
+                  }}
                 />
               )}
               <EventStatusBadge event={event} />
@@ -224,7 +337,7 @@ const EventsGrid = memo(
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatEventDate(event.dtstart_utc, event.dtend_utc)}
+                  {formatRelativeEventDate(event.dtstart_utc, event.dtend_utc)}
                 </span>
               </div>
 
@@ -270,25 +383,42 @@ const EventsGrid = memo(
 
               {/* Action Buttons */}
               {!isSelectMode && (
-                <div className="flex space-x-3 pt-2 w-full mt-auto">
-                  {event.source_url ? (
+                <div className="flex space-x-2 pt-2 w-full mt-auto">
+                  <InterestButton event={event} />
+                  {event.source_url && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 w-full"
-                      onMouseDown={() =>
-                        window.open(event.source_url || "", "_blank")
-                      }
+                      className="flex-shrink-0"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        if (event.source_url) {
+                          window.open(event.source_url, "_blank", "noopener,noreferrer");
+                        }
+                      }}
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                      View Source
                     </Button>
-                  ) : (
-                    <div className="text-center py-2 w-full">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        No event link available
-                      </p>
-                    </div>
+                  )}
+                  {isAdmin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`)) {
+                          deleteEventMutation.mutate(event.id);
+                        }
+                      }}
+                      disabled={deleteEventMutation.isPending}
+                    >
+                      {deleteEventMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
                   )}
                 </div>
               )}
@@ -321,21 +451,9 @@ const EventsGrid = memo(
                 <p className="sm:text-xl text-lg font-semibold text-gray-900 dark:text-white">
                   {sectionTitle}
                 </p>
-                <motion.div
-                  key={`events-grid-${category}-${data.length}-${currentPage}`}
-                  className="grid xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    visible: {
-                      transition: {
-                        staggerChildren: 0.015,
-                      },
-                    },
-                  }}
-                >
-                  {events.map(renderEventCard)}
-                </motion.div>
+                <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5">
+                  {events.map((event) => renderEventCard(event))}
+                </div>
               </div>
             );
           })}
@@ -356,120 +474,21 @@ const EventsGrid = memo(
           </div>
         )}
 
-        {/* Pagination */}
-        {data.length > 0 && totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onMouseDown={() =>
-                    handlePageChange(Math.max(1, currentPage - 1))
-                  }
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
+        {/* Infinite Scroll Loader */}
+        {hasNextPage && (
+          <div ref={loadMoreRef} className="flex justify-center py-8">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span>Loading more events...</span>
+            </div>
+          </div>
+        )}
 
-              {(() => {
-                const pages = [];
-                const showEllipsis = totalPages > 7;
-
-                if (showEllipsis) {
-                  // Show first 3 pages
-                  for (let i = 1; i <= 3; i++) {
-                    pages.push(
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          onMouseDown={() => handlePageChange(i)}
-                          isActive={currentPage === i}
-                        >
-                          {i}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  }
-
-                  // Show ellipsis if current page is far from start
-                  if (currentPage > 5) {
-                    pages.push(
-                      <PaginationItem key="ellipsis-start">
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    );
-                  }
-
-                  // Show current page and surrounding pages
-                  const start = Math.max(4, currentPage - 1);
-                  const end = Math.min(totalPages - 2, currentPage + 1);
-
-                  for (let i = start; i <= end; i++) {
-                    if (i > 3 && i < totalPages - 2) {
-                      pages.push(
-                        <PaginationItem key={i}>
-                          <PaginationLink
-                            onMouseDown={() => handlePageChange(i)}
-                            isActive={currentPage === i}
-                          >
-                            {i}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    }
-                  }
-
-                  // Show ellipsis if current page is far from end
-                  if (currentPage < totalPages - 4) {
-                    pages.push(
-                      <PaginationItem key="ellipsis-end">
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    );
-                  }
-
-                  // Show last 3 pages
-                  for (let i = totalPages - 2; i <= totalPages; i++) {
-                    pages.push(
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          onMouseDown={() => handlePageChange(i)}
-                          isActive={currentPage === i}
-                        >
-                          {i}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  }
-                } else {
-                  // Show all pages if 7 or fewer
-                  for (let i = 1; i <= totalPages; i++) {
-                    pages.push(
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          onMouseDown={() => handlePageChange(i)}
-                          isActive={currentPage === i}
-                        >
-                          {i}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  }
-                }
-
-                return pages;
-              })()}
-
-              <PaginationItem>
-                <PaginationNext
-                  onMouseDown={() =>
-                    handlePageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+        {/* All events loaded message */}
+        {data.length > 0 && !hasNextPage && !isLoading && (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+            You've reached the end! 🎉
+          </div>
         )}
       </div>
     );

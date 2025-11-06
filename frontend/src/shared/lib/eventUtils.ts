@@ -9,11 +9,20 @@ export const getEventStatus = (event: Event): "live" | "soon" | "none" => {
 
   const nowTime = now.getTime();
   const startTime = startDateTime.getTime();
-  const endTime = endDateTime ? endDateTime.getTime() : startTime + (60 * 60 * 1000); // Default 1 hour if no end time
   const oneHourInMs = 60 * 60 * 1000;
+  const twoHoursInMs = 2 * 60 * 60 * 1000;
 
-  if (nowTime >= startTime && nowTime <= endTime) return "live";
+  // For events without an end date, show "live" if start date is after 2 hours before now
+  if (!endDateTime) {
+    const twoHoursAgo = nowTime - twoHoursInMs;
+    if (startTime > twoHoursAgo) return "live";
+  } else {
+    // For events with an end date, show "live" if current time is between start and end
+    const endTime = endDateTime.getTime();
+    if (nowTime >= startTime && nowTime <= endTime) return "live";
+  }
 
+  // Show "soon" if event starts within the next hour
   if (startTime > nowTime && startTime - nowTime <= oneHourInMs) return "soon";
 
   return "none";

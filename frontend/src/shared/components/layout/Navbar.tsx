@@ -1,7 +1,7 @@
-import { Moon, Sun, Menu, X, User } from "lucide-react";
+import { Moon, Sun, Menu, X, User, Settings, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useNavbar } from "@/shared/hooks";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, UserButton, useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { CLERK_ROUTES } from "@/shared/config/clerk";
 
@@ -16,9 +16,7 @@ function Navbar() {
   const navigate = useNavigate();
 
   const { isSignedIn } = useAuth();
-  const { user } = useUser();
-
-  const primaryEmail = user?.primaryEmailAddress?.emailAddress;
+  const { signOut } = useClerk();
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
@@ -86,16 +84,26 @@ function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               {/* Auth Section */}
               {isSignedIn ? (
-                <div className="flex items-center gap-2">
+                <>
                   <Button
-                    variant="link"
+                    variant="ghost"
                     className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                     onMouseDown={() => navigate(CLERK_ROUTES.DASHBOARD)}
                   >
-                    <User className="h-4 w-4" />
-                    {primaryEmail || user?.firstName || "User"}
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
                   </Button>
-                </div>
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "h-9 w-9",
+                      },
+                    }}
+                    afterSignOutUrl={CLERK_ROUTES.HOME}
+                    userProfileMode="navigation"
+                    userProfileUrl={CLERK_ROUTES.USER_PROFILE}
+                  />
+                </>
               ) : (
                 <Button
                   variant="default"
@@ -173,17 +181,39 @@ function Navbar() {
 
               {/* Mobile Auth Section */}
               {isSignedIn ? (
-                <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    onMouseDown={() => {
-                      navigate(CLERK_ROUTES.DASHBOARD);
-                    }}
-                  >
-                    <User className="h-4 w-4" />
-                    {primaryEmail || user?.firstName || "User"}
-                  </Button>
+                <div className="flex flex-col items-center py-3 space-y-3">
+                  <div className="w-full space-y-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      onMouseDown={() => {
+                        navigate(CLERK_ROUTES.DASHBOARD);
+                        toggleMobileMenu();
+                      }}
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      onMouseDown={() => {
+                        navigate(CLERK_ROUTES.USER_PROFILE);
+                        toggleMobileMenu();
+                      }}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Profile Settings
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      onMouseDown={() => signOut()}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button
@@ -191,6 +221,7 @@ function Navbar() {
                   className="w-full justify-center text-sm font-medium"
                   onMouseDown={() => {
                     navigate(CLERK_ROUTES.SIGN_IN);
+                    toggleMobileMenu();
                   }}
                 >
                   <User className="h-4 w-4" />

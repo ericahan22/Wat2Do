@@ -18,6 +18,7 @@ export const CLERK_ROUTES = {
   VERIFY_EMAIL: '/auth/verify-email',
   FORGOT_PASSWORD: '/auth/forgot-password',
   RESET_PASSWORD: '/auth/reset-password',
+  USER_PROFILE: '/user-profile',
   DASHBOARD: '/dashboard',
   HOME: '/',
 } as const;

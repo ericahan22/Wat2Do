@@ -19,7 +19,6 @@ import {
 import { formatPrettyDate } from "@/shared/lib/dateUtils";
 import type { EventSubmission } from "@/features/events/types/submission";
 import { useNavigate } from "react-router-dom";
-import { useClerk } from "@clerk/clerk-react";
 
 export function MySubmissionsPage() {
   const {
@@ -29,7 +28,6 @@ export function MySubmissionsPage() {
     isDeleting,
   } = useUserSubmissions();
   const navigate = useNavigate();
-  const { signOut } = useClerk();
   // Type assertion to fix TypeScript issues
   const submissionsArray = submissions as EventSubmission[];
 
@@ -78,7 +76,7 @@ export function MySubmissionsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex items-start justify-between gap-4">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
               My Event Submissions
@@ -87,7 +85,9 @@ export function MySubmissionsPage() {
               Track the status of your submitted events
             </p>
           </div>
-          <Button variant="outline" onMouseDown={() => signOut()}>Logout</Button>
+          <Button onClick={() => navigate("/submit")} className="sm:whitespace-nowrap">
+            Submit New Event
+          </Button>
         </div>
 
         {/* Submissions Grid */}
@@ -197,7 +197,7 @@ export function MySubmissionsPage() {
                         }
                         className="w-full"
                       >
-                        View Created Event
+                        Edit Event
                       </Button>
                     </div>
                   )}
@@ -218,7 +218,7 @@ export function MySubmissionsPage() {
                         }
                       }}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4" />
                       Remove Submission
                     </Button>
                   )}
