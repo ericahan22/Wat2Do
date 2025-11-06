@@ -465,7 +465,7 @@ const EventsGrid = memo(
             <div className="max-w-md mx-auto">
               <GeeveKickingRocks className="w-48 h-48 mb-6 mx-auto text-gray-400 dark:text-gray-600" />
               <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
-                No upcoming events found
+                No events found
               </p>
               <p className="text-gray-400 dark:text-gray-500 text-xs">
                 Try adjusting your search or filters

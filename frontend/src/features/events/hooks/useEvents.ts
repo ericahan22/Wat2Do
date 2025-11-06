@@ -34,7 +34,7 @@ export function useEvents() {
     queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt, view, showInterested ? "interested" : ""],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: Record<string, any> = {
-        limit: 30, // Load 30 events at a time
+        limit: 15, // Load 15 events at a time
       };
       
       if (pageParam) {
