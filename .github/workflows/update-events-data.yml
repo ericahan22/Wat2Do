@@ -106,15 +106,12 @@ jobs:
         continue-on-error: false
 
       - name: Upload logs as artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: logs-${{ github.run_number }}
           path: |
-            backend/scraping/logs/
-            backend/scraping/*.log
-            backend/scraping/*.csv
-          retention-days: 30
+            backend/scraping/events_scraped.csv
+            backend/logs/scraping.log
 
       - name: Generate static data file
         id: generate_static

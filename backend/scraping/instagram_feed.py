@@ -397,7 +397,7 @@ def process_recent_feed(
 
                 posts_processed += 1
                 extracted_list = extract_events_from_caption(
-                    post.caption, source_image_url, post.date_utc
+                    post.caption, source_image_url, post.date_local
                 )
                 if not extracted_list:
                     logger.warning(
