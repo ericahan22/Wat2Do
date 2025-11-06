@@ -31,7 +31,7 @@ export function useEvents() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<EventsResponse, Error, any, string[], string | undefined>({
-    queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt, view],
+    queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt, view, showInterested ? "interested" : ""],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: Record<string, any> = {
         limit: 30, // Load 30 events at a time
@@ -60,6 +60,12 @@ export function useEvents() {
       // For calendar view, fetch all events
       if (view === "calendar") {
         queryParams.all = true;
+      }
+
+      // When viewing Interested, reveal all interested from 2025-01-01
+      if (showInterested) {
+        queryParams.all = true;
+        queryParams.dtstart_utc = formatDtstartToMidnight("2025-01-01");
       }
 
       return eventsAPIClient.getEvents(queryParams);
@@ -169,10 +175,14 @@ export function useEvents() {
       const nextParams = new URLSearchParams(prev);
 
       if (showInterested) {
+        // When deselecting interested, remove all filters to show upcoming events
         nextParams.delete("interested");
+        nextParams.delete("dtstart_utc");
+        nextParams.delete("added_at");
       } else {
         nextParams.set("interested", "true");
-        nextParams.delete("dtstart_utc");
+        // Reveal all interested from 2025-01-01
+        nextParams.set("dtstart_utc", formatDtstartToMidnight("2025-01-01"));
         nextParams.delete("added_at");
       }
       return nextParams;

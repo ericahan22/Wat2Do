@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import {
   ArrowLeft,
   Calendar,
@@ -26,8 +26,12 @@ import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import { Event } from "@/features/events/types/events";
 import BadgeMask from "@/shared/components/ui/badge-mask";
 
-const fetchEvent = async (eventId: string): Promise<Event> => {
-  const response = await fetch(`${API_BASE_URL}/events/${eventId}`);
+const fetchEvent = async (eventId: string, token?: string | null): Promise<Event> => {
+  const headers: HeadersInit = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_BASE_URL}/events/${eventId}`, { headers });
   if (!response.ok) {
     throw new Error("Event not found");
   }
@@ -86,6 +90,8 @@ const OrganizationBadge = ({ event }: { event: Event }) => {
 
 function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === 'admin';
   const navigate = useNavigate();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
@@ -95,45 +101,19 @@ function EventDetailPage() {
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", eventId],
-    queryFn: () => fetchEvent(eventId!),
-    enabled: !!eventId,
-  });
-
-  // Fetch submission info to check if user is submitter or admin
-  const { data: submissionInfo, isLoading: isSubmissionLoading } = useQuery({
-    queryKey: ["event-submission", eventId],
     queryFn: async () => {
-      try {
-        const token = await getToken();
-        const headers: HeadersInit = {};
-        if (token) {
-          headers.Authorization = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`${API_BASE_URL}/events/${eventId}/submission/`, {
-          headers,
-        });
-        if (!response.ok) throw new Error("Failed to fetch submission info");
-        return response.json();
-      } catch (error) {
-        console.error("Error fetching submission info:", error);
-        return { is_submitter: false, is_admin: false };
-      }
+      const token = await getToken();
+      return fetchEvent(eventId!, token);
     },
     enabled: !!eventId,
   });
 
   // Initialize editedData when event loads for pending events or for admins
-  // Filter to only show user-editable fields
   useEffect(() => {
-    if (event && !editedData && submissionInfo) {
-      const shouldEdit = (event.status === "PENDING" && (submissionInfo.is_submitter || submissionInfo.is_admin)) || submissionInfo.is_admin;
+    if (event && !editedData) {
+      const shouldEdit = (event.status === "PENDING" && (event as any).is_submitter) || isAdmin;
       if (shouldEdit) {
-        // Filter to only user-editable fields (same as submission form)
-        const allowedFields = new Set([
-          'title', 'dtstart', 'dtend', 'all_day', 'location', 
-          'price', 'food', 'registration', 'description'
-        ]);
+        const allowedFields = new Set(['title', 'dtstart', 'dtend', 'all_day', 'location', 'price', 'food', 'registration', 'description']);
         const filteredData: any = {};
         for (const field of Object.keys(event)) {
           if (allowedFields.has(field)) {
@@ -143,7 +123,7 @@ function EventDetailPage() {
         setEditedData(filteredData);
       }
     }
-  }, [event, submissionInfo, editedData]);
+  }, [event, editedData, isAdmin]);
 
   // Mutation for updating event
   const updateEventMutation = useMutation({
@@ -200,14 +180,11 @@ function EventDetailPage() {
     setEditError(null);
   };
 
-  // Determine if user can edit this event
-  const canEditEvent = submissionInfo?.is_submitter || submissionInfo?.is_admin;
-  
-  // Check if event is pending and user cannot view it (only check after submissionInfo is loaded)
-  const isPendingAndUnauthorized = event?.status === "PENDING" && !canEditEvent && !isSubmissionLoading;
+  const canEditEvent = (event as any)?.is_submitter || isAdmin;
+  const isPendingAndUnauthorized = event?.status === "PENDING" && !canEditEvent;
 
   // Show loading while either query is loading
-  if (isLoading || (event?.status === "PENDING" && isSubmissionLoading)) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
@@ -237,7 +214,7 @@ function EventDetailPage() {
   }
 
   // Render edit mode for pending events when user has permission, OR for admins regardless of status
-  if ((event.status === "PENDING" && canEditEvent) || submissionInfo?.is_admin) {
+  if ((event.status === "PENDING" && canEditEvent) || isAdmin) {
     return (
       <div className="max-w-4xl mx-auto">
         <SEOHead
@@ -255,12 +232,12 @@ function EventDetailPage() {
         </div>
 
         {/* Original Screenshot (if available for submitter/admin) */}
-        {submissionInfo?.screenshot_url && (
+        {(event as any)?.screenshot_url && (
           <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Original Screenshot</h2>
             <div className="relative w-full max-w-2xl mx-auto">
               <img
-                src={submissionInfo.screenshot_url}
+                src={(event as any).screenshot_url}
                 alt="Original event screenshot"
                 className="w-full h-auto rounded-lg shadow-lg"
               />
@@ -581,20 +558,28 @@ function EventDetailPage() {
                       </p>
                     </div>
                   </div>
-                  {/* Google Maps Embed */}
-                  <div className="w-full h-64 rounded-lg overflow-hidden">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      loading="lazy"
-                      allowFullScreen
-                      referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://www.google.com/maps/embed/v1/place?key=${
-                        import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
-                      }&q=${encodeURIComponent(`${event.location}, ${event.school || ""}`)}`}
-                    ></iframe>
-                  </div>
+                  {/* Google Maps Embed - Only show for physical locations */}
+                  {(() => {
+                    const locationLower = event.location.toLowerCase();
+                    const isVirtual = locationLower.includes("virtual") || 
+                                     locationLower.includes("zoom") || 
+                                     locationLower.includes("google meet");
+                    return !isVirtual && (
+                      <div className="w-full h-64 rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={`https://www.google.com/maps/embed/v1/place?key=${
+                            import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+                          }&q=${encodeURIComponent(`${event.location}, ${event.school || ""}`)}`}
+                        ></iframe>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
@@ -708,7 +693,7 @@ function EventDetailPage() {
       </motion.div>
 
       {/* Original Screenshot (if available for submitter/admin) */}
-      {canEditEvent && submissionInfo?.screenshot_url && (
+      {(event as any)?.screenshot_url && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -721,7 +706,7 @@ function EventDetailPage() {
             </h3>
             <div className="relative w-full">
               <img
-                src={submissionInfo.screenshot_url}
+                src={(event as any).screenshot_url}
                 alt="Original event screenshot"
                 className="w-full h-auto rounded-lg shadow-lg"
               />

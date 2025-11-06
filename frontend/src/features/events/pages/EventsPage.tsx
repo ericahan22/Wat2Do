@@ -161,15 +161,7 @@ function EventsPage() {
                   Interested
                 </FilterButton>
               )}
-              {!isShowingNewEvents && !showInterested && (
-                <FilterButton
-                  isActive={isShowingPastEvents}
-                  onToggle={handleToggleStartDate}
-                  icon={<History className="h-4 w-4" />}
-                >
-                  All
-                </FilterButton>
-              )}
+              {/* Removed the 'All' button as requested */}
               {view === "grid" && (
                 <FilterButton
                   isActive={isSelectMode}

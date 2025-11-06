@@ -59,6 +59,41 @@ def jwt_required(view_func):
     return _wrapped_view
 
 
+def optional_jwt(view_func):
+    """
+    Optional JWT authentication decorator.
+    If a token is provided and valid, populates request.auth_payload.
+    If no token or invalid token, continues without error (for public endpoints).
+    """
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        try:
+            state = authenticate_request(
+                request,
+                AuthenticateRequestOptions(
+                    secret_key=CLERK_SECRET_KEY,
+                    authorized_parties=CLERK_AUTHORIZED_PARTIES,
+                ),
+            )
+            
+            if state.is_signed_in:
+                request.auth_payload = state.payload
+                django_user = AnonymousUser()
+                django_user.username = state.payload.get("sub") or "clerk_user"
+                request.user = django_user
+            else:
+                # No token or invalid token - that's fine, just continue
+                request.auth_payload = {}
+                request.user = AnonymousUser()
+        except Exception:
+            # Any error during auth - that's fine, just continue
+            request.auth_payload = {}
+            request.user = AnonymousUser()
+        
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
 def admin_required(view_func):
     @wraps(view_func)
     @jwt_required

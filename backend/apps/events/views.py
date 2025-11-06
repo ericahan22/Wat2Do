@@ -2,7 +2,7 @@ import uuid
 from datetime import timedelta
 import pytz
 
-from apps.core.auth import jwt_required, admin_required
+from apps.core.auth import jwt_required, admin_required, optional_jwt
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
@@ -188,6 +188,7 @@ def get_events(request):
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
+@optional_jwt
 @ratelimit(key="ip", rate="60/hr", block=True)
 def get_event(request, event_id):
     """Get a single event by ID with upcoming dates"""
@@ -206,12 +207,22 @@ def get_event(request, event_id):
         
         event_data["display_handle"] = events_utils.determine_display_handle(event_data)
         
-        # Get upcoming event dates
-        upcoming_dates = EventDates.objects.filter(
-            event_id=event_id, dtstart_utc__gte=timezone.now()
-        ).order_by('dtstart_utc')[:10].values("dtstart_utc", "dtend_utc")
+        # Check if user is submitter or admin (optional_jwt sets auth_payload)
+        auth_payload = request.auth_payload
+        user_id = auth_payload.get("sub") or auth_payload.get("id")
+        is_admin = auth_payload.get("role") == "admin"
         
-        event_data["upcoming_dates"] = list(upcoming_dates)
+        submission = EventSubmission.objects.filter(created_event_id=event_id).first()
+        is_submitter = submission and user_id and str(submission.submitted_by) == str(user_id)
+        
+        event_data["is_submitter"] = is_submitter
+        event_data["screenshot_url"] = submission.screenshot_url if (is_admin or is_submitter) and submission else None
+        
+        # Get upcoming event dates
+        event_data["upcoming_dates"] = list(
+            EventDates.objects.filter(event_id=event_id, dtstart_utc__gte=timezone.now())
+            .order_by('dtstart_utc')[:10].values("dtstart_utc", "dtend_utc")
+        )
 
         return Response(event_data)
 
