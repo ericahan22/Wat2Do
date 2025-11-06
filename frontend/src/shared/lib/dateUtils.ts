@@ -209,10 +209,7 @@ export const formatRelativeDateTime = (dateString: string): string => {
 /**
  * Format event date for display on cards with relative naming:
  * - "Today" if happening today
- * - "Tomorrow" if tomorrow
- * - "This [Day]" if later this week (e.g., "This Sunday", "This Friday")
- * - "Next [Day]" if next week (e.g., "Next Monday", "Next Wednesday")
- * - After that, render the date normally (e.g., "Friday Oct 31")
+ * - Otherwise, render the date normally (e.g., "Friday Oct 31")
  */
 export const formatRelativeEventDate = (startDateString: string, endDateString?: string | null): string => {
   try {
@@ -220,47 +217,22 @@ export const formatRelativeEventDate = (startDateString: string, endDateString?:
     const eventEndDate = endDateString ? new Date(removeTimezoneInfo(endDateString)) : null;
     
     const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    
-    // Get end of this week (Sunday)
-    const endOfWeek = new Date(today);
-    const daysUntilSunday = (7 - today.getDay()) % 7 || 7; // If today is Sunday, get next Sunday
-    endOfWeek.setDate(today.getDate() + daysUntilSunday);
-    
-    // Get end of next week
-    const endOfNextWeek = new Date(endOfWeek);
-    endOfNextWeek.setDate(endOfWeek.getDate() + 7);
     
     // Reset time to start of day for comparison
     const eventStartDateOnly = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
     const eventEndDateOnly = eventEndDate ? new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate()) : eventStartDateOnly;
     const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const tomorrowOnly = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
-    const endOfWeekOnly = new Date(endOfWeek.getFullYear(), endOfWeek.getMonth(), endOfWeek.getDate());
-    const endOfNextWeekOnly = new Date(endOfNextWeek.getFullYear(), endOfNextWeek.getMonth(), endOfNextWeek.getDate());
     
     // Check if today falls within the event's date range (for multi-day events)
     const todayTime = todayOnly.getTime();
     const isHappeningToday = todayTime >= eventStartDateOnly.getTime() && todayTime <= eventEndDateOnly.getTime();
-    const isHappeningTomorrow = tomorrowOnly.getTime() >= eventStartDateOnly.getTime() && tomorrowOnly.getTime() <= eventEndDateOnly.getTime();
     
     if (isHappeningToday) {
       return 'Today';
-    } else if (isHappeningTomorrow || eventStartDateOnly.getTime() === tomorrowOnly.getTime()) {
-      return 'Tomorrow';
-    } else if (eventStartDateOnly.getTime() <= endOfWeekOnly.getTime() && eventStartDateOnly.getTime() > tomorrowOnly.getTime()) {
-      // Later this week
-      const dayName = format(eventStartDate, "EEEE");
-      return `This ${dayName}`;
-    } else if (eventStartDateOnly.getTime() <= endOfNextWeekOnly.getTime() && eventStartDateOnly.getTime() > endOfWeekOnly.getTime()) {
-      // Next week
-      const dayName = format(eventStartDate, "EEEE");
-      return `Next ${dayName}`;
-    } else {
-      // Default to standard format
-      return formatEventDate(startDateString, endDateString);
     }
+    
+    // Default to standard format
+    return formatEventDate(startDateString, endDateString);
   } catch {
     return formatEventDate(startDateString, endDateString);
   }
@@ -268,11 +240,8 @@ export const formatRelativeEventDate = (startDateString: string, endDateString?:
 
 /**
  * Format event date with time for detail pages:
- * - "Today 6pm - 8pm"
- * - "Tomorrow 3pm - 5pm"
- * - "This Thursday 8pm - 9:30pm"
- * - "Next Monday 2pm - 4pm"
- * - "Saturday Nov 22 1pm - 4pm"
+ * - "Today 6pm - 8pm" if happening today
+ * - Otherwise, standard format with time (e.g., "Saturday Nov 22 1pm - 4pm")
  */
 export const formatRelativeEventDateWithTime = (startDateString: string, endDateString?: string | null): string => {
   const endDate = endDateString || null;

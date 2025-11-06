@@ -467,7 +467,7 @@ function EventDetailPage() {
         className="relative max-w-lg mx-auto"
       >
         {/* Polaroid Frame */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 transform rotate-1 hover:rotate-0 transition-transform duration-300">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4">
           {/* Image Section */}
           <div className="relative mb-4">
             {event.source_image_url ? (

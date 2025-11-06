@@ -154,9 +154,6 @@ const InterestButton = ({ event }: { event: Event }) => {
           viewerHasInterested ? "fill-red-500 text-red-500" : ""
         }`}
       />
-      {event.interest_count > 0 && (
-        <span>({event.interest_count})</span>
-      )}
     </Button>
   );
 };
