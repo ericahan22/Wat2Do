@@ -12,14 +12,14 @@ export const getEventStatus = (event: Event): "live" | "soon" | "none" => {
   const oneHourInMs = 60 * 60 * 1000;
   const twoHoursInMs = 2 * 60 * 60 * 1000;
 
-  // For events without an end date, show "live" if start date is after 2 hours before now
-  if (!endDateTime) {
-    const twoHoursAgo = nowTime - twoHoursInMs;
-    if (startTime > twoHoursAgo) return "live";
-  } else {
-    // For events with an end date, show "live" if current time is between start and end
+  // For events with an end date, show "live" if current time is between start and end
+  if (endDateTime) {
     const endTime = endDateTime.getTime();
     if (nowTime >= startTime && nowTime <= endTime) return "live";
+  } else {
+    // For events without an end date, show "live" if event has started and started within the last 2 hours
+    const twoHoursAgo = nowTime - twoHoursInMs;
+    if (startTime <= nowTime && startTime > twoHoursAgo) return "live";
   }
 
   // Show "soon" if event starts within the next hour
