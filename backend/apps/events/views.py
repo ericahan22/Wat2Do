@@ -644,7 +644,7 @@ def submit_event(request):
 
         # CRITICAL: Force status to PENDING regardless of user input
         # This prevents users from bypassing the approval process
-            cleaned["status"] = "PENDING"
+        cleaned["status"] = "PENDING"
         
         # CRITICAL: Force school to University of Waterloo for user submissions
         cleaned["school"] = "University of Waterloo"
@@ -652,22 +652,22 @@ def submit_event(request):
         # Use atomic transaction to prevent orphaned records
         with transaction.atomic():
             # Create event
-        event = Events.objects.create(**cleaned)
-        
-        # Set source_url to the event detail page
-        source_url = f"https://wat2do.ca/events/{event.id}"
-        event.source_url = source_url
-        event.save()
+            event = Events.objects.create(**cleaned)
+            
+            # Set source_url to the event detail page
+            source_url = f"https://wat2do.ca/events/{event.id}"
+            event.source_url = source_url
+            event.save()
 
             # Create linked submission
-        submission = EventSubmission.objects.create(
-            screenshot_url=screenshot_url,
-            source_url=source_url,
-            status="pending",
-            submitted_by=clerk_user_id,
-            created_event=event,
+            submission = EventSubmission.objects.create(
+                screenshot_url=screenshot_url,
+                source_url=source_url,
+                status="pending",
+                submitted_by=clerk_user_id,
+                created_event=event,
                 extracted_data=[sanitized_data] if sanitized_data else [],
-        )
+            )
 
         return Response(
             {
@@ -778,7 +778,7 @@ def review_submission(request, submission_id):
             # No edited data, just approve with existing data
             event = submission.created_event
             event.status = "CONFIRMED"
-                event.save()
+            event.save()
         
         submission.status = "approved"
         submission.reviewed_at = timezone.now()
