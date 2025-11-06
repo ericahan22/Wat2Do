@@ -138,3 +138,5 @@ class TestComputeEventFields:
         # Duration should be 2 hours
         assert result["duration"] == timedelta(hours=2)
 
+
+

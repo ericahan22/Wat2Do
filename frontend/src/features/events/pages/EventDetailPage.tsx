@@ -231,19 +231,6 @@ function EventDetailPage() {
           </Button>
         </div>
 
-        {/* Original Screenshot (if available for submitter/admin) */}
-        {(event as any)?.screenshot_url && (
-          <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Original Screenshot</h2>
-            <div className="relative w-full max-w-2xl mx-auto">
-              <img
-                src={(event as any).screenshot_url}
-                alt="Original event screenshot"
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-            </div>
-          </div>
-        )}
 
         {/* Edit Mode */}
         <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -467,7 +454,7 @@ function EventDetailPage() {
         className="relative max-w-lg mx-auto"
       >
         {/* Polaroid Frame */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
           {/* Image Section */}
           <div className="relative mb-4">
             {event.source_image_url ? (
@@ -475,14 +462,14 @@ function EventDetailPage() {
                 <img
                   src={event.source_image_url}
                   alt={event.title}
-                  className="w-full h-48 object-cover rounded-lg shadow-lg aspect-square"
+                  className="w-full h-48 object-cover rounded-lg aspect-square"
                 />
                 <EventStatusBadge event={event} />
                 <NewEventBadge event={event} />
                 <OrganizationBadge event={event} />
               </div>
             ) : (
-              <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-lg shadow-lg flex items-center justify-center aspect-square">
+              <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center aspect-square">
                 <div className="text-center">
                   <Calendar className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                   <p className="text-gray-500 dark:text-gray-400 text-lg">
@@ -691,29 +678,6 @@ function EventDetailPage() {
           </div>
         </div>
       </motion.div>
-
-      {/* Original Screenshot (if available for submitter/admin) */}
-      {(event as any)?.screenshot_url && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="mt-8 max-w-lg mx-auto"
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 text-center">
-              Original Screenshot
-            </h3>
-            <div className="relative w-full">
-              <img
-                src={(event as any).screenshot_url}
-                alt="Original event screenshot"
-                className="w-full h-auto rounded-lg shadow-lg"
-              />
-            </div>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }

@@ -221,7 +221,7 @@ def get_event(request, event_id):
         # Get upcoming event dates
         event_data["upcoming_dates"] = list(
             EventDates.objects.filter(event_id=event_id, dtstart_utc__gte=timezone.now())
-            .order_by('dtstart_utc')[:10].values("dtstart_utc", "dtend_utc")
+            .order_by('dtstart_utc').values("dtstart_utc", "dtend_utc")
         )
 
         return Response(event_data)
