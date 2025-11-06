@@ -16,7 +16,7 @@ import {
   formatRelativeDateTime,
   FilterButton,
 } from "@/shared";
-import { Calendar, History, LayoutGrid, Sparkles, Heart } from "lucide-react";
+import { Calendar, LayoutGrid, Sparkles, Heart } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
 import { LAST_UPDATED, EVENT_CATEGORIES } from "@/data/staticData";
@@ -52,7 +52,6 @@ function EventsPage() {
     showInterested,
     searchTerm,
     categories,
-    handleToggleStartDate,
     handleToggleNewEvents,
     handleToggleInterested,
     fetchNextPage,

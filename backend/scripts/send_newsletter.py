@@ -18,7 +18,7 @@ django.setup()
 
 # Import Django modules after setup
 from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
-from services.clerk_email_service import clerk_email_service  # noqa: E402
+from services.email_service import email_service  # noqa: E402
 
 
 def send_newsletter_to_all():
@@ -46,7 +46,8 @@ def send_newsletter_to_all():
             if not email_address:
                 return False, "Failed to decrypt email address"
 
-            email_sent = clerk_email_service.send_newsletter_email(
+            # Use Resend-backed newsletter email service
+            email_sent = email_service.send_newsletter_email(
                 email_address, str(subscriber.unsubscribe_token)
             )
             return email_sent, None

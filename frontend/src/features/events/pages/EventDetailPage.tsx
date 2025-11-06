@@ -102,7 +102,7 @@ function EventDetailPage() {
   const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", eventId],
     queryFn: async () => {
-      const token = await getToken();
+        const token = await getToken();
       return fetchEvent(eventId!, token);
     },
     enabled: !!eventId,
@@ -291,7 +291,7 @@ function EventDetailPage() {
                   <Label htmlFor="description" className="text-sm font-medium">
                     Description
                   </Label>
-                  <Textarea
+          <Textarea
                     id="description"
                     value={editedData.description || ''}
                     onChange={(e) => handleFieldChange('description', e.target.value)}
@@ -382,7 +382,7 @@ function EventDetailPage() {
                     onChange={(e) => handleFieldChange('price', e.target.value ? parseFloat(e.target.value) : null)}
                     placeholder="0.00"
                     disabled={updateEventMutation.isPending}
-                  />
+          />
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     Leave empty for free events
                   </p>
@@ -538,7 +538,7 @@ function EventDetailPage() {
                       {formatEventDate(event.dtstart_utc)}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
+                      {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
                     </p>
                   </div>
                 </div>
@@ -565,19 +565,19 @@ function EventDetailPage() {
                                      locationLower.includes("zoom") || 
                                      locationLower.includes("google meet");
                     return !isVirtual && (
-                      <div className="w-full h-64 rounded-lg overflow-hidden">
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          loading="lazy"
-                          allowFullScreen
-                          referrerPolicy="no-referrer-when-downgrade"
-                          src={`https://www.google.com/maps/embed/v1/place?key=${
-                            import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
-                          }&q=${encodeURIComponent(`${event.location}, ${event.school || ""}`)}`}
-                        ></iframe>
-                      </div>
+                  <div className="w-full h-64 rounded-lg overflow-hidden">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps/embed/v1/place?key=${
+                        import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""
+                      }&q=${encodeURIComponent(`${event.location}, ${event.school || ""}`)}`}
+                    ></iframe>
+                  </div>
                     );
                   })()}
                 </div>
