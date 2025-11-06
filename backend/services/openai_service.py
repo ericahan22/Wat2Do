@@ -14,9 +14,9 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from pytz import timezone as pytz_timezone
 
 from scraping.logging_config import logger
-from shared.constants.emojis import EMOJI_CATEGORIES
 from shared.constants.event_categories import EVENT_CATEGORIES
 from utils.events_utils import clean_datetime
 from utils.date_utils import get_current_semester_end_time
@@ -117,6 +117,7 @@ class OpenAIService:
 
         # Use post creation time if provided, otherwise use current time
         context_datetime = post_created_at if post_created_at else now
+        context_datetime = pytz_timezone("America/Toronto").localize(context_datetime.replace(tzinfo=None))
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")

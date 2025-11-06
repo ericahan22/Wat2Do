@@ -266,3 +266,8 @@ class EventInterest(models.Model):
 
     def __str__(self):
         return f"User {self.user_id} interested in {self.event.title[:30] if self.event.title else 'untitled'}"
+
+
+class IgnoredPost(models.Model):
+    shortcode = models.CharField(max_length=32, unique=True)
+    added_at = models.DateTimeField(auto_now_add=True)

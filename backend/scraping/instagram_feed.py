@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from apps.clubs.models import Clubs
-from apps.events.models import Events
+from apps.events.models import Events, IgnoredPost
 from scraping.logging_config import logger
 from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
@@ -287,13 +287,15 @@ def insert_event_to_db(event_data, ig_handle, source_url):
 
 
 def get_seen_shortcodes():
-    """Fetches all post shortcodes from events table in DB"""
+    """Fetches all post shortcodes from events and ignored posts tables in DB"""
     logger.info("Fetching seen shortcodes from the database...")
     try:
         events = Events.objects.filter(source_url__isnull=False).values_list(
             "source_url", flat=True
         )
-        shortcodes = {url.split("/")[-2] for url in events if url}
+        event_shortcodes = {url.split("/")[-2] for url in events if url}
+        ignored_shortcodes = set(IgnoredPost.objects.values_list("shortcode", flat=True))
+        shortcodes = event_shortcodes | ignored_shortcodes
         return shortcodes
     except Exception as e:
         logger.error(f"Could not fetch shortcodes from database: {e}")
@@ -403,6 +405,7 @@ def process_recent_feed(
                     logger.warning(
                         f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
                     )
+                    IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
                     if check_post_limit():
                         break
                     continue
