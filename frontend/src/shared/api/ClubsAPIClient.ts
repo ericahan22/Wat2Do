@@ -2,15 +2,17 @@ import type { Club } from '@/features/clubs/types/clubs';
 import BaseAPIClient from '@/shared/api/BaseAPIClient';
 
 export interface ClubsResponse {
-  clubs: Club[];
-  count: number;
+  results: Club[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  totalCount: number;
 }
 
 export interface ClubsQueryParams {
   search?: string;
-  categories?: string[];
+  category?: string;
   limit?: number;
-  offset?: number;
+  cursor?: string;
 }
 
 // Helper function to build query string (DRY principle)
@@ -39,10 +41,10 @@ class ClubsAPIClient {
   constructor(private apiClient: BaseAPIClient) {}
 
   /**
-   * Fetches all clubs from the backend.
+   * Fetches clubs from the backend with cursor-based pagination.
    * Corresponds to a GET request to /api/clubs/
    */
-  async getClubs(params: ClubsQueryParams = {}): Promise<Club[]> {
+  async getClubs(params: ClubsQueryParams = {}): Promise<ClubsResponse> {
     const queryString = buildQueryString(params);
     const endpoint = queryString ? `clubs/?${queryString}` : 'clubs/';
     return this.apiClient.get(endpoint);
@@ -56,15 +58,6 @@ class ClubsAPIClient {
     return this.apiClient.get(`clubs/${clubId}/`);
   }
 
-  /**
-   * Gets clubs response with count.
-   * Corresponds to a GET request to /api/clubs/ with count
-   */
-  async getClubsWithCount(params: ClubsQueryParams = {}): Promise<ClubsResponse> {
-    const queryString = buildQueryString(params);
-    const endpoint = queryString ? `clubs/?${queryString}&count=true` : 'clubs/?count=true';
-    return this.apiClient.get(endpoint);
-  }
 
   /**
    * Searches clubs by name or description.

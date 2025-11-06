@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useApi } from "@/shared/hooks/useApi";
 import type { ClubsResponse } from "@/shared/api";
@@ -10,10 +10,23 @@ export function useClubs() {
   const searchTerm = searchParams.get("search") || "";
   const categoryFilter = searchParams.get("category") || "all";
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<ClubsResponse, Error, any, string[], string | undefined>({
     queryKey: ["clubs", searchTerm, categoryFilter],
-    queryFn: async () => {
-      const queryParams: Record<string, string> = {};
+    queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      const queryParams: Record<string, any> = {
+        limit: 50, // Load 50 clubs at a time
+      };
+      
+      if (pageParam) {
+        queryParams.cursor = pageParam;
+      }
       
       if (searchTerm) {
         queryParams.search = searchTerm;
@@ -25,8 +38,20 @@ export function useClubs() {
 
       return clubsAPIClient.getClubs(queryParams);
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false,
+    enabled: true,
   });
+
+  // Flatten all pages into a single array of clubs
+  const clubs = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page: ClubsResponse) => page.results);
+  }, [data]);
+
+  // Get total count from first page
+  const totalCount = (data?.pages?.[0] as ClubsResponse | undefined)?.totalCount ?? 0;
 
   const uniqueCategories = useMemo(() => {
     return [
@@ -46,9 +71,13 @@ export function useClubs() {
   }, []);
 
   return {
-    data: (data as unknown as ClubsResponse)?.clubs ?? [],
+    data: clubs,
+    totalCount,
     uniqueCategories,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }

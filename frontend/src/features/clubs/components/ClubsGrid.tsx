@@ -1,19 +1,49 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
-import { Tag, ExternalLink, Instagram, MessageCircle } from "lucide-react";
+import { Tag, ExternalLink, Instagram, MessageCircle, Loader2 } from "lucide-react";
 import { Club } from "@/features/clubs/types/clubs";
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 
 interface ClubsGridProps {
   data: Club[];
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
 }
 
-const ClubsGrid = memo(({ data }: ClubsGridProps) => {
+const ClubsGrid = memo(({ data, fetchNextPage, hasNextPage, isFetchingNextPage }: ClubsGridProps) => {
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Infinite scroll using Intersection Observer
+  useEffect(() => {
+    if (!fetchNextPage || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
   return (
     <div className="space-y-8">
       {/* Clubs Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(185px,_1fr))] gap-2 sm:gap-2.5">
+      <div className="grid xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5">
         {data.map((club) => (
           <Card
             key={club.id}
@@ -101,6 +131,23 @@ const ClubsGrid = memo(({ data }: ClubsGridProps) => {
           </Card>
         ))}
       </div>
+
+      {/* Infinite Scroll Loader */}
+      {hasNextPage && (
+        <div ref={loadMoreRef} className="flex justify-center py-8">
+          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Loading more clubs...</span>
+          </div>
+        </div>
+      )}
+
+      {/* All clubs loaded message */}
+      {data.length > 0 && !hasNextPage && (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+          You've reached the end! 🎉
+        </div>
+      )}
 
       {/* No results message */}
       {data.length === 0 && (
