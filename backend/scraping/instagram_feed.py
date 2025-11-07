@@ -109,7 +109,7 @@ def append_event_to_csv(
     added_to_db="success",
     club_type=None,
 ):
-    csv_file = Path(__file__).resolve().parent / "events_scraped.csv"
+    csv_file = Path(__file__).resolve().parent.parent / "logs" / "events_scraped.csv"
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
 
