@@ -467,6 +467,8 @@ def process_recent_feed(
                             source_url,
                             added_to_db=added_to_db or "unknown",
                         )
+                if added_to_db is not None:
+                    time.sleep(random.uniform(30, 60))
 
             except Exception as e:
                 logger.error(
@@ -488,7 +490,6 @@ def process_recent_feed(
                     break
                 if check_post_limit():
                     break
-                time.sleep(random.uniform(30, 60))
 
         if not termination_reason:
             termination_reason = "no_more_posts"
