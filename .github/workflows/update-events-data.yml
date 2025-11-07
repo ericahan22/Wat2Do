@@ -106,8 +106,8 @@ jobs:
         with:
           name: logs-${{ github.run_number }}
           path: |
-            backend/logs/events_scraped.csv
-            backend/logs/scraping.log
+            backend/scraping/logs/events_scraped.csv
+            backend/scraping/logs/scraping.log
 
       - name: Generate static data file
         id: generate_static

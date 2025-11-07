@@ -109,8 +109,10 @@ def append_event_to_csv(
     added_to_db="success",
     club_type=None,
 ):
-    csv_file = Path(__file__).resolve().parent.parent / "logs" / "events_scraped.csv"
-    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    logs_dir = Path(__file__).parent / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    csv_file = logs_dir / "events_scraped.csv"
+
     file_exists = csv_file.exists()
 
     dtstart = clean_datetime(event_data.get("dtstart"))
