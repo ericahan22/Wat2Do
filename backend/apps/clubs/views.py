@@ -17,44 +17,74 @@ from .models import Clubs
 @permission_classes([AllowAny])
 @ratelimit(key="ip", rate="60/hr", block=True)
 def get_clubs(request):
-    """Get all clubs from database (no pagination)"""
+    """Get clubs with cursor-based pagination for infinite scroll"""
     try:
         search_term = request.GET.get("search", "").strip()
         category_filter = request.GET.get("category", "").strip()
+        cursor = request.GET.get("cursor", "").strip()
+        limit = int(request.GET.get("limit", "50"))
+        
+        # Limit boundary check
+        if limit > 100:
+            limit = 100
 
-        base_queryset = Clubs.objects.all()
-        filtered_queryset = base_queryset
+        queryset = Clubs.objects.all().order_by("id")
+        
+        # Apply search filter
         if search_term:
-            filtered_queryset = filtered_queryset.filter(
-                club_name__icontains=search_term
-            )
+            queryset = queryset.filter(club_name__icontains=search_term)
+        
+        # Apply category filter
         if category_filter and category_filter.lower() != "all":
-            filtered_queryset = filtered_queryset.filter(
-                categories__icontains=category_filter
-            )
+            queryset = queryset.filter(categories__icontains=category_filter)
+        
+        # Handle cursor-based pagination
+        if cursor:
+            try:
+                cursor_id = int(cursor)
+                queryset = queryset.filter(id__gt=cursor_id)
+            except (ValueError, TypeError):
+                return Response(
+                    {"error": "Invalid cursor format"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        
+        # Get total count for the filtered queryset
+        total_count = queryset.count()
+        
+        # Fetch one more than limit to check if there are more results
+        results = list(queryset.values("id", "club_name", "categories", "club_page", "ig", "discord", "club_type")[:limit + 1])
+        
+        # Determine if there's a next page
+        has_more = len(results) > limit
+        if has_more:
+            results = results[:limit]  # Remove the extra item
+            
+            # Generate next cursor from last item
+            last_club = results[-1]
+            next_cursor = str(last_club['id'])
+        else:
+            next_cursor = None
+        
+        # Ensure categories is always a list for each club
+        for club in results:
+            categories = club.get("categories")
+            if categories:
+                if isinstance(categories, str):
+                    try:
+                        club["categories"] = json.loads(categories)
+                    except json.JSONDecodeError:
+                        club["categories"] = [categories] if categories else []
+                elif not isinstance(categories, list):
+                    club["categories"] = [categories] if categories else []
+            else:
+                club["categories"] = []
 
-        # Convert to list of dictionaries
-        clubs_data = []
-        for club in filtered_queryset:
-            # Ensure categories is always a list
-            categories = (
-                club.categories
-                if isinstance(club.categories, list)
-                else json.loads(club.categories)
-            )
-
-            clubs_data.append(
-                {
-                    "id": club.id,
-                    "club_name": club.club_name,
-                    "categories": categories,
-                    "club_page": club.club_page,
-                    "ig": club.ig,
-                    "discord": club.discord,
-                    "club_type": club.club_type,
-                }
-            )
-
-        return Response({"clubs": clubs_data})
+        return Response({
+            "results": results,
+            "nextCursor": next_cursor,
+            "hasMore": next_cursor is not None,
+            "totalCount": total_count
+        })
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

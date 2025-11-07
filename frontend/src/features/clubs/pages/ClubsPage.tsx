@@ -7,9 +7,13 @@ import SearchInput from "@/features/search/components/SearchInput";
 function ClubsPage() {
   const {
     data,
+    totalCount,
     uniqueCategories,
     isLoading,
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   } = useClubs();
 
   const { categoryParam, setCategoryParam } = useCategoryParam();
@@ -17,14 +21,14 @@ function ClubsPage() {
   const previousTitleRef = useRef<string>("Clubs - Wat2Do");
 
   const documentTitle = useMemo(() => {
-    const title = `${data.length} Total Clubs - Wat2Do`;
+    const title = `${totalCount} Total Clubs - Wat2Do`;
     
     if (!isLoading) {
       previousTitleRef.current = title;
     }
     
     return previousTitleRef.current;
-  }, [data.length, isLoading]);
+  }, [totalCount, isLoading]);
 
   useDocumentTitle(documentTitle);
 
@@ -47,7 +51,7 @@ function ClubsPage() {
       />
       <div className="sm:text-left">
         <h1 className="sm:text-3xl text-2xl font-bold mb-2">
-          <NumberFlow value={data.length} suffix={" clubs"} />
+          <NumberFlow value={totalCount} suffix={" clubs"} />
         </h1>
         <p className="text-gray-600 dark:text-gray-400">Explore student clubs and organizations</p>
       </div>
@@ -74,7 +78,7 @@ function ClubsPage() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {isLoading ? "Loading..." : `Showing ${data.length} clubs`}
+            {isLoading ? "Loading..." : `Showing ${data.length} of ${totalCount} clubs`}
           </p>
         </div>
       </div>
@@ -99,7 +103,14 @@ function ClubsPage() {
       )}
 
       {/* Clubs Grid */}
-      {!isLoading && !error && <ClubsGrid data={data} />}
+      {!isLoading && !error && (
+        <ClubsGrid
+          data={data}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+        />
+      )}
     </div>
   );
 }

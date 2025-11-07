@@ -165,10 +165,14 @@ def create_event_dates_from_event_data(event, event_data=None):
     event_dates_list = []
     
     for occurrence in occurrences:
-        # Calculate end time for this occurrence
-        occurrence_utc = occurrence.astimezone(pytz.UTC)
         occurrence_end = calculate_end_time(dtstart, dtend, duration, occurrence)
-        occurrence_end_utc = occurrence_end.astimezone(pytz.UTC) if occurrence_end else None
+        
+        if not event.rrule and not event.rdate:
+            occurrence_utc = dtstart_utc
+            occurrence_end_utc = dtend_utc
+        else:
+            occurrence_utc = occurrence.astimezone(pytz.UTC)
+            occurrence_end_utc = occurrence_end.astimezone(pytz.UTC) if occurrence_end else None
         
         event_date = EventDates(
             event=event,

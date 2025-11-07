@@ -20,6 +20,9 @@ class Clubs(models.Model):
 
     class Meta:
         db_table = "clubs"
+        indexes = [
+            models.Index(fields=["club_name"], name="clubs_club_name_idx"),
+        ]
 
     def __str__(self):
         return self.club_name
