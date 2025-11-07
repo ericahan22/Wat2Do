@@ -368,19 +368,16 @@ def process_recent_feed(
         for post in safe_feed_posts(loader):
             try:
                 post_time = timezone.make_aware(post.date_utc) if timezone.is_naive(post.date_utc) else post.date_utc
-                if post.shortcode in seen_shortcodes or post_time < cutoff:
+                if post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping post; consec_old_posts={consec_old_posts}"
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping old post; consec_old_posts={consec_old_posts}"
                     )
-                    if consec_old_posts >= max_consec_old_posts:
-                        termination_reason = (
-                            f"reached_consecutive_old_posts={max_consec_old_posts}"
-                        )
-                        logger.info(
-                            f"Reached {max_consec_old_posts} consecutive old posts, stopping."
-                        )
-                        break
+                    continue
+                if post.shortcode in seen_shortcodes:
+                    logger.debug(
+                        f"[{post.shortcode}] [{post.owner_username}] Skipping previously seen post"
+                    )
                     continue
 
                 consec_old_posts = 0
@@ -399,7 +396,6 @@ def process_recent_feed(
                     )
                     source_image_url = None
 
-                posts_processed += 1
                 extracted_list = extract_events_from_caption(
                     post.caption, source_image_url, post.date_local
                 )
@@ -407,9 +403,6 @@ def process_recent_feed(
                     logger.warning(
                         f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
                     )
-                    IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
-                    if check_post_limit():
-                        break
                     continue
 
                 source_url = f"https://www.instagram.com/p/{post.shortcode}/"
@@ -475,12 +468,6 @@ def process_recent_feed(
                             added_to_db=added_to_db or "unknown",
                         )
 
-                IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
-                if check_post_limit():
-                    break
-
-                time.sleep(random.uniform(30, 60))
-
             except Exception as e:
                 logger.error(
                     f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
@@ -488,6 +475,20 @@ def process_recent_feed(
                 logger.error(f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}")
                 time.sleep(random.uniform(3, 8))
                 continue
+            finally:
+                posts_processed += 1
+                IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
+                if consec_old_posts >= max_consec_old_posts:
+                    termination_reason = (
+                        f"reached_consecutive_old_posts={max_consec_old_posts}"
+                    )
+                    logger.info(
+                        f"Reached {max_consec_old_posts} consecutive old posts, stopping."
+                    )
+                    break
+                if check_post_limit():
+                    break
+                time.sleep(random.uniform(30, 60))
 
         if not termination_reason:
             termination_reason = "no_more_posts"
