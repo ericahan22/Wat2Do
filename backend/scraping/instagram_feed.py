@@ -475,10 +475,10 @@ def process_recent_feed(
                             added_to_db=added_to_db or "unknown",
                         )
 
+                IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
                 if check_post_limit():
                     break
 
-                seen_shortcodes.add(post.shortcode)
                 time.sleep(random.uniform(30, 60))
 
             except Exception as e:
