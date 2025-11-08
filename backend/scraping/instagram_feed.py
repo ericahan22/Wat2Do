@@ -467,8 +467,8 @@ def process_recent_feed(
                             source_url,
                             added_to_db=added_to_db or "unknown",
                         )
-                if added_to_db is not None:
-                    time.sleep(random.uniform(30, 60))
+                posts_processed += 1
+                time.sleep(random.uniform(30, 60))
 
             except Exception as e:
                 logger.error(
@@ -478,7 +478,6 @@ def process_recent_feed(
                 time.sleep(random.uniform(3, 8))
                 continue
             finally:
-                posts_processed += 1
                 IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
                 if consec_old_posts >= max_consec_old_posts:
                     termination_reason = (
