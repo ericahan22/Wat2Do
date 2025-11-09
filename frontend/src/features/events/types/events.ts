@@ -8,10 +8,8 @@ export interface Event {
   title: string;
   description: string;
   location: string;
-  dtstart?: string; // Local datetime string
-  dtend?: string | null; // Local datetime string
-  dtstart_utc: string; // ISO datetime string
-  dtend_utc: string | null; // ISO datetime string
+  dtstart_utc: string; // ISO datetime string (UTC)
+  dtend_utc: string | null; // ISO datetime string (UTC)
   price: number | null;
   food: string | null;
   registration: boolean;
@@ -28,7 +26,8 @@ export interface Event {
   source_url: string | null;
   display_handle: string; // Computed field from backend
   interest_count: number; // Number of users interested in this event
-  upcoming_dates?: EventDate[]; // Multiple occurrence dates for recurring events
+  dates?: EventDate[]; // Multiple occurrence dates for recurring events
+  is_submitter?: boolean; // Whether the current user is the submitter of this event
 }
 
 export interface EventsResponse {

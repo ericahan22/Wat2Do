@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { IconButton } from "@/shared/components/ui/icon-button";
-import { formatPrettyDate } from "@/shared/lib/dateUtils";
+import { formatEventDate } from "@/shared/lib/dateUtils";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
@@ -19,7 +19,7 @@ function TopBanner() {
           className="hover:text-gray-200"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatPrettyDate("2025-11-06")} - Interested events now available!
+            {formatEventDate("2025-11-06")} - Interested events now available!
           </span>
         </a>
         <IconButton

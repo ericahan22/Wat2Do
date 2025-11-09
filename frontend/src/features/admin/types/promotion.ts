@@ -27,8 +27,8 @@ export interface EventPromotion {
 export interface PromotedEvent {
   id: number;
   title: string;
-  dtstart: string;
-  dtend: string | null;
+  dtstart_utc: string;
+  dtend_utc: string | null;
   location: string;
   description: string | null;
   source_image_url: string | null;

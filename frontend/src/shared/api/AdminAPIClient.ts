@@ -60,14 +60,6 @@ class AdminAPIClient {
   }
 
   /**
-   * Gets all promotions.
-   * Corresponds to a GET request to /api/promotions/
-   */
-  async getAllPromotions(): Promise<{ promotions: unknown[] }> {
-    return this.apiClient.get('promotions/');
-  }
-
-  /**
    * Deletes a promotion.
    * Corresponds to a DELETE request to /api/promotions/{promotionId}/
    */

@@ -18,9 +18,7 @@ from pytz import timezone as pytz_timezone
 
 from scraping.logging_config import logger
 from shared.constants.event_categories import EVENT_CATEGORIES
-from utils.events_utils import clean_datetime
 from utils.date_utils import get_current_semester_end_time
-from datetime import timezone as pytimezone
 
 
 class OpenAIService:
@@ -106,9 +104,7 @@ class OpenAIService:
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract ZERO OR MORE events from caption text/image.
 
-        - Return an array of JSON objects, each object representing a unique event.
-        - If the same event lists multiple dates/times, represent it as a single object
-          and use rdate (additional dates) and/or rrule (recurrence rule) appropriately.
+        - Return an array of JSON objects, each object representing a unique event. 
         """
         # Get current date and day of week for context
         now = datetime.now()
@@ -122,7 +118,6 @@ class OpenAIService:
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")
 
-        # Get current semester end time for inferring RRULE UNTIL dates
         semester_end_time = get_current_semester_end_time(school)
         categories_str = "\n".join(f"- {cat}" for cat in EVENT_CATEGORIES)
 
@@ -150,100 +145,42 @@ class OpenAIService:
     If you determine that there is NO event in the post, return the JSON value: null (not an object, not an array, just the literal null). Otherwise, return an array of JSON objects with ALL of the following fields:
     {{
         "title": string,
-        "dtstart": string,            // local start in "YYYY-MM-DD HH:MM:SS+HH"
-        "dtend": string,              // local end in "YYYY-MM-DD HH:MM:SS+HH" or empty string
-        "dtstart_utc": string,        // UTC start "YYYY-MM-DD HH:MM:SSZ" or empty string
-        "dtend_utc": string,          // UTC end "YYYY-MM-DD HH:MM:SSZ" or empty string
-        "duration": string,           // "HH:MM:SS" or empty string
-        "all_day": boolean,
+        "description": string,
         "location": string,
         "latitude": number or null,
         "longitude": number or null,
-        "tz": string,
         "price": number or null,
         "food": string,
         "registration": boolean,
-        "rrule": string,
-        "rdate": string,              // comma-separated datetime strings in format "YYYYMMDDTHHMMSS,YYYYMMDDTHHMMSS,..." (e.g., "20251113T170000,20251204T170000,20251218T170000")
+        "occurrences": [
+            {{
+                "start_utc": string,  // UTC start "YYYY-MM-DDTHH:MM:SSZ"
+                "end_utc": string,    // UTC end "YYYY-MM-DDTHH:MM:SSZ" or empty string if unknown
+                "duration": string,   // "HH:MM:SS" or empty string if unknown
+                "tz": string          // Timezone name like "America/Toronto"; use the post's timezone context
+            }}
+        ],
         "school": string,
         "source_image_url": string,
-        "description": string,
         "categories": list            // one or more of the following, as a JSON array of strings: {categories_str}
     }}
 
-    CONSOLIDATION RULES (VERY IMPORTANT):
-    - If multiple dates/times describe the SAME event (same title/location/content), CONSOLIDATE into ONE object:
-        * Put the primary occurrence in dtstart/dtend.
-        * For additional dates: use EITHER rdate (for specific dates without a pattern) OR rrule (for a clear recurring pattern like "every Monday").
-        * IMPORTANT: Use EITHER rrule OR rdate, NEVER both. If using rdate, set rrule to "". If using rrule, set rdate to "".
-        * Never create separate objects for the same event just because of multiple dates.
-    - Only create multiple objects when the caption clearly describes DISTINCT events (different titles, venues, or clearly different activities).
-
-    RDATE vs RRULE RULES (CRITICAL):
-    
-    MUTUAL EXCLUSIVITY (MANDATORY):
-    - RRULE and RDATE are MUTUALLY EXCLUSIVE - you must use EITHER one OR the other, NEVER both.
-    - If an event has multiple specific dates with NO recurring pattern, use RDATE only (rrule must be "").
-    - If an event has a recurring pattern (e.g., "every Monday", "weekly"), use RRULE only (rdate must be "").
-    - If an event has no recurrence or additional dates, both rrule and rdate should be empty strings "".
-    
-    - Use RDATE when multiple specific dates are listed but NO recurring pattern is explicitly stated:
-        * Example: "Join us Oct 15, Oct 22, Nov 3, and Nov 10" -> Use RDATE with the additional dates, rrule must be ""
-        * RDATE should be a comma-separated string of datetime values in format YYYYMMDDTHHMMSS
-        * Example: "20251022T140000,20251103T140000,20251110T140000"
-        * Put the first occurrence in dtstart/dtend, remaining dates/times in rdate
-        * When using RDATE, always set rrule to ""
-    
-    - Use RRULE when a recurring pattern IS explicitly stated (e.g., "every Monday", "weekly on Wednesdays", "daily"):
-    * DO NOT USE RRULE IF THE EVENT HAS NO RECURRING PATTERN
-        * RRULE MUST include the UNTIL parameter to specify when the recurrence ends
-        * Format: FREQ=WEEKLY;BYDAY=MO;UNTIL={semester_end_time}
-        * If no end date is mentioned, use {semester_end_time} as the UNTIL value
-        * Common RRULE examples:
-            - Every Wednesday until December: FREQ=WEEKLY;BYDAY=WE;UNTIL=20251130T235959Z
-            - Daily for a week: FREQ=DAILY;UNTIL=20251110T235959Z
-            - Every Tuesday and Thursday: FREQ=WEEKLY;BYDAY=TU,TH;UNTIL=20251215T235959Z
-        * When using RRULE, always set rdate to ""
-
-    MULTIPLE TIME SLOTS FOR SAME RECURRING EVENT:
-    When the same event has multiple time slots on the same day(s) of the week, create SEPARATE event objects for each time slot.
-    Example: "Weekly sessions every Wednesday: 5-6 PM and 8-10 PM through December"
-    Should create TWO event objects:
-    [
-        {{
-            "...": "...",
-            "dtstart": "2025-11-05 17:00:00-05",
-            "dtend": "2025-11-05 18:00:00-05",
-            "dtstart_utc": "2025-11-05 22:00:00Z",
-            "dtend_utc": "2025-11-05 23:00:00Z",
-            "duration": "01:00:00",
-            "all_day": false,
-            "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
-            "rdate": "",
-        }},
-        {{
-            "...": "...",
-            "dtstart": "2025-11-05 20:00:00-05",
-            "dtend": "2025-11-05 22:00:00-05",
-            "dtstart_utc": "2025-11-06 01:00:00Z",
-            "dtend_utc": "2025-11-06 03:00:00Z",
-            "duration": "02:00:00",
-            "rrule": "FREQ=WEEKLY;BYDAY=WE;UNTIL=20251231T235959Z",
-            "rdate": "",
-        }}
-    ]
-    This represents two separate recurring time slots (5-6 PM and 8-10 PM) on every Wednesday from November through December.
+    OCCURRENCE RULES (CRITICAL):
+    - Every event MUST include at least one occurrence with a concrete UTC start time.
+    - Return ALL explicit dates and times mentioned in the post as separate entries in the occurrences array.
+    - Do NOT infer or compress recurrence patterns. List each date/time exactly as given.
+    - Always convert local times to UTC. The JSON must use ISO 8601 format with a trailing "Z" (e.g., "2025-11-05T22:00:00Z").
+    - If an end time is not provided, leave "end_utc" as an empty string.
+    - If duration is not explicitly available, leave "duration" as an empty string.
+    - Use the timezone context from the caption/image (default to "America/Toronto" for {school}) for the "tz" field.
 
     ADDITIONAL RULES:
     - Prioritize caption text; use image text if missing details.
     - Title-case event titles.
-    - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to next day.
+    - If year not found, assume {now.year}. If end time < start time (e.g., 7pm-12am), set end to the next day.
     - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
-    - Convert local times to UTC using tz for dtstart_utc/dtend_utc when available.
-    - For all_day: ONLY set to true if the post **explicitly states** it is an all-day event (e.g., "all day", "full day").
     - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
     - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "DC Library"). Otherwise, attempt geocoding using the school context. Use null if location is too vague or cannot be geocoded.
-    - For tz mappings, default to "America/Toronto" for {school}.
     - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
         * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price.
         * If only member prices are given and non-member price is absent, use the listed member price.
@@ -251,7 +188,6 @@ class OpenAIService:
         * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use null for free events or when no price is mentioned.
     - For food: Only set this field if the post says food or drinks will be served, provided, or available for attendees. If specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize ONLY the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
-    - For rrule and rdate: they are MUTUALLY EXCLUSIVE. Use EITHER rrule (for recurring patterns) OR rdate (for specific dates without a pattern), NEVER both. If using rrule, set rdate to "". If using rdate, set rrule to "".
     - For description: Make this the caption text word-for-word. If there is no caption text, use the image text.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON array text, no extra commentary.
@@ -312,19 +248,13 @@ class OpenAIService:
                     "location",
                     "latitude",
                     "longitude",
-                    "dtstart",
-                    "dtend",
-                    "dtstart_utc",
-                    "dtend_utc",
-                    "all_day",
-                    "tz",
-                    "food",
                     "price",
+                    "food",
                     "registration",
-                    "rrule",
-                    "rdate",
                     "school",
                     "source_image_url",
+                    "categories",
+                    "occurrences",
                 ]
 
                 for event_obj in events_list:
@@ -332,27 +262,45 @@ class OpenAIService:
                         if field not in event_obj:
                             if field in ["price", "latitude", "longitude"]:
                                 event_obj[field] = None
-                            elif field in ["registration", "all_day"]:
+                            elif field in ["registration"]:
                                 event_obj[field] = False
+                            elif field == "categories":
+                                event_obj[field] = []
+                            elif field == "occurrences":
+                                event_obj[field] = []
                             else:
                                 event_obj[field] = ""
 
                     if source_image_url and not event_obj.get("source_image_url"):
                         event_obj["source_image_url"] = source_image_url
 
-                    # --- Manual UTC conversion for dtstart_utc and dtend_utc ---
-                    dtstart = clean_datetime(event_obj.get("dtstart"))
-                    dtend = clean_datetime(event_obj.get("dtend"))
+                    if not isinstance(event_obj.get("categories"), list):
+                        event_obj["categories"] = [str(event_obj["categories"])] if event_obj["categories"] else []
 
-                    if dtstart:
-                        event_obj["dtstart_utc"] = dtstart.astimezone(pytimezone.utc).isoformat()
-                    else:
-                        event_obj["dtstart_utc"] = None
+                    occurrences = event_obj.get("occurrences") or []
+                    cleaned_occurrences: list[dict] = []
 
-                    if dtend:
-                        event_obj["dtend_utc"] = dtend.astimezone(pytimezone.utc).isoformat()
-                    else:
-                        event_obj["dtend_utc"] = None
+                    if isinstance(occurrences, list):
+                        for occ in occurrences:
+                            if not isinstance(occ, dict):
+                                continue
+
+                            duration_val = occ.get("duration", "")
+                            tz_val = occ.get("tz", "")
+                            start_utc = occ.get("start_utc", "")
+                            end_utc = occ.get("end_utc", "")
+
+                            cleaned_occurrences.append(
+                                {
+                                    "start_utc": start_utc,
+                                    "end_utc": end_utc,
+                                    "duration": duration_val,
+                                    "tz": tz_val,
+                                }
+                            )
+
+                    cleaned_occurrences.sort(key=lambda item: item.get("start_utc", ""))
+                    event_obj["occurrences"] = cleaned_occurrences
 
                     cleaned_events.append(event_obj)
 

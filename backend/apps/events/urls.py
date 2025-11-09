@@ -9,7 +9,6 @@ from . import views
 urlpatterns = [
     path("", views.get_events, name="events"),
     path("<int:event_id>/", views.get_event, name="event_detail"),
-    path("<int:event_id>/submission/", views.get_event_submission, name="get_event_submission"),
     path("<int:event_id>/update/", views.update_event, name="update_event"),
     path("<int:event_id>/delete/", views.delete_event, name="delete_event"),
     path("export.ics", views.export_events_ics, name="export_events_ics"),
@@ -27,9 +26,6 @@ urlpatterns = [
     path("submissions/<int:submission_id>/", views.delete_submission, name="delete_submission"),
     # Event interest endpoints
     path("my-interests/", views.get_my_interested_event_ids, name="get_my_interested_event_ids"),
-    path("<int:event_id>/interest/", views.get_event_interest, name="get_event_interest"),
     path("<int:event_id>/interest/mark/", views.mark_event_interest, name="mark_event_interest"),
     path("<int:event_id>/interest/unmark/", views.unmark_event_interest, name="unmark_event_interest"),
-    # Test endpoints
-    path("test-similarity/", views.test_similarity, name="test_similarity"),
 ]

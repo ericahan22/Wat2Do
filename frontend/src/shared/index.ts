@@ -25,6 +25,10 @@ export * from './lib/eventUtils';
 export * from './lib/clubTypeColors';
 export * from './lib/theme';
 
+// Utils
+export * from './utils/errorUtils';
+export { handleError } from './lib/errorHandler';
+
 // Types
 export type { ApiResponse, PaginatedResponse, ErrorResponse, Theme, NavbarState } from './types/common';
 

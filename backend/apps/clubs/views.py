@@ -22,11 +22,7 @@ def get_clubs(request):
         search_term = request.GET.get("search", "").strip()
         category_filter = request.GET.get("category", "").strip()
         cursor = request.GET.get("cursor", "").strip()
-        limit = int(request.GET.get("limit", "50"))
-        
-        # Limit boundary check
-        if limit > 100:
-            limit = 100
+        limit = 50
 
         queryset = Clubs.objects.all().order_by("id")
         

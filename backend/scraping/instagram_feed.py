@@ -13,7 +13,7 @@ import json
 import random
 import time
 import traceback
-from datetime import datetime, timedelta, timezone as pytimezone
+from datetime import timedelta
 from pathlib import Path
 
 import requests
@@ -23,7 +23,7 @@ from dotenv import load_dotenv
 from instaloader import Instaloader
 
 from apps.clubs.models import Clubs
-from apps.events.models import Events, IgnoredPost
+from apps.events.models import Events, IgnoredPost, EventDates
 from scraping.logging_config import logger
 from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
@@ -31,8 +31,7 @@ from services.openai_service import (
 )
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
-from utils.event_dates_utils import create_event_dates_from_event_data
-from utils.events_utils import clean_datetime, clean_duration
+from utils.event_dates_utils import normalize_occurrences
 from utils.scraping_utils import (
     normalize,
     jaccard_similarity,
@@ -59,46 +58,73 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
-def is_duplicate_event(event_data):
-    """Check for duplicate events using title, datetime, location, and description."""
+def is_duplicate_event(event_data, normalized_occurrences=None):
+    """Check for duplicate events using title, occurrences, location, and description."""
+
     title = event_data.get("title") or ""
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
-    dtstart_utc = event_data.get("dtstart_utc")
-    if not dtstart_utc:
+
+    occurrences = normalized_occurrences
+    if occurrences is None:
+        occurrences = normalize_occurrences(event_data.get("occurrences"))
+
+    if not occurrences:
+        return False
+
+    target_start = occurrences[0].get("start_utc")
+    if not target_start:
         return False
 
     try:
-        date = datetime.fromisoformat(dtstart_utc)
-        candidates = Events.objects.filter(dtstart_utc__date=date.date())
-        for c in candidates:
-            c_title = getattr(c, "title", "") or ""
-            c_loc = getattr(c, "location", "") or ""
-            c_desc = getattr(c, "description", "") or ""
-            c_dtstart_utc = getattr(c, "dtstart_utc", None)
-            if c_dtstart_utc and c_dtstart_utc.date() == date.date():
-                norm_title = normalize(title)
-                norm_c_title = normalize(c_title)
-                substring_match = norm_c_title in norm_title or norm_title in norm_c_title
-                title_sim = max(
-                    jaccard_similarity(c_title, title),
-                    sequence_similarity(c_title, title),
+        candidates = (
+            EventDates.objects.select_related("event")
+            .filter(dtstart_utc__date=target_start.date())
+        )
+
+        for candidate in candidates:
+            existing_event = candidate.event
+            if not existing_event:
+                continue
+
+            c_title = getattr(existing_event, "title", "") or ""
+            c_loc = getattr(existing_event, "location", "") or ""
+            c_desc = getattr(existing_event, "description", "") or ""
+            c_start = candidate.dtstart_utc
+
+            if not c_start:
+                continue
+
+            # Compare same-day occurrences with fuzzy matching on title/location/description.
+            if c_start.date() != target_start.date():
+                continue
+
+            norm_title = normalize(title)
+            norm_c_title = normalize(c_title)
+            substring_match = norm_c_title in norm_title or norm_title in norm_c_title
+
+            title_sim = max(
+                jaccard_similarity(c_title, title),
+                sequence_similarity(c_title, title),
+            )
+            loc_sim = jaccard_similarity(c_loc, location)
+            desc_sim = jaccard_similarity(c_desc, description)
+
+            if substring_match:
+                logger.warning(
+                    f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
                 )
-                loc_sim = jaccard_similarity(c_loc, location)
-                desc_sim = jaccard_similarity(c_desc, description)
-                if substring_match:
-                    logger.warning(
-                        f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
-                    )
-                    return True
-                if (title_sim > 0.7 and loc_sim > 0.5) or (loc_sim > 0.5 and desc_sim > 0.3):
-                    logger.warning(
-                        f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
-                        f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
-                    )
-                    return True
-    except Exception as e:
-        logger.error(f"Error during duplicate check: {e!s}")
+                return True
+
+            if (title_sim > 0.7 and loc_sim > 0.5) or (loc_sim > 0.5 and desc_sim > 0.3):
+                logger.warning(
+                    f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
+                    f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
+                )
+                return True
+    except Exception as exc:
+        logger.error(f"Error during duplicate check: {exc!s}")
+
     return False
 
 
@@ -115,23 +141,20 @@ def append_event_to_csv(
 
     file_exists = csv_file.exists()
 
-    dtstart = clean_datetime(event_data.get("dtstart"))
-    dtend = clean_datetime(event_data.get("dtend"))
-    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
-    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
-    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
-    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
-    duration = clean_duration(event_data.get("duration"))
-    all_day = event_data.get("all_day")
+    occurrences = event_data.get("occurrences", []) or []
+    primary_occurrence = occurrences[0] if occurrences else {}
+
+    dtstart_utc = primary_occurrence.get("start_utc")
+    dtend_utc = primary_occurrence.get("end_utc")
+    duration = primary_occurrence.get("duration")
+    tz = primary_occurrence.get("tz")
     location = event_data.get("location", "")
     food = event_data.get("food", "")
     price = event_data.get("price", "")
     registration = bool(event_data.get("registration", False))
     description = event_data.get("description", "")
-    rrule = event_data.get("rrule", "")
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
-    tz = event_data.get("tz", "")
     school = event_data.get("school", "")
     source_image_url = event_data.get("source_image_url", "")
     title = event_data.get("title", "")
@@ -141,9 +164,7 @@ def append_event_to_csv(
         "ig_handle",
         "title",
         "source_url",
-        "dtstart",
         "dtstart_utc",
-        "dtend",
         "dtend_utc",
         "duration",
         "location",
@@ -151,16 +172,14 @@ def append_event_to_csv(
         "price",
         "registration",
         "description",
-        "rrule",
         "latitude",
         "longitude",
         "tz",
         "school",
         "source_image_url",
-        "all_day",
         "club_type",
         "categories",
-        "raw_json",
+        "occurrences",
         "added_to_db",
         "status",
     ]
@@ -174,9 +193,7 @@ def append_event_to_csv(
                 "ig_handle": ig_handle,
                 "title": title,
                 "source_url": source_url,
-                "dtstart": dtstart,
                 "dtstart_utc": dtstart_utc,
-                "dtend": dtend,
                 "dtend_utc": dtend_utc,
                 "duration": duration,
                 "location": location,
@@ -184,16 +201,14 @@ def append_event_to_csv(
                 "price": price,
                 "registration": registration,
                 "description": description,
-                "rrule": rrule,
                 "latitude": latitude,
                 "longitude": longitude,
                 "tz": tz,
                 "school": school,
                 "source_image_url": source_image_url,
-                "all_day": all_day,
                 "club_type": club_type or event_data.get("club_type") or "",
                 "categories": json.dumps(categories, ensure_ascii=False),
-                "raw_json": json.dumps(event_data, ensure_ascii=False),
+                "occurrences": json.dumps(occurrences, ensure_ascii=False),
                 "added_to_db": added_to_db,
                 "status": "CONFIRMED",
             }
@@ -204,31 +219,28 @@ def append_event_to_csv(
 def insert_event_to_db(event_data, ig_handle, source_url):
     """Map scraped event data to Event model fields, insert to DB"""
     title = event_data.get("title", "")
-    dtstart = clean_datetime(event_data.get("dtstart"))
-    dtend = clean_datetime(event_data.get("dtend"))
-    dtstart = dtstart.replace(tzinfo=pytimezone.utc) if dtstart else None
-    dtend = dtend.replace(tzinfo=pytimezone.utc) if dtend else None
-    dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
-    dtend_utc = clean_datetime(event_data.get("dtend_utc"))
-    duration = clean_duration(event_data.get("duration"))
-    all_day = event_data.get("all_day")
     source_image_url = event_data.get("source_image_url") or ""
     description = event_data.get("description", "") or ""
     location = event_data.get("location")
     price = event_data.get("price", None)
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
-    tz = event_data.get("tz", "")
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
     school = event_data.get("school", "")
     categories = event_data.get("categories", [])
 
+    normalized_occurrences = normalize_occurrences(event_data.get("occurrences"))
+
+    if not normalized_occurrences:
+        logger.warning(f"Event '{title}' missing occurrences; skipping insert")
+        return "missing_occurrence"
+
     if not categories or not isinstance(categories, list):
         logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
         categories = ["Uncategorized"]
 
-    if is_duplicate_event(event_data):
+    if is_duplicate_event(event_data, normalized_occurrences):
         return "duplicate"
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
@@ -246,11 +258,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "title": title,
         "source_url": source_url,
         "dtstamp": timezone.now(),
-        "dtstart": dtstart,
-        "dtstart_utc": dtstart_utc,
-        "dtend": dtend or None,
-        "dtend_utc": dtend_utc,
-        "duration": duration,
         "club_type": club_type,
         "location": location,
         "food": food or None,
@@ -259,29 +266,30 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "description": description or None,
         "reactions": {},
         "source_image_url": source_image_url or None,
-        "raw_json": event_data,
         "status": "CONFIRMED",
-        "tz": tz,
-        "all_day": all_day,
         "latitude": latitude,
         "longitude": longitude,
         "school": school,
-        "rrule": event_data.get("rrule", ""),
         "categories": categories,
     }
 
     try:
         event = Events.objects.create(**create_kwargs)
-        # Create EventDates entries for this event
-        try:
-            event_dates = create_event_dates_from_event_data(event)
-            if event_dates:
-                from apps.events.models import EventDates
-                EventDates.objects.bulk_create(event_dates)
-                logger.debug(f"Created {len(event_dates)} EventDates entries for event {event.id}")
-        except Exception as ed_e:
-            logger.error(f"Error creating EventDates for event {event.id}: {ed_e}")
-            # Don't fail the whole operation if EventDates creation fails
+        event_dates = [
+            EventDates(
+                event=event,
+                dtstart_utc=occ["start_utc"],
+                dtend_utc=occ.get("end_utc"),
+                duration=occ.get("duration"),
+                tz=occ.get("tz"),
+            )
+            for occ in normalized_occurrences
+        ]
+
+        EventDates.objects.bulk_create(event_dates)
+        logger.debug(
+            f"Created {len(event_dates)} EventDates entries for event {event.id}"
+        )
         return True
     except Exception as e:
         logger.error(f"Error inserting event to DB: {e}")
@@ -413,25 +421,32 @@ def process_recent_feed(
                             f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
                         )
 
+                        normalized_occurrences = normalize_occurrences(
+                            event_data.get("occurrences")
+                        )
+
                         if not (
                             event_data.get("title")
-                            and event_data.get("dtstart")
                             and event_data.get("location")
+                            and normalized_occurrences
                         ):
-                            missing_fields = [
-                                key
-                                for key in ["title", "dtstart", "location"]
-                                if not event_data.get(key)
-                            ]
+                            missing_fields = []
+                            if not event_data.get("title"):
+                                missing_fields.append("title")
+                            if not event_data.get("location"):
+                                missing_fields.append("location")
+                            if not normalized_occurrences:
+                                missing_fields.append("occurrences")
                             logger.warning(
                                 f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
                             )
                             added_to_db = "missing_fields"
                             continue
 
-                        dtstart_utc = clean_datetime(event_data.get("dtstart_utc"))
+                        first_occurrence = normalized_occurrences[0]
+                        dtstart_utc = first_occurrence.get("start_utc")
                         now = timezone.now()
-                        if dtstart_utc < now:
+                        if dtstart_utc and dtstart_utc < now:
                             logger.info(
                                 f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
                             )

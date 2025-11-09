@@ -93,14 +93,6 @@ function ClubsPage() {
         </div>
       )}
 
-      {/* Error state */}
-      {error && (
-        <div className="flex items-center justify-center py-8">
-          <div className="text-lg text-red-600 dark:text-red-400">
-            Error loading clubs: {error.message}
-          </div>
-        </div>
-      )}
 
       {/* Clubs Grid */}
       {!isLoading && !error && (

@@ -17,42 +17,12 @@ class Events(models.Model):
         null=True, blank=True, help_text="'Student Center Ballroom, 123 University Ave'"
     )
 
-    # iCalendar datetime fields (RFC 5545 standard)
-    dtstamp = models.DateTimeField(
-        default=timezone.now, help_text="'time created in UTC, 2024-03-15T10:30:00Z'"
-    )
-    dtstart = models.DateTimeField(
-        default=timezone.now, help_text="'2024-03-20T09:00:00'"
-    )
-    dtend = models.DateTimeField(
-        blank=True, null=True, help_text="'2024-03-20T17:00:00'"
-    )
-    dtstart_utc = models.DateTimeField(
-        default=timezone.now, help_text="'2024-03-20T14:00:00Z'"
-    )
-    dtend_utc = models.DateTimeField(
-        blank=True, null=True, help_text="'2024-03-20T22:00:00Z'"
-    )
-    all_day = models.BooleanField(default=False, help_text="True")
-    duration = models.DurationField(blank=True, null=True, help_text="'8:00:00'")
-
     # Event categorization
     categories = models.JSONField(
         default=list,
         null=True,
         blank=True,
         help_text="['Career', 'Networking']",
-    )
-
-    # Timezone information
-    tz = models.CharField(
-        max_length=64, null=True, blank=True, help_text="'America/New_York'"
-    )
-
-    # Recurrence rules (iCalendar RFC 5545)
-    rrule = models.TextField(null=True, blank=True, help_text="'FREQ=WEEKLY;BYDAY=MO'")
-    rdate = models.JSONField(
-        null=True, blank=True, help_text="['2024-03-25', '2024-04-01']"
     )
 
     # Event status
@@ -63,14 +33,6 @@ class Events(models.Model):
         help_text="Event status (e.g., 'CONFIRMED', 'TENTATIVE', 'CANCELLED')",
     )
 
-    # Geographic location (regular numeric fields)
-    latitude = models.FloatField(null=True, blank=True, help_text="40.7128")
-    longitude = models.FloatField(null=True, blank=True, help_text="-74.0059")
-
-    # Data provenance and raw extraction
-    raw_json = models.JSONField(
-        default=dict, help_text="{'title': 'Career Fair', 'location': 'Student Center'}"
-    )
     source_url = models.TextField(
         null=True, blank=True, help_text="'https://university.edu/events/career-fair'"
     )
@@ -126,15 +88,7 @@ class Events(models.Model):
 
     class Meta:
         db_table = "events"
-        indexes = [
-            models.Index(fields=["school", "status", "dtend_utc"], name="events_school_status_dtend_idx"),
-            models.Index(fields=["school", "status", "dtend_utc", "dtstart_utc"], name="events_school_status_dtend_utc_dtstart_utc_idx"),
-            models.Index(
-                fields=["school", "status", "dtstart_utc"],
-                condition=models.Q(dtend_utc__isnull=True),
-                name="events_school_status_dtstart_nullend_idx",
-            ),
-        ]
+        indexes = []
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"
@@ -151,11 +105,6 @@ class EventSubmission(models.Model):
 
     # Submission details
     id = models.BigAutoField(primary_key=True)
-    screenshot_url = models.URLField(help_text="S3 URL of uploaded screenshot")
-    source_url = models.URLField(help_text="URL to original event source")
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True
-    )
     submitted_by = models.CharField(
         max_length=255, help_text="Clerk user ID who submitted this event"
     )
@@ -165,12 +114,6 @@ class EventSubmission(models.Model):
     reviewed_at = models.DateTimeField(null=True, blank=True)
     reviewed_by = models.CharField(max_length=255, null=True, blank=True)
 
-    # Extracted event data (populated after OpenAI processing)
-    extracted_data = models.JSONField(
-        null=True, blank=True, help_text="Event data extracted by OpenAI"
-    )
-
-    # Required link to created event
     created_event = models.ForeignKey(
         Events,
         null=False,
@@ -178,9 +121,6 @@ class EventSubmission(models.Model):
         on_delete=models.CASCADE,
         related_name="submission",
     )
-
-    # Admin notes
-    admin_notes = models.TextField(blank=True)
 
     class Meta:
         db_table = "event_submissions"
@@ -193,9 +133,6 @@ class EventSubmission(models.Model):
 class EventDates(models.Model):
     """
     Stores individual occurrence dates for events.
-    For events with rrule or rdate, this table contains all computed dates.
-    For simple events without recurrence, contains a single date entry.
-    This enables efficient querying of upcoming events without calculating rrule/rdate.
     """
 
     id = models.BigAutoField(primary_key=True)
@@ -205,12 +142,6 @@ class EventDates(models.Model):
         related_name="event_dates",
         db_index=True,
         help_text="Reference to the parent event",
-    )
-    dtstart = models.DateTimeField(
-        help_text="Local start time for this occurrence"
-    )
-    dtend = models.DateTimeField(
-        blank=True, null=True, help_text="Local end time for this occurrence"
     )
     dtstart_utc = models.DateTimeField(
         db_index=True, help_text="UTC start time for this occurrence"

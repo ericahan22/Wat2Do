@@ -7,8 +7,8 @@ from apps.events.models import Events
 class EventFilter(FilterSet):
     """Filter for Event queryset"""
 
-    dtstart_utc = DateTimeFilter(field_name="dtstart_utc", lookup_expr="gte")
-    dtend_utc = DateTimeFilter(field_name="dtstart_utc", lookup_expr="lte")
+    dtstart_utc = DateTimeFilter(field_name="event_dates__dtstart_utc", lookup_expr="gte")
+    dtend_utc = DateTimeFilter(field_name="event_dates__dtstart_utc", lookup_expr="lte")
     min_price = NumberFilter(field_name="price", lookup_expr="gte")
     max_price = NumberFilter(field_name="price", lookup_expr="lte")
     club_type = CharFilter(field_name="club_type")

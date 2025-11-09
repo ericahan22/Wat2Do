@@ -5,7 +5,6 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
 import GeeveKickingRocks from "@/assets/artwork/geeve-kicking-rocks.svg?react";
 import {
   Calendar,
@@ -22,12 +21,15 @@ import {
 import { Event } from "@/features/events";
 import { memo, useMemo, useEffect, useRef } from "react";
 import {
-  formatEventTimeRange,
+  formatTimeRange,
   formatRelativeEventDate,
   getDateCategory,
 } from "@/shared/lib/dateUtils";
-import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
-import BadgeMask from "@/shared/components/ui/badge-mask";
+import {
+  EventStatusBadge,
+  NewEventBadge,
+  OrganizationBadge,
+} from "@/shared/components/badges/EventBadges";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
@@ -49,76 +51,6 @@ interface EventsGridProps {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
 }
-
-const EventStatusBadge = ({ event }: { event: Event }) => {
-  const status = getEventStatus(event);
-
-  if (status === "live") {
-    return (
-      <BadgeMask variant="top-right">
-        <Badge variant="live" className="font-extrabold">
-          LIVE
-        </Badge>
-      </BadgeMask>
-    );
-  }
-
-  if (status === "soon") {
-    return (
-      <BadgeMask variant="top-right">
-        <Badge variant="soon" className="font-extrabold">
-          Starting soon
-        </Badge>
-      </BadgeMask>
-    );
-  }
-
-  return null;
-};
-
-const NewEventBadge = ({ event }: { event: Event }) => {
-  if (!isEventNew(event)) return null;
-
-  return (
-    <BadgeMask variant="top-left">
-      <Badge variant="new" className="font-extrabold">
-        NEW
-      </Badge>
-    </BadgeMask>
-  );
-};
-
-const OrganizationBadge = ({
-  event,
-  isSelectMode,
-}: {
-  event: Event;
-  isSelectMode: boolean;
-}) => {
-  if (!event.display_handle) return null;
-
-  // Only link if display_handle is an ig_handle
-  const isInstagram = !!event.ig_handle && event.display_handle === event.ig_handle;
-
-  return (
-    <BadgeMask variant="bottom-left">
-      <Badge
-        onMouseDown={() => {
-          if (!isSelectMode && isInstagram) {
-            window.open(
-              `https://www.instagram.com/${event.display_handle}/`,
-              "_blank"
-            );
-          }
-        }}
-        variant="outline"
-        className={`font-extrabold${isInstagram ? " cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" : ""}`}
-      >
-        {isInstagram ? `@${event.display_handle}` : event.display_handle}
-      </Badge>
-    </BadgeMask>
-  );
-};
 
 const InterestButton = ({ event }: { event: Event }) => {
   const { isSignedIn } = useAuth();
@@ -277,7 +209,7 @@ const EventsGrid = memo(
             delay: delay,
             ease: [0.18, 0.39, 0.14, 0.9],
           }}
-          style={{ pointerEvents: 'auto' }}
+          style={{ pointerEvents: "auto" }}
         >
           <Card
             className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full ${
@@ -334,14 +266,14 @@ const EventsGrid = memo(
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatRelativeEventDate(event.dtstart_utc, event.dtend_utc)}
+                  {formatRelativeEventDate(event.dtstart_utc)}
                 </span>
               </div>
 
               <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
                 <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">
-                  {formatEventTimeRange(event.dtstart_utc, event.dtend_utc)}
+                  {formatTimeRange(event.dtstart_utc, event.dtend_utc)}
                 </span>
               </div>
 
@@ -354,14 +286,14 @@ const EventsGrid = memo(
                 </div>
               )}
 
-              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {event.price === null || event.price === 0
-                    ? "Free"
-                    : `$${event.price}`}
-                </span>
-              </div>
+              {event.price !== null && (
+                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+                  <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">
+                    {event.price === 0 ? "Free" : `$${event.price}`}
+                  </span>
+                </div>
+              )}
 
               {event.food && (
                 <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
@@ -390,7 +322,11 @@ const EventsGrid = memo(
                       onMouseDown={(e) => {
                         e.stopPropagation();
                         if (event.source_url) {
-                          window.open(event.source_url, "_blank", "noopener,noreferrer");
+                          window.open(
+                            event.source_url,
+                            "_blank",
+                            "noopener,noreferrer"
+                          );
                         }
                       }}
                     >
@@ -404,7 +340,11 @@ const EventsGrid = memo(
                       className="flex-1 text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
                       onMouseDown={(e) => {
                         e.stopPropagation();
-                        if (confirm(`Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`)) {
+                        if (
+                          confirm(
+                            `Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`
+                          )
+                        ) {
                           deleteEventMutation.mutate(event.id);
                         }
                       }}

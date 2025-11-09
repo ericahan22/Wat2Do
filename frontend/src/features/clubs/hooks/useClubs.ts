@@ -20,9 +20,7 @@ export function useClubs() {
   } = useInfiniteQuery<ClubsResponse, Error, any, string[], string | undefined>({
     queryKey: ["clubs", searchTerm, categoryFilter],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const queryParams: Record<string, any> = {
-        limit: 50, // Load 50 clubs at a time
-      };
+      const queryParams: Record<string, any> = {};
       
       if (pageParam) {
         queryParams.cursor = pageParam;

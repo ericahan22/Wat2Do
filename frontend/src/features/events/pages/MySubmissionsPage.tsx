@@ -9,16 +9,16 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
   Calendar,
-  ExternalLink,
   Clock,
   CheckCircle,
   XCircle,
   AlertCircle,
   Trash2,
 } from "lucide-react";
-import { formatPrettyDate } from "@/shared/lib/dateUtils";
+import { formatEventDate } from "@/shared/lib/dateUtils";
 import type { EventSubmission } from "@/features/events/types/submission";
 import { useNavigate } from "react-router-dom";
+import { getSubmissionStatusVariant } from "@/shared/components/badges/EventBadges";
 
 export function MySubmissionsPage() {
   const {
@@ -30,32 +30,6 @@ export function MySubmissionsPage() {
   const navigate = useNavigate();
   // Type assertion to fix TypeScript issues
   const submissionsArray = submissions as EventSubmission[];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "approved":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "rejected":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      case "pending":
-        return <AlertCircle className="h-4 w-4 text-yellow-600" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "approved":
-        return "default" as const;
-      case "rejected":
-        return "destructive" as const;
-      case "pending":
-        return "secondary" as const;
-      default:
-        return "outline" as const;
-    }
-  };
 
   if (isLoading) {
     return (
@@ -85,7 +59,10 @@ export function MySubmissionsPage() {
               Track the status of your submitted events
             </p>
           </div>
-          <Button onClick={() => navigate("/submit")} className="sm:whitespace-nowrap">
+          <Button
+            onClick={() => navigate("/submit")}
+            className="sm:whitespace-nowrap"
+          >
             Submit New Event
           </Button>
         </div>
@@ -117,43 +94,24 @@ export function MySubmissionsPage() {
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(submission.status)}
-                      <CardTitle className="text-lg">
-                        Submission #{submission.id}
-                      </CardTitle>
-                    </div>
-                    <Badge variant={getStatusBadgeVariant(submission.status)}>
+                    <CardTitle className="text-lg">
+                      Submission #{submission.id}
+                    </CardTitle>
+                    <Badge
+                      variant={getSubmissionStatusVariant(submission.status)}
+                    >
                       {submission.status}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Screenshot */}
+                  {/* Event Image */}
                   <div>
                     <img
-                      src={submission.screenshot_url}
-                      alt="Event screenshot"
+                      src={submission.source_image_url || ""}
+                      alt="Event image"
                       className="w-full h-32 object-cover rounded border"
                     />
-                  </div>
-
-                  {/* Source URL */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <ExternalLink className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Source
-                      </span>
-                    </div>
-                    <a
-                      href={submission.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all"
-                    >
-                      {submission.source_url}
-                    </a>
                   </div>
 
                   {/* Timestamps */}
@@ -161,39 +119,27 @@ export function MySubmissionsPage() {
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-gray-500" />
                       <span className="text-sm text-gray-600 dark:text-gray-400">
-                        Submitted: {formatPrettyDate(submission.submitted_at)}
+                        Submitted: {formatEventDate(submission.submitted_at)}
                       </span>
                     </div>
                     {submission.reviewed_at && (
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-gray-500" />
                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Reviewed: {formatPrettyDate(submission.reviewed_at)}
+                          Reviewed: {formatEventDate(submission.reviewed_at)}
                         </span>
                       </div>
                     )}
                   </div>
 
-                  {/* Admin Notes */}
-                  {submission.admin_notes && (
-                    <div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Admin Notes:
-                      </span>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {submission.admin_notes}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Created Event Link */}
-                  {submission.created_event_id && (
+                  {submission.event_id && (
                     <div>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          navigate(`/events/${submission.created_event_id}`)
+                          navigate(`/events/${submission.event_id}`)
                         }
                         className="w-full"
                       >
