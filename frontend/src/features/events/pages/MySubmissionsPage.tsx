@@ -11,8 +11,6 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Trash2,
 } from "lucide-react";
 import { formatEventDate } from "@/shared/lib/dateUtils";
