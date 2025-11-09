@@ -319,8 +319,9 @@ def safe_feed_posts(loader, retries=3, backoff=60):
                         continue
                     seen_shortcodes.add(post.shortcode)
                 yield post
+                time.sleep(random.uniform(2, 4))
             break  # Finished all posts
-        except (ReadTimeout, ConnectionError) as e:
+        except (ReadTimeout, ConnectionError, requests.exceptions.SSLError) as e:
             attempts += 1
             logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})...")
             time.sleep(backoff)
@@ -563,6 +564,8 @@ def test_zyte_proxy(country="CA"):
 
 def session():
     L = Instaloader(user_agent=random.choice(USER_AGENTS))
+    L.context.request_timeout = 120
+    L.context.max_connection_attempts = 5
     try:
         SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
         SESSION_CACHE_DIR.mkdir(exist_ok=True)
@@ -597,7 +600,6 @@ if __name__ == "__main__":
     test_zyte_proxy("CA")
     logger.info("Attemping to load Instagram session...")
     L = session()
-    L.context.request_timeout = 120
     if L:
         logger.info("Session created successfully!")
         process_recent_feed(L)
