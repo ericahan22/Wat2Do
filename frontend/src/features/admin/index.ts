@@ -21,3 +21,5 @@ export type {
 
 // Pages
 export { default as AdminPage } from './pages/AdminPage';
+export { PromotionsPage } from './pages/PromotionsPage';
+export { SubmissionsReviewPage } from './pages/SubmissionsReviewPage';

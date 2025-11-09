@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-
-import { API_BASE_URL } from "@/shared/constants/api";
+import { useApi } from "@/shared/hooks/useApi";
 
 export function useEventSelection(view: "grid" | "calendar") {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
+  const { eventsAPIClient } = useApi();
 
   // Auto-clear selection when switching to calendar view
   useEffect(() => {
@@ -40,38 +40,26 @@ export function useEventSelection(view: "grid" | "calendar") {
 
   const exportToCalendar = async () => {
     const eventIds = Array.from(selectedEvents).join(",");
-    const exportUrl = `${API_BASE_URL}/events/export.ics?ids=${eventIds}`;
-
+    const blob = await eventsAPIClient.exportEventsICS({ ids: eventIds });
+    
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = exportUrl;
+    link.href = url;
     link.download = "events.ics";
     link.style.display = "none";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const exportToGoogleCalendar = async () => {
     const eventIds = Array.from(selectedEvents).join(",");
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/events/google-calendar-urls/?ids=${eventIds}`
-      );
-
-      if (!response.ok) {
-        console.error("Failed to fetch Google Calendar URLs");
-        return;
-      }
-
-      const data: { urls: string[] } = await response.json();
-
-      data.urls.forEach((url) => {
-        window.open(url, "_blank");
-      });
-    } catch (error) {
-      console.error("Error exporting to Google Calendar:", error);
-    }
+    const data = await eventsAPIClient.getGoogleCalendarUrls({ ids: eventIds });
+    
+    data.urls.forEach((url) => {
+      window.open(url, "_blank");
+    });
   };
 
   return {

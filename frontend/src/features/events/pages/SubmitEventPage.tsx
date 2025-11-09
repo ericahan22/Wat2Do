@@ -1,115 +1,135 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { handleError } from '@/shared/lib/errorHandler';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Label } from '@/shared/components/ui/label';
-import { Input } from '@/shared/components/ui/input';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Checkbox } from '@/shared/components/ui/checkbox';
 import { DragDropFileUpload } from '@/shared/components/ui/DragDropFileUpload';
 import { useEventSubmission } from '@/features/events/hooks/useEventSubmission';
-import { submissionSchema, type SubmissionFormData } from '@/features/events/schemas/submissionSchema';
 import { CheckCircle, Calendar, Upload, Image as ImageIcon, Loader2, FileJson } from 'lucide-react';
 import { useApi } from '@/shared/hooks/useApi';
+import { EventFormFields, EventFormData } from '@/features/events/components/EventFormFields';
+import { Form } from '@/shared/components/ui/form';
+import { utcToLocal, localToUtc } from '@/shared/lib/dateUtils';
 
 
 export function SubmitEventPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [extractedData, setExtractedData] = useState<EventFormData | null>(null);
+  const [sourceImageUrl, setSourceImageUrl] = useState<string>("");
   const [isExtracting, setIsExtracting] = useState(false);
-  const [extractError, setExtractError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { submitEvent, isLoading } = useEventSubmission();
   const { eventsAPIClient } = useApi();
 
-  const {
-    handleSubmit,
-    reset,
-    setValue,
-  } = useForm<SubmissionFormData>({
-    resolver: zodResolver(submissionSchema),
+  const form = useForm<EventFormData>({
+    defaultValues: {
+      title: "",
+      description: "",
+      location: "",
+      dates: [{ dtstart_local: "", dtend_local: "" }],
+      price: null,
+      food: "",
+      registration: false,
+    },
   });
 
   const handleFileSelect = (file: File) => {
     setScreenshot(file);
     setPreview(URL.createObjectURL(file));
     setExtractedData(null);
-    setExtractError(null);
-    setValue('screenshot_url', '');
-    setValue('extracted_data', null);
+    setSourceImageUrl("");
+    form.reset();
   };
 
   const handleFileRemove = () => {
     setScreenshot(null);
     setPreview(null);
     setExtractedData(null);
-    setExtractError(null);
-    setValue('screenshot_url', '');
-    setValue('extracted_data', null);
+    setSourceImageUrl("");
+    form.reset();
   };
 
   const handleExtract = async () => {
     if (!screenshot) return;
     
     setIsExtracting(true);
-    setExtractError(null);
     
     try {
       const result = await eventsAPIClient.extractEventFromScreenshot(screenshot);
-      // Backend now returns only user-editable fields
-      setExtractedData(result.extracted_data);
-      setValue('screenshot_url', result.screenshot_url);
-      setValue('extracted_data', result.extracted_data);
+      
+      // Convert UTC occurrences to local dates format
+      const dates = result.occurrences && result.occurrences.length > 0
+        ? result.occurrences.map((occ: any) => ({
+            dtstart_local: occ.start_utc ? utcToLocal(occ.start_utc) : "",
+            dtend_local: occ.end_utc ? utcToLocal(occ.end_utc) : "",
+          }))
+        : [{ dtstart_local: "", dtend_local: "" }];
+      
+      const eventData: EventFormData = {
+        title: result.title || '',
+        description: result.description || '',
+        location: result.location || '',
+        dates,
+        price: result.price ?? null,
+        food: result.food || '',
+        registration: result.registration || false,
+      };
+      
+      setSourceImageUrl(result.source_image_url || "");
+      setExtractedData(eventData);
+      
+      // Set all form values
+      form.reset(eventData);
+      
+      toast.success("Event data extracted successfully");
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Failed to extract event data';
-      setExtractError(msg);
+      handleError(error);
     } finally {
       setIsExtracting(false);
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
-    const updated = { ...extractedData, [field]: value };
-    setExtractedData(updated);
-    setValue('extracted_data', updated);
-    setExtractError(null);
-  };
-
-  const onSubmit = async (data: SubmissionFormData) => {
-    try {
-      setErrorMsg(null);
-      submitEvent(data, {
-        onSuccess: () => {
-          setSuccess(true);
-          setErrorMsg(null);
-          reset();
-          setPreview(null);
-          setScreenshot(null);
-          setExtractedData(null);
-          setTimeout(() => setSuccess(false), 5000);
-        },
-        onError: (error) => {
-          const msg = error instanceof Error && error.message ? error.message : 'Submission failed. Please try again.';
-          setErrorMsg(msg);
-        }
-      });
-    } catch (error) {
-      const msg = error instanceof Error && error.message ? error.message : 'Submission failed. Please try again.';
-      setErrorMsg(msg);
-    }
+  const onSubmit = async (data: EventFormData) => {
+    // Convert local dates back to UTC format for submission
+    const submissionData = {
+      source_image_url: sourceImageUrl,
+      title: data.title,
+      description: data.description,
+      location: data.location,
+      price: data.price,
+      food: data.food,
+      registration: data.registration,
+      occurrences: data.dates.map((d) => ({
+        start_utc: localToUtc(d.dtstart_local),
+        end_utc: d.dtend_local ? localToUtc(d.dtend_local) : undefined,
+        tz: 'America/Toronto',
+      })),
+    };
+    
+    submitEvent(submissionData, {
+      onSuccess: () => {
+        setSuccess(true);
+        toast.success("Event submitted successfully!");
+        form.reset();
+        setPreview(null);
+        setScreenshot(null);
+        setExtractedData(null);
+        setSourceImageUrl("");
+        setTimeout(() => setSuccess(false), 5000);
+      },
+    });
   };
 
   const resetForm = () => {
     setSuccess(false);
-    reset();
+    form.reset();
     setPreview(null);
     setScreenshot(null);
     setExtractedData(null);
-    setExtractError(null);
-    setErrorMsg(null);
+    setSourceImageUrl("");
   };
 
   return (
@@ -129,12 +149,6 @@ export function SubmitEventPage() {
 
         <Card className="shadow-lg">
           <CardContent>
-            {errorMsg && (
-              <div className="mb-6 rounded-md border border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-200 p-4 text-sm">
-                {errorMsg}
-              </div>
-            )}
-            
             {success ? (
               <div className="text-center py-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
@@ -154,7 +168,7 @@ export function SubmitEventPage() {
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 {/* Step 1: Screenshot Upload */}
                 <div className="space-y-3">
                   <Label className="text-base font-medium flex items-center gap-2">
@@ -190,12 +204,6 @@ export function SubmitEventPage() {
                       )}
                     </Button>
                   )}
-                  
-                  {extractError && (
-                    <div className="text-sm text-red-500 p-3 bg-red-50 dark:bg-red-900/20 rounded-md">
-                      {extractError}
-                    </div>
-                  )}
                 </div>
 
                 {/* Step 2: Edit Extracted Data */}
@@ -207,161 +215,9 @@ export function SubmitEventPage() {
                         Step 2: Review & Edit Event Data
                       </Label>
                       
-                      <div className="grid grid-cols-1 gap-4">
-                        {/* Title */}
-                        <div className="space-y-2">
-                          <Label htmlFor="title" className="text-sm font-medium">
-                            Title <span className="text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="title"
-                            type="text"
-                            value={extractedData.title || ''}
-                            onChange={(e) => handleFieldChange('title', e.target.value)}
-                            placeholder="Event title"
-                            disabled={isLoading}
-                            required
-                          />
-                        </div>
-
-                        {/* Description */}
-                        <div className="space-y-2">
-                          <Label htmlFor="description" className="text-sm font-medium">
-                            Description
-                          </Label>
-                          <Textarea
-                            id="description"
-                            value={extractedData.description || ''}
-                            onChange={(e) => handleFieldChange('description', e.target.value)}
-                            placeholder="Event description"
-                            disabled={isLoading}
-                            rows={4}
-                          />
-                        </div>
-
-                        {/* Location */}
-                        <div className="space-y-2">
-                          <Label htmlFor="location" className="text-sm font-medium">
-                            Location <span className="text-red-500">*</span>
-                          </Label>
-                          <Input
-                            id="location"
-                            type="text"
-                            value={extractedData.location || ''}
-                            onChange={(e) => handleFieldChange('location', e.target.value)}
-                            placeholder="Event location"
-                            disabled={isLoading}
-                            required
-                          />
-                        </div>
-
-                        {/* Date and Time */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="dtstart" className="text-sm font-medium">
-                              Start Date & Time <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id="dtstart"
-                              type="text"
-                              value={extractedData.dtstart || ''}
-                              onChange={(e) => handleFieldChange('dtstart', e.target.value)}
-                              placeholder="2025-11-06 13:30:00-05"
-                              disabled={isLoading}
-                              required
-                            />
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Format: YYYY-MM-DD HH:MM:SS-TZ
-                            </p>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="dtend" className="text-sm font-medium">
-                              End Date & Time
-                            </Label>
-                            <Input
-                              id="dtend"
-                              type="text"
-                              value={extractedData.dtend || ''}
-                              onChange={(e) => handleFieldChange('dtend', e.target.value)}
-                              placeholder="2025-11-06 15:30:00-05"
-                              disabled={isLoading}
-                            />
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              Leave empty if not sure
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* All Day Checkbox */}
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="all_day"
-                            checked={extractedData.all_day || false}
-                            onCheckedChange={(checked) => handleFieldChange('all_day', checked === true)}
-                            disabled={isLoading}
-                          />
-                          <Label htmlFor="all_day" className="text-sm font-medium cursor-pointer">
-                            All Day Event
-                          </Label>
-                        </div>
-
-                        {/* Price */}
-                        <div className="space-y-2">
-                          <Label htmlFor="price" className="text-sm font-medium">
-                            Price
-                          </Label>
-                          <Input
-                            id="price"
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={extractedData.price || ''}
-                            onChange={(e) => handleFieldChange('price', e.target.value ? parseFloat(e.target.value) : null)}
-                            placeholder="0.00"
-                            disabled={isLoading}
-                          />
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Leave empty for free events
-                          </p>
-                        </div>
-
-                        {/* Food */}
-                        <div className="space-y-2">
-                          <Label htmlFor="food" className="text-sm font-medium">
-                            Food & Drinks
-                          </Label>
-                          <Input
-                            id="food"
-                            type="text"
-                            value={extractedData.food || ''}
-                            onChange={(e) => handleFieldChange('food', e.target.value)}
-                            placeholder="Free pizza and drinks"
-                            disabled={isLoading}
-                          />
-                        </div>
-
-                        {/* Registration Checkbox */}
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="registration"
-                            checked={extractedData.registration || false}
-                            onCheckedChange={(checked) => handleFieldChange('registration', checked === true)}
-                            disabled={isLoading}
-                          />
-                          <Label htmlFor="registration" className="text-sm font-medium cursor-pointer">
-                            Registration Required
-                          </Label>
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-gray-500 dark:text-gray-400 pt-2">
-                        <span className="text-red-500">*</span> Required fields: <strong>title</strong>, <strong>dtstart</strong> (start date/time), and <strong>location</strong>.
-                        <br />
-                        <span className="text-xs mt-1 block text-gray-400 dark:text-gray-500">
-                          Note: Timezone conversions, duration, coordinates, and other derived fields are computed automatically by the server.
-                        </span>
-                      </p>
+                      <Form {...form}>
+                        <EventFormFields form={form} isDisabled={isLoading} showUndoHistory={false} />
+                      </Form>
                     </div>
 
                     {/* Submit Button */}

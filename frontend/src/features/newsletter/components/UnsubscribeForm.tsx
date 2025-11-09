@@ -38,13 +38,11 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
   email,
   onSubmit,
   isSubmitting,
-  error,
 }) => {
   const {
     control,
     register,
     handleSubmit,
-    formState: { errors },
   } = useForm<UnsubscribeFormData>({
     defaultValues: {
       reason: "",
@@ -55,8 +53,6 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
   const onFormSubmit = (data: UnsubscribeFormData) => {
     onSubmit(data.reason, data.feedback || undefined);
   };
-
-  const displayError = errors.reason?.message || error?.message;
 
   return (
     <div className="text-center flex flex-col gap-6">
@@ -119,12 +115,6 @@ const UnsubscribeForm: React.FC<UnsubscribeFormProps> = ({
             rows={3}
           />
         </div>
-
-        {displayError && (
-          <div className="text-red-600 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-            {displayError}
-          </div>
-        )}
 
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? (

@@ -55,6 +55,12 @@ def jwt_required(view_func):
             error = getattr(request, "error_message", "User not authenticated")
             return JsonResponse({"detail": error}, status=401)
         request.user = user
+        
+        # Extract user_id and is_admin from auth_payload (set by JwtAuthBackend)
+        auth_payload = getattr(request, "auth_payload", {})
+        request.user_id = auth_payload.get("sub") or auth_payload.get("id")
+        request.is_admin = auth_payload.get("role") == "admin"
+        
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
@@ -62,7 +68,7 @@ def jwt_required(view_func):
 def optional_jwt(view_func):
     """
     Optional JWT authentication decorator.
-    If a token is provided and valid, populates request.auth_payload.
+    If a token is provided and valid, populates request.auth_payload, request.user_id, and request.is_admin.
     If no token or invalid token, continues without error (for public endpoints).
     """
     @wraps(view_func)
@@ -78,16 +84,24 @@ def optional_jwt(view_func):
             
             if state.is_signed_in:
                 request.auth_payload = state.payload
+                # Extract user_id (tries 'sub' first, falls back to 'id')
+                request.user_id = state.payload.get("sub") or state.payload.get("id")
+                # Check if user is admin
+                request.is_admin = state.payload.get("role") == "admin"
                 django_user = AnonymousUser()
-                django_user.username = state.payload.get("sub") or "clerk_user"
+                django_user.username = request.user_id or "clerk_user"
                 request.user = django_user
             else:
                 # No token or invalid token - that's fine, just continue
                 request.auth_payload = {}
+                request.user_id = None
+                request.is_admin = False
                 request.user = AnonymousUser()
         except Exception:
             # Any error during auth - that's fine, just continue
             request.auth_payload = {}
+            request.user_id = None
+            request.is_admin = False
             request.user = AnonymousUser()
         
         return view_func(request, *args, **kwargs)
@@ -98,8 +112,7 @@ def admin_required(view_func):
     @wraps(view_func)
     @jwt_required
     def _wrapped_view(request, *args, **kwargs):
-        role = request.auth_payload.get("role")
-        if role != "admin":
+        if not getattr(request, "is_admin", False):
             return JsonResponse({"message": "Admin only"}, status=403)
         return view_func(request, *args, **kwargs)
     return _wrapped_view

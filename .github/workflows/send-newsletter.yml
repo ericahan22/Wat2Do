@@ -2,7 +2,7 @@ name: Send Newsletter
 
 on:
   schedule:
-    - cron: '0 19 * * *'  # 2pm EST (7pm UTC)
+    - cron: '0 11 * * *'  # 9am EST (4pm UTC)
   workflow_dispatch:      # Optional manual trigger
 
 jobs:

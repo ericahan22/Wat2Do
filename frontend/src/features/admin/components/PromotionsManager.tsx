@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useEvents } from "@/features/events/hooks/useEvents";
 import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { useApi } from "@/shared/hooks/useApi";
+import { handleError } from "@/shared/lib/errorHandler";
 import type { EventPromotion, PromotedEvent } from "@/features/admin/types/promotion";
 import { Event } from "@/features/events/types/events";
 import { PromoteEventForm } from "@/features/admin/components/PromoteEventForm";
@@ -18,8 +19,8 @@ export function PromotionsManager() {
   const [currentPromotion, setCurrentPromotion] = useState<EventPromotion | null>(null);
 
   const { adminAPIClient } = useApi();
-  const { events, isLoading: eventsLoading, error: eventsError } = useEvents();
-  const { promotedEvents, promotedEventsLoading, promotedEventsError, refetchPromotedEvents } = useEventPromotion();
+  const { events, isLoading: eventsLoading } = useEvents();
+  const { promotedEvents, promotedEventsLoading, refetchPromotedEvents } = useEventPromotion();
 
   const checkPromotionStatus = useCallback(async (eventId: string) => {
     try {
@@ -27,7 +28,8 @@ export function PromotionsManager() {
       setIsPromoted(data.is_promoted);
       setCurrentPromotion(data.promotion);
     } catch (err) {
-      console.error("Error checking promotion status:", err);
+      // This is not a React Query function, so handle error directly
+      handleError(err);
     }
   }, [adminAPIClient]);
 
@@ -82,7 +84,6 @@ export function PromotionsManager() {
                 </SelectContent>
               </Select>
               {eventsLoading && <p className="text-sm text-gray-500 mt-1">Loading events...</p>}
-              {eventsError && <p className="text-sm text-red-500 mt-1">Error loading events: {eventsError.message}</p>}
             </div>
 
             {selectedEventId && (
@@ -150,8 +151,6 @@ export function PromotionsManager() {
           <CardContent>
             {promotedEventsLoading ? (
               <p className=" text-center py-8">Loading promoted events...</p>
-            ) : promotedEventsError ? (
-              <p className="text-red-500 text-center py-8">Error loading promoted events: {promotedEventsError.message}</p>
             ) : promotedEvents.length === 0 ? (
               <p className=" text-center py-8">No events are currently promoted</p>
             ) : (
@@ -162,7 +161,7 @@ export function PromotionsManager() {
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <h3 className="font-medium ">{event.title}</h3>
-                          <p className="text-sm ">{new Date(event.dtstart).toLocaleDateString()} at {event.location}</p>
+                          <p className="text-sm ">{new Date(event.dtstart_utc).toLocaleDateString()} at {event.location}</p>
                         </div>
                         <div className="text-right space-y-2">
                           <Badge

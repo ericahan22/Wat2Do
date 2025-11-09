@@ -63,12 +63,11 @@ const UnsubscribePage: React.FC = () => {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card className="max-w-md w-full p-6 text-center flex flex-col gap-4">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
           <h1 className="text-xl font-bold ">
             Error
           </h1>
-          <p className="text-red-600 dark:text-red-400">
-            {error.message}
+          <p className="text-gray-600 dark:text-gray-400">
+            An error occurred. Please try again later.
           </p>
           <Button onClick={() => navigate("/")} variant="outline">
             Goto events

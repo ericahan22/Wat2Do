@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useEventPromotion } from "@/features/admin/hooks/useEventPromotion";
 import { Button } from "@/shared/components/ui/button";
@@ -47,10 +48,6 @@ export function PromoteEventForm({
     isUpdating,
     isUnpromoting,
     isDeleting,
-    promoteError,
-    updateError,
-    unpromoteError,
-    deleteError,
   } = useEventPromotion();
 
   const form = useForm<PromotionFormData>({
@@ -64,37 +61,33 @@ export function PromoteEventForm({
   });
 
   const onSubmit = async (data: PromotionFormData) => {
-    try {
-      // Format data for API
-      const requestData = {
-        priority: data.priority,
-        expires_at: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined,
-        promoted_by: data.promotedBy || undefined,
-        promotion_type: data.promotionType,
-        notes: data.notes,
-      };
+    // Format data for API
+    const requestData = {
+      priority: data.priority,
+      expires_at: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined,
+      promoted_by: data.promotedBy || undefined,
+      promotion_type: data.promotionType,
+      notes: data.notes,
+    };
 
-      // Always try to promote first - if it fails with "already promoted", then update
-      try {
-        await promoteEvent(eventId, requestData);
-        alert("Event promoted successfully!");
+    // Always try to promote first - if it fails with "already promoted", then update
+    try {
+      await promoteEvent(eventId, requestData);
+      toast.success("Event promoted successfully!");
+      onSuccess?.();
+    } catch (promoteError: unknown) {
+      // Check if the error is because event is already promoted
+      const error = promoteError as { response?: { data?: { error?: string } }; message?: string };
+      const errorMessage = error?.response?.data?.error || error?.message || "";
+      if (errorMessage.includes("already promoted") || errorMessage.includes("Use PATCH to update")) {
+        // Event is already promoted, so update instead
+        await updatePromotion(eventId, requestData);
+        toast.success("Promotion updated successfully!");
         onSuccess?.();
-      } catch (promoteError: unknown) {
-        // Check if the error is because event is already promoted
-        const error = promoteError as { response?: { data?: { error?: string } }; message?: string };
-        const errorMessage = error?.response?.data?.error || error?.message || "";
-        if (errorMessage.includes("already promoted") || errorMessage.includes("Use PATCH to update")) {
-          // Event is already promoted, so update instead
-          await updatePromotion(eventId, requestData);
-          alert("Promotion updated successfully!");
-          onSuccess?.();
-        } else {
-          // Re-throw other errors
-          throw promoteError;
-        }
+      } else {
+        // Re-throw other errors so global handler can catch them
+        throw promoteError;
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
     }
   };
 
@@ -103,13 +96,9 @@ export function PromoteEventForm({
       return;
     }
 
-    try {
-      await unpromoteEvent(eventId);
-      alert("Event unpromoted successfully!");
-      onSuccess?.();
-    } catch (error) {
-      console.error("Error unpromoting event:", error);
-    }
+    await unpromoteEvent(eventId);
+    toast.success("Event unpromoted successfully!");
+    onSuccess?.();
   };
 
   const handleDelete = async () => {
@@ -121,17 +110,12 @@ export function PromoteEventForm({
       return;
     }
 
-    try {
-      await deletePromotion(eventId);
-      alert("Promotion deleted successfully!");
-      onSuccess?.();
-    } catch (error) {
-      console.error("Error deleting promotion:", error);
-    }
+    await deletePromotion(eventId);
+    toast.success("Promotion deleted successfully!");
+    onSuccess?.();
   };
 
   const isLoading = isPromoting || isUpdating || isUnpromoting || isDeleting || form.formState.isSubmitting;
-  const currentError = promoteError || updateError || unpromoteError || deleteError;
 
   return (
     <Card className="max-w-2xl mx-auto">
@@ -142,26 +126,6 @@ export function PromoteEventForm({
       </CardHeader>
       
       <CardContent>
-        {currentError && (
-          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  Error
-                </h3>
-                <div className="mt-2 text-sm text-red-700 dark:text-red-300">
-                  {currentError.message}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Event Info (Read-only) */}

@@ -11,7 +11,6 @@ export interface ClubsResponse {
 export interface ClubsQueryParams {
   search?: string;
   category?: string;
-  limit?: number;
   cursor?: string;
 }
 
@@ -50,32 +49,6 @@ class ClubsAPIClient {
     return this.apiClient.get(endpoint);
   }
 
-  /**
-   * Fetches a single club by its ID.
-   * Corresponds to a GET request to /api/clubs/{id}/
-   */
-  async getClubById(clubId: string): Promise<Club> {
-    return this.apiClient.get(`clubs/${clubId}/`);
-  }
-
-
-  /**
-   * Searches clubs by name or description.
-   * Corresponds to a GET request to /api/clubs/search/
-   */
-  async searchClubs(query: string, limit?: number): Promise<Club[]> {
-    const params = new URLSearchParams({ q: query });
-    if (limit) params.append('limit', limit.toString());
-    return this.apiClient.get(`clubs/search/?${params.toString()}`);
-  }
-
-  /**
-   * Gets clubs by category.
-   * Corresponds to a GET request to /api/clubs/category/{category}/
-   */
-  async getClubsByCategory(category: string): Promise<Club[]> {
-    return this.apiClient.get(`clubs/category/${encodeURIComponent(category)}/`);
-  }
 }
 
 export default ClubsAPIClient;

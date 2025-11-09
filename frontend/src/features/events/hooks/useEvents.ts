@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useApi } from "@/shared/hooks/useApi";
-import { getTodayString, formatDtstartToMidnight } from "@/shared/lib/dateUtils";
+import { getTodayString } from "@/shared/lib/dateUtils";
 import { useMyInterestedEvents } from "./useEventInterest";
 import { EventsResponse } from "@/shared/api/EventsAPIClient";
 import { Event } from "@/features/events";
@@ -33,9 +33,7 @@ export function useEvents() {
   } = useInfiniteQuery<EventsResponse, Error, any, string[], string | undefined>({
     queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt, view, showInterested ? "interested" : ""],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const queryParams: Record<string, any> = {
-        limit: 20, // Load 15 events at a time
-      };
+      const queryParams: Record<string, any> = {};
       
       if (pageParam) {
         queryParams.cursor = pageParam;
@@ -50,7 +48,7 @@ export function useEvents() {
       }
       
       if (dtstart_utc) {
-        queryParams.dtstart_utc = formatDtstartToMidnight(dtstart_utc);
+        queryParams.dtstart_utc = dtstart_utc;
       }
       
       if (addedAt) {
@@ -65,7 +63,7 @@ export function useEvents() {
       // When viewing Interested, reveal all interested from 2025-01-01
       if (showInterested) {
         queryParams.all = true;
-        queryParams.dtstart_utc = formatDtstartToMidnight("2025-01-01");
+        queryParams.dtstart_utc = "2025-01-01T00:00:00Z";
       }
 
       return eventsAPIClient.getEvents(queryParams);
@@ -139,7 +137,7 @@ export function useEvents() {
       if (dtstart_utc && dtstart_utc !== todayStr) {
         nextParams.delete("dtstart_utc");
       } else {
-        nextParams.set("dtstart_utc", formatDtstartToMidnight("2025-01-01"));
+        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
         nextParams.delete("interested");
       }
       return nextParams;
@@ -182,7 +180,7 @@ export function useEvents() {
       } else {
         nextParams.set("interested", "true");
         // Reveal all interested from 2025-01-01
-        nextParams.set("dtstart_utc", formatDtstartToMidnight("2025-01-01"));
+        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
         nextParams.delete("added_at");
       }
       return nextParams;

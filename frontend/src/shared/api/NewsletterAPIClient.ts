@@ -39,30 +39,6 @@ class NewsletterAPIClient {
   }
 
   /**
-   * Unsubscribes from newsletter.
-   * Corresponds to a POST request to /api/newsletter/unsubscribe/
-   */
-  async unsubscribe(data: NewsletterUnsubscribeRequest): Promise<NewsletterUnsubscribeResponse> {
-    return this.apiClient.post('newsletter/unsubscribe/', data);
-  }
-
-  /**
-   * Gets subscription status.
-   * Corresponds to a GET request to /api/newsletter/status/
-   */
-  async getSubscriptionStatus(email: string): Promise<{ subscribed: boolean; email: string }> {
-    return this.apiClient.get(`newsletter/status/?email=${encodeURIComponent(email)}`);
-  }
-
-  /**
-   * Resubscribes to newsletter.
-   * Corresponds to a POST request to /api/newsletter/resubscribe/
-   */
-  async resubscribe(email: string): Promise<{ message: string; email: string }> {
-    return this.apiClient.post('newsletter/resubscribe/', { email });
-  }
-
-  /**
    * Gets unsubscribe info by token.
    * Corresponds to a GET request to /api/newsletter/unsubscribe/{token}/
    */

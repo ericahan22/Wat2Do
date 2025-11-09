@@ -11,9 +11,9 @@ export interface EventsQueryParams {
   categories?: string;
   dtstart_utc?: string;
   added_at?: string;
-  limit?: number;
   cursor?: string;
   all?: boolean; // For calendar view - returns all events without pagination
+  ids?: string; // Comma-separated list of event IDs for export/calendar URLs
 }
 
 export interface EventSubmissionResponse {
@@ -93,12 +93,18 @@ class EventsAPIClient {
    * Special handling for FormData (file uploads)
    */
   /**
-   * Extract event data from screenshot.
+   * Extract event data from image.
    * Corresponds to a POST request to /api/events/extract/
    */
   async extractEventFromScreenshot(screenshot: File): Promise<{
-    screenshot_url: string;
-    extracted_data: any;
+    source_image_url: string;
+    title: string;
+    description?: string;
+    location: string;
+    price?: number;
+    food?: string;
+    registration: boolean;
+    occurrences: Array<{ start_utc: string; end_utc?: string; tz?: string }>;
     all_extracted: any[];
   }> {
     const dataForm = new FormData();
@@ -118,17 +124,15 @@ class EventsAPIClient {
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to extract event data');
+      throw new Error(error.message || 'Failed to extract event data');
     }
     
     return response.json();
   }
 
   async submitEvent(formData: SubmissionFormData): Promise<EventSubmissionResponse> {
-    const payload = {
-      screenshot_url: formData.screenshot_url,
-      extracted_data: formData.extracted_data,
-    };
+    // Payload is now flat - all event fields at top level
+    const payload = { ...formData };
     
     // For JSON payload
     const token = await this.apiClient.getAuthToken();
@@ -149,9 +153,7 @@ class EventsAPIClient {
       let message = `Submission failed (status ${response.status})`;
       try {
         const errBody = await response.json();
-        if (typeof errBody?.error === 'string' && errBody.error.trim()) {
-          message = errBody.error;
-        } else if (typeof errBody?.message === 'string' && errBody.message.trim()) {
+        if (typeof errBody?.message === 'string' && errBody.message.trim()) {
           message = errBody.message;
         }
       } catch {
@@ -170,12 +172,16 @@ class EventsAPIClient {
   async reviewSubmission(
     submissionId: number,
     action: 'approve' | 'reject',
-    adminNotes?: string,
-    extractedData?: Record<string, unknown>
+    eventData?: Record<string, unknown>
   ): Promise<{ message: string }> {
+    // Event data is now passed flat at top level (not nested)
+    const payload: any = { action };
+    if (eventData) {
+      Object.assign(payload, eventData);
+    }
     return this.apiClient.post(
       `events/submissions/${submissionId}/review/`,
-      { action, admin_notes: adminNotes, extracted_data: extractedData }
+      payload
     );
   }
 
@@ -189,12 +195,12 @@ class EventsAPIClient {
 
   /**
    * Exports events as ICS file.
-   * Corresponds to a GET request to /api/events/export/ics/
+   * Corresponds to a GET request to /api/events/export.ics
    * Special handling for file download
    */
   async exportEventsICS(params: EventsQueryParams = {}): Promise<Blob> {
     const queryString = buildQueryString(params);
-    const endpoint = queryString ? `events/export/ics/?${queryString}` : 'events/export/ics/';
+    const endpoint = queryString ? `events/export.ics?${queryString}` : 'events/export.ics';
     
     const token = await this.apiClient.getAuthToken();
     const headers: HeadersInit = {};
@@ -224,37 +230,6 @@ class EventsAPIClient {
     return this.apiClient.get(endpoint);
   }
 
-  /**
-   * Gets RSS feed for events.
-   * Corresponds to a GET request to /api/events/rss/
-   * Special handling for XML response
-   */
-  async getRSSFeed(): Promise<string> {
-    const token = await this.apiClient.getAuthToken();
-    const headers: HeadersInit = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/rss/`, {
-      method: 'GET',
-      headers,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response.text();
-  }
-
-  /**
-   * Gets promoted events.
-   * Corresponds to a GET request to /api/events/promoted/
-   */
-  async getPromotedEvents(): Promise<Event[]> {
-    return this.apiClient.get('events/promoted/');
-  }
 
   /**
    * Gets the current user's interested event IDs.
@@ -278,6 +253,14 @@ class EventsAPIClient {
    */
   async unmarkEventInterest(eventId: number): Promise<{ message: string; interested: boolean; interest_count: number }> {
     return this.apiClient.delete(`events/${eventId}/interest/unmark/`);
+  }
+
+  /**
+   * Updates an event (submitter or admin only).
+   * Corresponds to a PUT request to /api/events/{id}/update/
+   */
+  async updateEvent(eventId: number, eventData: Record<string, unknown>): Promise<{ message: string; event_id: number }> {
+    return this.apiClient.put(`events/${eventId}/update/`, { event_data: eventData });
   }
 
   /**

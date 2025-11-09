@@ -4,7 +4,7 @@ import EventDetailPage from "@/features/events/pages/EventDetailPage";
 import { SubmitEventPage } from "@/features/events/pages/SubmitEventPage";
 import { MySubmissionsPage } from "@/features/events/pages/MySubmissionsPage";
 import { ClubsPage } from "@/features/clubs";
-import { AdminPage } from "@/features/admin";
+import { AdminPage, PromotionsPage, SubmissionsReviewPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
 import { SignInPage, SignUpPage, UserProfilePage } from "@/features/auth/pages";
 import {
@@ -45,6 +45,22 @@ function App() {
             element={
               <ProtectedAdminRoute>
                 <AdminPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/promotions"
+            element={
+              <ProtectedAdminRoute>
+                <PromotionsPage />
+              </ProtectedAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/submissions"
+            element={
+              <ProtectedAdminRoute>
+                <SubmissionsReviewPage />
               </ProtectedAdminRoute>
             }
           />
