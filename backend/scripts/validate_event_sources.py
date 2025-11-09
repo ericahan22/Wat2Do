@@ -26,7 +26,7 @@ from scraping.logging_config import logger
 class EventSourceValidator:
     """Validates event source URLs and removes invalid events"""
     
-    def __init__(self, max_concurrent=10):
+    def __init__(self, max_concurrent=2):
         self.user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         self.max_concurrent = max_concurrent
         
@@ -308,7 +308,7 @@ def main():
     parser = argparse.ArgumentParser(description='Validate event source URLs (with concurrent requests)')
     parser.add_argument('--limit', type=int, help='Limit number of events to check (for testing)')
     parser.add_argument('--school', type=str, help='Filter by school name')
-    parser.add_argument('--workers', type=int, default=10, help='Max concurrent requests (default: 10)')
+    parser.add_argument('--workers', type=int, default=2, help='Max concurrent requests (default: 2)')
     
     args = parser.parse_args()
     
