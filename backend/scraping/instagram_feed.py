@@ -21,6 +21,7 @@ from requests.exceptions import ReadTimeout, ConnectionError
 from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
+from dateutil import parser
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events, IgnoredPost, EventDates
@@ -57,6 +58,7 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
+def is_duplicate_event(event_data):
 def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
 
@@ -226,7 +228,9 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     school = event_data.get("school", "")
     categories = event_data.get("categories", [])
     occurrences = event_data.get("occurrences")
+    occurrences = event_data.get("occurrences")
 
+    if not occurrences:
     if not occurrences:
         logger.warning(f"Event '{title}' missing occurrences; skipping insert")
         return "missing_occurrence"
@@ -235,6 +239,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
         categories = ["Uncategorized"]
 
+    if is_duplicate_event(event_data):
     if is_duplicate_event(event_data):
         return "duplicate"
 
@@ -421,12 +426,14 @@ def process_recent_feed(
                             event_data.get("title")
                             and event_data.get("location")
                             and event_data.get("occurrences")
+                            and event_data.get("occurrences")
                         ):
                             missing_fields = []
                             if not event_data.get("title"):
                                 missing_fields.append("title")
                             if not event_data.get("location"):
                                 missing_fields.append("location")
+                            if not event_data.get("occurrences"):
                             if not event_data.get("occurrences"):
                                 missing_fields.append("occurrences")
                             logger.warning(
@@ -435,6 +442,7 @@ def process_recent_feed(
                             added_to_db = "missing_fields"
                             continue
 
+                        first_occurrence = event_data.get("occurrences")[0]
                         first_occurrence = event_data.get("occurrences")[0]
                         dtstart_utc = first_occurrence.get("start_utc")
                         now = timezone.now()

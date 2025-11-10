@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.clubs",
     "apps.promotions",
     "apps.newsletter",
+    "apps.payments",
 ]
 
 MIDDLEWARE = [

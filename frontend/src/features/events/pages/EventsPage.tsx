@@ -16,7 +16,7 @@ import {
   formatRelativeDateTime,
   FilterButton,
 } from "@/shared";
-import { Calendar, LayoutGrid, Sparkles, Heart } from "lucide-react";
+import { Calendar, LayoutGrid, Sparkles, Heart, Clock } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
 import { LAST_UPDATED, EVENT_CATEGORIES } from "@/data/staticData";
@@ -25,10 +25,7 @@ function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const view = (searchParams.get("view") as "grid" | "calendar") || "grid";
   const randomCategory = useMemo(
-    () =>
-      EVENT_CATEGORIES[
-        Math.floor(Math.random() * EVENT_CATEGORIES.length)
-      ],
+    () => EVENT_CATEGORIES[Math.floor(Math.random() * EVENT_CATEGORIES.length)],
     []
   );
   const placeholder = searchParams.get("placeholder") || randomCategory;
@@ -54,6 +51,7 @@ function EventsPage() {
     categories,
     handleToggleNewEvents,
     handleToggleInterested,
+    handleToggleAllEvents,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -73,6 +71,7 @@ function EventsPage() {
     dtstart_utc && dtstart_utc !== todayString
   );
   const isShowingNewEvents = Boolean(addedAt);
+  const isShowingAllEvents = Boolean(dtstart_utc);
 
   const getEventTypeText = () => {
     if (searchTerm || categories) return "Found";
@@ -83,7 +82,9 @@ function EventsPage() {
   };
 
   // Use totalCount when available, except for interested filter which filters client-side
-  const displayCount = showInterested ? events.length : totalCount || events.length;
+  const displayCount = showInterested
+    ? events.length
+    : totalCount || events.length;
 
   return (
     <>
@@ -151,16 +152,20 @@ function EventsPage() {
               >
                 Newly Added
               </FilterButton>
-              {!isShowingNewEvents && (
-                <FilterButton
-                  isActive={showInterested}
-                  onToggle={handleToggleInterested}
-                  icon={<Heart className="h-4 w-4" />}
-                >
-                  Interested
-                </FilterButton>
-              )}
-              {/* Removed the 'All' button as requested */}
+              <FilterButton
+                isActive={isShowingAllEvents}
+                onToggle={handleToggleAllEvents}
+                icon={<Clock className="h-4 w-4" />}
+              >
+                All
+              </FilterButton>
+              <FilterButton
+                isActive={showInterested}
+                onToggle={handleToggleInterested}
+                icon={<Heart className="h-4 w-4" />}
+              >
+                Interested
+              </FilterButton>
               {view === "grid" && (
                 <FilterButton
                   isActive={isSelectMode}

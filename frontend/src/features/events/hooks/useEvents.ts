@@ -20,37 +20,51 @@ export function useEvents() {
   const addedAt = searchParams.get("added_at") || "";
   const showInterested = searchParams.get("interested") === "true";
   const view = searchParams.get("view") || "grid";
-  
+
   const { data: interestedEventIds } = useMyInterestedEvents();
 
-  const { 
+  const {
     data,
-    isLoading, 
+    isLoading,
     error,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<EventsResponse, Error, any, string[], string | undefined>({
-    queryKey: ["events", searchTerm, categories, dtstart_utc, addedAt, view, showInterested ? "interested" : ""],
+  } = useInfiniteQuery<
+    EventsResponse,
+    Error,
+    any,
+    string[],
+    string | undefined
+  >({
+    queryKey: [
+      "events",
+      searchTerm,
+      categories,
+      dtstart_utc,
+      addedAt,
+      view,
+      showInterested ? "interested" : "",
+    ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: Record<string, any> = {};
-      
+
       if (pageParam) {
         queryParams.cursor = pageParam;
       }
-      
+
       if (searchTerm) {
         queryParams.search = searchTerm;
       }
-      
+
       if (categories) {
         queryParams.categories = categories;
       }
-      
+
       if (dtstart_utc) {
         queryParams.dtstart_utc = dtstart_utc;
       }
-      
+
       if (addedAt) {
         queryParams.added_at = addedAt;
       }
@@ -71,7 +85,7 @@ export function useEvents() {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     refetchOnWindowFocus: false,
-    enabled: true,  
+    enabled: true,
   });
 
   // Flatten all pages into a single array of events
@@ -81,7 +95,8 @@ export function useEvents() {
   }, [data]);
 
   // Get total count from first page
-  const totalCount = (data?.pages?.[0] as EventsResponse | undefined)?.totalCount ?? 0;
+  const totalCount =
+    (data?.pages?.[0] as EventsResponse | undefined)?.totalCount ?? 0;
 
   // Filter events by interested if the filter is active
   const filteredEvents = useMemo(() => {
@@ -95,9 +110,11 @@ export function useEvents() {
 
   const documentTitle = useMemo(() => {
     let title: string;
-    
+
     // Use totalCount if available and not filtering by interested (which filters client-side)
-    const displayCount = showInterested ? filteredEvents.length : totalCount || filteredEvents.length;
+    const displayCount = showInterested
+      ? filteredEvents.length
+      : totalCount || filteredEvents.length;
 
     if (searchTerm || categories) {
       title = `${displayCount} Found Events - Wat2Do`;
@@ -116,7 +133,16 @@ export function useEvents() {
     }
 
     return previousTitleRef.current;
-  }, [filteredEvents.length, totalCount, isLoading, searchTerm, categories, dtstart_utc, addedAt, showInterested]);
+  }, [
+    filteredEvents.length,
+    totalCount,
+    isLoading,
+    searchTerm,
+    categories,
+    dtstart_utc,
+    addedAt,
+    showInterested,
+  ]);
 
   useDocumentTitle(documentTitle);
 
@@ -156,7 +182,6 @@ export function useEvents() {
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
         nextParams.delete("dtstart_utc");
-        nextParams.delete("interested");
       }
       return nextParams;
     });
@@ -176,12 +201,22 @@ export function useEvents() {
         // When deselecting interested, remove all filters to show upcoming events
         nextParams.delete("interested");
         nextParams.delete("dtstart_utc");
-        nextParams.delete("added_at");
       } else {
         nextParams.set("interested", "true");
-        // Reveal all interested from 2025-01-01
-        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
+      }
+      return nextParams;
+    });
+  };
+
+  const handleToggleAllEvents = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+
+      if (dtstart_utc) {
+        nextParams.delete("dtstart_utc");
+      } else {
         nextParams.delete("added_at");
+        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
       }
       return nextParams;
     });
@@ -201,6 +236,7 @@ export function useEvents() {
     handleToggleStartDate,
     handleToggleNewEvents,
     handleToggleInterested,
+    handleToggleAllEvents,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,

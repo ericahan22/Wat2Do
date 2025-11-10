@@ -959,3 +959,42 @@ def delete_event(request, event_id):
         
     except Exception as e:
         return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Boost event
+
+@api_view(["GET"])
+def boost_event_view(request, event_id):
+    """
+    Body/query should include 'days' (int).
+    Example: POST /events/123/boost?days=7
+    """
+    clerk_user_id = get_clerk_user_id(request)
+    if not clerk_user_id:
+        return HttpResponseBadRequest("Unauthorized")
+
+    # Parse and validate integer days from query/body as you prefer
+    try:
+        days = int(request.GET.get("days") or request.POST.get("days"))
+    except (TypeError, ValueError):
+        return HttpResponseBadRequest("Missing/invalid 'days'")
+
+    # Optional: ensure only owner can boost their own event
+    event = get_object_or_404(Event, pk=event_id)
+    if event.owner_clerk_user_id != clerk_user_id:
+        return HttpResponseBadRequest("You can only boost your own events")
+
+    try:
+        promo = boost_event(clerk_user_id, event_id, days)
+        return JsonResponse({
+            "ok": True,
+            "promotion": {
+                "starts_at": promo.starts_at.isoformat(),
+                "ends_at": promo.ends_at.isoformat(),
+                "active": promo.active,
+            }
+        })
+    except InsufficientCredits as e:
+        return HttpResponseBadRequest(str(e))
+    except ValueError as e:
+        return HttpResponseBadRequest(str(e))
