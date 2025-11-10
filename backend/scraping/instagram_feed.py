@@ -31,7 +31,6 @@ from services.openai_service import (
 )
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
-from utils.event_dates_utils import normalize_occurrences
 from utils.scraping_utils import (
     normalize,
     jaccard_similarity,
@@ -58,17 +57,14 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
-def is_duplicate_event(event_data, normalized_occurrences=None):
+def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
 
     title = event_data.get("title") or ""
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
-
-    occurrences = normalized_occurrences
-    if occurrences is None:
-        occurrences = normalize_occurrences(event_data.get("occurrences"))
-
+    occurrences = event_data.get("occurrences")
+    
     if not occurrences:
         return False
 
@@ -229,10 +225,9 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     longitude = event_data.get("longitude", None)
     school = event_data.get("school", "")
     categories = event_data.get("categories", [])
+    occurrences = event_data.get("occurrences")
 
-    normalized_occurrences = normalize_occurrences(event_data.get("occurrences"))
-
-    if not normalized_occurrences:
+    if not occurrences:
         logger.warning(f"Event '{title}' missing occurrences; skipping insert")
         return "missing_occurrence"
 
@@ -240,7 +235,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
         categories = ["Uncategorized"]
 
-    if is_duplicate_event(event_data, normalized_occurrences):
+    if is_duplicate_event(event_data):
         return "duplicate"
 
     # Get club_type by matching ig_handle from Events to ig of Clubs
@@ -283,7 +278,7 @@ def insert_event_to_db(event_data, ig_handle, source_url):
                 duration=occ.get("duration"),
                 tz=occ.get("tz"),
             )
-            for occ in normalized_occurrences
+            for occ in occurrences
         ]
 
         EventDates.objects.bulk_create(event_dates)
@@ -422,21 +417,17 @@ def process_recent_feed(
                             f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
                         )
 
-                        normalized_occurrences = normalize_occurrences(
-                            event_data.get("occurrences")
-                        )
-
                         if not (
                             event_data.get("title")
                             and event_data.get("location")
-                            and normalized_occurrences
+                            and event_data.get("occurrences")
                         ):
                             missing_fields = []
                             if not event_data.get("title"):
                                 missing_fields.append("title")
                             if not event_data.get("location"):
                                 missing_fields.append("location")
-                            if not normalized_occurrences:
+                            if not event_data.get("occurrences"):
                                 missing_fields.append("occurrences")
                             logger.warning(
                                 f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
@@ -444,7 +435,7 @@ def process_recent_feed(
                             added_to_db = "missing_fields"
                             continue
 
-                        first_occurrence = normalized_occurrences[0]
+                        first_occurrence = event_data.get("occurrences")[0]
                         dtstart_utc = first_occurrence.get("start_utc")
                         now = timezone.now()
                         if dtstart_utc and dtstart_utc < now:
