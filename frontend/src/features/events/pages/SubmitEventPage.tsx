@@ -33,6 +33,7 @@ export function SubmitEventPage() {
       price: null,
       food: "",
       registration: false,
+      source_url: "",
     },
   });
 
@@ -76,6 +77,7 @@ export function SubmitEventPage() {
         price: result.price ?? null,
         food: result.food || '',
         registration: result.registration || false,
+        source_url: "",
       };
       
       setSourceImageUrl(result.source_image_url || "");
