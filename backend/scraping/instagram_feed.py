@@ -58,6 +58,14 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
+def parse_datetime(dt_str):
+    """Parse a datetime string to a timezone-aware datetime object."""
+    dt = parser.parse(dt_str)
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt)
+    return dt
+
+
 def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
 
@@ -69,11 +77,13 @@ def is_duplicate_event(event_data):
     if not occurrences:
         return False
 
-    target_start = occurrences[0].get("start_utc")
+    target_start_str = occurrences[0].get("start_utc")
+    target_start = parse_datetime(target_start_str)
     if not target_start:
         return False
 
     try:
+        
         candidates = (
             EventDates.objects.select_related("event")
             .filter(dtstart_utc__date=target_start.date())
@@ -266,16 +276,26 @@ def insert_event_to_db(event_data, ig_handle, source_url):
 
     try:
         event = Events.objects.create(**create_kwargs)
-        event_dates = [
-            EventDates(
-                event=event,
-                dtstart_utc=occ["start_utc"],
-                dtend_utc=occ.get("end_utc"),
-                duration=occ.get("duration"),
-                tz=occ.get("tz"),
+        event_dates = []
+        
+        for occ in occurrences:
+            # Parse start_utc
+            dtstart_utc = parse_datetime(occ.get("start_utc"))
+            if not dtstart_utc:
+                continue  # Skip occurrences without start time
+            
+            # Parse end_utc (can be empty string or None)
+            dtend_utc = parse_datetime(occ.get("end_utc"))
+            
+            event_dates.append(
+                EventDates(
+                    event=event,
+                    dtstart_utc=dtstart_utc,
+                    dtend_utc=dtend_utc,
+                    duration=occ.get("duration") or None,
+                    tz=occ.get("tz") or None,
+                )
             )
-            for occ in occurrences
-        ]
 
         EventDates.objects.bulk_create(event_dates)
         logger.debug(
