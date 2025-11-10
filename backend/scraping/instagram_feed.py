@@ -222,8 +222,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     price = event_data.get("price", None)
     food = event_data.get("food", None)
     registration = bool(event_data.get("registration", False))
-    latitude = event_data.get("latitude", None)
-    longitude = event_data.get("longitude", None)
     school = event_data.get("school", "")
     categories = event_data.get("categories", [])
     occurrences = event_data.get("occurrences")
@@ -253,7 +251,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "ig_handle": ig_handle,
         "title": title,
         "source_url": source_url,
-        "dtstamp": timezone.now(),
         "club_type": club_type,
         "location": location,
         "food": food or None,
@@ -263,8 +260,6 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         "reactions": {},
         "source_image_url": source_image_url or None,
         "status": "CONFIRMED",
-        "latitude": latitude,
-        "longitude": longitude,
         "school": school,
         "categories": categories,
     }
