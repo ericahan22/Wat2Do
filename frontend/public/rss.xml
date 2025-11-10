@@ -5,7 +5,7 @@
     <link>https://wat2do.ca</link>
     <atom:link href="https://wat2do.ca/rss.xml" rel="self" type="application/rss+xml" />
     <description>Upcoming events at the University of Waterloo</description>
-    <lastBuildDate>Mon, 10 Nov 2025 19:39:41 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 10 Nov 2025 19:49:06 GMT</lastBuildDate>
     <ttl>10</ttl>
   <item>
     <title>Humans vs Zombies Weeklong</title>
@@ -2058,20 +2058,6 @@ After the deep-dive, you’ll hear from a panel of Engineers from various teams 
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/00cde0a7-6148-407e-9bec-286bb07b7ea5.jpg" medium="image" />
   </item>
   <item>
-    <title>Soirée Crêpes Et Jeux De Société!</title>
-    <link>https://www.instagram.com/p/DQ3Bq-wDOZ2/</link>
-    <description><![CDATA[Nous vous invitons à notre activité la plus aimée de tou.te.s! 
-
-La soirée crêpes et jeux de société! Venez nombreux pour vous amuser en français et déguster nos crêpes le jeudi 20 novembre à 18h30 !! 
-
-Merci de remplir le formulaire (lien dans notre bio IG) pour confirmer votre présence. 
-
-À bientôt!]]></description>
-    <guid isPermaLink="false">1217@wat2do</guid>
-    <pubDate>Mon, 10 Nov 2025 04:44:24 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b18d5558-b895-4377-ab37-09ebf843123d.jpg" medium="image" />
-  </item>
-  <item>
     <title>Stand Up Comedy Night</title>
     <link>https://wusa.ca/event/stand-up-comedy-night/</link>
     <description><![CDATA[
@@ -2085,6 +2071,20 @@ We made the show completely free, so come out and grab a seat (while they last)!
     <guid isPermaLink="false">1102@wat2do</guid>
     <pubDate>Wed, 05 Nov 2025 05:38:35 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d7d6c041-fe20-4869-869f-c31d38b9fdc2.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Soirée Crêpes Et Jeux De Société!</title>
+    <link>https://www.instagram.com/p/DQ3Bq-wDOZ2/</link>
+    <description><![CDATA[Nous vous invitons à notre activité la plus aimée de tou.te.s! 
+
+La soirée crêpes et jeux de société! Venez nombreux pour vous amuser en français et déguster nos crêpes le jeudi 20 novembre à 18h30 !! 
+
+Merci de remplir le formulaire (lien dans notre bio IG) pour confirmer votre présence. 
+
+À bientôt!]]></description>
+    <guid isPermaLink="false">1217@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 04:44:24 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b18d5558-b895-4377-ab37-09ebf843123d.jpg" medium="image" />
   </item>
   <item>
     <title>Asim Azhar at The Opera House</title>
@@ -2253,12 +2253,72 @@ See you all at the comp! 🖤💛]]></description>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/411e8c76-59e2-4fc6-929d-0cb47bd5314c.jpg" medium="image" />
   </item>
   <item>
+    <title>Stock Pitch Competition</title>
+    <link>https://www.instagram.com/p/DQ407A-EnH-/</link>
+    <description><![CDATA[🚨 Calling all Ontario undergrads! 🚨
+
+The University of Waterloo Wealth Management Association is hosting its first-ever Stock Pitch Competition! 🏆📈
+
+📅 Date: Saturday, Nov 29, 2025
+⏰ Time: 10:30 AM – 4:00 PM
+📍 Location: Arts Lecture Hall, University of Waterloo
+💼 Dress Code: Business Formal
+
+📝 Registration Deadline: Saturday, Nov 22 at 11:59 PM
+
+Showcase your investment ideas, compete for $500, and network with professionals from the Big 5 banks and other wealth management firms! 🤝🍴
+
+✅ Open to all undergrads across Ontario (SAF students especially encouraged!)
+✅ Teams of 3–4 (don’t have a team? No worries, we’ll assign you!)
+✅ No entry fee
+✅ Case details released Nov 24 @ 8 AM
+
+Whether you’re a first-year looking to gain hands-on experience or just want to sharpen your equity research skills, this is your chance to shine! 🌟
+
+Questions? Email: wealthmanagementuw@gmail.com
+
+#UWFinance #StockPitchCompetition #WealthManagementUW #UWaterloo #FinanceStudents #EquityResearch #StudentCompetition]]></description>
+    <guid isPermaLink="false">1229@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 19:48:11 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1cd464ef-f816-40ab-934b-180faeb4de91.jpg" medium="image" />
+  </item>
+  <item>
     <title>Fall 2025 League</title>
     <link>https://www.instagram.com/p/DPy78imkbik/</link>
     <description><![CDATA[Sign up now for our Fall 2025 League! 6 weeks of curling, all skill levels welcome! Membership is $90. Use the link in our bio to fill out the Google Form and Sign Up on Athletics (2 forms to fill out).]]></description>
     <guid isPermaLink="false">488@wat2do</guid>
     <pubDate>Wed, 15 Oct 2025 17:32:31 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/2d2e4749-f8ec-4765-bf73-e969c1bc5b02.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Stock Pitch Competition</title>
+    <link>https://www.instagram.com/p/DQ407A-EnH-/</link>
+    <description><![CDATA[🚨 Calling all Ontario undergrads! 🚨
+
+The University of Waterloo Wealth Management Association is hosting its first-ever Stock Pitch Competition! 🏆📈
+
+📅 Date: Saturday, Nov 29, 2025
+⏰ Time: 10:30 AM – 4:00 PM
+📍 Location: Arts Lecture Hall, University of Waterloo
+💼 Dress Code: Business Formal
+
+📝 Registration Deadline: Saturday, Nov 22 at 11:59 PM
+
+Showcase your investment ideas, compete for $500, and network with professionals from the Big 5 banks and other wealth management firms! 🤝🍴
+
+✅ Open to all undergrads across Ontario (SAF students especially encouraged!)
+✅ Teams of 3–4 (don’t have a team? No worries, we’ll assign you!)
+✅ No entry fee
+✅ Case details released Nov 24 @ 8 AM
+
+Whether you’re a first-year looking to gain hands-on experience or just want to sharpen your equity research skills, this is your chance to shine! 🌟
+
+Questions? Email: wealthmanagementuw@gmail.com
+
+#UWFinance #StockPitchCompetition #WealthManagementUW #UWaterloo #FinanceStudents #EquityResearch #StudentCompetition]]></description>
+    <guid isPermaLink="false">1229@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 19:48:11 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1cd464ef-f816-40ab-934b-180faeb4de91.jpg" medium="image" />
   </item>
   <item>
     <title>Wellness Lounge</title>
@@ -2319,6 +2379,28 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
+    <title>Double Down Tourney</title>
+    <link>https://www.instagram.com/p/DQ4e3W6EdC1/</link>
+    <description><![CDATA[Get ready to Double Down in our end of term Showdown auction draft! Use a set budget to bid against players for Pokemon that you think will give you the best chance for success in this VGC Reg H tourney! The format will be bo3 open team sheets, with 3-4 rounds of Swiss based on the number of players.
+
+Sign up on our Discord by November 16th to participate in the auction. The tourney itself will take place during our Tuesday social at MC2017 and on our Discord on November 25th. If you can't participate in the auction, a random team of leftover Pokemon will be given to you, but there's no saying how good it will be, so show up the auction if you can!
+
+The prize for the winner of this tourney will be a Sitting Cuties Incineroar plushie!
+
+If you have any questions, DM us on insta or join our Discord for more info. The link to our Discord is in our bio!
+
+Double Down Auction
+🗓️ Nov 16, 6-8pm
+📍 Discord
+
+Double Down Tourney
+🗓️ Nov 25,  6-9pm
+📍 MC 2017]]></description>
+    <guid isPermaLink="false">1223@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 17:21:28 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/976cb7f8-011a-418f-a57a-14feff0bd306.webp" medium="image" />
+  </item>
+  <item>
     <title>Talk That Transforms</title>
     <link>https://www.instagram.com/p/DQnrUhTESRt/</link>
     <description><![CDATA[Assalamualaikum WarahmatAllahi Wabarakahtuhu everyone! 
@@ -2352,28 +2434,6 @@ May Allah (SWT) accept our efforts, Ameen!
     <guid isPermaLink="false">1023@wat2do</guid>
     <pubDate>Tue, 04 Nov 2025 03:54:28 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8b716920-c4bf-4dcf-9463-8b3a0927e928.jpg" medium="image" />
-  </item>
-  <item>
-    <title>Double Down Tourney</title>
-    <link>https://www.instagram.com/p/DQ4e3W6EdC1/</link>
-    <description><![CDATA[Get ready to Double Down in our end of term Showdown auction draft! Use a set budget to bid against players for Pokemon that you think will give you the best chance for success in this VGC Reg H tourney! The format will be bo3 open team sheets, with 3-4 rounds of Swiss based on the number of players.
-
-Sign up on our Discord by November 16th to participate in the auction. The tourney itself will take place during our Tuesday social at MC2017 and on our Discord on November 25th. If you can't participate in the auction, a random team of leftover Pokemon will be given to you, but there's no saying how good it will be, so show up the auction if you can!
-
-The prize for the winner of this tourney will be a Sitting Cuties Incineroar plushie!
-
-If you have any questions, DM us on insta or join our Discord for more info. The link to our Discord is in our bio!
-
-Double Down Auction
-🗓️ Nov 16, 6-8pm
-📍 Discord
-
-Double Down Tourney
-🗓️ Nov 25,  6-9pm
-📍 MC 2017]]></description>
-    <guid isPermaLink="false">1223@wat2do</guid>
-    <pubDate>Mon, 10 Nov 2025 17:21:28 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/976cb7f8-011a-418f-a57a-14feff0bd306.webp" medium="image" />
   </item>
   <item>
     <title>UX Interview Tips</title>
@@ -2466,6 +2526,36 @@ Image shows ticket prices: General $15, Student $10, and a QR code for ticket pu
     <guid isPermaLink="false">1125@wat2do</guid>
     <pubDate>Thu, 06 Nov 2025 04:02:19 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/35db1222-9c0a-49f4-8c1c-60e7cb499599.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Stock Pitch Competition</title>
+    <link>https://www.instagram.com/p/DQ407A-EnH-/</link>
+    <description><![CDATA[🚨 Calling all Ontario undergrads! 🚨
+
+The University of Waterloo Wealth Management Association is hosting its first-ever Stock Pitch Competition! 🏆📈
+
+📅 Date: Saturday, Nov 29, 2025
+⏰ Time: 10:30 AM – 4:00 PM
+📍 Location: Arts Lecture Hall, University of Waterloo
+💼 Dress Code: Business Formal
+
+📝 Registration Deadline: Saturday, Nov 22 at 11:59 PM
+
+Showcase your investment ideas, compete for $500, and network with professionals from the Big 5 banks and other wealth management firms! 🤝🍴
+
+✅ Open to all undergrads across Ontario (SAF students especially encouraged!)
+✅ Teams of 3–4 (don’t have a team? No worries, we’ll assign you!)
+✅ No entry fee
+✅ Case details released Nov 24 @ 8 AM
+
+Whether you’re a first-year looking to gain hands-on experience or just want to sharpen your equity research skills, this is your chance to shine! 🌟
+
+Questions? Email: wealthmanagementuw@gmail.com
+
+#UWFinance #StockPitchCompetition #WealthManagementUW #UWaterloo #FinanceStudents #EquityResearch #StudentCompetition]]></description>
+    <guid isPermaLink="false">1229@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 19:48:11 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1cd464ef-f816-40ab-934b-180faeb4de91.jpg" medium="image" />
   </item>
   <item>
     <title>Waterloo Warriors vs. Gryphons</title>
