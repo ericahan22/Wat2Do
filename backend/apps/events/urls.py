@@ -22,8 +22,8 @@ urlpatterns = [
     path("submit/", views.submit_event, name="submit_event"),
     path("my-submissions/", views.get_user_submissions, name="get_user_submissions"),
     path("submissions/", views.get_submissions, name="get_submissions"),
-    path("submissions/<int:submission_id>/review/", views.review_submission, name="review_submission"),
-    path("submissions/<int:submission_id>/", views.delete_submission, name="delete_submission"),
+    path("submissions/<int:event_id>/review/", views.review_submission, name="review_submission"),
+    path("submissions/<int:event_id>/", views.delete_submission, name="delete_submission"),
     # Event interest endpoints
     path("my-interests/", views.get_my_interested_event_ids, name="get_my_interested_event_ids"),
     path("<int:event_id>/interest/mark/", views.mark_event_interest, name="mark_event_interest"),

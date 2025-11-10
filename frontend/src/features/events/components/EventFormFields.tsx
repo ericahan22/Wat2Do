@@ -179,9 +179,6 @@ export function EventFormFields({
                 disabled={isDisabled}
               />
             </FormControl>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Original source URL for this event
-            </p>
           </FormItem>
         )}
       />
