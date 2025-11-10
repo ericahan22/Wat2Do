@@ -650,7 +650,7 @@ def submit_event(request):
 
 @api_view(["GET"])
 @ratelimit(key="ip", rate="100/hr", block=True)
-@admin_required
+@jwt_required
 def get_submissions(request):
     try:
         submissions = EventSubmission.objects.select_related("created_event").all().order_by("-submitted_at")
@@ -671,7 +671,7 @@ def get_submissions(request):
 
 
 @api_view(["POST"])
-@admin_required
+@jwt_required
 @ratelimit(key="ip", rate="100/hr", block=True)
 def review_submission(request, submission_id):
     """Approve or reject submission"""
