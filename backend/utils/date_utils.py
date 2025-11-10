@@ -3,6 +3,8 @@ Date utilities for semester end times and date-related operations.
 """
 
 from datetime import datetime
+from dateutil import parser as dateutil_parser
+import pytz
 
 
 # Semester end times in format YYYYMMDDTHHMMSSZ (UTC)
@@ -46,4 +48,31 @@ def get_current_semester_end_time(university: str = "University of Waterloo") ->
     else:
         # Fall semester (September - December)
         return semester_end_times[0]
+
+
+def parse_utc_datetime(dt_str: str):
+    """
+    Parse a datetime string to a timezone-aware UTC datetime object.
+    
+    Args:
+        dt_str: A datetime string in any format that dateutil.parser can handle
+        
+    Returns:
+        A timezone-aware datetime object in UTC
+        
+    Example:
+        >>> parse_utc_datetime("2025-01-15T10:30:00Z")
+        datetime.datetime(2025, 1, 15, 10, 30, 0, tzinfo=<UTC>)
+    """
+    if not dt_str:
+        return None
+    
+    dt = dateutil_parser.parse(dt_str)
+    if dt.tzinfo is None:
+        # Naive datetime - assume UTC
+        dt = pytz.UTC.localize(dt)
+    else:
+        # Timezone-aware datetime - convert to UTC
+        dt = dt.astimezone(pytz.UTC)
+    return dt
 

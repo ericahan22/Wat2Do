@@ -27,9 +27,9 @@ export function EventEditForm({ event }: EventEditFormProps) {
       title: event.title || "",
       description: event.description || "",
       location: event.location || "",
-      dates:
-        event.dates && event.dates.length > 0
-          ? event.dates.map((d) => ({
+      occurrences:
+        event.occurrences && event.occurrences.length > 0
+          ? event.occurrences.map((d) => ({
               dtstart_local: utcToLocal(d.dtstart_utc),
               dtend_local: d.dtend_utc ? utcToLocal(d.dtend_utc) : "",
             }))
@@ -74,7 +74,7 @@ export function EventEditForm({ event }: EventEditFormProps) {
   const onSubmit = (data: EventFormData) => {
     const submitData = {
       ...data,
-      dates: data.dates.map((d) => ({
+      occurrences: data.occurrences.map((d) => ({
         dtstart_utc: localToUtc(d.dtstart_local),
         dtend_utc: d.dtend_local ? localToUtc(d.dtend_local) : null,
       })),

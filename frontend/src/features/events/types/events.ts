@@ -26,7 +26,7 @@ export interface Event {
   source_url: string | null;
   display_handle: string; // Computed field from backend
   interest_count: number; // Number of users interested in this event
-  dates?: EventDate[]; // Multiple occurrence dates for recurring events
+  occurrences?: EventDate[]; // Multiple occurrence dates for recurring events
   is_submitter?: boolean; // Whether the current user is the submitter of this event
 }
 

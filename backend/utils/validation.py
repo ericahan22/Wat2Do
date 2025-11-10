@@ -29,18 +29,18 @@ def validate_event_data(data: Dict[str, Any]) -> Dict[str, Any]:
     for occ in occurrences:
         if not isinstance(occ, dict):
             continue
-        start_utc = occ.get("start_utc", "").strip()
-        if not start_utc:
+        dtstart_utc = occ.get("dtstart_utc", "").strip()
+        if not dtstart_utc:
             continue
-        cleaned_occ = {"start_utc": start_utc}
-        if occ.get("end_utc"):
-            cleaned_occ["end_utc"] = str(occ.get("end_utc")).strip()
+        cleaned_occ = {"dtstart_utc": dtstart_utc}
+        if occ.get("dtend_utc"):
+            cleaned_occ["dtend_utc"] = str(occ.get("dtend_utc")).strip()
         if occ.get("tz"):
             cleaned_occ["tz"] = str(occ.get("tz")).strip()
         cleaned_occurrences.append(cleaned_occ)
     
     if not cleaned_occurrences:
-        raise ValueError("At least one occurrence with start_utc is required")
+        raise ValueError("At least one occurrence with dtstart_utc is required")
     
     # Sanitize text fields
     cleaned = {

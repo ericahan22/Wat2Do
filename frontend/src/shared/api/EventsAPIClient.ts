@@ -104,7 +104,7 @@ class EventsAPIClient {
     price?: number;
     food?: string;
     registration: boolean;
-    occurrences: Array<{ start_utc: string; end_utc?: string; tz?: string }>;
+    occurrences: Array<{ dtstart_utc: string; dtend_utc?: string; tz?: string }>;
     all_extracted: any[];
   }> {
     const dataForm = new FormData();

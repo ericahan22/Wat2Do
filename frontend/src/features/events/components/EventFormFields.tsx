@@ -22,7 +22,7 @@ export interface EventFormData {
   title: string;
   description: string;
   location: string;
-  dates: DateField[];
+  occurrences: DateField[];
   price: number | null;
   food: string;
   registration: boolean;
@@ -50,12 +50,12 @@ export function EventFormFields({
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "dates",
+    name: "occurrences",
   });
 
   const handleRemoveDate = useCallback(
     (index: number) => {
-      const dateToRemove = form.getValues(`dates.${index}`);
+      const dateToRemove = form.getValues(`occurrences.${index}`);
 
       // Add to deletion history
       setDeletionHistory((prev) => [
@@ -76,7 +76,7 @@ export function EventFormFields({
     if (deletionHistory.length === 0) return;
 
     const lastDeleted = deletionHistory[deletionHistory.length - 1];
-    const currentDates = form.getValues("dates");
+    const currentDates = form.getValues("occurrences");
 
     // Calculate the correct insertion index
     const deletionsBeforeThis = deletionHistory
@@ -95,7 +95,7 @@ export function EventFormFields({
       ...currentDates.slice(adjustedIndex),
     ];
 
-    form.setValue("dates", newDates);
+    form.setValue("occurrences", newDates);
 
     // Remove from deletion history
     setDeletionHistory((prev) => prev.slice(0, -1));
@@ -222,7 +222,7 @@ export function EventFormFields({
           >
             <FormField
               control={form.control}
-              name={`dates.${index}.dtstart_local`}
+              name={`occurrences.${index}.dtstart_local`}
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>Start Date & Time</FormLabel>
@@ -239,7 +239,7 @@ export function EventFormFields({
             />
             <FormField
               control={form.control}
-              name={`dates.${index}.dtend_local`}
+              name={`occurrences.${index}.dtend_local`}
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormLabel>End Date & Time</FormLabel>
@@ -338,7 +338,7 @@ export function EventFormFields({
 
       <p className="text-sm text-gray-500 dark:text-gray-400 pt-2">
         <span className="text-red-500">*</span> Required fields:{" "}
-        <strong>title</strong>, <strong>dates</strong> (at least one start
+        <strong>title</strong>, <strong>occurrences</strong> (at least one start
         date/time), and <strong>location</strong>.
         <br />
         <span className="text-xs mt-1 block text-gray-400 dark:text-gray-500">

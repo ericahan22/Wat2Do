@@ -21,7 +21,6 @@ from requests.exceptions import ReadTimeout, ConnectionError
 from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
-from dateutil import parser
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events, IgnoredPost, EventDates
@@ -38,6 +37,7 @@ from utils.scraping_utils import (
     sequence_similarity,
     get_post_image_url,
 )
+from utils.date_utils import parse_utc_datetime
 
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "25"))
@@ -58,14 +58,6 @@ IG_DID = os.getenv("IG_DID")
 SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
-def parse_datetime(dt_str):
-    """Parse a datetime string to a timezone-aware datetime object."""
-    dt = parser.parse(dt_str)
-    if timezone.is_naive(dt):
-        dt = timezone.make_aware(dt)
-    return dt
-
-
 def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
 
@@ -77,8 +69,8 @@ def is_duplicate_event(event_data):
     if not occurrences:
         return False
 
-    target_start_str = occurrences[0].get("start_utc")
-    target_start = parse_datetime(target_start_str)
+    target_start_str = occurrences[0].get("dtstart_utc")
+    target_start = parse_utc_datetime(target_start_str)
     if not target_start:
         return False
 
@@ -151,8 +143,8 @@ def append_event_to_csv(
     occurrences = event_data.get("occurrences", []) or []
     primary_occurrence = occurrences[0] if occurrences else {}
 
-    dtstart_utc = primary_occurrence.get("start_utc")
-    dtend_utc = primary_occurrence.get("end_utc")
+    dtstart_utc = primary_occurrence.get("dtstart_utc")
+    dtend_utc = primary_occurrence.get("dtend_utc")
     duration = primary_occurrence.get("duration")
     tz = primary_occurrence.get("tz")
     location = event_data.get("location", "")
@@ -279,8 +271,8 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         event_dates = []
         
         for occ in occurrences:
-            dtstart_utc = parse_datetime(occ.get("start_utc"))
-            dtend_utc_raw = occ.get("end_utc")
+            dtstart_utc = parse_datetime(occ.get("dtstart_utc"))
+            dtend_utc_raw = occ.get("dtend_utc")
             dtend_utc = parse_datetime(dtend_utc_raw) if dtend_utc_raw and dtend_utc_raw.strip() else None
             
             event_dates.append(
@@ -448,12 +440,10 @@ def process_recent_feed(
                             continue
 
                         first_occurrence = event_data.get("occurrences")[0]
-                        dtstart_utc = first_occurrence.get("start_utc")
+                        dtstart_utc = first_occurrence.get("dtstart_utc")
                         now = timezone.now()
                         if isinstance(dtstart_utc, str):
-                            dtstart_utc = parser.parse(dtstart_utc)
-                            if timezone.is_naive(dtstart_utc):
-                                dtstart_utc = timezone.make_aware(dtstart_utc)
+                            dtstart_utc = parse_utc_datetime(dtstart_utc)
                         if dtstart_utc and dtstart_utc < now:
                             logger.info(
                                 f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"

@@ -9,8 +9,8 @@ export const submissionSchema = z.object({
   food: z.string().optional(),
   registration: z.boolean(),
   occurrences: z.array(z.object({
-    start_utc: z.string(),
-    end_utc: z.string().optional(),
+    dtstart_utc: z.string(),
+    dtend_utc: z.string().optional(),
     tz: z.string().optional(),
   })).min(1, 'At least one occurrence is required'),
 });

@@ -154,8 +154,8 @@ class OpenAIService:
         "registration": boolean,
         "occurrences": [
             {{
-                "start_utc": string,  // UTC start "YYYY-MM-DDTHH:MM:SSZ"
-                "end_utc": string,    // UTC end "YYYY-MM-DDTHH:MM:SSZ" or empty string if unknown
+                "dtstart_utc": string,  // UTC start "YYYY-MM-DDTHH:MM:SSZ"
+                "dtend_utc": string,    // UTC end "YYYY-MM-DDTHH:MM:SSZ" or empty string if unknown
                 "duration": string,   // "HH:MM:SS" or empty string if unknown
                 "tz": string          // Timezone name like "America/Toronto"; use the post's timezone context
             }}
@@ -170,7 +170,7 @@ class OpenAIService:
     - Return ALL explicit dates and times mentioned in the post as separate entries in the occurrences array.
     - Do NOT infer or compress recurrence patterns. List each date/time exactly as given.
     - Always convert local times to UTC. The JSON must use ISO 8601 format with a trailing "Z" (e.g., "2025-11-05T22:00:00Z").
-    - If an end time is not provided, leave "end_utc" as an empty string.
+    - If an end time is not provided, leave "dtend_utc" as an empty string.
     - If duration is not explicitly available, leave "duration" as an empty string.
     - Use the timezone context from the caption/image (default to "America/Toronto" for {school}) for the "tz" field.
 
@@ -287,19 +287,19 @@ class OpenAIService:
 
                             duration_val = occ.get("duration", "")
                             tz_val = occ.get("tz", "")
-                            start_utc = occ.get("start_utc", "")
-                            end_utc = occ.get("end_utc", "")
+                            dtstart_utc = occ.get("dtstart_utc", "")
+                            dtend_utc = occ.get("dtend_utc", "")
 
                             cleaned_occurrences.append(
                                 {
-                                    "start_utc": start_utc,
-                                    "end_utc": end_utc,
+                                    "dtstart_utc": dtstart_utc,
+                                    "dtend_utc": dtend_utc,
                                     "duration": duration_val,
                                     "tz": tz_val,
                                 }
                             )
 
-                    cleaned_occurrences.sort(key=lambda item: item.get("start_utc", ""))
+                    cleaned_occurrences.sort(key=lambda item: item.get("dtstart_utc", ""))
                     event_obj["occurrences"] = cleaned_occurrences
 
                     cleaned_events.append(event_obj)

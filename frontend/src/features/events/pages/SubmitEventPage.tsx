@@ -29,7 +29,7 @@ export function SubmitEventPage() {
       title: "",
       description: "",
       location: "",
-      dates: [{ dtstart_local: "", dtend_local: "" }],
+      occurrences: [{ dtstart_local: "", dtend_local: "" }],
       price: null,
       food: "",
       registration: false,
@@ -62,10 +62,10 @@ export function SubmitEventPage() {
       const result = await eventsAPIClient.extractEventFromScreenshot(screenshot);
       
       // Convert UTC occurrences to local dates format
-      const dates = result.occurrences && result.occurrences.length > 0
+      const occurrences = result.occurrences && result.occurrences.length > 0
         ? result.occurrences.map((occ: any) => ({
-            dtstart_local: occ.start_utc ? utcToLocal(occ.start_utc) : "",
-            dtend_local: occ.end_utc ? utcToLocal(occ.end_utc) : "",
+            dtstart_local: occ.dtstart_utc ? utcToLocal(occ.dtstart_utc) : "",
+            dtend_local: occ.dtend_utc ? utcToLocal(occ.dtend_utc) : "",
           }))
         : [{ dtstart_local: "", dtend_local: "" }];
       
@@ -73,7 +73,7 @@ export function SubmitEventPage() {
         title: result.title || '',
         description: result.description || '',
         location: result.location || '',
-        dates,
+        occurrences: occurrences,
         price: result.price ?? null,
         food: result.food || '',
         registration: result.registration || false,
@@ -104,9 +104,9 @@ export function SubmitEventPage() {
       price: data.price,
       food: data.food,
       registration: data.registration,
-      occurrences: data.dates.map((d) => ({
-        start_utc: localToUtc(d.dtstart_local),
-        end_utc: d.dtend_local ? localToUtc(d.dtend_local) : undefined,
+      occurrences: data.occurrences.map((d) => ({
+        dtstart_utc: localToUtc(d.dtstart_local),
+        dtend_utc: d.dtend_local ? localToUtc(d.dtend_local) : undefined,
         tz: 'America/Toronto',
       })),
     };

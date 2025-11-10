@@ -1,7 +1,5 @@
 import json
 import uuid
-import logging
-import traceback
 from datetime import timedelta
 import pytz
 
@@ -26,10 +24,9 @@ from utils import events_utils
 from utils.embedding_utils import find_similar_events
 from utils.filters import EventFilter
 from utils.validation import validate_event_data
+from utils.date_utils import parse_utc_datetime
 
 from .models import Events, EventSubmission, EventInterest, EventDates
-
-logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
@@ -109,12 +106,7 @@ def get_events(request):
                 cursor_dtstart_utc_str = cursor_parts[0]
                 cursor_id = int(cursor_parts[1])
                 
-                from dateutil import parser as dateutil_parser
-                cursor_dtstart_utc = dateutil_parser.parse(cursor_dtstart_utc_str)
-                if cursor_dtstart_utc.tzinfo is None:
-                    cursor_dtstart_utc = pytz.UTC.localize(cursor_dtstart_utc)
-                else:
-                    cursor_dtstart_utc = cursor_dtstart_utc.astimezone(pytz.UTC)
+                cursor_dtstart_utc = parse_utc_datetime(cursor_dtstart_utc_str)
                 
                 # Filter events after cursor position
                 filtered_queryset = filtered_queryset.filter(
@@ -218,7 +210,7 @@ def get_event(request, event_id):
         event_data["is_submitter"] = submission and request.user_id and str(submission.submitted_by) == str(request.user_id)
         
         # Get all event dates
-        event_data["dates"] = list(
+        event_data["occurrences"] = list(
             EventDates.objects.filter(event_id=event_id)
             .order_by('dtstart_utc').values("dtstart_utc", "dtend_utc")
         )
@@ -600,7 +592,6 @@ def submit_event(request):
         # Event data is passed flat at top level
         cleaned = validate_event_data(data)
         
-        from dateutil import parser as dateutil_parser
         with transaction.atomic():
             event = Events.objects.create(
                 title=cleaned["title"],
@@ -618,19 +609,8 @@ def submit_event(request):
 
             # Create EventDates for each occurrence
             for occ in cleaned["occurrences"]:
-                dtstart_utc = dateutil_parser.parse(occ["start_utc"])
-                if dtstart_utc.tzinfo is None:
-                    dtstart_utc = pytz.UTC.localize(dtstart_utc)
-                else:
-                    dtstart_utc = dtstart_utc.astimezone(pytz.UTC)
-                
-                dtend_utc = None
-                if occ.get("end_utc"):
-                    dtend_utc = dateutil_parser.parse(occ["end_utc"])
-                    if dtend_utc.tzinfo is None:
-                        dtend_utc = pytz.UTC.localize(dtend_utc)
-                    else:
-                        dtend_utc = dtend_utc.astimezone(pytz.UTC)
+                dtstart_utc = parse_utc_datetime(occ["dtstart_utc"])
+                dtend_utc = parse_utc_datetime(occ.get("dtend_utc")) if occ.get("dtend_utc") else None
                 
                 EventDates.objects.create(
                     event=event,
@@ -654,7 +634,7 @@ def submit_event(request):
 
 @api_view(["GET"])
 @ratelimit(key="ip", rate="100/hr", block=True)
-@jwt_required
+@admin_required
 def get_submissions(request):
     try:
         submissions = EventSubmission.objects.select_related("created_event").all().order_by("-submitted_at")
@@ -675,121 +655,38 @@ def get_submissions(request):
 
 
 @api_view(["POST"])
-@jwt_required
+@admin_required
 @ratelimit(key="ip", rate="100/hr", block=True)
 def review_submission(request, event_id):
     """Approve or reject submission"""
     try:
-        logger.info(f"[review_submission] Starting review for event_id={event_id}, user_id={request.user_id}")
-        
-        # Parse request body
-        try:
-            data = json.loads(request.body)
-            logger.debug(f"[review_submission] Parsed request data: {data}")
-        except json.JSONDecodeError as e:
-            logger.error(f"[review_submission] JSON decode error: {e}, body: {request.body}")
-            return Response(
-                {"message": "Invalid JSON in request body", "error": str(e)}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Get event
-        try:
-            event = get_object_or_404(Events, id=event_id)
-            logger.debug(f"[review_submission] Found event: id={event.id}, title={event.title}, status={event.status}")
-        except Exception as e:
-            logger.error(f"[review_submission] Error getting event {event_id}: {e}")
-            logger.error(f"[review_submission] Traceback: {traceback.format_exc()}")
-            return Response(
-                {"message": f"Event not found: {event_id}", "error": str(e)}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Get submission (safer query method)
-        try:
-            submission = EventSubmission.objects.filter(created_event=event).first()
-            if not submission:
-                logger.warning(f"[review_submission] No submission found for event_id={event_id}")
-                return Response(
-                    {"message": "No submission found for this event"}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            logger.debug(f"[review_submission] Found submission: id={submission.id}, submitted_by={submission.submitted_by}")
-        except Exception as e:
-            logger.error(f"[review_submission] Error getting submission for event {event_id}: {e}")
-            logger.error(f"[review_submission] Traceback: {traceback.format_exc()}")
-            return Response(
-                {"message": "Error retrieving submission", "error": str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
-        # Get action
+        data = json.loads(request.body)
+        event = get_object_or_404(Events, id=event_id)
+        submission = EventSubmission.objects.filter(created_event=event).first()
+        if not submission:
+            return Response({"message": "No submission found for this event"}, status=status.HTTP_404_NOT_FOUND)
         action = data.get("action")
-        if not action:
-            logger.warning(f"[review_submission] No action provided in request data")
-            return Response(
-                {"message": "Action is required. Use 'approve' or 'reject'"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        logger.info(f"[review_submission] Processing action={action} for event_id={event_id}")
         
         if action == "approve":
-            try:
-                event.status = "CONFIRMED"
-                event.save()
-                logger.debug(f"[review_submission] Updated event status to CONFIRMED")
-                
-                submission.reviewed_at = timezone.now()
-                submission.reviewed_by = request.user_id
-                submission.save()
-                logger.info(f"[review_submission] Successfully approved event_id={event_id}")
-                
-                return Response({"message": "Event approved", "event_id": event.id})
-            except Exception as e:
-                logger.error(f"[review_submission] Error approving event {event_id}: {e}")
-                logger.error(f"[review_submission] Traceback: {traceback.format_exc()}")
-                return Response(
-                    {"message": "Error approving event", "error": str(e)}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            event.status = "CONFIRMED"
+            event.save()
+            submission.reviewed_at = timezone.now()
+            submission.reviewed_by = request.user_id
+            submission.save()
+            return Response({"message": "Event approved", "event_id": event.id})
 
         elif action == "reject":
-            try:
-                submission.reviewed_at = timezone.now()
-                submission.reviewed_by = request.user_id
-                submission.save()
-                logger.debug(f"[review_submission] Updated submission review info")
-                
-                if event:
-                    event.status = "CANCELLED"
-                    event.save()
-                    logger.debug(f"[review_submission] Updated event status to CANCELLED")
-                
-                logger.info(f"[review_submission] Successfully rejected event_id={event_id}")
-                return Response({"message": "Event rejected"})
-            except Exception as e:
-                logger.error(f"[review_submission] Error rejecting event {event_id}: {e}")
-                logger.error(f"[review_submission] Traceback: {traceback.format_exc()}")
-                return Response(
-                    {"message": "Error rejecting event", "error": str(e)}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+            submission.reviewed_at = timezone.now()
+            submission.reviewed_by = request.user_id
+            submission.save()
+            if event:
+                event.status = "CANCELLED"
+                event.save()
+            return Response({"message": "Event rejected"})
 
-        logger.warning(f"[review_submission] Invalid action: {action}")
-        return Response(
-            {"message": "Invalid action. Use 'approve' or 'reject'"}, 
-            status=status.HTTP_400_BAD_REQUEST
-        )
-        
+        return Response({"message": "Invalid action. Use 'approve' or 'reject'"}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        logger.error(f"[review_submission] Unexpected error in review_submission: {e}")
-        logger.error(f"[review_submission] Traceback: {traceback.format_exc()}")
-        logger.error(f"[review_submission] Request data: event_id={event_id}, user_id={getattr(request, 'user_id', 'unknown')}")
-        return Response(
-            {"message": "Internal server error", "error": str(e)}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["GET"])
@@ -976,21 +873,9 @@ def update_event(request, event_id):
         # Update occurrences if provided
         if cleaned.get("occurrences"):
             EventDates.objects.filter(event=event).delete()
-            from dateutil import parser as dateutil_parser
             for occ in cleaned["occurrences"]:
-                dtstart_utc = dateutil_parser.parse(occ["start_utc"])
-                if dtstart_utc.tzinfo is None:
-                    dtstart_utc = pytz.UTC.localize(dtstart_utc)
-                else:
-                    dtstart_utc = dtstart_utc.astimezone(pytz.UTC)
-                
-                dtend_utc = None
-                if occ.get("end_utc"):
-                    dtend_utc = dateutil_parser.parse(occ["end_utc"])
-                    if dtend_utc.tzinfo is None:
-                        dtend_utc = pytz.UTC.localize(dtend_utc)
-                    else:
-                        dtend_utc = dtend_utc.astimezone(pytz.UTC)
+                dtstart_utc = parse_utc_datetime(occ["dtstart_utc"])
+                dtend_utc = parse_utc_datetime(occ.get("dtend_utc")) if occ.get("dtend_utc") else None
                 
                 EventDates.objects.create(
                     event=event,
