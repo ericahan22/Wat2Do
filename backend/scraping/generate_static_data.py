@@ -56,7 +56,7 @@ def fetch_events():
 
     try:
         today = date.today()
-        qs = EventsModel.objects.filter(dtstart__date__gte=today).order_by("dtstart")
+        qs = EventsModel.objects.filter(event_dates__dtstart_utc__date__gte=today).order_by("event_dates__dtstart_utc")
         for e in qs:
             events_list.append(
                 {
@@ -64,8 +64,6 @@ def fetch_events():
                     "title": getattr(e, "title", None),
                     "description": getattr(e, "description", None),
                     "location": getattr(e, "location", None),
-                    "dtstart": getattr(e, "dtstart", None),
-                    "dtend": getattr(e, "dtend", None),
                     "source_url": getattr(e, "source_url", None),
                     "source_image_url": getattr(e, "source_image_url", None),
                     "food": getattr(e, "food", None),
@@ -148,7 +146,7 @@ def main():
 
             rss_items = []
             for ev in events:
-                pub_dt = ev.get("dtstart") or ev.get("added_at") or last_build_dt
+                pub_dt = ev.get("event_dates__dtstart_utc") or ev.get("added_at") or last_build_dt
                 pub_dt_parsed = parse_dt_to_utc(pub_dt) or last_build_dt
                 pub_str = pub_dt_parsed.strftime("%a, %d %b %Y %H:%M:%S GMT")
 
