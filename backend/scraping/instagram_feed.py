@@ -438,6 +438,10 @@ def process_recent_feed(
                         first_occurrence = event_data.get("occurrences")[0]
                         dtstart_utc = first_occurrence.get("start_utc")
                         now = timezone.now()
+                        if isinstance(dtstart_utc, str):
+                            dtstart_utc = parser.parse(dtstart_utc)
+                            if timezone.is_naive(dtstart_utc):
+                                dtstart_utc = timezone.make_aware(dtstart_utc)
                         if dtstart_utc and dtstart_utc < now:
                             logger.info(
                                 f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
