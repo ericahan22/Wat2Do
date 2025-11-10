@@ -279,13 +279,9 @@ def insert_event_to_db(event_data, ig_handle, source_url):
         event_dates = []
         
         for occ in occurrences:
-            # Parse start_utc
             dtstart_utc = parse_datetime(occ.get("start_utc"))
-            if not dtstart_utc:
-                continue  # Skip occurrences without start time
-            
-            # Parse end_utc (can be empty string or None)
-            dtend_utc = parse_datetime(occ.get("end_utc"))
+            dtend_utc_raw = occ.get("end_utc")
+            dtend_utc = parse_datetime(dtend_utc_raw) if dtend_utc_raw and dtend_utc_raw.strip() else None
             
             event_dates.append(
                 EventDates(
