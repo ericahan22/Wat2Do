@@ -673,18 +673,18 @@ def get_submissions(request):
 @api_view(["POST"])
 @jwt_required
 @ratelimit(key="ip", rate="100/hr", block=True)
-def review_submission(request, submission_id):
-    """Approve or reject submission"""
+def review_submission(request, event_id):
+    """Approve or reject submission
+    """
     try:
         data = json.loads(request.body)
-        submission = get_object_or_404(EventSubmission, id=submission_id)
+        event = get_object_or_404(Events, id=event_id)
+        submission = event.submission
+        if not submission:
+            return Response({"message": "No submission found for this event"}, status=status.HTTP_404_NOT_FOUND)
         action = data.get("action")
-        event = submission.created_event
         
         if action == "approve":
-            if not event:
-                return Response({"message": "No linked event"}, status=status.HTTP_400_BAD_REQUEST)
-            
             event.status = "CONFIRMED"
             event.save()
             submission.reviewed_at = timezone.now()
