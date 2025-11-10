@@ -196,18 +196,3 @@ class EventInterest(models.Model):
 class IgnoredPost(models.Model):
     shortcode = models.CharField(max_length=32, unique=True)
     added_at = models.DateTimeField(auto_now_add=True)
-
-
-class Promotion(models.Model):
-    # One promo window per event; extend it by spending more credits
-    event = models.OneToOneField(Events, on_delete=models.CASCADE, related_name="promotion")
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
-
-    @property
-    def active(self) -> bool:
-        now = timezone.now()
-        return self.starts_at <= now <= self.ends_at
-
-    def __str__(self):
-        return f"Promotion({self.event.id}) {self.starts_at} → {self.ends_at}"
