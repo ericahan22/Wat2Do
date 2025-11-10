@@ -59,7 +59,6 @@ SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
 def is_duplicate_event(event_data):
-def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
 
     title = event_data.get("title") or ""
