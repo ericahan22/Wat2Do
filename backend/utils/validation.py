@@ -69,4 +69,8 @@ def validate_event_data(data: Dict[str, Any]) -> Dict[str, Any]:
     if data.get("registration"):
         cleaned["registration"] = bool(data.get("registration"))
     
+    # Source URL
+    if data.get("source_url"):
+        cleaned["source_url"] = str(data.get("source_url")).strip() or None
+    
     return cleaned

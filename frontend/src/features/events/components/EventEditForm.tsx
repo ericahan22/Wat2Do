@@ -37,6 +37,7 @@ export function EventEditForm({ event }: EventEditFormProps) {
       price: event.price ?? null,
       food: event.food || "",
       registration: event.registration || false,
+      source_url: event.source_url || "",
     },
   });
 

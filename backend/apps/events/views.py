@@ -730,17 +730,12 @@ def get_user_submissions(request):
 @api_view(["DELETE"])
 @ratelimit(key="ip", rate="30/hr", block=True)
 @jwt_required
-def delete_submission(request, submission_id): 
+def delete_submission(request, event_id): 
     try:
-        submission = get_object_or_404(EventSubmission, id=submission_id)
+        event = get_object_or_404(Events, id=event_id)
+        submission = event.submission
 
-        if str(submission.submitted_by) != str(request.user_id):
-            return Response(
-                {"message": "Not authorized to delete this submission"}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        if submission.reviewed_at and submission.created_event.status == "CONFIRMED":
+        if event.status == "CONFIRMED":
             return Response({
                 "message": "Approved submissions cannot be removed. Contact support if needed."
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -889,6 +884,8 @@ def update_event(request, event_id):
             event.price = cleaned["price"]
         if "registration" in cleaned:
             event.registration = cleaned["registration"]
+        if "source_url" in cleaned:
+            event.source_url = cleaned.get("source_url")
         
         # Update occurrences if provided
         if cleaned.get("occurrences"):

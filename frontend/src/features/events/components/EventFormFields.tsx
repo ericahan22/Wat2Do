@@ -26,6 +26,7 @@ export interface EventFormData {
   price: number | null;
   food: string;
   registration: boolean;
+  source_url: string;
 }
 
 interface DeletedDate {
@@ -159,6 +160,28 @@ export function EventFormFields({
                 required
               />
             </FormControl>
+          </FormItem>
+        )}
+      />
+
+      {/* Source URL */}
+      <FormField
+        control={form.control}
+        name="source_url"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Source URL</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                type="url"
+                placeholder="https://example.com/event"
+                disabled={isDisabled}
+              />
+            </FormControl>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Original source URL for this event
+            </p>
           </FormItem>
         )}
       />
