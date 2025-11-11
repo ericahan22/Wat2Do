@@ -125,7 +125,7 @@ export function EventPreview({ event }: EventPreviewProps) {
                 </p>
               </div>
               <div className="ml-8 flex flex-wrap gap-2">
-                {event.dates?.map((date) => (
+                {event.occurrences?.map((date) => (
                   <Badge
                     key={date.dtstart_utc}
                     variant="outline"
