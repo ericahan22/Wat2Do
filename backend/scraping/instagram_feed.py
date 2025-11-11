@@ -40,9 +40,9 @@ from utils.scraping_utils import (
 from utils.date_utils import parse_utc_datetime
 
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "25"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "30"))
 MAX_CONSEC_OLD_POSTS = 10
-CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
+CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "1"))
 
 # Load environment variables from .env file
 load_dotenv()
@@ -326,7 +326,7 @@ def safe_feed_posts(loader, retries=3, backoff=60):
                         continue
                     seen_shortcodes.add(post.shortcode)
                 yield post
-                time.sleep(random.uniform(2, 4))
+                time.sleep(random.uniform(7, 20))
             break  # Finished all posts
         except (ReadTimeout, ConnectionError, requests.exceptions.SSLError) as e:
             attempts += 1
@@ -363,14 +363,6 @@ def process_recent_feed(
     logger.info(f"Starting feed processing with cutoff: {cutoff}")
 
     seen_shortcodes = get_seen_shortcodes()
-
-    def check_post_limit():
-        nonlocal termination_reason
-        if posts_processed >= max_posts:
-            termination_reason = f"reached_max_posts={max_posts}"
-            logger.info(f"Reached max post limit of {max_posts}, stopping")
-            return True
-        return False
 
     try:
         for post in safe_feed_posts(loader):
@@ -480,7 +472,6 @@ def process_recent_feed(
                             source_url,
                             added_to_db=added_to_db or "unknown",
                         )
-                posts_processed += 1
                 time.sleep(random.uniform(30, 60))
 
             except Exception as e:
@@ -491,6 +482,12 @@ def process_recent_feed(
                 time.sleep(random.uniform(3, 8))
                 continue
             finally:
+                posts_processed += 1
+                if posts_processed > max_posts:
+                    termination_reason = f"reached_max_posts={max_posts}"
+                    logger.info(f"Reached max post limit of {max_posts}, stopping.")
+                    break
+                
                 IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
                 if consec_old_posts >= max_consec_old_posts:
                     termination_reason = (
@@ -499,8 +496,6 @@ def process_recent_feed(
                     logger.info(
                         f"Reached {max_consec_old_posts} consecutive old posts, stopping."
                     )
-                    break
-                if check_post_limit():
                     break
 
         if not termination_reason:

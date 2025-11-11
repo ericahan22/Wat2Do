@@ -12,11 +12,11 @@ on:
       MAX_POSTS:
         required: false
         type: number
-        default: 25
+        default: 30
       CUTOFF_DAYS:
         required: false
         type: number
-        default: 2
+        default: 1
 
 jobs:
   instagram_feed:
@@ -24,8 +24,8 @@ jobs:
     permissions:
       contents: write
     env:
-      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '25' }}
-      CUTOFF_DAYS: ${{ github.event.inputs.CUTOFF_DAYS || '2' }}
+      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '30' }}
+      CUTOFF_DAYS: ${{ github.event.inputs.CUTOFF_DAYS || '1' }}
       PRODUCTION: '1'
       DJANGO_SETTINGS_MODULE: 'config.settings.development'
       DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
