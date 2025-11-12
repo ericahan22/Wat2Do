@@ -5,7 +5,7 @@
     <link>https://wat2do.ca</link>
     <atom:link href="https://wat2do.ca/rss.xml" rel="self" type="application/rss+xml" />
     <description>Upcoming events at the University of Waterloo</description>
-    <lastBuildDate>Wed, 12 Nov 2025 03:51:26 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 12 Nov 2025 13:03:44 GMT</lastBuildDate>
     <ttl>10</ttl>
   <item>
     <title>Speed Dataing</title>
@@ -75,6 +75,14 @@ Drop in for snacks, smiles, and connection. We can’t wait to see you!
     <guid isPermaLink="false">1260@wat2do</guid>
     <pubDate>Tue, 11 Nov 2025 04:05:15 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4adbf037-7653-45ed-a875-411e40df5aba.jpg" medium="image" />
+  </item>
+  <item>
+    <title>COCA Outreach Table</title>
+    <link>https://www.instagram.com/p/DQ7ahgDknuc/</link>
+    <description><![CDATA[Schedule for this week!! see you all😊]]></description>
+    <guid isPermaLink="false">1272@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:54:32 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e915be17-6aed-45ba-9721-253e7b1735b2.jpg" medium="image" />
   </item>
   <item>
     <title>Wellness Lounge</title>
@@ -258,6 +266,14 @@ Registration link is in our bio 👆]]></description>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c276f8e6-3c4a-498c-9fc8-9ea7ab4f8b45.jpg" medium="image" />
   </item>
   <item>
+    <title>FOSSA x COCA Prep &amp; Homeless Service</title>
+    <link>https://www.instagram.com/p/DQ7ahgDknuc/</link>
+    <description><![CDATA[Schedule for this week!! see you all😊]]></description>
+    <guid isPermaLink="false">1273@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:54:32 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e915be17-6aed-45ba-9721-253e7b1735b2.jpg" medium="image" />
+  </item>
+  <item>
     <title>Ramp Up Your Career: Panel Speaker + Networking</title>
     <link>https://www.instagram.com/p/DQvHs-JjPAi/</link>
     <description><![CDATA[Join us on to get an inside look into Ramp through a panel discussion and Q&A with the recruiter and previous interns!
@@ -266,6 +282,15 @@ We hope to see everyone there! Sign up with the link  in the bio.]]></descriptio
     <guid isPermaLink="false">1153@wat2do</guid>
     <pubDate>Fri, 07 Nov 2025 03:48:31 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/76fa8fec-a8ab-4d81-af35-d8a8533042bf.jpg" medium="image" />
+  </item>
+  <item>
+    <title>IBM Quantum Research Scientist: Sean Wagner</title>
+    <link>https://www.instagram.com/p/DQ8Ba18Df-K/</link>
+    <description><![CDATA[Quantum meets reality.
+Join us tomorrow (Wednesday) at 7PM in QNC 0101 for IBM’s Dr. Sean Wagner on building the future of quantum computing.]]></description>
+    <guid isPermaLink="false">1279@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 13:02:06 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/0425008d-8837-494a-a86f-9404a18529de.jpg" medium="image" />
   </item>
   <item>
     <title>Stories Of The Sahaba</title>
@@ -310,6 +335,22 @@ Grading signups are also open, so be sure to fill out the grading form (in the D
     <guid isPermaLink="false">1220@wat2do</guid>
     <pubDate>Mon, 10 Nov 2025 04:49:48 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e2202123-84c8-4824-b1a3-525d4f9534f6.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Bible Study With Abouna Takla</title>
+    <link>https://www.instagram.com/p/DQ7ahgDknuc/</link>
+    <description><![CDATA[Schedule for this week!! see you all😊]]></description>
+    <guid isPermaLink="false">1274@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:54:33 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e915be17-6aed-45ba-9721-253e7b1735b2.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Liturgy</title>
+    <link>https://www.instagram.com/p/DQ7ahgDknuc/</link>
+    <description><![CDATA[Schedule for this week!! see you all😊]]></description>
+    <guid isPermaLink="false">1275@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:54:33 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e915be17-6aed-45ba-9721-253e7b1735b2.jpg" medium="image" />
   </item>
   <item>
     <title>Prayer Meeting</title>
@@ -424,6 +465,26 @@ We can't wait to see you all there!!!
     <guid isPermaLink="false">1256@wat2do</guid>
     <pubDate>Tue, 11 Nov 2025 03:53:38 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dac08a89-698d-448d-bb1a-b31e92bc3e1b.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Day In The Life Of A Research Assistant</title>
+    <link>https://www.instagram.com/p/DQ7VofBEdTC/</link>
+    <description><![CDATA[🔬 Ever wondered what it’s like to be a Research Assistant? 
+
+Join us for “Day in the Life of a Research Assistant” an interactive event where you’ll get to:
+✨ Chat with real research assistants
+🏫 Tour a psychology lab
+🌯 Enjoy free food (from @vincenzoswaterloo 🤤🔥)
+
+📅 Date: Nov 13th | 🕔 Time: 5PM–8PM
+📍 Location: AL 124
+
+Come discover research opportunities, ask questions, and get inspired by what lab life is all about! 💭
+
+#psychology #lab #research #network #events #unilife]]></description>
+    <guid isPermaLink="false">1277@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:56:21 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39be41a3-24ce-4dff-8519-53b3d126eddc.jpg" medium="image" />
   </item>
   <item>
     <title>Sip With Zip</title>
@@ -658,6 +719,14 @@ free entry · all ages · limited capacity
     <guid isPermaLink="false">1212@wat2do</guid>
     <pubDate>Mon, 10 Nov 2025 04:12:59 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/996787c6-81e1-426e-9556-b615a6fd291a.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Talk By Father Cyril Elnazir + Crabby Joe</title>
+    <link>https://www.instagram.com/p/DQ7ahgDknuc/</link>
+    <description><![CDATA[Schedule for this week!! see you all😊]]></description>
+    <guid isPermaLink="false">1276@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:54:33 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e915be17-6aed-45ba-9721-253e7b1735b2.jpg" medium="image" />
   </item>
   <item>
     <title>Mental Health First Aid - Essentials Course</title>
@@ -2177,6 +2246,33 @@ Livestream the meeting here.
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f4ebfd41-65da-405e-b547-b70d2d658e42.jpg" medium="image" />
   </item>
   <item>
+    <title>Redline</title>
+    <link>https://www.instagram.com/p/DQ8AJ6aEWUa/</link>
+    <description><![CDATA[🚨REDLINE: Nov 27th at Room 47🚨
+
+Unless you’re living under a rock, you know it’s been the season of bass music! ISOKNOCK gave us NITEHARTS, SKRILLEX had an insane comeback album, and hell, UWDJ doesn’t go a week without one of our DJs playing a crazy dubstep set nowadays. It’s only fitting that we throw an event to commemorate BASS SZN and highlight UWDJ’s amazing talent!
+
+🗓️: Thursday, Nov 27th, 2025
+
+🕙: 10PM - 2AM
+
+📍: Room 47 Uptown (47 King St N)
+
+🎧: SOUNDS BY @TOOLIEBEATS @RISH.AF_ @JOEL.BAE @TINYTEAZE @SUBVXRT
+
+‼️: 19+ event | valid government and student ID required (students of ANY university welcome!)
+
+🎟️: Tickets available NOW, link in bio 📲
+$12 Earlybird | $15 Tier 1 | $20 Tier 2 | Limited tickets at the door, based on capacity
+
+This will be our LAST OFFICIAL EVENT of the term, so we hope to see you all there! Remember, if you’re not REDLINING, you’re not HEADLINING 😏
+
+visuals by @twoiism 🤝]]></description>
+    <guid isPermaLink="false">1271@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 12:51:55 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4c12c826-3469-43ff-b742-171d1c564279.jpg" medium="image" />
+  </item>
+  <item>
     <title>End Of Term A Cappella Concert</title>
     <link>https://www.instagram.com/p/DQsel9JEWqe/</link>
     <description><![CDATA[‼️ LISTEN UP WE GOT NEWS FOR YOU ‼️ 
@@ -2244,6 +2340,26 @@ Make sure to bring your friends and take your time to relax this season. Come ou
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/449db3a1-a1b8-4ede-927c-c36db00a05ab.jpg" medium="image" />
   </item>
   <item>
+    <title>UWMAS Alumni Kickoff Social</title>
+    <link>https://www.instagram.com/p/DQ7xhfGjXH3/</link>
+    <description><![CDATA[✨ It’s finally here! ✨
+
+You’re invited to the UWMAS Alumni Kickoff Social Event — a night of community, conversation, and celebration with alumni, Muslim campus leaders.
+
+ 📅 Thursday, November 29
+
+📍 SLC Main Commons, University of Waterloo
+
+⏰ 4 PM – 7 PM
+
+Let’s make this first event one to remember 💛
+
+ #UWMAS #WaterlooAlumni #Networking #Community #TogetherWeGrow]]></description>
+    <guid isPermaLink="false">1278@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 13:00:05 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/424c6919-c94a-40d6-ac3d-153d0c36754a.jpg" medium="image" />
+  </item>
+  <item>
     <title>20th Anniversary Celebration</title>
     <link>https://www.instagram.com/p/DQeeN0Pjl8t/</link>
     <description><![CDATA[You’re invited to celebrate 20 years of the University of Waterloo Ballroom Dance Club! 
@@ -2254,7 +2370,7 @@ Thank you to all of our members and alumni that have made this club into what it
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/782e0e6f-6d16-45fa-a731-61febf6863ad.jpg" medium="image" />
   </item>
   <item>
-    <title>Wloo CC End Of Term Comp @ PAC</title>
+    <title>wloo CC End of Term Comp</title>
     <link>https://www.instagram.com/p/DQ7jRskjza6/</link>
     <description><![CDATA[wloo CC End of Term Comp @ PAC 🧗‍♀️
 
@@ -2284,7 +2400,7 @@ Sign up for the comp and get your membership through the link in bio 🔗]]></de
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1332501c-befc-4255-937d-7ec0366ef476.jpg" medium="image" />
   </item>
   <item>
-    <title>Wloo CC End Of Term Comp @ PAC</title>
+    <title>wloo CC End of Term Comp</title>
     <link>https://www.instagram.com/p/DQ7jRskjza6/</link>
     <description><![CDATA[wloo CC End of Term Comp @ PAC 🧗‍♀️
 
@@ -2314,7 +2430,7 @@ Sign up for the comp and get your membership through the link in bio 🔗]]></de
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1332501c-befc-4255-937d-7ec0366ef476.jpg" medium="image" />
   </item>
   <item>
-    <title>Wloo CC End Of Term Comp @ PAC</title>
+    <title>wloo CC End of Term Comp</title>
     <link>https://www.instagram.com/p/DQ7jRskjza6/</link>
     <description><![CDATA[wloo CC End of Term Comp @ PAC 🧗‍♀️
 
@@ -2344,7 +2460,7 @@ Sign up for the comp and get your membership through the link in bio 🔗]]></de
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1332501c-befc-4255-937d-7ec0366ef476.jpg" medium="image" />
   </item>
   <item>
-    <title>Wloo CC End Of Term Comp @ PAC</title>
+    <title>wloo CC End of Term Comp</title>
     <link>https://www.instagram.com/p/DQ7jRskjza6/</link>
     <description><![CDATA[wloo CC End of Term Comp @ PAC 🧗‍♀️
 
