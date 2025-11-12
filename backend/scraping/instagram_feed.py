@@ -40,9 +40,9 @@ from utils.scraping_utils import (
 from utils.date_utils import parse_utc_datetime
 
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "30"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "35"))
 MAX_CONSEC_OLD_POSTS = 10
-CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "1"))
+CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
 # Load environment variables from .env file
 load_dotenv()
