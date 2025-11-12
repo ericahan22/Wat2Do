@@ -40,7 +40,7 @@ from utils.scraping_utils import (
 from utils.date_utils import parse_utc_datetime
 
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "35"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "30"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
@@ -326,7 +326,7 @@ def safe_feed_posts(loader, retries=3, backoff=60):
                         continue
                     seen_shortcodes.add(post.shortcode)
                 yield post
-                time.sleep(random.uniform(7, 20))
+                time.sleep(random.uniform(30, 90))
             break  # Finished all posts
         except (ReadTimeout, ConnectionError, requests.exceptions.SSLError) as e:
             attempts += 1
@@ -472,7 +472,6 @@ def process_recent_feed(
                             source_url,
                             added_to_db=added_to_db or "unknown",
                         )
-                time.sleep(random.uniform(30, 60))
 
             except Exception as e:
                 logger.error(
