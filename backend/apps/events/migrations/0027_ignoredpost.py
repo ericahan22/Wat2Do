@@ -4,18 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0026_remove_events_events_query_opt_idx_and_more'),
+        ("events", "0026_remove_events_events_query_opt_idx_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='IgnoredPost',
+            name="IgnoredPost",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('shortcode', models.CharField(max_length=32, unique=True)),
-                ('added_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("shortcode", models.CharField(max_length=32, unique=True)),
+                ("added_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

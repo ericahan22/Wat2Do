@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 
 class Events(models.Model):
@@ -157,7 +156,9 @@ class EventDates(models.Model):
         indexes = [
             models.Index(fields=["dtstart_utc"], name="eventdates_dtstart_utc_idx"),
             models.Index(fields=["dtend_utc"], name="eventdates_dtend_utc_idx"),
-            models.Index(fields=["event", "dtstart_utc"], name="eventdates_event_dtstart_idx"),
+            models.Index(
+                fields=["event", "dtstart_utc"], name="eventdates_event_dtstart_idx"
+            ),
         ]
         ordering = ["dtstart_utc"]
 
@@ -170,17 +171,16 @@ class EventInterest(models.Model):
     Tracks user interest in events.
     Many-to-many relationship between users (Clerk user IDs) and events.
     """
+
     event = models.ForeignKey(
         Events,
         on_delete=models.CASCADE,
         related_name="interests",
         db_index=True,
-        help_text="Reference to the event"
+        help_text="Reference to the event",
     )
     user_id = models.CharField(
-        max_length=255,
-        db_index=True,
-        help_text="Clerk user ID of the interested user"
+        max_length=255, db_index=True, help_text="Clerk user ID of the interested user"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

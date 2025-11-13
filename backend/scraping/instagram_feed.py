@@ -17,13 +17,13 @@ from datetime import timedelta
 from pathlib import Path
 
 import requests
-from requests.exceptions import ReadTimeout, ConnectionError
 from django.utils import timezone
 from dotenv import load_dotenv
 from instaloader import Instaloader
+from requests.exceptions import ConnectionError, ReadTimeout
 
 from apps.clubs.models import Clubs
-from apps.events.models import Events, IgnoredPost, EventDates
+from apps.events.models import EventDates, Events, IgnoredPost
 from scraping.logging_config import logger
 from scraping.zyte_setup import setup_zyte
 from services.openai_service import (
@@ -31,14 +31,13 @@ from services.openai_service import (
 )
 from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
-from utils.scraping_utils import (
-    normalize,
-    jaccard_similarity,
-    sequence_similarity,
-    get_post_image_url,
-)
 from utils.date_utils import parse_utc_datetime
-
+from utils.scraping_utils import (
+    get_post_image_url,
+    jaccard_similarity,
+    normalize,
+    sequence_similarity,
+)
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "30"))
 MAX_CONSEC_OLD_POSTS = 10
@@ -65,7 +64,7 @@ def is_duplicate_event(event_data):
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
     occurrences = event_data.get("occurrences")
-    
+
     if not occurrences:
         return False
 
@@ -75,10 +74,8 @@ def is_duplicate_event(event_data):
         return False
 
     try:
-        
-        candidates = (
-            EventDates.objects.select_related("event")
-            .filter(dtstart_utc__date=target_start.date())
+        candidates = EventDates.objects.select_related("event").filter(
+            dtstart_utc__date=target_start.date()
         )
 
         for candidate in candidates:
@@ -115,7 +112,9 @@ def is_duplicate_event(event_data):
                 )
                 return True
 
-            if (title_sim > 0.7 and loc_sim > 0.5) or (loc_sim > 0.5 and desc_sim > 0.3):
+            if (title_sim > 0.7 and loc_sim > 0.5) or (
+                loc_sim > 0.5 and desc_sim > 0.3
+            ):
                 logger.warning(
                     f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
                     f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
@@ -269,12 +268,16 @@ def insert_event_to_db(event_data, ig_handle, source_url):
     try:
         event = Events.objects.create(**create_kwargs)
         event_dates = []
-        
+
         for occ in occurrences:
             dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
             dtend_utc_raw = occ.get("dtend_utc")
-            dtend_utc = parse_utc_datetime(dtend_utc_raw) if dtend_utc_raw and dtend_utc_raw.strip() else None
-            
+            dtend_utc = (
+                parse_utc_datetime(dtend_utc_raw)
+                if dtend_utc_raw and dtend_utc_raw.strip()
+                else None
+            )
+
             event_dates.append(
                 EventDates(
                     event=event,
@@ -303,7 +306,9 @@ def get_seen_shortcodes():
             "source_url", flat=True
         )
         event_shortcodes = {url.split("/")[-2] for url in events if url}
-        ignored_shortcodes = set(IgnoredPost.objects.values_list("shortcode", flat=True))
+        ignored_shortcodes = set(
+            IgnoredPost.objects.values_list("shortcode", flat=True)
+        )
         shortcodes = event_shortcodes | ignored_shortcodes
         return shortcodes
     except Exception as e:
@@ -330,12 +335,16 @@ def safe_feed_posts(loader, retries=3, backoff=60):
             break  # Finished all posts
         except (ReadTimeout, ConnectionError, requests.exceptions.SSLError) as e:
             attempts += 1
-            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})...")
+            logger.warning(
+                f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})..."
+            )
             time.sleep(backoff)
             try:
                 new_loader = session()
                 loader.__dict__.update(new_loader.__dict__)
-                logger.info("Session re-instantiated successfully. Continuing feed scrape.")
+                logger.info(
+                    "Session re-instantiated successfully. Continuing feed scrape."
+                )
             except Exception as session_e:
                 logger.error(f"Failed to re-instantiate session: {session_e}")
                 break
@@ -367,7 +376,11 @@ def process_recent_feed(
     try:
         for post in safe_feed_posts(loader):
             try:
-                post_time = timezone.make_aware(post.date_utc) if timezone.is_naive(post.date_utc) else post.date_utc
+                post_time = (
+                    timezone.make_aware(post.date_utc)
+                    if timezone.is_naive(post.date_utc)
+                    else post.date_utc
+                )
                 if post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
@@ -382,14 +395,18 @@ def process_recent_feed(
 
                 consec_old_posts = 0
                 logger.info("-" * 100)
-                logger.info(f"[{post.shortcode}] [{post.owner_username}] Processing post")
+                logger.info(
+                    f"[{post.shortcode}] [{post.owner_username}] Processing post"
+                )
 
                 # Safely get image URL and upload to S3
                 raw_image_url = get_post_image_url(post)
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
                     source_image_url = upload_image_from_url(raw_image_url)
-                    logger.debug(f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}")
+                    logger.debug(
+                        f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}"
+                    )
                 else:
                     logger.warning(
                         f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
@@ -443,7 +460,9 @@ def process_recent_feed(
                             added_to_db = "past_date"
                             continue
 
-                        result = insert_event_to_db(event_data, post.owner_username, source_url)
+                        result = insert_event_to_db(
+                            event_data, post.owner_username, source_url
+                        )
                         if result is True:
                             events_added += 1
                             logger.info(
@@ -477,25 +496,32 @@ def process_recent_feed(
                 logger.error(
                     f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
                 )
-                logger.error(f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}")
+                logger.error(
+                    f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}"
+                )
                 time.sleep(random.uniform(3, 8))
                 continue
             finally:
                 posts_processed += 1
-                if posts_processed > max_posts:
-                    termination_reason = f"reached_max_posts={max_posts}"
-                    logger.info(f"Reached max post limit of {max_posts}, stopping.")
-                    break
-                
                 IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
-                if consec_old_posts >= max_consec_old_posts:
-                    termination_reason = (
-                        f"reached_consecutive_old_posts={max_consec_old_posts}"
-                    )
-                    logger.info(
-                        f"Reached {max_consec_old_posts} consecutive old posts, stopping."
-                    )
-                    break
+
+            # Check termination conditions after finally block
+            should_break = False
+            if posts_processed > max_posts:
+                termination_reason = f"reached_max_posts={max_posts}"
+                logger.info(f"Reached max post limit of {max_posts}, stopping.")
+                should_break = True
+            elif consec_old_posts >= max_consec_old_posts:
+                termination_reason = (
+                    f"reached_consecutive_old_posts={max_consec_old_posts}"
+                )
+                logger.info(
+                    f"Reached {max_consec_old_posts} consecutive old posts, stopping."
+                )
+                should_break = True
+
+            if should_break:
+                break
 
         if not termination_reason:
             termination_reason = "no_more_posts"

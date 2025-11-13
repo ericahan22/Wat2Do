@@ -1,13 +1,13 @@
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from apps.core.auth import admin_required
 from apps.events.models import Events
 
 from .models import EventPromotion
-from apps.core.auth import jwt_required, admin_required
 
 
 @api_view(["POST"])

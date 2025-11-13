@@ -26,13 +26,19 @@ if not SECRET_KEY:
     if os.getenv("PRODUCTION") == "1":
         raise ValueError("SECRET_KEY environment variable must be set in production!")
     # Only allow insecure default in development
-    SECRET_KEY = "django-insecure-dev-key-for-local-development-only-please-change-in-production"
+    SECRET_KEY = (
+        "django-insecure-dev-key-for-local-development-only-please-change-in-production"
+    )
 
 DEBUG = os.getenv("PRODUCTION") != "1"
 
-ALLOWED_PARTIES = os.getenv("ALLOWED_PARTIES").split(",") if os.getenv('ALLOWED_PARTIES') else []
+ALLOWED_PARTIES = (
+    os.getenv("ALLOWED_PARTIES").split(",") if os.getenv("ALLOWED_PARTIES") else []
+)
 CLERK_ALLOWED_PARTIES = ALLOWED_PARTIES
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",") if os.getenv('ALLOWED_HOSTS') else []
+ALLOWED_HOSTS = (
+    os.getenv("ALLOWED_HOSTS").split(",") if os.getenv("ALLOWED_HOSTS") else []
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -68,8 +74,8 @@ MIDDLEWARE = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'apps.core.auth.JwtAuthBackend',
-    'django.contrib.auth.backends.ModelBackend'
+    "apps.core.auth.JwtAuthBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 
@@ -78,7 +84,7 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
     CORS_ALLOWED_ORIGINS = ALLOWED_PARTIES
-    
+
 CORS_ALLOW_CREDENTIALS = True
 
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
@@ -93,12 +99,12 @@ if DEBUG:
     ]
 else:
     CSRF_TRUSTED_ORIGINS = ALLOWED_PARTIES
-    
+
 # CSRF settings for SPA frontend
-CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1" 
-CSRF_COOKIE_HTTPONLY = False 
-CSRF_COOKIE_SAMESITE = "Lax" 
-CSRF_USE_SESSIONS = True 
+CSRF_COOKIE_SECURE = os.getenv("PRODUCTION") == "1"
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_USE_SESSIONS = True
 
 ROOT_URLCONF = "config.urls"
 
