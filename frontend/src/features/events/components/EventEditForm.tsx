@@ -42,8 +42,8 @@ export function EventEditForm({ event }: EventEditFormProps) {
   });
 
   const updateEventMutation = useMutation({
-    mutationFn: (eventData: any) =>
-      eventsAPIClient.updateEvent(Number(event.id), eventData),
+    mutationFn: (eventData: EventFormData) =>
+      eventsAPIClient.updateEvent(Number(event.id), eventData as unknown as Record<string, unknown>),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["event", event.id] });
       toast.success("Event updated successfully");
@@ -79,7 +79,7 @@ export function EventEditForm({ event }: EventEditFormProps) {
         dtend_utc: d.dtend_local ? localToUtc(d.dtend_local) : null,
       })),
     };
-    updateEventMutation.mutate(submitData);
+    updateEventMutation.mutate(submitData as unknown as EventFormData);
   };
 
   const handleApprove = () => {

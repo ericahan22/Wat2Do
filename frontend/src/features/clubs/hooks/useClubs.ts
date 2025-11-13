@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useApi } from "@/shared/hooks/useApi";
 import type { ClubsResponse } from "@/shared/api";
@@ -17,10 +17,10 @@ export function useClubs() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<ClubsResponse, Error, any, string[], string | undefined>({
+  } = useInfiniteQuery<ClubsResponse, Error, ClubsResponse, string[], string | undefined>({
     queryKey: ["clubs", searchTerm, categoryFilter],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const queryParams: Record<string, any> = {};
+      const queryParams: Record<string, string | undefined> = {};
       
       if (pageParam) {
         queryParams.cursor = pageParam;
@@ -44,12 +44,13 @@ export function useClubs() {
 
   // Flatten all pages into a single array of clubs
   const clubs = useMemo(() => {
-    if (!data?.pages) return [];
-    return data.pages.flatMap((page: ClubsResponse) => page.results);
+    const infiniteData = data as unknown as InfiniteData<ClubsResponse> | undefined;
+    if (!infiniteData?.pages) return [];
+    return infiniteData.pages.flatMap((page: ClubsResponse) => page.results);
   }, [data]);
 
   // Get total count from first page
-  const totalCount = (data?.pages?.[0] as ClubsResponse | undefined)?.totalCount ?? 0;
+  const totalCount = ((data as unknown as InfiniteData<ClubsResponse>)?.pages?.[0] as ClubsResponse | undefined)?.totalCount ?? 0;
 
   const uniqueCategories = useMemo(() => {
     return [

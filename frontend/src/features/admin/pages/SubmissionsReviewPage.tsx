@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useSubmissionsReview } from "@/features/admin/hooks/useSubmissionsReview";
 import { Badge } from "@/shared/components/ui/badge";
 import { Loading } from "@/shared/components/ui/loading";
-import { getSubmissionStatusVariant } from "@/shared/components/badges/EventBadges";
+import { getSubmissionStatusVariant } from "@/shared/lib/eventUtils";
 
 export function SubmissionsReviewPage() {
   const { signOut } = useClerk();

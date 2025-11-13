@@ -105,7 +105,7 @@ class EventsAPIClient {
     food?: string;
     registration: boolean;
     occurrences: Array<{ dtstart_utc: string; dtend_utc?: string; tz?: string }>;
-    all_extracted: any[];
+    all_extracted: unknown[];
   }> {
     const dataForm = new FormData();
     dataForm.append('screenshot', screenshot);
@@ -175,7 +175,7 @@ class EventsAPIClient {
     eventData?: Record<string, unknown>
   ): Promise<{ message: string }> {
     // Event data is now passed flat at top level (not nested)
-    const payload: any = { action };
+    const payload: Record<string, unknown> = { action };
     if (eventData) {
       Object.assign(payload, eventData);
     }

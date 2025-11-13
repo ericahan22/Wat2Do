@@ -132,19 +132,30 @@ def get_events(request):
                 Prefetch('event_dates', queryset=EventDates.objects.order_by('dtstart_utc'))
             )[:limit + 1])
         
-        # Build results with earliest occurrence dates
+        # Build results with most recent upcoming occurrence dates
         results = []
+        now = timezone.now()
+        ninety_minutes_ago = now - timedelta(minutes=90)
+        
         for event in events_list:
-            event_dates = list(event.event_dates.all())
-            earliest_date = event_dates[0] if event_dates else None
+            # Get all event dates and filter for upcoming ones
+            all_dates = list(event.event_dates.all())
+            # Filter to only upcoming dates (>= ninety_minutes_ago to match the filter logic)
+            upcoming_dates = [
+                date for date in all_dates 
+                if date.dtstart_utc >= ninety_minutes_ago
+            ]
+            # Select the most recent upcoming date (first one since they're ordered by dtstart_utc)
+            # If no upcoming dates, fall back to the earliest date overall
+            selected_date = upcoming_dates[0] if upcoming_dates else (all_dates[0] if all_dates else None)
             
             event_data = {
                 "id": event.id,
                 "title": event.title,
                 "description": event.description,
                 "location": event.location,
-                "dtstart_utc": earliest_date.dtstart_utc if earliest_date else None,
-                "dtend_utc": earliest_date.dtend_utc if earliest_date else None,
+                "dtstart_utc": selected_date.dtstart_utc if selected_date else None,
+                "dtend_utc": selected_date.dtend_utc if selected_date else None,
                 "price": event.price,
                 "food": event.food,
                 "registration": event.registration,

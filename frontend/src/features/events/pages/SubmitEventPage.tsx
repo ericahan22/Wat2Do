@@ -63,7 +63,7 @@ export function SubmitEventPage() {
       
       // Convert UTC occurrences to local dates format
       const occurrences = result.occurrences && result.occurrences.length > 0
-        ? result.occurrences.map((occ: any) => ({
+        ? result.occurrences.map((occ: { dtstart_utc?: string; dtend_utc?: string }) => ({
             dtstart_local: occ.dtstart_utc ? utcToLocal(occ.dtstart_utc) : "",
             dtend_local: occ.dtend_utc ? utcToLocal(occ.dtend_utc) : "",
           }))

@@ -1,12 +1,12 @@
 import { useMemo, useRef } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useApi } from "@/shared/hooks/useApi";
 import { getTodayString } from "@/shared/lib/dateUtils";
 import { useMyInterestedEvents } from "./useEventInterest";
-import { EventsResponse } from "@/shared/api/EventsAPIClient";
+import { EventsResponse, type EventsQueryParams } from "@/shared/api/EventsAPIClient";
 import { Event } from "@/features/events";
 
 export function useEvents() {
@@ -33,7 +33,7 @@ export function useEvents() {
   } = useInfiniteQuery<
     EventsResponse,
     Error,
-    any,
+    EventsResponse,
     string[],
     string | undefined
   >({
@@ -47,7 +47,7 @@ export function useEvents() {
       showInterested ? "interested" : "",
     ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const queryParams: Record<string, any> = {};
+      const queryParams: EventsQueryParams = {};
 
       if (pageParam) {
         queryParams.cursor = pageParam;
@@ -90,13 +90,14 @@ export function useEvents() {
 
   // Flatten all pages into a single array of events
   const events = useMemo(() => {
-    if (!data?.pages) return [];
-    return data.pages.flatMap((page: EventsResponse) => page.results);
+    const infiniteData = data as unknown as InfiniteData<EventsResponse> | undefined;
+    if (!infiniteData?.pages) return [];
+    return infiniteData.pages.flatMap((page: EventsResponse) => page.results);
   }, [data]);
 
   // Get total count from first page
   const totalCount =
-    (data?.pages?.[0] as EventsResponse | undefined)?.totalCount ?? 0;
+    ((data as unknown as InfiniteData<EventsResponse>)?.pages?.[0] as EventsResponse | undefined)?.totalCount ?? 0;
 
   // Filter events by interested if the filter is active
   const filteredEvents = useMemo(() => {

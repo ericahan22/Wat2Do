@@ -16,7 +16,7 @@ import {
 import { formatEventDate } from "@/shared/lib/dateUtils";
 import type { EventSubmission } from "@/features/events/types/submission";
 import { useNavigate } from "react-router-dom";
-import { getSubmissionStatusVariant } from "@/shared/components/badges/EventBadges";
+import { getSubmissionStatusVariant } from "@/shared/lib/eventUtils";
 
 export function MySubmissionsPage() {
   const {
