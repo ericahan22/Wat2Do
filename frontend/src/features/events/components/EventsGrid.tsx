@@ -370,12 +370,12 @@ const EventsGrid = memo(
         {/* Events Grid with Section Headers */}
         <div className="space-y-6">
           {[
+            "past",
             "today",
             "tomorrow",
             "later this week",
             "later this month",
             "later",
-            "past",
           ].map((category) => {
             const events = groupedEvents[category];
             if (events.length === 0) return null;
