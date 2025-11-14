@@ -1,19 +1,19 @@
-from functools import wraps
 import logging
+from functools import wraps
 
-from clerk_backend_api import authenticate_request, AuthenticateRequestOptions
+from clerk_backend_api import AuthenticateRequestOptions, authenticate_request
 from django.contrib.auth import authenticate
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import AnonymousUser, User
 from django.http import JsonResponse
 
-from config.settings.base import CLERK_SECRET_KEY, CLERK_AUTHORIZED_PARTIES
+from config.settings.base import CLERK_AUTHORIZED_PARTIES, CLERK_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 
 
 class JwtAuthBackend(BaseBackend):
-    def authenticate(self, request, **kwargs):
+    def authenticate(self, request, **_kwargs):
         try:
             state = authenticate_request(
                 request,
@@ -25,15 +25,16 @@ class JwtAuthBackend(BaseBackend):
 
             if not state.is_signed_in:
                 request.error_message = getattr(state, "message", "Not signed in")
-                logger.warning("JWT auth: Clerk rejected token: %s", request.error_message)
+                logger.warning(
+                    "JWT auth: Clerk rejected token: %s", request.error_message
+                )
                 return None
 
             request.auth_payload = state.payload
-            
+
             django_user = AnonymousUser()
             django_user.username = state.payload.get("sub") or "clerk_user"
             return django_user
-
 
         except Exception:
             request.error_message = "Unable to authenticate user"
@@ -55,13 +56,14 @@ def jwt_required(view_func):
             error = getattr(request, "error_message", "User not authenticated")
             return JsonResponse({"detail": error}, status=401)
         request.user = user
-        
+
         # Extract user_id and is_admin from auth_payload (set by JwtAuthBackend)
         auth_payload = getattr(request, "auth_payload", {})
         request.user_id = auth_payload.get("sub") or auth_payload.get("id")
         request.is_admin = auth_payload.get("role") == "admin"
-        
+
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
 
 
@@ -71,6 +73,7 @@ def optional_jwt(view_func):
     If a token is provided and valid, populates request.auth_payload, request.user_id, and request.is_admin.
     If no token or invalid token, continues without error (for public endpoints).
     """
+
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
         try:
@@ -81,7 +84,7 @@ def optional_jwt(view_func):
                     authorized_parties=CLERK_AUTHORIZED_PARTIES,
                 ),
             )
-            
+
             if state.is_signed_in:
                 request.auth_payload = state.payload
                 # Extract user_id (tries 'sub' first, falls back to 'id')
@@ -103,8 +106,9 @@ def optional_jwt(view_func):
             request.user_id = None
             request.is_admin = False
             request.user = AnonymousUser()
-        
+
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view
 
 
@@ -115,4 +119,5 @@ def admin_required(view_func):
         if not getattr(request, "is_admin", False):
             return JsonResponse({"message": "Admin only"}, status=403)
         return view_func(request, *args, **kwargs)
+
     return _wrapped_view

@@ -4,17 +4,6 @@ import { getEventStatus, isEventNew } from "@/shared/lib/eventUtils";
 import type { Event } from "@/features/events/types/events";
 
 /**
- * Maps submission status to badge variant
- * @param status - Submission status (approved, rejected, pending)
- * @returns Badge variant string
- */
-export function getSubmissionStatusVariant(status: string): "success" | "destructive" | "warning" {
-  if (status === "approved") return "success";
-  if (status === "rejected") return "destructive";
-  return "warning";
-}
-
-/**
  * Badge component for event status (live, soon)
  */
 export function EventStatusBadge({ event }: { event: Event }) {

@@ -56,7 +56,9 @@ def fetch_events():
 
     try:
         today = date.today()
-        qs = EventsModel.objects.filter(event_dates__dtstart_utc__date__gte=today).order_by("event_dates__dtstart_utc")
+        qs = EventsModel.objects.filter(
+            event_dates__dtstart_utc__date__gte=today
+        ).order_by("event_dates__dtstart_utc")
         for e in qs:
             events_list.append(
                 {
@@ -118,7 +120,7 @@ def main():
                 "Cultural",
                 "Religious",
                 "Advocacy & Causes",
-                "Sales & Fundraising"
+                "Sales & Fundraising",
             ]
             for i, category in enumerate(categories):
                 f.write(f'  "{category}"')
@@ -146,7 +148,11 @@ def main():
 
             rss_items = []
             for ev in events:
-                pub_dt = ev.get("event_dates__dtstart_utc") or ev.get("added_at") or last_build_dt
+                pub_dt = (
+                    ev.get("event_dates__dtstart_utc")
+                    or ev.get("added_at")
+                    or last_build_dt
+                )
                 pub_dt_parsed = parse_dt_to_utc(pub_dt) or last_build_dt
                 pub_str = pub_dt_parsed.strftime("%a, %d %b %Y %H:%M:%S GMT")
 

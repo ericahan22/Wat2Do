@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("events", "0029_remove_events_latitude_remove_events_longitude"),
     ]
@@ -15,4 +14,3 @@ class Migration(migrations.Migration):
             name="admin_notes",
         ),
     ]
-

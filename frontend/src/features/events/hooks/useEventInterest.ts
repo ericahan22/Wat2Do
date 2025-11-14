@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { useApi } from "@/shared/hooks/useApi";
+import type { EventsResponse } from "@/shared/api/EventsAPIClient";
+import type { Event } from "@/features/events/types/events";
 
 /**
  * Hook to get all event IDs the current user is interested in
@@ -59,14 +61,14 @@ export function useToggleEventInterest(eventId: number) {
       });
 
       // Optimistically update event interest counts in events list (infinite query structure)
-      queryClient.setQueriesData<InfiniteData<any>>({ queryKey: ["events"] }, (oldData) => {
+      queryClient.setQueriesData<InfiniteData<EventsResponse>>({ queryKey: ["events"] }, (oldData) => {
         if (!oldData?.pages) return oldData;
         
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page: EventsResponse) => ({
             ...page,
-            results: page.results.map((event: any) => {
+            results: page.results.map((event: Event) => {
               if (event.id === eventId) {
                 const delta = nextInterested ? 1 : -1;
                 return {
@@ -84,14 +86,14 @@ export function useToggleEventInterest(eventId: number) {
     },
     onSuccess: (response) => {
       // Update the event's interest count with the actual server value (infinite query structure)
-      queryClient.setQueriesData<InfiniteData<any>>({ queryKey: ["events"] }, (oldData) => {
+      queryClient.setQueriesData<InfiniteData<EventsResponse>>({ queryKey: ["events"] }, (oldData) => {
         if (!oldData?.pages) return oldData;
         
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page: EventsResponse) => ({
             ...page,
-            results: page.results.map((event: any) => {
+            results: page.results.map((event: Event) => {
               if (event.id === eventId) {
                 return {
                   ...event,
@@ -111,14 +113,14 @@ export function useToggleEventInterest(eventId: number) {
       }
       
       // Rollback event interest count (infinite query structure)
-      queryClient.setQueriesData<InfiniteData<any>>({ queryKey: ["events"] }, (oldData) => {
+      queryClient.setQueriesData<InfiniteData<EventsResponse>>({ queryKey: ["events"] }, (oldData) => {
         if (!oldData?.pages) return oldData;
         
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
+          pages: oldData.pages.map((page: EventsResponse) => ({
             ...page,
-            results: page.results.map((event: any) => {
+            results: page.results.map((event: Event) => {
               if (event.id === eventId) {
                 const delta = nextInterested ? -1 : 1; // Reverse the optimistic update
                 return {

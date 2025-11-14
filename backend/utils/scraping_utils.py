@@ -1,5 +1,6 @@
 import re
 from difflib import SequenceMatcher
+
 from scraping.logging_config import logger
 
 
@@ -29,7 +30,9 @@ def get_post_image_url(post):
         if post._node.get("image_versions2"):
             return post._node["image_versions2"]["candidates"][0]["url"]
         if post._node.get("carousel_media"):
-            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0]["url"]
+            return post._node["carousel_media"][0]["image_versions2"]["candidates"][0][
+                "url"
+            ]
         if post._node.get("display_url"):
             return post._node["display_url"]
         return None

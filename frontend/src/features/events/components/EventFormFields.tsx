@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { Plus, Trash2, Undo2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -36,7 +36,7 @@ interface DeletedDate {
 }
 
 interface EventFormFieldsProps {
-  form: any; // UseFormReturn from react-hook-form
+  form: UseFormReturn<EventFormData>;
   isDisabled?: boolean;
   showUndoHistory?: boolean;
 }

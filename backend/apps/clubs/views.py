@@ -25,15 +25,15 @@ def get_clubs(request):
         limit = 50
 
         queryset = Clubs.objects.all().order_by("id")
-        
+
         # Apply search filter
         if search_term:
             queryset = queryset.filter(club_name__icontains=search_term)
-        
+
         # Apply category filter
         if category_filter and category_filter.lower() != "all":
             queryset = queryset.filter(categories__icontains=category_filter)
-        
+
         # Handle cursor-based pagination
         if cursor:
             try:
@@ -44,24 +44,34 @@ def get_clubs(request):
                     {"error": "Invalid cursor format"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        
+
         # Get total count for the filtered queryset
         total_count = queryset.count()
-        
+
         # Fetch one more than limit to check if there are more results
-        results = list(queryset.values("id", "club_name", "categories", "club_page", "ig", "discord", "club_type")[:limit + 1])
-        
+        results = list(
+            queryset.values(
+                "id",
+                "club_name",
+                "categories",
+                "club_page",
+                "ig",
+                "discord",
+                "club_type",
+            )[: limit + 1]
+        )
+
         # Determine if there's a next page
         has_more = len(results) > limit
         if has_more:
             results = results[:limit]  # Remove the extra item
-            
+
             # Generate next cursor from last item
             last_club = results[-1]
-            next_cursor = str(last_club['id'])
+            next_cursor = str(last_club["id"])
         else:
             next_cursor = None
-        
+
         # Ensure categories is always a list for each club
         for club in results:
             categories = club.get("categories")
@@ -76,11 +86,13 @@ def get_clubs(request):
             else:
                 club["categories"] = []
 
-        return Response({
-            "results": results,
-            "nextCursor": next_cursor,
-            "hasMore": next_cursor is not None,
-            "totalCount": total_count
-        })
+        return Response(
+            {
+                "results": results,
+                "nextCursor": next_cursor,
+                "hasMore": next_cursor is not None,
+                "totalCount": total_count,
+            }
+        )
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

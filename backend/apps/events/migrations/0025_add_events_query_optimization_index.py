@@ -4,21 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0024_eventinterest'),
+        ("events", "0024_eventinterest"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='events',
+            model_name="events",
             index=models.Index(
-                fields=['school', 'status', 'dtstart_utc', 'dtend_utc'],
-                name='events_query_opt_idx'
+                fields=["school", "status", "dtstart_utc", "dtend_utc"],
+                name="events_query_opt_idx",
             ),
         ),
     ]
-
-
-
-

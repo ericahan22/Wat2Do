@@ -1,16 +1,17 @@
+import concurrent.futures
 import os
 import sys
+import threading
+
 import django
 import openai
-import concurrent.futures
-import threading
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from apps.events.models import Events
-from shared.constants.event_categories import EVENT_CATEGORIES
+from apps.events.models import Events  # noqa: E402
+from shared.constants.event_categories import EVENT_CATEGORIES  # noqa: E402
 
 DEFAULT_CATEGORY = "Uncategorized"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
@@ -42,8 +43,13 @@ def get_categories_from_openai(title, description, event_id=None):
         content = response.choices[0].message.content.strip()
         print(f"[{event_id}] OpenAI response: {content}")
         if content.startswith("```"):
-            content = content.split("```")[-2].strip() if "```" in content[3:] else content.replace("```json", "").replace("```", "").strip()
+            content = (
+                content.split("```")[-2].strip()
+                if "```" in content[3:]
+                else content.replace("```json", "").replace("```", "").strip()
+            )
         import json
+
         cats = json.loads(content)
         if isinstance(cats, list) and all(isinstance(c, str) for c in cats):
             valid_cats = [c for c in cats if c in EVENT_CATEGORIES]
@@ -51,7 +57,9 @@ def get_categories_from_openai(title, description, event_id=None):
                 print(f"[{event_id}] Valid categories: {valid_cats}")
                 return valid_cats
             else:
-                print(f"[{event_id}] No valid categories found in response, using default.")
+                print(
+                    f"[{event_id}] No valid categories found in response, using default."
+                )
     except Exception as e:
         print(f"[{event_id}] OpenAI error: {e}")
     return [DEFAULT_CATEGORY]
@@ -62,7 +70,9 @@ def process_event(event):
     description = event.description or ""
     print(f"\nProcessing event (ID: {event.id})")
     print(f"[{event.id}] Title: {title}")
-    print(f"[{event.id}] Description: {description[:100]}{'...' if len(description) > 100 else ''}")
+    print(
+        f"[{event.id}] Description: {description[:100]}{'...' if len(description) > 100 else ''}"
+    )
     cats = get_categories_from_openai(title, description, event_id=event.id)
     with lock:
         if event.categories != cats:
@@ -84,7 +94,9 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
         results = list(executor.map(process_event, events))
         updated = sum(results)
-    print(f"\nDone. Updated {updated} out of {len(events)} uncategorized events with OpenAI-categorized categories.")
+    print(
+        f"\nDone. Updated {updated} out of {len(events)} uncategorized events with OpenAI-categorized categories."
+    )
 
 
 if __name__ == "__main__":

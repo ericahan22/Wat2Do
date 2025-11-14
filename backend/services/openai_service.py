@@ -34,7 +34,9 @@ class OpenAIService:
             if api_key:
                 self.client = OpenAI(api_key=api_key)
             else:
-                print("Warning: OPENAI_API_KEY not set. OpenAI functionality will be limited.")
+                print(
+                    "Warning: OPENAI_API_KEY not set. OpenAI functionality will be limited."
+                )
         except Exception as e:
             print(f"Warning: Failed to initialize OpenAI client: {e}")
             self.client = None
@@ -104,7 +106,7 @@ class OpenAIService:
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract ZERO OR MORE events from caption text/image.
 
-        - Return an array of JSON objects, each object representing a unique event. 
+        - Return an array of JSON objects, each object representing a unique event.
         """
         # Get current date and day of week for context
         now = datetime.now()
@@ -113,7 +115,9 @@ class OpenAIService:
 
         # Use post creation time if provided, otherwise use current time
         context_datetime = post_created_at if post_created_at else now
-        context_datetime = pytz_timezone("America/Toronto").localize(context_datetime.replace(tzinfo=None))
+        context_datetime = pytz_timezone("America/Toronto").localize(
+            context_datetime.replace(tzinfo=None)
+        )
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")
@@ -264,9 +268,7 @@ class OpenAIService:
                                 event_obj[field] = None
                             elif field in ["registration"]:
                                 event_obj[field] = False
-                            elif field == "categories":
-                                event_obj[field] = []
-                            elif field == "occurrences":
+                            elif field in ("categories", "occurrences"):
                                 event_obj[field] = []
                             else:
                                 event_obj[field] = ""
@@ -275,7 +277,11 @@ class OpenAIService:
                         event_obj["source_image_url"] = source_image_url
 
                     if not isinstance(event_obj.get("categories"), list):
-                        event_obj["categories"] = [str(event_obj["categories"])] if event_obj["categories"] else []
+                        event_obj["categories"] = (
+                            [str(event_obj["categories"])]
+                            if event_obj["categories"]
+                            else []
+                        )
 
                     occurrences = event_obj.get("occurrences") or []
                     cleaned_occurrences: list[dict] = []
@@ -299,7 +305,9 @@ class OpenAIService:
                                 }
                             )
 
-                    cleaned_occurrences.sort(key=lambda item: item.get("dtstart_utc", ""))
+                    cleaned_occurrences.sort(
+                        key=lambda item: item.get("dtstart_utc", "")
+                    )
                     event_obj["occurrences"] = cleaned_occurrences
 
                     cleaned_events.append(event_obj)
@@ -318,6 +326,7 @@ class OpenAIService:
             logger.error(f"Traceback: {traceback.format_exc()}")
             # Return empty list if API call fails
             return []
+
 
 # Singleton instance
 openai_service = OpenAIService()

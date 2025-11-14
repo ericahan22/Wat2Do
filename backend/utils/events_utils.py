@@ -1,4 +1,3 @@
-
 def determine_display_handle(event):
     """
     Determine a display handle for an event.

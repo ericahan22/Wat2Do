@@ -7,5 +7,5 @@ EVENT_CATEGORIES = [
     "Cultural",
     "Religious",
     "Advocacy & Causes",
-    "Sales & Fundraising"
+    "Sales & Fundraising",
 ]

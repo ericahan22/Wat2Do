@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('events', '0030_remove_eventsubmission_admin_notes'),
+        ("events", "0030_remove_eventsubmission_admin_notes"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='events',
-            name='raw_json',
+            model_name="events",
+            name="raw_json",
         ),
     ]
