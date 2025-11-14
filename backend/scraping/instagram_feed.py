@@ -40,7 +40,7 @@ from utils.scraping_utils import (
 from utils.date_utils import parse_utc_datetime
 
 
-MAX_POSTS = int(os.getenv("MAX_POSTS", "30"))
+MAX_POSTS = int(os.getenv("MAX_POSTS", "15"))
 MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
@@ -311,38 +311,6 @@ def get_seen_shortcodes():
         return set()
 
 
-def safe_feed_posts(loader, retries=3, backoff=60):
-    """
-    Yield posts from loader.get_feed_posts(), retrying on network errors.
-    On error, re-instantiate the session and skip already-yielded posts.
-    """
-    seen_shortcodes = set()
-    attempts = 0
-    while attempts < retries:
-        try:
-            for post in loader.get_feed_posts():
-                if hasattr(post, "shortcode"):
-                    if post.shortcode in seen_shortcodes:
-                        continue
-                    seen_shortcodes.add(post.shortcode)
-                yield post
-                time.sleep(random.uniform(30, 90))
-            break  # Finished all posts
-        except (ReadTimeout, ConnectionError, requests.exceptions.SSLError) as e:
-            attempts += 1
-            logger.warning(f"Network error: {e!s}. Retrying in {backoff} seconds (attempt {attempts}/{retries})...")
-            time.sleep(backoff)
-            try:
-                new_loader = session()
-                loader.__dict__.update(new_loader.__dict__)
-                logger.info("Session re-instantiated successfully. Continuing feed scrape.")
-            except Exception as session_e:
-                logger.error(f"Failed to re-instantiate session: {session_e}")
-                break
-    if attempts >= retries:
-        logger.error("Too many consecutive network errors. Aborting feed scrape.")
-
-
 def process_recent_feed(
     loader,
     cutoff=None,
@@ -365,7 +333,7 @@ def process_recent_feed(
     seen_shortcodes = get_seen_shortcodes()
 
     try:
-        for post in safe_feed_posts(loader):
+        for post in loader.get_feed_posts():
             try:
                 post_time = timezone.make_aware(post.date_utc) if timezone.is_naive(post.date_utc) else post.date_utc
                 if post_time < cutoff:
@@ -496,6 +464,8 @@ def process_recent_feed(
                         f"Reached {max_consec_old_posts} consecutive old posts, stopping."
                     )
                     break
+                
+            time.sleep(random.uniform(30, 90))
 
         if not termination_reason:
             termination_reason = "no_more_posts"
@@ -513,7 +483,7 @@ def process_recent_feed(
     logger.info(f"Added {events_added} event(s) to Supabase")
 
 
-def test_zyte_proxy(country="CA"):
+def create_proxy_session(country="CA"):
     """
     Patch requests.Session to route through Zyte with geolocation,
     test Zyte proxy routing and geolocation
@@ -526,17 +496,11 @@ def test_zyte_proxy(country="CA"):
         logger.warning(
             "ZYTE_PROXY not set - skipping proxied geolocation test and trying direct request"
         )
-        try:
-            resp = requests.get("https://ipapi.co/json/", timeout=15)
-            resp.raise_for_status()
-            logger.info("Direct geolocation test succeeded")
-            return True
-        except Exception as e:
-            logger.warning(f"Direct geolocation test failed: {e!s}")
-            return False
-
-    old_request = requests.Session.request
-
+        return requests.Session()
+    
+    session = requests.Session()
+    old_request = session.request
+    
     def zyte_request(self, method, url, **kwargs):
         headers = kwargs.get("headers", {})
         headers["Zyte-Geolocation"] = country
@@ -547,29 +511,30 @@ def test_zyte_proxy(country="CA"):
         kwargs["timeout"] = kwargs.get("timeout", 30)
         return old_request(self, method, url, **kwargs)
 
-    requests.Session.request = zyte_request
-
+    session.request = zyte_request.__get__(session, requests.Session)
     logger.debug(f"Testing Zyte proxy geolocation: {country}")
     try:
-        resp = requests.get(
-            "https://ipapi.co/json/",
-            timeout=30,
-            verify=str(zyte_cert_path) if zyte_cert_path else True,
-            proxies={"http": zyte_proxy, "https": zyte_proxy},
-        )
+        resp = session.get("https://ipapi.co/json/")
         resp.raise_for_status()
         data = resp.json()
         logger.debug("Connected via Zyte proxy")
         logger.debug(f"Public IP: {data.get('ip')}")
         logger.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
         logger.debug(f"City: {data.get('city')}")
+        return session
     except Exception as e:
         logger.warning(f"Proxied geolocation failed: {e!s}")
-    return True
+        return None
 
 
 def session():
+    proxied_session = create_proxy_session("CA")
+    if not proxied_session:
+        logger.critical("Failed to create proxied session, aborting...")
+        return None
+    
     L = Instaloader(user_agent=random.choice(USER_AGENTS))
+    L.context._session = proxied_session
     L.context.request_timeout = 120
     L.context.max_connection_attempts = 5
     try:
@@ -603,11 +568,20 @@ def session():
 
 
 if __name__ == "__main__":
-    test_zyte_proxy("CA")
-    logger.info("Attemping to load Instagram session...")
-    L = session()
-    if L:
-        logger.info("Session created successfully!")
-        process_recent_feed(L)
-    else:
-        logger.critical("Failed to initialize Instagram session, stopping...")
+    lock_file_path = Path(__file__).parent / "scrape.lock"
+    if lock_file_path.exists():
+        sys.exit()
+    try:
+        lock_file_path.touch()
+        logger.info("Attemping to load Instagram session...")
+        L = session()
+        if L:
+            logger.info("Session created successfully!")
+            process_recent_feed(L)
+        else:
+            logger.critical("Failed to initialize Instagram session, stopping...")
+    except Exception as e:
+        logger.error(f"An uncaught exception occurred: {e}")
+    finally:
+        if lock_file_path.exists():
+            lock_file_path.unlink()

@@ -2,8 +2,8 @@ name: Scrape Instagram, Update Events DB, Update Static Data
 
 on:
   schedule:
-    - cron: '0 3,12,17,22 * * *'  # 11pm, 8am, 1pm, 6pm EST
-  workflow_dispatch:      # Optional manual trigger
+    - cron: '0 12-23/4 * * *'  # 7am, 11am, 3pm, 7pm, 11pm EST
+  workflow_dispatch:
     inputs:
       run_scraper:
         required: true
@@ -12,7 +12,7 @@ on:
       MAX_POSTS:
         required: false
         type: number
-        default: 30
+        default: 15
       CUTOFF_DAYS:
         required: false
         type: number
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
     env:
-      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '30' }}
+      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '15' }}
       CUTOFF_DAYS: ${{ github.event.inputs.CUTOFF_DAYS || '2' }}
       PRODUCTION: '1'
       DJANGO_SETTINGS_MODULE: 'config.settings.development'
