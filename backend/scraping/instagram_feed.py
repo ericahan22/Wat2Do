@@ -372,7 +372,7 @@ def process_recent_feed(
                     raw_image_url = post.thumbnail_url
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
-                    source_image_url = upload_image_from_url(raw_image_url)
+                    source_image_url = upload_image_from_url(str(raw_image_url))
                     logger.debug(
                         f"[{post_shortcode}] [{post_username}] Uploaded image to S3: {source_image_url}"
                     )
@@ -492,6 +492,9 @@ def process_recent_feed(
         if not termination_reason:
             termination_reason = "no_more_posts"
 
+    except LoginRequired:
+        logger.warning("LoginRequired exception caught in process_recent_feed. Re-raising.")
+        raise
     except Exception as e:
         # Top-level errors (e.g., loader failure / auth)
         termination_reason = "error"
@@ -549,6 +552,17 @@ def create_proxy_session(country="CA"):
         return None
 
 
+def get_session_file_path():
+    """Helper function to get the consistent session file path"""
+    try:
+        SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
+        SESSION_CACHE_DIR.mkdir(exist_ok=True)
+        session_file = SESSION_CACHE_DIR / f"{USERNAME}_session.json"
+    except Exception:
+        session_file = Path(__file__).resolve().parent.parent / f"{USERNAME}_session.json"
+    return session_file
+
+
 def session():
     """
     Creates an instagrapi Client, injects the Zyte proxied session,
@@ -563,43 +577,23 @@ def session():
     cl.session = proxied_session
     cl.session.headers.update({"User-Agent": random.choice(USER_AGENTS)})
     cl.request_timeout = 120
-    try:
-        SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
-        SESSION_CACHE_DIR.mkdir(exist_ok=True)
-        session_file = SESSION_CACHE_DIR / f"{USERNAME}_session.json"
-    except Exception:
-        session_file = Path(__file__).resolve().parent.parent / f"{USERNAME}_session.json"
+    session_file = get_session_file_path()
+
     try:
         if session_file.exists():
             cl.load_settings(session_file)
             logger.info(f"Loaded session from file: {session_file!s}")
-            # Test session
-            cl.get_timeline_feed()
-            logger.info("Session file is valid.")
         else:
             logger.info("No session file found, falling back to SESSIONID from env")
             if not SESSIONID:
                 raise ValueError("SESSIONID not found in .env, cannot login.")
             cl.login_by_sessionid(SESSIONID)
             logger.info("Logged in using SESSIONID.")
-        # Save session
-        cl.dump_settings(session_file)
-        return cl
-    except LoginRequired:
-        logger.warning("Session file was invalid or expired. Attempting login with USERNAME/PASSWORD.")
-        try:
-            if not USERNAME or not PASSWORD:
-                raise ValueError("USERNAME or PASSWORD not found in .env, cannot login.")
-            cl.login(USERNAME, PASSWORD)
             cl.dump_settings(session_file)
-            logger.info("Logged in successfully with username/password.")
-            return cl
-        except Exception as login_e:
-            logger.error(f"Failed to login with USERNAME/PASSWORD: {login_e}")
-            raise
+        return cl
     except Exception as e:
         logger.error(f"Failed to initialize session: {e}")
-        raise
+        return cl
 
 
 if __name__ == "__main__":
@@ -610,13 +604,30 @@ if __name__ == "__main__":
         lock_file_path.touch()
         logger.info("Attemping to load Instagram session...")
         cl = session()
-        if cl:
-            logger.info("Session created successfully!")
+        if not cl:
+             logger.critical("Failed to initialize Instagram session, stopping...")
+             sys.exit()
+        logger.info("Session object created, attempting to process feed...")
+        try:
             process_recent_feed(cl)
-        else:
-            logger.critical("Failed to initialize Instagram session, stopping...")
+        except LoginRequired:
+            logger.warning("Session was invalid or expired. Attempting login with USERNAME/PASSWORD.")
+            try:
+                if not USERNAME or not PASSWORD:
+                    raise ValueError("USERNAME or PASSWORD not found in .env, cannot login.")
+                cl.settings = {} 
+                cl.login(USERNAME, PASSWORD)
+                session_file = get_session_file_path()
+                cl.dump_settings(session_file)
+                logger.info("Logged in successfully with username/password. Re-running process.")
+                process_recent_feed(cl)
+            except Exception as login_e:
+                logger.error(f"Failed to login with USERNAME/PASSWORD: {login_e}")
+                raise
+        logger.info("Session created/validated and feed processed successfully!")
     except Exception as e:
         logger.error(f"An uncaught exception occurred: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
     finally:
         if lock_file_path.exists():
             lock_file_path.unlink()
