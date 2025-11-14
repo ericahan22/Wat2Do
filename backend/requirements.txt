@@ -11,7 +11,7 @@ django-ratelimit==3.0.1
 # Scraping and web utilities
 --find-links=./wheels
 setuptools>=65.5.0
-instaloader==4.14.2+custom1
+instagrapi
 python-dotenv
 python-dateutil==2.9.0.post0
 requests==2.31.0

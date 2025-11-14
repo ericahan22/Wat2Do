@@ -19,8 +19,8 @@ from pathlib import Path
 import requests
 from django.utils import timezone
 from dotenv import load_dotenv
-from instaloader import Instaloader
-from requests.exceptions import ConnectionError, ReadTimeout
+from instagrapi import Client
+from instagrapi.exceptions import LoginRequired
 
 from apps.clubs.models import Clubs
 from apps.events.models import EventDates, Events, IgnoredPost
@@ -33,7 +33,6 @@ from services.storage_service import upload_image_from_url
 from shared.constants.user_agents import USER_AGENTS
 from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import (
-    get_post_image_url,
     jaccard_similarity,
     normalize,
     sequence_similarity,
@@ -61,7 +60,6 @@ SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 def is_duplicate_event(event_data):
     """Check for duplicate events using title, occurrences, location, and description."""
-
     title = event_data.get("title") or ""
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
@@ -319,7 +317,7 @@ def get_seen_shortcodes():
 
 
 def process_recent_feed(
-    loader,
+    cl,
     cutoff=None,
     max_posts=MAX_POSTS,
     max_consec_old_posts=MAX_CONSEC_OLD_POSTS,
@@ -340,60 +338,65 @@ def process_recent_feed(
     seen_shortcodes = get_seen_shortcodes()
 
     try:
-        for post in loader.get_feed_posts():
+        posts_iterator = cl.feed_timeline()
+        logger.info(f"Fetched {len(posts_iterator)} posts from timeline feed.")
+
+        for post in posts_iterator:
             try:
-                post_time = (
-                    timezone.make_aware(post.date_utc)
-                    if timezone.is_naive(post.date_utc)
-                    else post.date_utc
-                )
+                post_time = post.taken_at
+                post_shortcode = post.code
+                post_username = post.user.username
+
                 if post_time < cutoff:
                     consec_old_posts += 1
                     logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping old post; consec_old_posts={consec_old_posts}"
+                        f"[{post_shortcode}] [{post_username}] Skipping old post; consec_old_posts={consec_old_posts}"
                     )
                     continue
-                if post.shortcode in seen_shortcodes:
+                if post_shortcode in seen_shortcodes:
                     logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping previously seen post"
+                        f"[{post_shortcode}] [{post_username}] Skipping previously seen post"
                     )
                     continue
 
                 consec_old_posts = 0
                 logger.info("-" * 100)
                 logger.info(
-                    f"[{post.shortcode}] [{post.owner_username}] Processing post"
+                    f"[{post_shortcode}] [{post_username}] Processing post"
                 )
 
-                # Safely get image URL and upload to S3
-                raw_image_url = get_post_image_url(post)
+                raw_image_url = None
+                if post.media_type == 8 and post.resources:  # Carousel
+                    raw_image_url = post.resources[0].thumbnail_url
+                elif post.thumbnail_url:  # Single photo or video thumbnail
+                    raw_image_url = post.thumbnail_url
                 if raw_image_url:
                     time.sleep(random.uniform(1, 3))
                     source_image_url = upload_image_from_url(raw_image_url)
                     logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}"
+                        f"[{post_shortcode}] [{post_username}] Uploaded image to S3: {source_image_url}"
                     )
                 else:
                     logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
+                        f"[{post_shortcode}] [{post_username}] No image URL found for post, skipping image upload"
                     )
                     source_image_url = None
 
                 extracted_list = extract_events_from_caption(
-                    post.caption, source_image_url, post.date_local
+                    post.caption_text, source_image_url, post.taken_at
                 )
                 if not extracted_list:
                     logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
+                        f"[{post_shortcode}] [{post_username}] AI client returned no events for post"
                     )
                     continue
 
-                source_url = f"https://www.instagram.com/p/{post.shortcode}/"
+                source_url = f"https://www.instagram.com/p/{post_shortcode}/"
                 for idx, event_data in enumerate(extracted_list):
                     added_to_db = None
                     try:
                         logger.debug(
-                            f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
+                            f"[{post_shortcode}] [{post_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
                         )
 
                         if not (
@@ -409,7 +412,7 @@ def process_recent_feed(
                             if not event_data.get("occurrences"):
                                 missing_fields.append("occurrences")
                             logger.warning(
-                                f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
+                                f"[{post_shortcode}] [{post_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
                             )
                             added_to_db = "missing_fields"
                             continue
@@ -421,55 +424,55 @@ def process_recent_feed(
                             dtstart_utc = parse_utc_datetime(dtstart_utc)
                         if dtstart_utc and dtstart_utc < now:
                             logger.info(
-                                f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
+                                f"[{post_shortcode}] [{post_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
                             )
                             added_to_db = "past_date"
                             continue
 
                         result = insert_event_to_db(
-                            event_data, post.owner_username, source_url
+                            event_data, post_username, source_url
                         )
                         if result is True:
                             events_added += 1
                             logger.info(
-                                f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
+                                f"[{post_shortcode}] [{post_username}] Successfully added event '{event_data.get('title')}'"
                             )
                             added_to_db = "success"
                         elif result == "duplicate":
                             logger.warning(
-                                f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
+                                f"[{post_shortcode}] [{post_username}] Duplicate event, not added: '{event_data.get('title')}'"
                             )
                             added_to_db = "duplicate"
                         else:
                             logger.error(
-                                f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
+                                f"[{post_shortcode}] [{post_username}] Failed to add event '{event_data.get('title')}'"
                             )
                             added_to_db = "failed"
                     except Exception as inner_e:
                         logger.error(
-                            f"[{post.shortcode}] [{post.owner_username}] Error handling extracted event index {idx}: {inner_e!s}"
+                            f"[{post_shortcode}] [{post_username}] Error handling extracted event index {idx}: {inner_e!s}"
                         )
                         added_to_db = "error"
                     finally:
                         append_event_to_csv(
                             event_data,
-                            post.owner_username,
+                            post_username,
                             source_url,
                             added_to_db=added_to_db or "unknown",
                         )
 
             except Exception as e:
                 logger.error(
-                    f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
+                    f"[{post_shortcode}] [{post_username}] Error processing post: {e!s}"
                 )
                 logger.error(
-                    f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}"
+                    f"[{post_shortcode}] [{post_username}] Traceback: {traceback.format_exc()}"
                 )
                 time.sleep(random.uniform(3, 8))
                 continue
             finally:
                 posts_processed += 1
-                IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
+                IgnoredPost.objects.get_or_create(shortcode=post_shortcode)
                 
                 if posts_processed > max_posts:
                     termination_reason = f"reached_max_posts={max_posts}"
@@ -547,42 +550,55 @@ def create_proxy_session(country="CA"):
 
 
 def session():
+    """
+    Creates an instagrapi Client, injects the Zyte proxied session,
+    and loads the session from file or environment variables.
+    """
     proxied_session = create_proxy_session("CA")
     if not proxied_session:
         logger.critical("Failed to create proxied session, aborting...")
         return None
     
-    L = Instaloader(user_agent=random.choice(USER_AGENTS))
-    L.context._session = proxied_session
-    L.context.request_timeout = 120
-    L.context.max_connection_attempts = 5
+    cl = Client()
+    cl.session = proxied_session
+    cl.session.headers.update({"User-Agent": random.choice(USER_AGENTS)})
+    cl.request_timeout = 120
     try:
         SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
         SESSION_CACHE_DIR.mkdir(exist_ok=True)
-        files = [p for p in SESSION_CACHE_DIR.iterdir() if p.is_file()]
-        session_file = files[0] if files else SESSION_CACHE_DIR / f"session-{USERNAME}"
+        session_file = SESSION_CACHE_DIR / f"{USERNAME}_session.json"
     except Exception:
-        session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
+        session_file = Path(__file__).resolve().parent.parent / f"{USERNAME}_session.json"
     try:
         if session_file.exists():
-            L.load_session_from_file(USERNAME, filename=str(session_file))
+            cl.load_settings(session_file)
             logger.info(f"Loaded session from file: {session_file!s}")
+            # Test session
+            cl.get_timeline_feed()
+            logger.info("Session file is valid.")
         else:
-            logger.info("No session file found, falling back to env")
-            L.load_session(
-                USERNAME,
-                {
-                    "csrftoken": CSRFTOKEN,
-                    "sessionid": SESSIONID,
-                    "ds_user_id": DS_USER_ID,
-                    "mid": MID,
-                    "ig_did": IG_DID,
-                },
-            )
-        L.save_session_to_file(filename=str(session_file))
-        return L
+            logger.info("No session file found, falling back to SESSIONID from env")
+            if not SESSIONID:
+                raise ValueError("SESSIONID not found in .env, cannot login.")
+            cl.login_by_sessionid(SESSIONID)
+            logger.info("Logged in using SESSIONID.")
+        # Save session
+        cl.dump_settings(session_file)
+        return cl
+    except LoginRequired:
+        logger.warning("Session file was invalid or expired. Attempting login with USERNAME/PASSWORD.")
+        try:
+            if not USERNAME or not PASSWORD:
+                raise ValueError("USERNAME or PASSWORD not found in .env, cannot login.")
+            cl.login(USERNAME, PASSWORD)
+            cl.dump_settings(session_file)
+            logger.info("Logged in successfully with username/password.")
+            return cl
+        except Exception as login_e:
+            logger.error(f"Failed to login with USERNAME/PASSWORD: {login_e}")
+            raise
     except Exception as e:
-        logger.error(f"Failed to load session: {e}")
+        logger.error(f"Failed to initialize session: {e}")
         raise
 
 
@@ -593,10 +609,10 @@ if __name__ == "__main__":
     try:
         lock_file_path.touch()
         logger.info("Attemping to load Instagram session...")
-        L = session()
-        if L:
+        cl = session()
+        if cl:
             logger.info("Session created successfully!")
-            process_recent_feed(L)
+            process_recent_feed(cl)
         else:
             logger.critical("Failed to initialize Instagram session, stopping...")
     except Exception as e:

@@ -150,7 +150,7 @@ frontend/
 - django-cors-headers
 - whitenoise
 - pgvector
-- instaloader (custom)
+- instagrapi
 - requests, beautifulsoup4
 - openai
 - python-dotenv

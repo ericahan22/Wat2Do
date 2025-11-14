@@ -80,13 +80,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Cache Instaloader session
+      - name: Cache instagrapi session
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.insta_cache
-          key: ${{ runner.os }}-instaloader-session-${{ hashFiles('backend/requirements.txt') }}
+          key: ${{ runner.os }}-instagrapi-session-${{ hashFiles('backend/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-instaloader-session-
+            ${{ runner.os }}-instagrapi-session-
             
       - name: Install dependencies
         working-directory: backend
