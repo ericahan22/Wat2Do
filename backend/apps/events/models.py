@@ -82,7 +82,6 @@ class Events(models.Model):
     other_handle = models.CharField(
         max_length=100, blank=True, null=True, help_text="Other social media handle"
     )
-    posted_at = models.DateTimeField(null=True, blank=True, help_text="Posted at UTC")
 
     class Meta:
         db_table = "events"
