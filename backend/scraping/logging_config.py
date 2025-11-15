@@ -20,6 +20,7 @@ def setup_logging():
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.INFO)
+    logging.getLogger("instagrapi").setLevel(logging.INFO)
 
     fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [

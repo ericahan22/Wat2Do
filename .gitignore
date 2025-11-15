@@ -16,6 +16,8 @@ __pycache__/
 backend/scraping/*.csv
 backend/scraping/test*.py
 backend/testing/
+backend/.insta_cache/
+backend/scraping/certs/zyte-ca-bundle.crt
 
 # Log files
 *.log

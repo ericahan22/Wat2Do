@@ -16,7 +16,6 @@ import traceback
 from datetime import timedelta
 from pathlib import Path
 
-import requests
 from django.utils import timezone
 from dotenv import load_dotenv
 from instagrapi import Client
@@ -30,14 +29,12 @@ from services.openai_service import (
     extract_events_from_caption,
 )
 from services.storage_service import upload_image_from_url
-from shared.constants.user_agents import USER_AGENTS
 from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import (
     jaccard_similarity,
     normalize,
     sequence_similarity,
 )
-from utils.date_utils import parse_utc_datetime
 
 
 MAX_POSTS = int(os.getenv("MAX_POSTS", "15"))
@@ -45,17 +42,12 @@ MAX_CONSEC_OLD_POSTS = 10
 CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(dotenv_path=".env")
 
 # Get credentials from environment variables
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
-CSRFTOKEN = os.getenv("CSRFTOKEN")
 SESSIONID = os.getenv("SESSIONID")
-DS_USER_ID = os.getenv("DS_USER_ID")
-MID = os.getenv("MID")
-IG_DID = os.getenv("IG_DID")
-SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
 
 
 def is_duplicate_event(event_data):
@@ -338,7 +330,7 @@ def process_recent_feed(
     seen_shortcodes = get_seen_shortcodes()
 
     try:
-        posts_iterator = cl.feed_timeline()
+        posts_iterator = cl.get_timeline_feed()
         logger.info(f"Fetched {len(posts_iterator)} posts from timeline feed.")
 
         for post in posts_iterator:
@@ -508,50 +500,6 @@ def process_recent_feed(
     logger.info(f"Added {events_added} event(s) to Supabase")
 
 
-def create_proxy_session(country="CA"):
-    """
-    Patch requests.Session to route through Zyte with geolocation,
-    test Zyte proxy routing and geolocation
-    """
-    zyte_cert_path = setup_zyte()
-    zyte_proxy = os.getenv("ZYTE_PROXY")
-    logger.debug(f"Zyte proxy config: proxy={zyte_proxy!r}, cert={zyte_cert_path!s}")
-
-    if not zyte_proxy:
-        logger.warning(
-            "ZYTE_PROXY not set - skipping proxied geolocation test and trying direct request"
-        )
-        return requests.Session()
-    
-    session = requests.Session()
-    old_request = session.request
-    
-    def zyte_request(self, method, url, **kwargs):
-        headers = kwargs.get("headers", {})
-        headers["Zyte-Geolocation"] = country
-        kwargs["headers"] = headers
-        kwargs["proxies"] = {"http": zyte_proxy, "https": zyte_proxy}
-        if zyte_cert_path:
-            kwargs["verify"] = str(zyte_cert_path)
-        kwargs["timeout"] = kwargs.get("timeout", 30)
-        return old_request(self, method, url, **kwargs)
-
-    session.request = zyte_request.__get__(session, requests.Session)
-    logger.debug(f"Testing Zyte proxy geolocation: {country}")
-    try:
-        resp = session.get("https://ipapi.co/json/")
-        resp.raise_for_status()
-        data = resp.json()
-        logger.debug("Connected via Zyte proxy")
-        logger.debug(f"Public IP: {data.get('ip')}")
-        logger.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
-        logger.debug(f"City: {data.get('city')}")
-        return session
-    except Exception as e:
-        logger.warning(f"Proxied geolocation failed: {e!s}")
-        return None
-
-
 def get_session_file_path():
     """Helper function to get the consistent session file path"""
     try:
@@ -568,32 +516,78 @@ def session():
     Creates an instagrapi Client, injects the Zyte proxied session,
     and loads the session from file or environment variables.
     """
-    proxied_session = create_proxy_session("CA")
-    if not proxied_session:
-        logger.critical("Failed to create proxied session, aborting...")
+    zyte_cert_path = setup_zyte()
+    zyte_proxy = os.getenv("ZYTE_PROXY")
+    if not zyte_proxy:
+        logger.critical("ZYTE_PROXY not set, aborting...")
         return None
     
-    cl = Client()
-    cl.session = proxied_session
-    cl.session.headers.update({"User-Agent": random.choice(USER_AGENTS)})
-    cl.request_timeout = 120
     session_file = get_session_file_path()
+    session_data = None
+    if session_file.exists():
+        try:
+            session_data = json.loads(session_file.read_text())
+            logger.info(f"Manually loaded session from file: {session_file!s}")
+        except Exception as e:
+            logger.warning(f"Could not read session file: {e}, will re-login")
+            session_file.unlink()
+    
+    client_settings = {
+        "proxy": zyte_proxy,
+        "request_timeout": 30,
+        "delay_range": [1, 3]
+    }
+    if session_data:
+        client_settings["settings"] = session_data
 
     try:
-        if session_file.exists():
-            cl.load_settings(session_file)
-            logger.info(f"Loaded session from file: {session_file!s}")
+        cl = Client(**client_settings)
+        cl.public.verify = str(zyte_cert_path)
+        cl.private.verify = str(zyte_cert_path)
+        zyte_headers = {
+            "Zyte-Override-Headers": "User-Agent",
+            "Zyte-Geolocation": "CA"
+        }
+        cl.public.headers.update(zyte_headers)
+        cl.private.headers.update(zyte_headers)
+        logger.debug("Zyte proxy/SSL/headers configured on client sessions.")   
+
+        if session_data:
+            cl.user_id = session_data["user_id"]
+            logger.debug("Validating session...")
+            cl.user_info_v1(cl.user_id)
+            logger.info("Successfully loaded and validated session")
         else:
-            logger.info("No session file found, falling back to SESSIONID from env")
+            logger.info("No session file found, logging in with SESSIONID")
             if not SESSIONID:
                 raise ValueError("SESSIONID not found in .env, cannot login.")
             cl.login_by_sessionid(SESSIONID)
             logger.info("Logged in using SESSIONID.")
             cl.dump_settings(session_file)
         return cl
+
+    except LoginRequired:
+        logger.warning("Invalid session, attempting full login with USERNAME/PASSWORD")
+        try:
+            if not USERNAME or not PASSWORD:
+                raise ValueError("USERNAME/PASSWORD not found in .env, cannot re-login")
+            cl = Client(**client_settings)
+            cl.public.verify = str(zyte_cert_path)
+            cl.private.verify = str(zyte_cert_path)
+            cl.public.headers.update(zyte_headers)
+            cl.private.headers.update(zyte_headers)
+            cl.login(USERNAME, PASSWORD)
+            cl.dump_settings(session_file)
+            logger.info("Logged in successfully with username/password")
+            return cl
+        except Exception as login_e:
+            logger.error(f"Full login with USERNAME/PASSWORD failed: {login_e}")
+            logger.error(traceback.format_exc())
+            return None   
     except Exception as e:
         logger.error(f"Failed to initialize session: {e}")
-        return cl
+        logger.error(traceback.format_exc())
+        return None
 
 
 if __name__ == "__main__":
@@ -605,25 +599,10 @@ if __name__ == "__main__":
         logger.info("Attemping to load Instagram session...")
         cl = session()
         if not cl:
-             logger.critical("Failed to initialize Instagram session, stopping...")
-             sys.exit()
+            logger.critical("Failed to initialize Instagram session (likely Zyte proxy failure), stopping...")
+            sys.exit()
         logger.info("Session object created, attempting to process feed...")
-        try:
-            process_recent_feed(cl)
-        except LoginRequired:
-            logger.warning("Session was invalid or expired. Attempting login with USERNAME/PASSWORD.")
-            try:
-                if not USERNAME or not PASSWORD:
-                    raise ValueError("USERNAME or PASSWORD not found in .env, cannot login.")
-                cl.settings = {} 
-                cl.login(USERNAME, PASSWORD)
-                session_file = get_session_file_path()
-                cl.dump_settings(session_file)
-                logger.info("Logged in successfully with username/password. Re-running process.")
-                process_recent_feed(cl)
-            except Exception as login_e:
-                logger.error(f"Failed to login with USERNAME/PASSWORD: {login_e}")
-                raise
+        process_recent_feed(cl)
         logger.info("Session created/validated and feed processed successfully!")
     except Exception as e:
         logger.error(f"An uncaught exception occurred: {e}")
