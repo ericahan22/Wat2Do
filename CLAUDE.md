@@ -51,7 +51,7 @@ npm run dev  # Development server on port 5173
 - **Apps**: `events`, `clubs`, `newsletter`, `promotions`, `core`
 - **Database**: PostgreSQL (production) / SQLite (local with USE_SQLITE=1)
 - **Services**: OpenAI integration, email service, S3 storage
-- **Scraping**: Instagram data extraction with custom instaloader build
+- **Scraping**: Instagram data extraction with Apify
 
 ### Frontend Structure (`/frontend/`)
 - **Feature-based architecture** under `/src/features/`

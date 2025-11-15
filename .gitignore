@@ -16,6 +16,7 @@ __pycache__/
 backend/scraping/*.csv
 backend/scraping/test*.py
 backend/testing/
+backend/apify_raw_results.json
 
 # Log files
 *.log
