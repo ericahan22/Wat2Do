@@ -58,10 +58,9 @@ class StorageService:
         try:
             response = requests.get(image_url, timeout=60)
             response.raise_for_status()
-
             return response.content
-        except Exception:
-            logger.exception(f"Failed to download image from {image_url}")
+        except Exception as e:
+            logger.error(f"Failed to download image from {image_url}: {e}")
             return None
 
     def upload_image_from_url(

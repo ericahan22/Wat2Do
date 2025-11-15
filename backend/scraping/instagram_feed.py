@@ -37,7 +37,7 @@ from utils.scraping_utils import (
 load_dotenv()
 
 CUTOFF_DAYS = 1
-MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "10"))
+MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "5"))
 APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN")
 
 
@@ -483,7 +483,7 @@ async def process_scraped_posts(posts_data, cutoff_date):
     logger.info(f"Starting post processing for {len(posts_data)} scraped posts.")
     logger.info(f"Concurrency limit set to {MAX_CONCURRENT_TASKS} tasks.")
 
-    seen_shortcodes = get_seen_shortcodes()
+    seen_shortcodes = await sync_to_async(get_seen_shortcodes)()
     
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
     tasks = []

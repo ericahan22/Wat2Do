@@ -20,6 +20,7 @@ def setup_logging():
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.INFO)
+    logging.getLogger("apify_client").setLevel(logging.WARNING)
 
     fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
@@ -28,6 +29,7 @@ def setup_logging():
     ]
     logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
     root_logger._wat2do_configured = True
+    root_logger.propagate = False
 
 
 setup_logging()

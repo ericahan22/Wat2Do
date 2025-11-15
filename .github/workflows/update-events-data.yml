@@ -4,7 +4,6 @@ on:
   schedule:
     - cron: '0 13 * * *'  # 8am EST (UTC-5)
   workflow_dispatch:
-    inputs:
 
 jobs:
   instagram_feed:
