@@ -8,55 +8,37 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
+import asyncio
+from asgiref.sync import sync_to_async
 import csv
 import json
-import random
-import time
 import traceback
 from datetime import timedelta
 from pathlib import Path
 
-import requests
+from apify_client import ApifyClient
 from django.utils import timezone
 from dotenv import load_dotenv
-from instaloader import Instaloader
-from requests.exceptions import ConnectionError, ReadTimeout
 
 from apps.clubs.models import Clubs
 from apps.events.models import EventDates, Events, IgnoredPost
 from scraping.logging_config import logger
-from scraping.zyte_setup import setup_zyte
-from services.openai_service import (
-    extract_events_from_caption,
-)
+from shared.constants.urls_to_scrape import FULL_URLS
 from services.storage_service import upload_image_from_url
-from shared.constants.user_agents import USER_AGENTS
 from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import (
-    get_post_image_url,
     jaccard_similarity,
     normalize,
     sequence_similarity,
 )
-from utils.date_utils import parse_utc_datetime
 
-
-MAX_POSTS = int(os.getenv("MAX_POSTS", "15"))
-MAX_CONSEC_OLD_POSTS = 10
-CUTOFF_DAYS = int(os.getenv("CUTOFF_DAYS", "2"))
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Get credentials from environment variables
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
-CSRFTOKEN = os.getenv("CSRFTOKEN")
-SESSIONID = os.getenv("SESSIONID")
-DS_USER_ID = os.getenv("DS_USER_ID")
-MID = os.getenv("MID")
-IG_DID = os.getenv("IG_DID")
-SUPABASE_DB_URL = os.getenv("SUPABASE_DB_URL")
+CUTOFF_DAYS = 1
+MAX_CONCURRENT_TASKS = int(os.getenv("MAX_CONCURRENT_TASKS", "10"))
+APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN")
 
 
 def is_duplicate_event(event_data):
@@ -307,300 +289,336 @@ def get_seen_shortcodes():
         events = Events.objects.filter(source_url__isnull=False).values_list(
             "source_url", flat=True
         )
-        event_shortcodes = {url.split("/")[-2] for url in events if url}
+        event_shortcodes = {
+            url.strip("/").split("/")[-1]
+            for url in events
+            if url and "/p/" in url
+        }
         ignored_shortcodes = set(
             IgnoredPost.objects.values_list("shortcode", flat=True)
         )
         shortcodes = event_shortcodes | ignored_shortcodes
+        logger.info(f"Found {len(shortcodes)} seen shortcodes.")
         return shortcodes
     except Exception as e:
         logger.error(f"Could not fetch shortcodes from database: {e}")
         return set()
 
 
-def process_recent_feed(
-    loader,
-    cutoff=None,
-    max_posts=MAX_POSTS,
-    max_consec_old_posts=MAX_CONSEC_OLD_POSTS,
-):
+def get_apify_input():
     """
-    Process Instagram feed posts and extract event info.
-    Stops scraping once posts become older than cutoff.
+    Builds the Apify actor input JSON for apify/instagram-post-scraper.
     """
-    if not cutoff:
-        cutoff = timezone.now() - timedelta(days=CUTOFF_DAYS)
+    cutoff_date = timezone.now() - timedelta(days=CUTOFF_DAYS)
+    cutoff_str = cutoff_date.strftime("%Y-%m-%d")
+    logger.info(f"Setting post cutoff date to {cutoff_str} ({CUTOFF_DAYS} day ago)")
+    
+    # Parse usernames from URLs
+    usernames = []
+    for url in FULL_URLS:
+        try:
+            clean_url = url.split("instagram.com/")[1]
+            username = clean_url.split("/")[0]
+            if username and username not in usernames:
+                usernames.append(username)
+        except Exception:
+            logger.warning(f"Could not parse username from URL: {url}")
 
+    logger.info(f"Parsed {len(usernames)} unique usernames from the list.")
+
+    actor_input = {
+        "onlyPostsNewerThan": cutoff_str,
+        "skipPinnedPosts": True,
+        "username": usernames
+    }
+    return actor_input
+
+
+async def process_single_post_async(post, semaphore, cutoff_date):
+    """Asynchronously processes a single post."""
+    
+    # --- Wrappers for sync functions ---
+    @sync_to_async(thread_sensitive=False)
+    def async_upload_image(url):
+        return upload_image_from_url(url)
+
+    @sync_to_async(thread_sensitive=False)
+    def async_extract_events(caption, img_url, post_time):
+        from services.openai_service import extract_events_from_caption
+        return extract_events_from_caption(caption, img_url, post_time)
+
+    @sync_to_async(thread_sensitive=True)
+    def async_insert_event_to_db(event_data, ig_handle, source_url):
+        return insert_event_to_db(event_data, ig_handle, source_url)
+
+    @sync_to_async(thread_sensitive=False)
+    def async_append_event_to_csv(event_data, ig_handle, source_url, status):
+        return append_event_to_csv(event_data, ig_handle, source_url, added_to_db=status)
+
+    @sync_to_async(thread_sensitive=True)
+    def async_ignore_post(shortcode):
+        IgnoredPost.objects.get_or_create(shortcode=shortcode)
+
+    shortcode = None
     events_added = 0
-    posts_processed = 0
-    consec_old_posts = 0
-    termination_reason = None
-    logger.info(f"Starting feed processing with cutoff: {cutoff}")
+    
+    async with semaphore:
+        try:
+            timestamp_str = post.get("timestamp")
+            post_time_utc = parse_utc_datetime(timestamp_str)
+            if not post_time_utc:
+                logger.warning(f"Skipping post with unparseable timestamp: {timestamp_str}")
+                return 0
+            
+            if post_time_utc < cutoff_date:
+                logger.debug(f"Skipping post from {post_time_utc.date()} (older than cutoff {cutoff_date.date()})")
+                return 0 
+
+            # Map Apify fields
+            owner_username = post.get("ownerUsername")
+            caption = post.get("caption")
+            source_url = post.get("url")
+            raw_image_url = post.get("displayUrl")
+
+            if not source_url or "/p/" not in source_url:
+                logger.warning(f"Skipping item with invalid URL: {source_url}")
+                return 0
+            
+            shortcode = source_url.strip("/").split("/")[-1]
+
+            if not owner_username or not caption:
+                logger.warning(
+                    f"[{shortcode}] [{owner_username}] Skipping post with missing owner or caption."
+                )
+                return 0
+
+            logger.info("--------------------------------------------------------------------------------")
+            logger.info(f"[{shortcode}] [{owner_username}] Processing post...")
+
+            # 1. Upload Image
+            if raw_image_url:
+                source_image_url = await async_upload_image(raw_image_url)
+                logger.debug(f"[{shortcode}] [{owner_username}] Uploaded image to S3: {source_image_url}")
+            else:
+                source_image_url = None
+
+            # 2. Extract Events
+            extracted_list = await async_extract_events(caption, source_image_url, post_time_utc)
+
+            if not extracted_list:
+                logger.warning(f"[{shortcode}] [{owner_username}] AI client returned no events for post")
+                return 0
+
+            # 3. Process Events
+            for idx, event_data in enumerate(extracted_list):
+                added_to_db = None
+                try:
+                    logger.debug(
+                        f"[{shortcode}] [{owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
+                    )
+
+                    if not (
+                        event_data.get("title")
+                        and event_data.get("location")
+                        and event_data.get("occurrences")
+                    ):
+                        added_to_db = "missing_fields"
+                        logger.warning(f"[{shortcode}] Missing required fields, skipping")
+                        continue
+
+                    first_occurrence = event_data.get("occurrences")[0]
+                    dtstart_utc_str = first_occurrence.get("dtstart_utc")
+                    dtstart_utc = parse_utc_datetime(dtstart_utc_str)
+                    
+                    if dtstart_utc and dtstart_utc < timezone.now():
+                        added_to_db = "past_date"
+                        logger.info(f"[{shortcode}] Skipping event with past date")
+                        continue
+
+                    # 4. Insert to DB
+                    result = await async_insert_event_to_db(
+                        event_data, owner_username, source_url
+                    )
+                    
+                    if result is True:
+                        events_added += 1
+                        added_to_db = "success"
+                        logger.info(f"[{shortcode}] Successfully added event '{event_data.get('title')}'")
+                    elif result == "duplicate":
+                        added_to_db = "duplicate"
+                        logger.warning(f"[{shortcode}] Duplicate event, not added")
+                    else:
+                        added_to_db = "failed"
+                        logger.error(f"[{shortcode}] Failed to add event")
+                
+                except Exception as inner_e:
+                    logger.error(f"[{shortcode}] Error handling extracted event: {inner_e!s}")
+                    added_to_db = "error"
+                finally:
+                    # 5. Append to CSV
+                    await async_append_event_to_csv(
+                        event_data,
+                        owner_username,
+                        source_url,
+                        status=added_to_db or "unknown",
+                    )
+        
+        except Exception as e:
+            logger.error(f"[{shortcode or 'UNKNOWN'}] Error in async task: {e!s}")
+            logger.error(f"[{shortcode or 'UNKNOWN'}] Traceback: {traceback.format_exc()}")
+            return 0
+        
+        finally:
+            # 6. Add to Ignored
+            if shortcode:
+                await async_ignore_post(shortcode)
+
+        return events_added
+        
+    
+async def process_scraped_posts(posts_data, cutoff_date):
+    """
+    Process Apify scraped posts concurrently using asyncio.
+    """
+    logger.info(f"Starting post processing for {len(posts_data)} scraped posts.")
+    logger.info(f"Concurrency limit set to {MAX_CONCURRENT_TASKS} tasks.")
 
     seen_shortcodes = get_seen_shortcodes()
-
-    try:
-        for post in loader.get_feed_posts():
-            try:
-                post_time = (
-                    timezone.make_aware(post.date_utc)
-                    if timezone.is_naive(post.date_utc)
-                    else post.date_utc
-                )
-                if post_time < cutoff:
-                    consec_old_posts += 1
-                    logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping old post; consec_old_posts={consec_old_posts}"
-                    )
-                    continue
-                if post.shortcode in seen_shortcodes:
-                    logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Skipping previously seen post"
-                    )
-                    continue
-
-                consec_old_posts = 0
-                logger.info("-" * 100)
-                logger.info(
-                    f"[{post.shortcode}] [{post.owner_username}] Processing post"
-                )
-
-                # Safely get image URL and upload to S3
-                raw_image_url = get_post_image_url(post)
-                if raw_image_url:
-                    time.sleep(random.uniform(1, 3))
-                    source_image_url = upload_image_from_url(raw_image_url)
-                    logger.debug(
-                        f"[{post.shortcode}] [{post.owner_username}] Uploaded image to S3: {source_image_url}"
-                    )
-                else:
-                    logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] No image URL found for post, skipping image upload"
-                    )
-                    source_image_url = None
-
-                extracted_list = extract_events_from_caption(
-                    post.caption, source_image_url, post.date_local
-                )
-                if not extracted_list:
-                    logger.warning(
-                        f"[{post.shortcode}] [{post.owner_username}] AI client returned no events for post"
-                    )
-                    continue
-
-                source_url = f"https://www.instagram.com/p/{post.shortcode}/"
-                for idx, event_data in enumerate(extracted_list):
-                    added_to_db = None
-                    try:
-                        logger.debug(
-                            f"[{post.shortcode}] [{post.owner_username}] Event {idx + 1}/{len(extracted_list)}: {json.dumps(event_data, ensure_ascii=False, separators=(',', ':'))}"
-                        )
-
-                        if not (
-                            event_data.get("title")
-                            and event_data.get("location")
-                            and event_data.get("occurrences")
-                        ):
-                            missing_fields = []
-                            if not event_data.get("title"):
-                                missing_fields.append("title")
-                            if not event_data.get("location"):
-                                missing_fields.append("location")
-                            if not event_data.get("occurrences"):
-                                missing_fields.append("occurrences")
-                            logger.warning(
-                                f"[{post.shortcode}] [{post.owner_username}] Missing required fields for event '{event_data.get('title', 'Unknown')}': {missing_fields}, skipping"
-                            )
-                            added_to_db = "missing_fields"
-                            continue
-
-                        first_occurrence = event_data.get("occurrences")[0]
-                        dtstart_utc = first_occurrence.get("dtstart_utc")
-                        now = timezone.now()
-                        if isinstance(dtstart_utc, str):
-                            dtstart_utc = parse_utc_datetime(dtstart_utc)
-                        if dtstart_utc and dtstart_utc < now:
-                            logger.info(
-                                f"[{post.shortcode}] [{post.owner_username}] Skipping event '{event_data.get('title')}' with past date {dtstart_utc}"
-                            )
-                            added_to_db = "past_date"
-                            continue
-
-                        result = insert_event_to_db(
-                            event_data, post.owner_username, source_url
-                        )
-                        if result is True:
-                            events_added += 1
-                            logger.info(
-                                f"[{post.shortcode}] [{post.owner_username}] Successfully added event '{event_data.get('title')}'"
-                            )
-                            added_to_db = "success"
-                        elif result == "duplicate":
-                            logger.warning(
-                                f"[{post.shortcode}] [{post.owner_username}] Duplicate event, not added: '{event_data.get('title')}'"
-                            )
-                            added_to_db = "duplicate"
-                        else:
-                            logger.error(
-                                f"[{post.shortcode}] [{post.owner_username}] Failed to add event '{event_data.get('title')}'"
-                            )
-                            added_to_db = "failed"
-                    except Exception as inner_e:
-                        logger.error(
-                            f"[{post.shortcode}] [{post.owner_username}] Error handling extracted event index {idx}: {inner_e!s}"
-                        )
-                        added_to_db = "error"
-                    finally:
-                        append_event_to_csv(
-                            event_data,
-                            post.owner_username,
-                            source_url,
-                            added_to_db=added_to_db or "unknown",
-                        )
-
-            except Exception as e:
-                logger.error(
-                    f"[{post.shortcode}] [{post.owner_username}] Error processing post: {e!s}"
-                )
-                logger.error(
-                    f"[{post.shortcode}] [{post.owner_username}] Traceback: {traceback.format_exc()}"
-                )
-                time.sleep(random.uniform(3, 8))
-                continue
-            finally:
-                posts_processed += 1
-                IgnoredPost.objects.get_or_create(shortcode=post.shortcode)
-                
-                if posts_processed > max_posts:
-                    termination_reason = f"reached_max_posts={max_posts}"
-                    logger.info(f"Reached max post limit of {max_posts}, stopping.")
-                    break
-                if consec_old_posts >= max_consec_old_posts:
-                    termination_reason = (
-                        f"reached_consecutive_old_posts={max_consec_old_posts}"
-                    )
-                    logger.info(
-                        f"Reached {max_consec_old_posts} consecutive old posts, stopping."
-                    )
-                    break
-                
-            time.sleep(random.uniform(30, 90))
-
-        if not termination_reason:
-            termination_reason = "no_more_posts"
-
-    except Exception as e:
-        # Top-level errors (e.g., loader failure / auth)
-        termination_reason = "error"
-        logger.error(f"Feed processing aborted due to error: {e!s}")
-        logger.error(f"Traceback: {traceback.format_exc()}")
-
-    logger.debug(
-        f"Feed processing completed. reason={termination_reason}, posts_processed={posts_processed}, events_added={events_added}"
-    )
-    logger.info("\n------------------------- Summary -------------------------")
-    logger.info(f"Added {events_added} event(s) to Supabase")
-
-
-def create_proxy_session(country="CA"):
-    """
-    Patch requests.Session to route through Zyte with geolocation,
-    test Zyte proxy routing and geolocation
-    """
-    zyte_cert_path = setup_zyte()
-    zyte_proxy = os.getenv("ZYTE_PROXY")
-    logger.debug(f"Zyte proxy config: proxy={zyte_proxy!r}, cert={zyte_cert_path!s}")
-
-    if not zyte_proxy:
-        logger.warning(
-            "ZYTE_PROXY not set - skipping proxied geolocation test and trying direct request"
-        )
-        return requests.Session()
     
-    session = requests.Session()
-    old_request = session.request
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_TASKS)
+    tasks = []
+    total_skipped_old = 0
+    total_skipped_missing_data = 0
     
-    def zyte_request(self, method, url, **kwargs):
-        headers = kwargs.get("headers", {})
-        headers["Zyte-Geolocation"] = country
-        kwargs["headers"] = headers
-        kwargs["proxies"] = {"http": zyte_proxy, "https": zyte_proxy}
-        if zyte_cert_path:
-            kwargs["verify"] = str(zyte_cert_path)
-        kwargs["timeout"] = kwargs.get("timeout", 30)
-        return old_request(self, method, url, **kwargs)
+    # --- Pre-filter in main thread ---   
+    valid_posts_to_process = []
+    for post in posts_data:
+        # 1. Check for valid URL
+        source_url = post.get("url")
+        if not source_url or "/p/" not in source_url:
+            continue
 
-    session.request = zyte_request.__get__(session, requests.Session)
-    logger.debug(f"Testing Zyte proxy geolocation: {country}")
-    try:
-        resp = session.get("https://ipapi.co/json/")
-        resp.raise_for_status()
-        data = resp.json()
-        logger.debug("Connected via Zyte proxy")
-        logger.debug(f"Public IP: {data.get('ip')}")
-        logger.debug(f"Country: {data.get('country_name')} ({data.get('country')})")
-        logger.debug(f"City: {data.get('city')}")
-        return session
-    except Exception as e:
-        logger.warning(f"Proxied geolocation failed: {e!s}")
-        return None
+        # 2. Check for required fields
+        caption = post.get("caption")
+        display_url = post.get("displayUrl")
+        if not caption or not display_url:
+            total_skipped_missing_data += 1
+            continue
+            
+        # 3. Check date filter
+        timestamp_str = post.get("timestamp")
+        post_time_utc = parse_utc_datetime(timestamp_str)
+        if not post_time_utc or post_time_utc < cutoff_date:
+            total_skipped_old += 1
+            continue
+            
+        # 4. Check if already seen in DB
+        shortcode = source_url.strip("/").split("/")[-1]
+        if shortcode in seen_shortcodes:
+            logger.debug(f"[{shortcode}] Skipping previously seen post")
+            continue
+            
+        valid_posts_to_process.append(post)
 
+    logger.info(f"Skipped {total_skipped_old} old posts based on timestamp.")
+    logger.info(f"Skipped {total_skipped_missing_data} posts missing caption or image.")
+    logger.info(f"Found {len(valid_posts_to_process)} new posts not in DB.")
 
-def session():
-    proxied_session = create_proxy_session("CA")
-    if not proxied_session:
-        logger.critical("Failed to create proxied session, aborting...")
-        return None
-    
-    L = Instaloader(user_agent=random.choice(USER_AGENTS))
-    L.context._session = proxied_session
-    L.context.request_timeout = 120
-    L.context.max_connection_attempts = 5
-    try:
-        SESSION_CACHE_DIR = Path(os.getenv("GITHUB_WORKSPACE", ".")) / ".insta_cache"
-        SESSION_CACHE_DIR.mkdir(exist_ok=True)
-        files = [p for p in SESSION_CACHE_DIR.iterdir() if p.is_file()]
-        session_file = files[0] if files else SESSION_CACHE_DIR / f"session-{USERNAME}"
-    except Exception:
-        session_file = Path(__file__).resolve().parent.parent / ("session-" + USERNAME)
-    try:
-        if session_file.exists():
-            L.load_session_from_file(USERNAME, filename=str(session_file))
-            logger.info(f"Loaded session from file: {session_file!s}")
+    for post in valid_posts_to_process:
+        tasks.append(process_single_post_async(post, semaphore, cutoff_date))
+
+    logger.info(f"Created {len(tasks)} new post tasks to run concurrently.")
+
+    if not tasks:
+        logger.info("No new posts to process.")
+        logger.info("\n------------------------- Summary -------------------------")
+        logger.info("Added 0 event(s) to Supabase")
+        return
+
+    # Process results
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    total_events_added = 0
+    total_failures = 0
+    for res in results:
+        if isinstance(res, Exception):
+            total_failures += 1
         else:
-            logger.info("No session file found, falling back to env")
-            L.load_session(
-                USERNAME,
-                {
-                    "csrftoken": CSRFTOKEN,
-                    "sessionid": SESSIONID,
-                    "ds_user_id": DS_USER_ID,
-                    "mid": MID,
-                    "ig_did": IG_DID,
-                },
-            )
-        L.save_session_to_file(filename=str(session_file))
-        return L
+            total_events_added += int(res)
+
+    logger.info(f"Feed processing completed.")
+    logger.warning(f"{total_failures} tasks failed with errors.")
+    logger.info("\n------------------------- Summary -------------------------")
+    logger.info(f"Added {total_events_added} event(s) to Supabase")
+    
+    
+def run_apify_scraper():
+    """
+    Initializes Apify client, runs the Instagram scraper,
+    saves the raw results, and processes them.
+    """
+    if not APIFY_API_TOKEN:
+        logger.critical("APIFY_API_TOKEN not found in environment. Aborting.")
+        return None
+
+    posts_data = []
+    try:
+        client = ApifyClient(APIFY_API_TOKEN)
+        actor_input = get_apify_input()
+        logger.info("Starting Apify actor 'apify/instagram-post-scraper'...")
+        run = client.actor("apify/instagram-post-scraper").call(run_input=actor_input)
+        logger.info(f"Apify run started (ID: {run['id']}). Waiting for results...")
+        
+        for item in client.dataset(run['defaultDatasetId']).list_items().items:
+            posts_data.append(item)
+
+        logger.info(f"Successfully fetched {len(posts_data)} posts from Apify.")
+
+        output_filename = "apify_raw_results.json"
+        try:
+            with open(output_filename, "w", encoding="utf-8") as f:
+                json.dump(posts_data, f, indent=4, ensure_ascii=False)
+            logger.info(f"Saved {len(posts_data)} raw Apify results to {output_filename}")
+        except Exception as e:
+            logger.error(f"Failed to save raw results to JSON file: {e}")
+        
+        return posts_data
+
     except Exception as e:
-        logger.error(f"Failed to load session: {e}")
-        raise
+        logger.error(f"An error occurred during the Apify scrape: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        return None
 
 
 if __name__ == "__main__":
     lock_file_path = Path(__file__).parent / "scrape.lock"
     if lock_file_path.exists():
+        print("Scrape already in progress. Exiting.") 
         sys.exit()
+    
+    logs_dir = Path(__file__).parent / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_file_path = logs_dir / "scraping.log"
+    if log_file_path.exists():
+        with open(log_file_path, 'w') as f:
+            f.truncate(0)
+
     try:
         lock_file_path.touch()
-        logger.info("Attemping to load Instagram session...")
-        L = session()
-        if L:
-            logger.info("Session created successfully!")
-            process_recent_feed(L)
+        logger.info("--- Starting new scrape session ---")
+        
+        posts_data = run_apify_scraper()
+        if posts_data is None:
+            logger.warning("No data was loaded or fetched. Halting.")
         else:
-            logger.critical("Failed to initialize Instagram session, stopping...")
+            logger.info("Starting post processing...")
+            cutoff_date = timezone.now() - timedelta(days=CUTOFF_DAYS)
+            asyncio.run(process_scraped_posts(posts_data, cutoff_date))
+
     except Exception as e:
         logger.error(f"An uncaught exception occurred: {e}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
     finally:
         if lock_file_path.exists():
             lock_file_path.unlink()
+            logger.info("Removed scrape.lock")
+        logger.info("--- Scraping session finished ---")

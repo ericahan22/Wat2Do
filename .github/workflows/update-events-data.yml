@@ -2,21 +2,9 @@ name: Scrape Instagram, Update Events DB, Update Static Data
 
 on:
   schedule:
-    - cron: '0 12-23/4 * * *'  # 7am, 11am, 3pm, 7pm, 11pm EST
+    - cron: '0 13 * * *'  # 8am EST (UTC-5)
   workflow_dispatch:
     inputs:
-      run_scraper:
-        required: true
-        type: boolean
-        default: false
-      MAX_POSTS:
-        required: false
-        type: number
-        default: 15
-      CUTOFF_DAYS:
-        required: false
-        type: number
-        default: 2
 
 jobs:
   instagram_feed:
@@ -24,10 +12,12 @@ jobs:
     permissions:
       contents: write
     env:
-      MAX_POSTS: ${{ github.event.inputs.MAX_POSTS || '15' }}
-      CUTOFF_DAYS: ${{ github.event.inputs.CUTOFF_DAYS || '2' }}
+      # --- Django & App Config ---
       PRODUCTION: '1'
       DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      # --- Database Config ---
       DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
@@ -35,29 +25,19 @@ jobs:
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
       POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
-      USERNAME: ${{ secrets.USERNAME }}
-      PASSWORD: ${{ secrets.PASSWORD }}
-      SESSIONID: ${{ secrets.SESSIONID }}
-      CSRFTOKEN: ${{ secrets.CSRFTOKEN }}
-      DS_USER_ID: ${{ secrets.DS_USER_ID }}
-      IG_DID: ${{ secrets.IG_DID }}
-      MID: ${{ secrets.MID }}
+      # --- Service Keys ---
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      DOC_ID: ${{ secrets.DOC_ID }}
-      USER_AGENT: ${{ secrets.USER_AGENT }}
-      X_IG_APP_ID: ${{ secrets.X_IG_APP_ID }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
-      ZYTE_PROXY: ${{ secrets.ZYTE_PROXY }}
       EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-      
+      # --- Apify Token ---
+      APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -66,11 +46,9 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Create logs and cache directories
+      - name: Create logs directory
         working-directory: backend/scraping
-        run: |
-          mkdir -p logs
-          mkdir -p $GITHUB_WORKSPACE/.insta_cache
+        run: mkdir -p logs
 
       - name: Cache pip
         uses: actions/cache@v4
@@ -80,34 +58,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Cache Instaloader session
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/.insta_cache
-          key: ${{ runner.os }}-instaloader-session-${{ hashFiles('backend/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-instaloader-session-
-            
       - name: Install dependencies
         working-directory: backend
         run: |
-          pip install --upgrade pip setuptools wheel
           pip install --prefer-binary -r requirements.txt
 
       - name: Run scraper
-        if: github.event_name == 'schedule' || github.event.inputs.run_scraper == 'true'
         working-directory: backend/scraping
         run: |
           python -u instagram_feed.py 2>&1 | tee logs/scraping.log
         continue-on-error: false
 
       - name: Upload logs as artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: logs-${{ github.run_number }}
           path: |
             backend/scraping/logs/events_scraped.csv
             backend/scraping/logs/scraping.log
+            backend/scraping/apify_raw_results.json
+          if-no-files-found: 'ignore'
 
       - name: Generate static data file
         id: generate_static

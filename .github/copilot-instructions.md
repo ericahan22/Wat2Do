@@ -150,7 +150,7 @@ frontend/
 - django-cors-headers
 - whitenoise
 - pgvector
-- instaloader (custom)
+- apify_client
 - requests, beautifulsoup4
 - openai
 - python-dotenv
@@ -172,7 +172,7 @@ frontend/
 ## CI/CD
 
 - GitHub Actions workflow runs daily scraping job.
-- Requires secrets: Instagram credentials, OpenAI API key, database URL.
+- Requires secrets: APIFY_API_TOKEN, OpenAI API key, database URL.
 - Uses Python 3.11, caches pip dependencies, uploads logs as artifacts.
 
 ---
