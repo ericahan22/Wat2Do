@@ -109,6 +109,26 @@ def main():
             current_time = datetime.now(timezone.utc).isoformat()
             f.write(f'export const LAST_UPDATED = "{current_time}";\n\n')
 
+            # Write event emoji categories
+            f.write("export const EVENT_EMOJIS_CATEGORIES: [string, string, string][] = [\n")
+            emoji_categories = [
+                ["Objects", "Graduation%20Cap", "Academic"],
+                ["Objects", "Briefcase", "Career & Networking"],
+                ["Activity", "Video%20Game", "Social & Games"],
+                ["Activity", "Soccer%20Ball", "Athletics"],
+                ["Activity", "Artist%20Palette", "Creative Arts"],
+                ["Travel%20and%20Places", "Classical%20Building", "Cultural"],
+                ["Animals%20and%20Nature", "Dove", "Religious"],
+                ["Objects", "Megaphone", "Advocacy & Causes"],
+                ["Objects", "Chart%20Increasing", "Sales & Fundraising"]
+            ]
+            for i, (group, emoji, category) in enumerate(emoji_categories):
+                f.write(f'  ["{group}", "{emoji}", "{category}"]')
+                if i < len(emoji_categories) - 1:
+                    f.write(",")
+                f.write("\n")
+            f.write("];\n\n")
+
             # Write event categories
             f.write("export const EVENT_CATEGORIES = [\n")
             categories = [
