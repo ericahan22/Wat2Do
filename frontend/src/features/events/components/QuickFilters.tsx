@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { useQuickFilters } from "@/features/events/hooks/useQuickFilters";
 import { cn } from "@/shared/lib/utils";
+import { getEmojiUrl } from "@/shared/lib/emojiUtils";
 
 const QuickFilters: React.FC = () => {
   const {
@@ -23,7 +24,7 @@ const QuickFilters: React.FC = () => {
       }}
       onMouseDown={handleMouseDown}
     >
-      {filterOptions.map((category) => {
+      {filterOptions.map(([emojiCategory, emoji, category]) => {
         const isActive = isFilterActive(category);
 
         return (
@@ -38,6 +39,11 @@ const QuickFilters: React.FC = () => {
             }`}
             onClick={() => handleFilterClick(category)}
           >
+            <img
+              src={getEmojiUrl([emojiCategory, emoji])}
+              alt={category}
+              className="w-4 h-4"
+            />
             <p
               className={cn(
                 "text-sm",

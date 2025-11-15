@@ -1,6 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { EVENT_CATEGORIES } from "@/data/staticData";
+import { EVENT_EMOJIS_CATEGORIES } from "@/data/staticData";
 
 // Use event categories directly
 
@@ -73,7 +73,10 @@ export const useQuickFilters = () => {
 
         // Parse semicolon-separated categories
         const categories = currentCategoriesValue
-          ? currentCategoriesValue.split(";").map((c) => c.trim()).filter((c) => c)
+          ? currentCategoriesValue
+              .split(";")
+              .map((c) => c.trim())
+              .filter((c) => c)
           : [];
 
         // Check if category is already active (case-insensitive)
@@ -112,16 +115,14 @@ export const useQuickFilters = () => {
         .split(";")
         .map((c) => c.trim())
         .filter((c) => c);
-      return categories.some(
-        (c) => c.toLowerCase() === category.toLowerCase()
-      );
+      return categories.some((c) => c.toLowerCase() === category.toLowerCase());
     },
     [currentCategories]
   );
 
   return {
     // Data
-    filterOptions: EVENT_CATEGORIES,
+    filterOptions: EVENT_EMOJIS_CATEGORIES,
     currentCategories,
 
     // Refs
