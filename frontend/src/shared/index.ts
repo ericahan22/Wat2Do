@@ -10,7 +10,7 @@ export { default as ProtectedRoute } from './components/ProtectedRoute';
 export { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 export { default as FloatingEventExportBar } from './components/common/FloatingEventExportBar';
 export { SEOHead } from './components/SEOHead';
-
+export { default as JSONEditor } from './components/ui/json-editor';
 // Hooks
 export { useDocumentTitle } from './hooks/useDocumentTitle';
 export { useTheme } from './hooks/useTheme';

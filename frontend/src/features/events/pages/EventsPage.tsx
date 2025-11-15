@@ -15,6 +15,7 @@ import {
   FloatingEventExportBar,
   formatRelativeDateTime,
   FilterButton,
+  // JSONEditor,
 } from "@/shared";
 import { Calendar, LayoutGrid, Sparkles, Heart, Clock } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
@@ -103,6 +104,7 @@ function EventsPage() {
           "campus activities",
         ]}
       />
+      {/* <JSONEditor /> */}
       <div className="flex flex-col gap-4">
         <div className="sm:text-left">
           <h1 className="sm:text-3xl text-2xl font-bold mb-2 -mt-3 sm:mt-0">
