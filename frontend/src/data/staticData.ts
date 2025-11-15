@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "2025-11-15T13:29:56.724227+00:00";
+export const LAST_UPDATED = "2025-11-15T16:57:42.276863+00:00";
 
 export const EVENT_CATEGORIES = [
   "Academic",
