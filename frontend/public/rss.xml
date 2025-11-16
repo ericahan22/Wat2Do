@@ -5,7 +5,7 @@
     <link>https://wat2do.ca</link>
     <atom:link href="https://wat2do.ca/rss.xml" rel="self" type="application/rss+xml" />
     <description>Upcoming events at the University of Waterloo</description>
-    <lastBuildDate>Sun, 16 Nov 2025 23:45:06 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 16 Nov 2025 23:55:38 GMT</lastBuildDate>
     <ttl>10</ttl>
   <item>
     <title>Winter Wonderland</title>
@@ -301,24 +301,6 @@ SEE YOU SOON at STC 0020 from 4-7 PM!]]></description>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/800f0ede-94fa-4119-b3e4-26713855eb8a.jpg" medium="image" />
   </item>
   <item>
-    <title>DAT Info Session</title>
-    <link>https://www.instagram.com/p/DQ1-OwLDCvl/</link>
-    <description><![CDATA[🦷✨ Thinking about dental school? Join WiSTEM x The Princeton Review for a DAT Info Session!
-
-Get insider tips, study strategies, and everything you need to know before writing the Dental Aptitude Test. 💡📚
-
-📅 November 17, 2025
-
-⏰ 5:00 – 6:30 PM EST
-
-💻 Online – link in bio to register!
-
- #DATPrep #FutureDentist #WiSTEM #ThePrincetonReview]]></description>
-    <guid isPermaLink="false">1206@wat2do</guid>
-    <pubDate>Sun, 09 Nov 2025 17:17:50 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d9763e41-a29c-469d-85fd-2921d8c36e71.jpg" medium="image" />
-  </item>
-  <item>
     <title>Clothing Swap</title>
     <link>https://wusa.ca/event/clothing-swap/</link>
     <description><![CDATA[Refresh your wardrobe sustainably while celebrating Trans Awareness Week! ♻️👕 Bring your gently used clothes and swap them for something new. 🌈✨ 
@@ -360,6 +342,24 @@ See you there!
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/7556e9b5-5955-4833-bb4f-eb800e46a938.jpg" medium="image" />
   </item>
   <item>
+    <title>DAT Info Session</title>
+    <link>https://www.instagram.com/p/DQ1-OwLDCvl/</link>
+    <description><![CDATA[🦷✨ Thinking about dental school? Join WiSTEM x The Princeton Review for a DAT Info Session!
+
+Get insider tips, study strategies, and everything you need to know before writing the Dental Aptitude Test. 💡📚
+
+📅 November 17, 2025
+
+⏰ 5:00 – 6:30 PM EST
+
+💻 Online – link in bio to register!
+
+ #DATPrep #FutureDentist #WiSTEM #ThePrincetonReview]]></description>
+    <guid isPermaLink="false">1206@wat2do</guid>
+    <pubDate>Sun, 09 Nov 2025 17:17:50 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d9763e41-a29c-469d-85fd-2921d8c36e71.jpg" medium="image" />
+  </item>
+  <item>
     <title>Water Facility Tour</title>
     <link>https://www.instagram.com/p/DQ7IckFjylG/</link>
     <description><![CDATA[Interested in touring Waterloo’s WATER facility? Sign up through the link in our bio! 
@@ -383,16 +383,6 @@ We will be providing paper and tools! These origami stars will be used for decor
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/365a9aab-74ed-4e7e-a2d4-751a52b52ab8.jpg" medium="image" />
   </item>
   <item>
-    <title>Book Club</title>
-    <link>https://wusa.ca/event/book-club/</link>
-    <description><![CDATA[📚 Join us every Monday from 6–7 PM at the RAISE office for a relaxed book club meet. Whether you’re diving into your current read or picking something new from our library, you’ll find a cozy spot 🛋️, welcoming faces 😊, and plenty of snacks 🍪🍿.
-
-Come as you are — pajamas and blankets are encouraged!]]></description>
-    <guid isPermaLink="false">1082@wat2do</guid>
-    <pubDate>Wed, 05 Nov 2025 04:44:28 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e8ec83c4-d935-46c5-94b5-2855ed6f46b8.png" medium="image" />
-  </item>
-  <item>
     <title>Mentorship Wrap-Up</title>
     <link>https://www.instagram.com/p/DQ-Ak0gAU2y/</link>
     <description><![CDATA[🎉 Mentorship Wrap-Up — Let’s Celebrate the Term! 🎉
@@ -409,6 +399,16 @@ Come share your experiences, meet other participants, and enjoy a fun, relaxed e
     <guid isPermaLink="false">1301@wat2do</guid>
     <pubDate>Thu, 13 Nov 2025 13:05:56 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1b7fa7a2-69a0-479a-875c-f4fc0ad389fd.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Book Club</title>
+    <link>https://wusa.ca/event/book-club/</link>
+    <description><![CDATA[📚 Join us every Monday from 6–7 PM at the RAISE office for a relaxed book club meet. Whether you’re diving into your current read or picking something new from our library, you’ll find a cozy spot 🛋️, welcoming faces 😊, and plenty of snacks 🍪🍿.
+
+Come as you are — pajamas and blankets are encouraged!]]></description>
+    <guid isPermaLink="false">1082@wat2do</guid>
+    <pubDate>Wed, 05 Nov 2025 04:44:28 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/e8ec83c4-d935-46c5-94b5-2855ed6f46b8.png" medium="image" />
   </item>
   <item>
     <title>Water Facility Tour</title>
@@ -457,6 +457,18 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
+    <title>International Food Fair</title>
+    <link>https://www.instagram.com/p/DRIvMy5DHzY/</link>
+    <description><![CDATA[INTERNATIONAL FOOD FAIR🌎🥘
+Join us as we celebrate the diversity of our engineering community through food from around the world! Come sample dishes, learn about different cultures, and connect with students over the universal language of good food.
+📆Tuesday, November 18th
+⏰11:00 AM - 12:30 PM
+📍PSE Second Floor (E7)]]></description>
+    <guid isPermaLink="false">1338@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:55:32 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b27c9589-a147-4ea7-b78c-7c5f55f2d3e8.jpg" medium="image" />
+  </item>
+  <item>
     <title>Resume Roast</title>
     <link>https://www.instagram.com/p/DQ-pHkMDFUV/</link>
     <description><![CDATA[Join us for our Resume Roast 🔥
@@ -490,18 +502,6 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/4c753e39-ca19-4713-bc35-ceca25690929.jpg" medium="image" />
   </item>
   <item>
-    <title>Resume Review Workshop</title>
-    <link>https://www.instagram.com/p/DQu8h3YgYNe/</link>
-    <description><![CDATA[Let’s tweak your resume, together. 
-
-Following up our resume building workshop on Nov. 7th, we’d like to invite all 2nd, 3rd and 4th years to our Resume Review Workshop hosted by @alpacanada. 
-
-RSVP in our bio!]]></description>
-    <guid isPermaLink="false">1154@wat2do</guid>
-    <pubDate>Fri, 07 Nov 2025 03:50:17 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be556700-0059-4a55-8276-9bbbdef8ae70.jpg" medium="image" />
-  </item>
-  <item>
     <title>Rock Climbing</title>
     <link>https://www.instagram.com/p/DQrdSmyjroS/</link>
     <description><![CDATA[ROCK CLIMBING🧗🏼‍♂️
@@ -517,6 +517,18 @@ Image note: Poster also labels the location as "PAC Climbing Wall" and displays 
     <guid isPermaLink="false">1111@wat2do</guid>
     <pubDate>Wed, 05 Nov 2025 17:25:55 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a062034f-7670-4029-99a4-ff8fb43f17ed.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Resume Review Workshop</title>
+    <link>https://www.instagram.com/p/DQu8h3YgYNe/</link>
+    <description><![CDATA[Let’s tweak your resume, together. 
+
+Following up our resume building workshop on Nov. 7th, we’d like to invite all 2nd, 3rd and 4th years to our Resume Review Workshop hosted by @alpacanada. 
+
+RSVP in our bio!]]></description>
+    <guid isPermaLink="false">1154@wat2do</guid>
+    <pubDate>Fri, 07 Nov 2025 03:50:17 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/be556700-0059-4a55-8276-9bbbdef8ae70.jpg" medium="image" />
   </item>
   <item>
     <title>Mocktail Showdown &amp; Jeopardy</title>
@@ -565,16 +577,6 @@ Don’t miss out on this incredible opportunity to sharpen your skills in Excel!
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f31fc89d-555b-4b06-885b-8591ba0a0c04.jpg" medium="image" />
   </item>
   <item>
-    <title>Investment Banking X Private Equity Panel</title>
-    <link>https://www.instagram.com/p/DQ-hjZGj0PU/</link>
-    <description><![CDATA[This is NOT a drill! 🔕 Catch us in STC 0010 next Tuesday! 
-
-The time. The Place. It’s happening, so don’t miss out on meeting our Private Equity AND Investment Banking professionals.]]></description>
-    <guid isPermaLink="false">1297@wat2do</guid>
-    <pubDate>Thu, 13 Nov 2025 03:58:14 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0636f86-358d-43e2-b81a-10b6d7fed0b0.jpg" medium="image" />
-  </item>
-  <item>
     <title>Bhangra Bash VIII</title>
     <link>https://www.instagram.com/p/DQ5rZzXjGR-/</link>
     <description><![CDATA[⚡️It’s that time of the year — BHANGRA BASH VIII is HERE! ⚡️
@@ -585,6 +587,16 @@ Get ready for a night of food, games, performances, music, and non-stop dancing 
     <guid isPermaLink="false">1254@wat2do</guid>
     <pubDate>Tue, 11 Nov 2025 03:50:03 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b967f46c-18af-4772-8d52-daccd7530625.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Investment Banking X Private Equity Panel</title>
+    <link>https://www.instagram.com/p/DQ-hjZGj0PU/</link>
+    <description><![CDATA[This is NOT a drill! 🔕 Catch us in STC 0010 next Tuesday! 
+
+The time. The Place. It’s happening, so don’t miss out on meeting our Private Equity AND Investment Banking professionals.]]></description>
+    <guid isPermaLink="false">1297@wat2do</guid>
+    <pubDate>Thu, 13 Nov 2025 03:58:14 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/c0636f86-358d-43e2-b81a-10b6d7fed0b0.jpg" medium="image" />
   </item>
   <item>
     <title>Study Night Sweet Loop</title>
@@ -641,6 +653,22 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
+    <title>Paint Night</title>
+    <link>https://wusa.ca/event/paint-night/</link>
+    <description><![CDATA[🎨 Unwind, connect, and get creative with RAISE! ✨
+
+Drop in for a chill evening of painting, good vibes, and great company. We’ll have art supplies and snacks available (while they last), and no registration is required. Just show up, relax, and create alongside fellow Waterloo students!
+
+📅 Tuesday, Nov 19
+🕕 6:00 PM – 8:00 PM
+📍 RAISE Office (SLC 3207)
+
+Open to all Waterloo undergrads. We can’t wait to see you there! 🎉]]></description>
+    <guid isPermaLink="false">1101@wat2do</guid>
+    <pubDate>Wed, 05 Nov 2025 05:38:29 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/94dccd5e-4501-4de6-b2c6-5bf16ab8ce71.jpg" medium="image" />
+  </item>
+  <item>
     <title>Prism in Toronto Workshop: AR With Prof. David Han</title>
     <link>https://www.instagram.com/p/DQ2YiRCCVEl/</link>
     <description><![CDATA[PRISM Collective is coming to Toronto <3\n\nimmerse yourself in the world of Augmented Reality with Waterloo & UofT professor and immersive media artist David Han 🧑🏼‍🎨\n\n📅 wednesday, nov 19th\n⏰ 6:00-8:00 pm\n📍new stadium (83 walnut ave)\n\njoin us in learning how to utilize Augmented Reality as a medium, discuss how to evaluate media based on worldviews, and creating your personal AR scene using Styly, a web-based AR platform!\n\nsign up at https://luma.com/7i9uwk00?locale=en-CA]]></description>
@@ -659,22 +687,6 @@ Make sure to RVSP with the link in our bio to help us gauge attendance!]]></desc
     <guid isPermaLink="false">1315@wat2do</guid>
     <pubDate>Sat, 15 Nov 2025 04:51:06 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/5fa50dfe-33d1-46da-9bee-d709e0cf173b.jpg" medium="image" />
-  </item>
-  <item>
-    <title>Paint Night</title>
-    <link>https://wusa.ca/event/paint-night/</link>
-    <description><![CDATA[🎨 Unwind, connect, and get creative with RAISE! ✨
-
-Drop in for a chill evening of painting, good vibes, and great company. We’ll have art supplies and snacks available (while they last), and no registration is required. Just show up, relax, and create alongside fellow Waterloo students!
-
-📅 Tuesday, Nov 19
-🕕 6:00 PM – 8:00 PM
-📍 RAISE Office (SLC 3207)
-
-Open to all Waterloo undergrads. We can’t wait to see you there! 🎉]]></description>
-    <guid isPermaLink="false">1101@wat2do</guid>
-    <pubDate>Wed, 05 Nov 2025 05:38:29 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/94dccd5e-4501-4de6-b2c6-5bf16ab8ce71.jpg" medium="image" />
   </item>
   <item>
     <title>Design to Launch: Building Interactive Websites with Framer</title>
@@ -739,30 +751,6 @@ Tickets are free but spots are limited. RSVP through the link in bio.
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/85afdd58-94c9-4879-b08b-1c28a2bf2964.jpg" medium="image" />
   </item>
   <item>
-    <title>DDC Alumni Panel</title>
-    <link>https://www.instagram.com/p/DRIlVTkDrr5/</link>
-    <description><![CDATA[Join us for an exclusive and inspiring evening with Double Degree alumni! Hear their journeys, gain advice, and get your questions answered live. 🎓🤗
-
-Make sure to sign up with the link in bio to get the event link on Wednesday ‼️]]></description>
-    <guid isPermaLink="false">1335@wat2do</guid>
-    <pubDate>Sun, 16 Nov 2025 22:30:00 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d5450f88-0ced-4cea-97c0-11975ea2f809.jpg" medium="image" />
-  </item>
-  <item>
-    <title>Careers In Real Estate Event</title>
-    <link>https://www.instagram.com/p/DQ9sYGyCdU2/</link>
-    <description><![CDATA[Join us at our Careers in Real Estate event! We’ll be having a lesson over potential real estate careers and possibly a Q&A session with previous investment analysts in the club. Don’t miss out on this opportunity!
-
-🗓️ Wednesday, November 19
-⏳ 7:00-8:00pm
-📍 QNC 1507
-
-Sign up using the link in our bio! We can’t wait to see you there!]]></description>
-    <guid isPermaLink="false">1282@wat2do</guid>
-    <pubDate>Wed, 12 Nov 2025 17:25:24 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f0545a4b-ba95-4cfc-8430-cf267b765fbc.jpg" medium="image" />
-  </item>
-  <item>
     <title>Maaveerar Naal: Our Heroes, Our Legacy</title>
     <link>https://www.instagram.com/p/DQuM_nojjAE/</link>
     <description><![CDATA[In honour of the fallen heroes of the Tamileelam community, UWATNA and LUTSA dedicate the month of November to remember and pay tribute to their sacrifices made for the freedom and progress of our people. Each year, Tamils around the world unite in this month of remembrance to celebrate the courage and resilience of our Maaveerars.
@@ -777,6 +765,20 @@ Let us come together to pay our respects to those who gave everything for our fr
     <guid isPermaLink="false">1139@wat2do</guid>
     <pubDate>Thu, 06 Nov 2025 17:30:45 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/3ff61cd5-1f69-42f4-92bf-68505813f0ad.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Careers In Real Estate Event</title>
+    <link>https://www.instagram.com/p/DQ9sYGyCdU2/</link>
+    <description><![CDATA[Join us at our Careers in Real Estate event! We’ll be having a lesson over potential real estate careers and possibly a Q&A session with previous investment analysts in the club. Don’t miss out on this opportunity!
+
+🗓️ Wednesday, November 19
+⏳ 7:00-8:00pm
+📍 QNC 1507
+
+Sign up using the link in our bio! We can’t wait to see you there!]]></description>
+    <guid isPermaLink="false">1282@wat2do</guid>
+    <pubDate>Wed, 12 Nov 2025 17:25:24 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f0545a4b-ba95-4cfc-8430-cf267b765fbc.jpg" medium="image" />
   </item>
   <item>
     <title>Sisters Calligraphy Workshop</title>
@@ -802,6 +804,16 @@ IA we hope to see all the sisters there🎉]]></description>
     <guid isPermaLink="false">1140@wat2do</guid>
     <pubDate>Thu, 06 Nov 2025 22:23:13 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/45517d69-bd05-481d-972a-507f3760db52.jpg" medium="image" />
+  </item>
+  <item>
+    <title>DDC Alumni Panel</title>
+    <link>https://www.instagram.com/p/DRIlVTkDrr5/</link>
+    <description><![CDATA[Join us for an exclusive and inspiring evening with Double Degree alumni! Hear their journeys, gain advice, and get your questions answered live. 🎓🤗
+
+Make sure to sign up with the link in bio to get the event link on Wednesday ‼️]]></description>
+    <guid isPermaLink="false">1335@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 22:30:00 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d5450f88-0ced-4cea-97c0-11975ea2f809.jpg" medium="image" />
   </item>
   <item>
     <title>Esports Tournament</title>
@@ -847,6 +859,20 @@ Get ready for our next Stem Cell Drive happening on Thursday, November 20th at D
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/dddac9a2-e533-4e9a-88aa-082d0430ea70.jpg" medium="image" />
   </item>
   <item>
+    <title>From Outages to Ownership</title>
+    <link>https://www.instagram.com/p/DQWwJc1E95L/</link>
+    <description><![CDATA[From Outages to Ownership: Disaster Recovery, DNS, and Career Journeys in Okta Engineering
+
+Ready to see how a top tech company handles the really big challenges? Join us and our Okta engineers for an evening focused on the critical work that keeps our services running; even when major outages happen. Our Staff Software Engineer will kick off the event with a fascinating technical talk, diving into DNS, redundancy, and disaster recovery based on her real-world experience at Okta. It’s a timely look at how engineering teams build for reliability at scale.
+
+After the deep-dive, you’ll hear from a panel of Engineers from various teams as they share their own career paths, offer a peek into their day-to-day work, and give you practical advice for launching your career. Stick around for our informal networking mixer to connect one-on-one with the team and ask any final questions!
+
+🔗 Link in bio to register]]></description>
+    <guid isPermaLink="false">776@wat2do</guid>
+    <pubDate>Tue, 28 Oct 2025 18:53:00 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/fe53699c-1f89-4d69-b422-332d26738f8d.jpg" medium="image" />
+  </item>
+  <item>
     <title>FARMSA Stock Pitch Competition</title>
     <link>https://www.instagram.com/p/DQ5y2YYjvvb/</link>
     <description><![CDATA[📈 FARMSA Fall 2025 Stock Pitch Competition is here!
@@ -890,28 +916,6 @@ Don’t miss your chance to compete, connect, and experience the thrill of real-
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/df769c48-cb06-4e6d-9ced-e10a4c935e6a.jpg" medium="image" />
   </item>
   <item>
-    <title>From Outages to Ownership</title>
-    <link>https://www.instagram.com/p/DQWwJc1E95L/</link>
-    <description><![CDATA[From Outages to Ownership: Disaster Recovery, DNS, and Career Journeys in Okta Engineering
-
-Ready to see how a top tech company handles the really big challenges? Join us and our Okta engineers for an evening focused on the critical work that keeps our services running; even when major outages happen. Our Staff Software Engineer will kick off the event with a fascinating technical talk, diving into DNS, redundancy, and disaster recovery based on her real-world experience at Okta. It’s a timely look at how engineering teams build for reliability at scale.
-
-After the deep-dive, you’ll hear from a panel of Engineers from various teams as they share their own career paths, offer a peek into their day-to-day work, and give you practical advice for launching your career. Stick around for our informal networking mixer to connect one-on-one with the team and ask any final questions!
-
-🔗 Link in bio to register]]></description>
-    <guid isPermaLink="false">776@wat2do</guid>
-    <pubDate>Tue, 28 Oct 2025 18:53:00 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/fe53699c-1f89-4d69-b422-332d26738f8d.jpg" medium="image" />
-  </item>
-  <item>
-    <title>Craft And Game Night</title>
-    <link>https://www.instagram.com/p/DQ4hPraDVsQ/</link>
-    <description><![CDATA[Unwind with NSBE at our Craft & Game Night! 🎨🎲 Come create paper portraits, play your favorite board games, and enjoy a chill evening of creativity, laughter, and connection with the NSBE family! See you there 💜💜]]></description>
-    <guid isPermaLink="false">1228@wat2do</guid>
-    <pubDate>Mon, 10 Nov 2025 19:07:59 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/71b46c0c-3240-4b72-99dd-7c6ad393f261.jpg" medium="image" />
-  </item>
-  <item>
     <title>Games Night</title>
     <link>https://www.instagram.com/p/DQr3e-XkoBF/</link>
     <description><![CDATA[Join us for Games Night Thursday November 20th at STC 1019, fun, friends, and liquid nitrogen ice cream await! 🍦🍦 Image indicates the event is 6-8PM and the poster shows an MNS logo.]]></description>
@@ -920,19 +924,12 @@ After the deep-dive, you’ll hear from a panel of Engineers from various teams 
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/00cde0a7-6148-407e-9bec-286bb07b7ea5.jpg" medium="image" />
   </item>
   <item>
-    <title>Stand Up Comedy Night</title>
-    <link>https://wusa.ca/event/stand-up-comedy-night/</link>
-    <description><![CDATA[
-
-We’re bringing you a Stand Up Comedy Show in the SLC Bomber!
-
-Professional comedians from across the GTA and UW students getting on stage!
-
-We made the show completely free, so come out and grab a seat (while they last)!
-]]></description>
-    <guid isPermaLink="false">1102@wat2do</guid>
-    <pubDate>Wed, 05 Nov 2025 05:38:35 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d7d6c041-fe20-4869-869f-c31d38b9fdc2.jpg" medium="image" />
+    <title>Craft And Game Night</title>
+    <link>https://www.instagram.com/p/DQ4hPraDVsQ/</link>
+    <description><![CDATA[Unwind with NSBE at our Craft & Game Night! 🎨🎲 Come create paper portraits, play your favorite board games, and enjoy a chill evening of creativity, laughter, and connection with the NSBE family! See you there 💜💜]]></description>
+    <guid isPermaLink="false">1228@wat2do</guid>
+    <pubDate>Mon, 10 Nov 2025 19:07:59 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/71b46c0c-3240-4b72-99dd-7c6ad393f261.jpg" medium="image" />
   </item>
   <item>
     <title>Soirée Crêpes Et Jeux De Société!</title>
@@ -949,15 +946,19 @@ Merci de remplir le formulaire (lien dans notre bio IG) pour confirmer votre pr�
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/b18d5558-b895-4377-ab37-09ebf843123d.jpg" medium="image" />
   </item>
   <item>
-    <title>F25 EngPlay: Peter Johnson, The Tool Thief</title>
-    <link>https://uwaterloo.ca/theatres/events/f25-engplay-peter-johnson-tool-thief</link>
-    <description><![CDATA[Come see "EngPlay Presents: Peter Johnson: The Tool Thief", a legally distinct engineering parody of godly proportions. Peter Johnson discovers he's not like everyone else, and he and his friends embark on a harrowing journey of self-discovery, hijinks, and a little bit of debauchery to prevent a war among the Eng-gods. Performances are held on November 20th and November 21st at the Humanities Theatre, doors open at 6:30 pm. Heckling is encouraged. Enjoy at your own risk.
+    <title>Stand Up Comedy Night</title>
+    <link>https://wusa.ca/event/stand-up-comedy-night/</link>
+    <description><![CDATA[
 
-Venue: Humanities Theatre, Hagey Hall, University of Waterloo
-Tickets: $12.81]]></description>
-    <guid isPermaLink="false">1062@wat2do</guid>
-    <pubDate>Wed, 05 Nov 2025 01:28:05 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/84bd945d-fc3c-4fea-971a-2dcf3b95b0ef.jpg" medium="image" />
+We’re bringing you a Stand Up Comedy Show in the SLC Bomber!
+
+Professional comedians from across the GTA and UW students getting on stage!
+
+We made the show completely free, so come out and grab a seat (while they last)!
+]]></description>
+    <guid isPermaLink="false">1102@wat2do</guid>
+    <pubDate>Wed, 05 Nov 2025 05:38:35 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/d7d6c041-fe20-4869-869f-c31d38b9fdc2.jpg" medium="image" />
   </item>
   <item>
     <title>Board Game Social</title>
@@ -992,6 +993,17 @@ We will be collecting donations for Sudan, and you will be able to pie your favo
     <guid isPermaLink="false">1331@wat2do</guid>
     <pubDate>Sun, 16 Nov 2025 13:27:30 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/f50fc774-7800-48f2-a749-51be4671f18b.jpg" medium="image" />
+  </item>
+  <item>
+    <title>F25 EngPlay: Peter Johnson, The Tool Thief</title>
+    <link>https://uwaterloo.ca/theatres/events/f25-engplay-peter-johnson-tool-thief</link>
+    <description><![CDATA[Come see "EngPlay Presents: Peter Johnson: The Tool Thief", a legally distinct engineering parody of godly proportions. Peter Johnson discovers he's not like everyone else, and he and his friends embark on a harrowing journey of self-discovery, hijinks, and a little bit of debauchery to prevent a war among the Eng-gods. Performances are held on November 20th and November 21st at the Humanities Theatre, doors open at 6:30 pm. Heckling is encouraged. Enjoy at your own risk.
+
+Venue: Humanities Theatre, Hagey Hall, University of Waterloo
+Tickets: $12.81]]></description>
+    <guid isPermaLink="false">1062@wat2do</guid>
+    <pubDate>Wed, 05 Nov 2025 01:28:05 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/84bd945d-fc3c-4fea-971a-2dcf3b95b0ef.jpg" medium="image" />
   </item>
   <item>
     <title>Nhau! Y2K Karaoke Bar Night</title>
@@ -1364,6 +1376,18 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
+    <title>Wellness Lounge</title>
+    <link>https://www.instagram.com/p/DQr4X3FEm3r/</link>
+    <description><![CDATA[Here are the peer support and wellness lounge hours offered by our wonderful team this term! 🕰️
+
+Our wellness lounge can be used as a quiet place to study 📚, a place to meet people 🤝, or a place to relax 🛌 and make crafts 🧵✂️ or sip tea 🫖! 
+
+Our upper-year peer support team 💪 is prepared to help you manage various situations by listening 👂 and providing you with relevant resources 🗃️ and strategies during your one-on-one session! You can schedule an appointment 📅 via the link in our bio 🔗, or simply walk in to the office 🚶‍♂️ for our peer support services 🫂.]]></description>
+    <guid isPermaLink="false">1146@wat2do</guid>
+    <pubDate>Thu, 06 Nov 2025 22:29:47 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
+  </item>
+  <item>
     <title>Krispy Kreme Donut Sale</title>
     <link>https://www.instagram.com/p/DRAMARJkZFu/</link>
     <description><![CDATA[The Biology Graduate Students Association (BGSA) is excited to announce our 🍩 Krispy Kreme Donut Sale 🍩 fundraiser! Satisfy your sweet tooth while supporting events and initiatives for biology graduate students.
@@ -1384,18 +1408,6 @@ Questions? Email Chenelle - cacarong@uwaterloo.ca]]></description>
     <guid isPermaLink="false">1305@wat2do</guid>
     <pubDate>Thu, 13 Nov 2025 17:27:21 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/5ddfe28d-c96a-4be0-82aa-bc18ffda684f.jpg" medium="image" />
-  </item>
-  <item>
-    <title>Wellness Lounge</title>
-    <link>https://www.instagram.com/p/DQr4X3FEm3r/</link>
-    <description><![CDATA[Here are the peer support and wellness lounge hours offered by our wonderful team this term! 🕰️
-
-Our wellness lounge can be used as a quiet place to study 📚, a place to meet people 🤝, or a place to relax 🛌 and make crafts 🧵✂️ or sip tea 🫖! 
-
-Our upper-year peer support team 💪 is prepared to help you manage various situations by listening 👂 and providing you with relevant resources 🗃️ and strategies during your one-on-one session! You can schedule an appointment 📅 via the link in our bio 🔗, or simply walk in to the office 🚶‍♂️ for our peer support services 🫂.]]></description>
-    <guid isPermaLink="false">1146@wat2do</guid>
-    <pubDate>Thu, 06 Nov 2025 22:29:47 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
     <title>Double Down Tourney</title>
@@ -1502,14 +1514,6 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
-    <title>Creative Writing Showcase and Open Mic</title>
-    <link>https://www.instagram.com/p/DQUjsg7ERX4/</link>
-    <description><![CDATA[🙌 Everyone get so excited for the termly English Department Creative Writing Showcase and Open Mic! 🥳 Scan the QR code or use the link in our LinkTree to RSVP!]]></description>
-    <guid isPermaLink="false">723@wat2do</guid>
-    <pubDate>Mon, 27 Oct 2025 18:06:22 GMT</pubDate>
-    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1eb24bfc-ae37-4f68-a8ff-ac015622a6b7.jpg" medium="image" />
-  </item>
-  <item>
     <title>Wellness Lounge</title>
     <link>https://www.instagram.com/p/DQr4X3FEm3r/</link>
     <description><![CDATA[Here are the peer support and wellness lounge hours offered by our wonderful team this term! 🕰️
@@ -1522,6 +1526,44 @@ Our upper-year peer support team 💪 is prepared to help you manage various sit
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/8f9fd8c6-6913-4dde-8a21-e97693267cea.jpg" medium="image" />
   </item>
   <item>
+    <title>Creative Writing Showcase and Open Mic</title>
+    <link>https://www.instagram.com/p/DQUjsg7ERX4/</link>
+    <description><![CDATA[🙌 Everyone get so excited for the termly English Department Creative Writing Showcase and Open Mic! 🥳 Scan the QR code or use the link in our LinkTree to RSVP!]]></description>
+    <guid isPermaLink="false">723@wat2do</guid>
+    <pubDate>Mon, 27 Oct 2025 18:06:22 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1eb24bfc-ae37-4f68-a8ff-ac015622a6b7.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Interview Skills Workshop</title>
+    <link>https://www.instagram.com/p/DRIvIVdjICd/</link>
+    <description><![CDATA[INTERVIEW SKILLS WORKSHOP🗣️📑
+UW EngSoc is hosting an interview skills workshop at the IDEAs Clinic Second floor (E7/PSE 2409) on November 26th from 6 to 8 PM! If you are interested in participating or volunteering, please these links:
+Participant: bit.ly/F25InterviewSkillsParticipant
+Volunteer: bit.ly/F25InterviewSkillsVolunteer
+
+Details:
+6-7 PM: Center for Career Development (CCD) presentation on interview skills
+7-8 PM: Participants partner up with upper year students for mock interviews]]></description>
+    <guid isPermaLink="false">1339@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:55:37 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a88e05cf-e3ee-4eeb-9662-45a4983a6633.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Interview Skills Workshop</title>
+    <link>https://www.instagram.com/p/DRIvIVdjICd/</link>
+    <description><![CDATA[INTERVIEW SKILLS WORKSHOP🗣️📑
+UW EngSoc is hosting an interview skills workshop at the IDEAs Clinic Second floor (E7/PSE 2409) on November 26th from 6 to 8 PM! If you are interested in participating or volunteering, please these links:
+Participant: bit.ly/F25InterviewSkillsParticipant
+Volunteer: bit.ly/F25InterviewSkillsVolunteer
+
+Details:
+6-7 PM: Center for Career Development (CCD) presentation on interview skills
+7-8 PM: Participants partner up with upper year students for mock interviews]]></description>
+    <guid isPermaLink="false">1339@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:55:37 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a88e05cf-e3ee-4eeb-9662-45a4983a6633.jpg" medium="image" />
+  </item>
+  <item>
     <title>November Board Meeting</title>
     <link>https://wusa.ca/event/november-board-meeting/</link>
     <description><![CDATA[
@@ -1531,6 +1573,21 @@ Livestream the meeting here.
     <guid isPermaLink="false">1098@wat2do</guid>
     <pubDate>Wed, 05 Nov 2025 05:38:08 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/39a3c102-9c0d-457e-bca3-dfbb0349a4f3.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Interview Skills Workshop</title>
+    <link>https://www.instagram.com/p/DRIvIVdjICd/</link>
+    <description><![CDATA[INTERVIEW SKILLS WORKSHOP🗣️📑
+UW EngSoc is hosting an interview skills workshop at the IDEAs Clinic Second floor (E7/PSE 2409) on November 26th from 6 to 8 PM! If you are interested in participating or volunteering, please these links:
+Participant: bit.ly/F25InterviewSkillsParticipant
+Volunteer: bit.ly/F25InterviewSkillsVolunteer
+
+Details:
+6-7 PM: Center for Career Development (CCD) presentation on interview skills
+7-8 PM: Participants partner up with upper year students for mock interviews]]></description>
+    <guid isPermaLink="false">1339@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:55:37 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/a88e05cf-e3ee-4eeb-9662-45a4983a6633.jpg" medium="image" />
   </item>
   <item>
     <title>Bubble Tea Talent Show</title>
@@ -1847,6 +1904,42 @@ Sign up for the comp and get your membership through the link in bio 🔗]]></de
     <guid isPermaLink="false">1270@wat2do</guid>
     <pubDate>Wed, 12 Nov 2025 03:50:06 GMT</pubDate>
     <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/1332501c-befc-4255-937d-7ec0366ef476.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Animusic Ensembles F25 End Of Term Concert</title>
+    <link>https://www.instagram.com/p/DRIuCONDFyG/</link>
+    <description><![CDATA[Hi everyone!!
+
+It’s time for Animusic Ensembles F25 End of Term Concert 💕 
+
+This term, our concert will take place in the STC Building! Doors will open at 3:00pm and the concert will begin at 4:00pm. As always, we’ll also be selling our club merch created by our talented members — so come early to check it out!
+
+Come by and enjoy our amazing performances!!
+
+📅 Sunday, November 30th
+⏰ 4:00pm (doors open at 3:00pm)
+📍 STC]]></description>
+    <guid isPermaLink="false">1337@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:46:18 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/55ea1f42-5834-4654-b6be-3f335231d6fb.jpg" medium="image" />
+  </item>
+  <item>
+    <title>Animusic Ensembles F25 End Of Term Concert</title>
+    <link>https://www.instagram.com/p/DRIuCONDFyG/</link>
+    <description><![CDATA[Hi everyone!!
+
+It’s time for Animusic Ensembles F25 End of Term Concert 💕 
+
+This term, our concert will take place in the STC Building! Doors will open at 3:00pm and the concert will begin at 4:00pm. As always, we’ll also be selling our club merch created by our talented members — so come early to check it out!
+
+Come by and enjoy our amazing performances!!
+
+📅 Sunday, November 30th
+⏰ 4:00pm (doors open at 3:00pm)
+📍 STC]]></description>
+    <guid isPermaLink="false">1337@wat2do</guid>
+    <pubDate>Sun, 16 Nov 2025 23:46:18 GMT</pubDate>
+    <media:content url="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/events/55ea1f42-5834-4654-b6be-3f335231d6fb.jpg" medium="image" />
   </item>
   <item>
     <title>wloo CC End of Term Comp</title>
