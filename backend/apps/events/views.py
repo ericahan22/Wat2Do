@@ -47,16 +47,17 @@ def get_events(request):
             status="CONFIRMED", school="University of Waterloo"
         )
 
-        # Apply default upcoming events filter using EventDates join
+        # Upcoming events filter: show all live and future events by default
         if not dtstart_utc_param:
             now = timezone.now()
-            ninety_minutes_ago = now - timedelta(minutes=90)
-            # Filter events that are either:
-            # 1. Have no end time and started within last 90 minutes
-            # 2. Have end time and are currently happening (between start and end)
             events_queryset = events_queryset.filter(
-                Q(event_dates__dtend_utc__isnull=True, event_dates__dtstart_utc__gte=ninety_minutes_ago)
-                | Q(event_dates__dtend_utc__isnull=False, event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now)
+                Q(event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now) |  # Live
+                Q(event_dates__dtstart_utc__gte=now)  # Upcoming
+            ).distinct()
+        else:
+            # If dtstart_utc_param is provided, use it as lower bound
+            events_queryset = events_queryset.filter(
+                event_dates__dtstart_utc__gte=dtstart_utc_param
             ).distinct()
 
         filterset = EventFilter(request.GET, queryset=events_queryset)
@@ -143,27 +144,23 @@ def get_events(request):
                 )[: limit + 1]
             )
 
-        # Build results with most recent upcoming occurrence dates
+        # Build results with the next upcoming occurrence date
         results = []
         now = timezone.now()
-        ninety_minutes_ago = now - timedelta(minutes=90)
 
         for event in events_list:
-            # Get all event dates and filter for upcoming ones
             all_dates = list(event.event_dates.all())
-            # Filter to only upcoming/live dates matching the query logic:
-            # 1. No end time and started within last 90 minutes
-            # 2. Has end time and currently happening (between start and end)
-            upcoming_dates = [
+            # Find the next upcoming or currently live date
+            upcoming_or_live_dates = [
                 date for date in all_dates
-                if (date.dtend_utc is None and date.dtstart_utc >= ninety_minutes_ago)
-                or (date.dtend_utc is not None and date.dtstart_utc <= now and date.dtend_utc >= now)
+                if date.dtstart_utc and (
+                    date.dtstart_utc >= now or
+                    (date.dtstart_utc <= now and date.dtend_utc and date.dtend_utc >= now)
+                )
             ]
-            # Select the most recent upcoming date (first one since they're ordered by dtstart_utc)
-            # If no upcoming dates, fall back to the earliest date overall
             selected_date = (
-                upcoming_dates[0]
-                if upcoming_dates
+                upcoming_or_live_dates[0]
+                if upcoming_or_live_dates
                 else (all_dates[0] if all_dates else None)
             )
 

@@ -212,11 +212,11 @@ export function useEvents() {
   const handleToggleAllEvents = () => {
     setSearchParams((prev) => {
       const nextParams = new URLSearchParams(prev);
-
-      if (dtstart_utc) {
+      nextParams.delete("added_at");
+      // If "all" is already selected, deselect it
+      if (nextParams.get("dtstart_utc") === "2025-01-01T00:00:00Z") {
         nextParams.delete("dtstart_utc");
       } else {
-        nextParams.delete("added_at");
         nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
       }
       return nextParams;
