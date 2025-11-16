@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "2025-11-16T04:02:10.405787+00:00";
+export const LAST_UPDATED = "2025-11-16T04:04:31.165220+00:00";
 
 export const EVENT_EMOJIS_CATEGORIES: [string, string, string][] = [
   ["Objects", "Graduation%20Cap", "Academic"],
