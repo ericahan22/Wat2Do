@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 13 * * *'  # 8am EST (UTC-5)
   workflow_dispatch:
+    inputs:
+      username:
+        description: 'Instagram username to scrape'
+        required: true
+        type: string
 
 jobs:
   instagram_feed:
@@ -64,6 +69,8 @@ jobs:
 
       - name: Run scraper
         working-directory: backend/scraping
+        env:
+          SCRAPE_USERNAME: ${{ github.event.inputs.username }}
         run: |
           python -u instagram_feed.py 2>&1 | tee logs/scraping.log
         continue-on-error: false

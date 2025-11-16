@@ -312,17 +312,23 @@ def get_apify_input():
     cutoff_date = timezone.now() - timedelta(days=CUTOFF_DAYS)
     cutoff_str = cutoff_date.strftime("%Y-%m-%d")
     logger.info(f"Setting post cutoff date to {cutoff_str} ({CUTOFF_DAYS} day ago)")
-    
-    # Parse usernames from URLs
-    usernames = []
-    for url in FULL_URLS:
-        try:
-            clean_url = url.split("instagram.com/")[1]
-            username = clean_url.split("/")[0]
-            if username and username not in usernames:
-                usernames.append(username)
-        except Exception:
-            logger.warning(f"Could not parse username from URL: {url}")
+
+    # Scrape single username if provided via env
+    single_username = os.getenv("SCRAPE_USERNAME")
+    if single_username:
+        usernames = [single_username]
+        logger.info(f"Scraping @{single_username}")
+    else:
+        # Parse usernames from URLs
+        usernames = []
+        for url in FULL_URLS:
+            try:
+                clean_url = url.split("instagram.com/")[1]
+                username = clean_url.split("/")[0]
+                if username and username not in usernames:
+                    usernames.append(username)
+            except Exception:
+                logger.warning(f"Could not parse username from URL: {url}")
 
     logger.info(f"Parsed {len(usernames)} unique usernames from the list.")
 
