@@ -2,12 +2,41 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-react";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { Button, Skeleton } from "@/shared/components/ui";
 import { SEOHead } from "@/shared/components/SEOHead";
 import { formatEventDate } from "@/shared/lib/dateUtils";
 import { EventEditForm } from "@/features/events/components/EventEditForm";
 import { EventPreview } from "@/features/events/components/EventPreview";
 import { useApi } from "@/shared/hooks/useApi";
+
+const EventDetailSkeleton = () => {
+  return (
+    <div className="max-w-xl mx-auto mt-8">
+        {/* Event Card Skeleton */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
+          {/* Image Skeleton */}
+          <Skeleton className="w-full h-64 rounded-lg mb-4" />
+
+          {/* Title Skeleton */}
+          <Skeleton className="h-8 w-3/4 mx-auto mb-4" />
+
+          {/* Description Skeleton */}
+          <div className="space-y-2 mb-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+
+          {/* Details Skeletons */}
+          <div className="space-y-2">
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+            <Skeleton className="h-16 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+  );
+};
 
 function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -26,14 +55,7 @@ function EventDetailPage() {
 
   // Show loading while either query is loading
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
-          <span>Loading event...</span>
-        </div>
-      </div>
-    );
+    return <EventDetailSkeleton />;
   }
 
   // Show "Event Not Found" for actual errors, or if pending and unauthorized

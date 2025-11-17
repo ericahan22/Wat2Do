@@ -68,8 +68,8 @@ export function EventPreview({ event }: EventPreviewProps) {
   };
 
   return (
-    <div className="max-w-xl mx-auto">
-      {/* Back Button */}
+    <>
+      {/* Back Button - Aligned with navbar */}
       <div className="mb-6">
         <Button onMouseDown={handleBack} variant="ghost" className="p-2">
           <ArrowLeft className="h-4 w-4" />
@@ -77,8 +77,9 @@ export function EventPreview({ event }: EventPreviewProps) {
         </Button>
       </div>
 
-      {/* Polaroid Frame */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
+      <div className="max-w-xl mx-auto">
+        {/* Polaroid Frame */}
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
         {/* Image Section */}
         <div className="relative mb-4">
           {event.source_image_url ? (
@@ -265,6 +266,7 @@ export function EventPreview({ event }: EventPreviewProps) {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
