@@ -1,11 +1,11 @@
-name: Scrape Instagram, Update Events DB, Update Static Data
+name: Process Single User
 
 on:
-  schedule:
-    - cron: '0 13 * * *'  # 8am EST (UTC-5)
+  repository_dispatch:
+    types: [new_instagram_post]
 
 jobs:
-  instagram_feed:
+  process-post:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -35,6 +35,8 @@ jobs:
       EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
       # --- Apify Token ---
       APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+      TARGET_USERNAME: ${{ github.event.client_payload.username }}
+      MAX_CONCURRENT_TASKS: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +45,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Create logs directory
         working-directory: backend/scraping
         run: mkdir -p logs
@@ -61,11 +63,10 @@ jobs:
         run: |
           pip install --prefer-binary -r requirements.txt
 
-      - name: Run scraper
+      - name: Run Scraper for Single User
         working-directory: backend/scraping
         run: |
-          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
-        continue-on-error: false
+          python -u process_single_user.py 2>&1 | tee logs/scraping.log
 
       - name: Upload logs as artifacts
         if: always()
@@ -77,17 +78,3 @@ jobs:
             backend/scraping/logs/scraping.log
             backend/scraping/apify_raw_results.json
           if-no-files-found: 'ignore'
-
-      - name: Generate static data file
-        id: generate_static
-        working-directory: backend/scraping
-        run: python generate_static_data.py
-
-      - name: Commit and push changes
-        if: steps.generate_static.outcome == 'success'
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add frontend/src/data/staticData.ts frontend/public/rss.xml
-          git commit -m "chore: update static data from DB" || echo "No changes to commit"
-          git pull --rebase && git push --force

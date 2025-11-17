@@ -305,28 +305,22 @@ def get_seen_shortcodes():
         return set()
 
 
-def get_apify_input():
-    """
-    Builds the Apify actor input JSON for apify/instagram-post-scraper.
-    """
+def get_apify_input(username=None):
     cutoff_date = timezone.now() - timedelta(days=CUTOFF_DAYS)
     cutoff_str = cutoff_date.strftime("%Y-%m-%d")
     logger.info(f"Setting post cutoff date to {cutoff_str} ({CUTOFF_DAYS} day ago)")
 
-    # Scrape single username if provided via env
-    single_username = os.getenv("SCRAPE_USERNAME")
-    if single_username:
-        usernames = [single_username]
-        logger.info(f"Scraping @{single_username}")
+    if username:
+        usernames = [username]
+        logger.info(f"Scraping @{username}")
     else:
-        # Parse usernames from URLs
         usernames = []
         for url in FULL_URLS:
             try:
                 clean_url = url.split("instagram.com/")[1]
-                username = clean_url.split("/")[0]
-                if username and username not in usernames:
-                    usernames.append(username)
+                uname = clean_url.split("/")[0]
+                if uname and uname not in usernames:
+                    usernames.append(uname)
             except Exception:
                 logger.warning(f"Could not parse username from URL: {url}")
 
@@ -557,10 +551,11 @@ async def process_scraped_posts(posts_data, cutoff_date):
     logger.info(f"Added {total_events_added} event(s) to Supabase")
     
     
-def run_apify_scraper():
+def run_apify_scraper(username=None):
     """
     Initializes Apify client, runs the Instagram scraper,
     saves the raw results, and processes them.
+    If username is provided, only scrape that user.
     """
     if not APIFY_API_TOKEN:
         logger.critical("APIFY_API_TOKEN not found in environment. Aborting.")
@@ -569,7 +564,7 @@ def run_apify_scraper():
     posts_data = []
     try:
         client = ApifyClient(APIFY_API_TOKEN)
-        actor_input = get_apify_input()
+        actor_input = get_apify_input(username)
         logger.info("Starting Apify actor 'apify/instagram-post-scraper'...")
         run = client.actor("apify/instagram-post-scraper").call(run_input=actor_input)
         logger.info(f"Apify run started (ID: {run['id']}). Waiting for results...")
