@@ -10,7 +10,6 @@ WORKDIR /app
 
 # Copy requirements files and wheels directory
 COPY requirements.txt .
-COPY wheels/ ./wheels/
 
 # Install Python dependencies
 RUN pip install --upgrade pip
