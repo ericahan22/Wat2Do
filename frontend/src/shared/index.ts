@@ -17,6 +17,7 @@ export { useTheme } from './hooks/useTheme';
 export { useCategoryParam } from './hooks/useCategoryParam';
 export { useNavbar } from './hooks/useNavbar';
 export { useAuthRedirect, useGuestRedirect } from './hooks/useAuthRedirect';
+export { useApi } from './hooks/useApi';
 
 // Lib
 export * from './lib/utils';

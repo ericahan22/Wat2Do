@@ -64,6 +64,14 @@ class EventsAPIClient {
   }
 
   /**
+   * Fetches the latest update timestamp and event title from all events.
+   * Corresponds to a GET request to /api/events/latest-update/
+   */
+  async getLatestUpdate(): Promise<{ lastUpdated: string | null; latestEventTitle: string | null }> {
+    return this.apiClient.get('events/latest-update/');
+  }
+
+  /**
    * Fetches a single event by its ID.
    * Corresponds to a GET request to /api/events/{id}/
    */

@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   useEvents,
   useEventSelection,
@@ -13,14 +14,16 @@ import {
   TabsList,
   TabsTrigger,
   FloatingEventExportBar,
-  formatRelativeDateTime,
+  formatTimeAgo,
   FilterButton,
+  useApi,
+  Skeleton,
   // JSONEditor,
 } from "@/shared";
 import { Calendar, LayoutGrid, Sparkles, Heart, Clock } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
-import { LAST_UPDATED, EVENT_CATEGORIES } from "@/data/staticData";
+import { EVENT_CATEGORIES } from "@/data/staticData";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,6 +33,14 @@ function EventsPage() {
     []
   );
   const placeholder = searchParams.get("placeholder") || randomCategory;
+  const { eventsAPIClient } = useApi();
+
+  // Fetch the latest update timestamp
+  const { data: latestUpdateData, isLoading: isLoadingLastUpdate } = useQuery({
+    queryKey: ["latestUpdate"],
+    queryFn: () => eventsAPIClient.getLatestUpdate(),
+    refetchOnWindowFocus: false,
+  });
 
   const handleViewChange = useCallback(
     (newView: "grid" | "calendar") => {
@@ -114,7 +125,24 @@ function EventsPage() {
             />
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-            Updated {formatRelativeDateTime(LAST_UPDATED)}
+            {isLoadingLastUpdate ? (
+              <span className="inline-flex items-center gap-2">
+                <Skeleton className="h-5 w-48 inline-block" />
+              </span>
+            ) : latestUpdateData?.latestEventTitle && latestUpdateData?.lastUpdated ? (
+              <>
+                <Link
+                  to={`/?search=${encodeURIComponent(latestUpdateData.latestEventTitle)}`}
+                  className="font-medium hover:underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                  {latestUpdateData.latestEventTitle}
+                </Link>
+                {" added "}
+                {formatTimeAgo(latestUpdateData.lastUpdated)}
+              </>
+            ) : (
+              "No recent updates"
+            )}
           </p>
         </div>
 

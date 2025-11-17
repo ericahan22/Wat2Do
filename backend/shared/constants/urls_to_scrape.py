@@ -203,5 +203,5 @@ FULL_URLS = [
     "https://instagram.com/uwcsclub",
     "https://instagram.com/uwvisualartsclub",
     "https://instagram.com/uwhiphop",
-    "https://instagram.com/cocawaterloolaurier"
+    "https://instagram.com/cocawaterloolaurier",
 ]

@@ -3,7 +3,7 @@ import sys
 
 import django
 
-# Setup Django 
+# Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
@@ -29,6 +29,7 @@ def main():
 
     cutoff_date = timezone.now() - timedelta(days=2)
     import asyncio
+
     try:
         asyncio.run(process_scraped_posts(posts_data, cutoff_date))
     except Exception as e:
