@@ -312,7 +312,7 @@ def get_apify_input(username=None):
 
     if username:
         usernames = [username]
-        logger.info(f"Scraping @{username}")
+        logger.info(f"Scraping @{username}...")
     else:
         usernames = []
         for url in FULL_URLS:
