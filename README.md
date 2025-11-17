@@ -17,7 +17,7 @@
 </p>
 
 <a href="https://wat2do.ca" target="_blank">Wat2Do.ca</a> is a web app to help you discover club events at the University of
-Waterloo, scraped directly from Instagram.
+Waterloo, scraped directly from Instagram by capturing all student club events within 10 minutes!
 
 ## ✨ Features
 

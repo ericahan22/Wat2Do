@@ -1,5 +1,5 @@
 import os
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import django
 import dotenv
@@ -26,6 +26,7 @@ class EmailService:
     def _get_events_added_today(self):
         """Fetch events that were added to the database since yesterday at midnight"""
         from datetime import timedelta
+
         from django.utils import timezone
 
         # Get yesterday at midnight (12:00 AM)
