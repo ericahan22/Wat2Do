@@ -32,16 +32,19 @@ from .models import EventDates, EventInterest, Events, EventSubmission
 @permission_classes([AllowAny])
 @ratelimit(key="ip", rate="600/hr", block=True)
 def get_latest_update(request):
-    """Get the latest added_at timestamp from all events"""
+    """Get the latest added_at timestamp and title from all events"""
     try:
         latest_event = (
             Events.objects.filter(status="CONFIRMED").order_by("-added_at").first()
         )
 
         if latest_event and latest_event.added_at:
-            return Response({"lastUpdated": latest_event.added_at.isoformat()})
+            return Response({
+                "lastUpdated": latest_event.added_at.isoformat(),
+                "latestEventTitle": latest_event.title
+            })
 
-        return Response({"lastUpdated": None})
+        return Response({"lastUpdated": None, "latestEventTitle": None})
     except Exception as e:
         return Response(
             {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

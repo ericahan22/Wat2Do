@@ -1,4 +1,5 @@
 import { format } from "date-fns-tz";
+import { formatDistanceToNow } from "date-fns";
 
 const toMidnight = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -127,4 +128,9 @@ export const utcToLocal = (utcString: string): string => {
 export const localToUtc = (localString: string): string => {
   if (!localString) return "";
   return new Date(localString).toISOString();
+};
+
+/** "5 minutes ago" | "2 hours ago" | "3 days ago" */
+export const formatTimeAgo = (utcString: string): string => {
+  return formatDistanceToNow(new Date(utcString), { addSuffix: true });
 };

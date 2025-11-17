@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   useEvents,
@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
   FloatingEventExportBar,
-  formatRelativeDateTime,
+  formatTimeAgo,
   FilterButton,
   useApi,
   Skeleton,
@@ -127,10 +127,21 @@ function EventsPage() {
           <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
             {isLoadingLastUpdate ? (
               <span className="inline-flex items-center gap-2">
-                Updated <Skeleton className="h-5 w-32 inline-block" />
+                <Skeleton className="h-5 w-48 inline-block" />
               </span>
+            ) : latestUpdateData?.latestEventTitle && latestUpdateData?.lastUpdated ? (
+              <>
+                <Link
+                  to={`/?search=${encodeURIComponent(latestUpdateData.latestEventTitle)}`}
+                  className="font-medium hover:underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                >
+                  {latestUpdateData.latestEventTitle}
+                </Link>
+                {" added "}
+                {formatTimeAgo(latestUpdateData.lastUpdated)}
+              </>
             ) : (
-              `Updated ${latestUpdateData?.lastUpdated ? formatRelativeDateTime(latestUpdateData.lastUpdated) : "recently"}`
+              "No recent updates"
             )}
           </p>
         </div>
