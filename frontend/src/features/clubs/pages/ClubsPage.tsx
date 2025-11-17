@@ -1,8 +1,18 @@
 import { useMemo, useRef } from "react";
 import NumberFlow from "@number-flow/react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead } from "@/shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead, Card, Skeleton } from "@/shared";
 import { useClubs, ClubsGrid } from "@/features/clubs";
 import SearchInput from "@/features/search/components/SearchInput";
+
+const ClubsGridSkeleton = () => {
+  return (
+    <div className="grid xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5">
+      {Array.from({ length: 20 }).map((_, i) => (
+        <Skeleton key={i} className="h-44 w-full rounded-xl" />
+      ))}
+    </div>
+  );
+};
 
 function ClubsPage() {
   const {
@@ -83,16 +93,8 @@ function ClubsPage() {
         </div>
       </div>
 
-      {/* Loading state - show content with loading indicator */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-8">
-          <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 dark:border-gray-100"></div>
-            <span>Loading clubs...</span>
-          </div>
-        </div>
-      )}
-
+      {/* Loading state - show skeleton */}
+      {isLoading && <ClubsGridSkeleton />}
 
       {/* Clubs Grid */}
       {!isLoading && !error && (

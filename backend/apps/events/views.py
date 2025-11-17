@@ -31,6 +31,30 @@ from .models import EventDates, EventInterest, Events, EventSubmission
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @ratelimit(key="ip", rate="600/hr", block=True)
+def get_latest_update(request):
+    """Get the latest added_at timestamp from all events"""
+    try:
+        latest_event = Events.objects.filter(
+            status="CONFIRMED"
+        ).order_by("-added_at").first()
+
+        if latest_event and latest_event.added_at:
+            return Response({
+                "lastUpdated": latest_event.added_at.isoformat()
+            })
+
+        return Response({
+            "lastUpdated": None
+        })
+    except Exception as e:
+        return Response(
+            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="600/hr", block=True)
 def get_events(request):
     """Get events with cursor-based pagination for infinite scroll"""
     try:

@@ -11,9 +11,8 @@ import { ClerkAppProvider } from "@/shared/components/ClerkAppProvider";
 import "@/app/index.css";
 import App from "@/app/App.tsx";
 import { BrowserRouter } from "react-router-dom";
-import { SEOHead } from "@/shared";
+import { SEOHead, Toaster } from "@/shared";
 import { Analytics } from "@vercel/analytics/react";
-import { Toaster } from "@/components/ui/sonner";
 import { handleError } from "@/shared/lib/errorHandler";
 
 const queryClient = new QueryClient({
