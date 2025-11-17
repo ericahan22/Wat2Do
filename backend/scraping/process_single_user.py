@@ -22,7 +22,6 @@ def main():
         logger.error("No TARGET_USERNAME provided.")
         sys.exit(1)
 
-    logger.info(f"Scraping @{target_user}...")
     posts_data = run_apify_scraper(username=target_user)
     if not posts_data:
         logger.warning("No posts found.")
@@ -33,7 +32,6 @@ def main():
 
     try:
         asyncio.run(process_scraped_posts(posts_data, cutoff_date))
-        logger.info("Done.")
     except Exception as e:
         logger.error(f"Error during processing: {e}")
         sys.exit(1)

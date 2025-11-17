@@ -19,10 +19,10 @@ def setup_logging():
     logging.getLogger("botocore").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
-    logging.getLogger("PIL").setLevel(logging.INFO)
+    logging.getLogger("PIL").setLevel(logging.WARNING)
     logging.getLogger("apify_client").setLevel(logging.WARNING)
 
-    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    fmt = "%(asctime)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
