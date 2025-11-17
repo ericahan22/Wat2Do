@@ -6,7 +6,6 @@ specifically AWS S3. It handles image validation, optimization, and upload.
 """
 
 import os
-import random
 import uuid
 from io import BytesIO
 
@@ -17,7 +16,6 @@ from dotenv import load_dotenv
 from PIL import Image
 
 from scraping.logging_config import logger
-from shared.constants.user_agents import USER_AGENTS
 
 
 class StorageService:

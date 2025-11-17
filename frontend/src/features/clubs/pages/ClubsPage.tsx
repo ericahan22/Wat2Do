@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import NumberFlow from "@number-flow/react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead, Card, Skeleton } from "@/shared";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead, Skeleton } from "@/shared";
 import { useClubs, ClubsGrid } from "@/features/clubs";
 import SearchInput from "@/features/search/components/SearchInput";
 

@@ -1,16 +1,19 @@
 import os
 import sys
+
 import django
 
-# Setup Django 
+# Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from scraping.logging_config import logger
-from scraping.instagram_feed import run_apify_scraper, process_scraped_posts
-from django.utils import timezone
 from datetime import timedelta
+
+from django.utils import timezone
+
+from scraping.instagram_feed import process_scraped_posts, run_apify_scraper
+from scraping.logging_config import logger
 
 
 def main():
@@ -27,6 +30,7 @@ def main():
 
     cutoff_date = timezone.now() - timedelta(days=2)
     import asyncio
+
     try:
         asyncio.run(process_scraped_posts(posts_data, cutoff_date))
         logger.info("Done.")

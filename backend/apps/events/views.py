@@ -34,18 +34,14 @@ from .models import EventDates, EventInterest, Events, EventSubmission
 def get_latest_update(request):
     """Get the latest added_at timestamp from all events"""
     try:
-        latest_event = Events.objects.filter(
-            status="CONFIRMED"
-        ).order_by("-added_at").first()
+        latest_event = (
+            Events.objects.filter(status="CONFIRMED").order_by("-added_at").first()
+        )
 
         if latest_event and latest_event.added_at:
-            return Response({
-                "lastUpdated": latest_event.added_at.isoformat()
-            })
+            return Response({"lastUpdated": latest_event.added_at.isoformat()})
 
-        return Response({
-            "lastUpdated": None
-        })
+        return Response({"lastUpdated": None})
     except Exception as e:
         return Response(
             {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -75,8 +71,10 @@ def get_events(request):
         if not dtstart_utc_param:
             now = timezone.now()
             events_queryset = events_queryset.filter(
-                Q(event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now) |  # Live
-                Q(event_dates__dtstart_utc__gte=now)  # Upcoming
+                Q(
+                    event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now
+                )  # Live
+                | Q(event_dates__dtstart_utc__gte=now)  # Upcoming
             ).distinct()
         else:
             # If dtstart_utc_param is provided, use it as lower bound
@@ -176,10 +174,16 @@ def get_events(request):
             all_dates = list(event.event_dates.all())
             # Find the next upcoming or currently live date
             upcoming_or_live_dates = [
-                date for date in all_dates
-                if date.dtstart_utc and (
-                    date.dtstart_utc >= now or
-                    (date.dtstart_utc <= now and date.dtend_utc and date.dtend_utc >= now)
+                date
+                for date in all_dates
+                if date.dtstart_utc
+                and (
+                    date.dtstart_utc >= now
+                    or (
+                        date.dtstart_utc <= now
+                        and date.dtend_utc
+                        and date.dtend_utc >= now
+                    )
                 )
             ]
             selected_date = (
