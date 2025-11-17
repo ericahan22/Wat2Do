@@ -90,7 +90,7 @@ export default function JSONEditor() {
     return () => {
       view.destroy();
     };
-  }, []);
+  }, [customTooltip, value]);
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">

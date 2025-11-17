@@ -9,7 +9,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 import asyncio
-from asgiref.sync import sync_to_async
 import csv
 import json
 import traceback
@@ -17,21 +16,21 @@ from datetime import timedelta
 from pathlib import Path
 
 from apify_client import ApifyClient
+from asgiref.sync import sync_to_async
 from django.utils import timezone
 from dotenv import load_dotenv
 
 from apps.clubs.models import Clubs
 from apps.events.models import EventDates, Events, IgnoredPost
 from scraping.logging_config import logger
-from shared.constants.urls_to_scrape import FULL_URLS
 from services.storage_service import upload_image_from_url
+from shared.constants.urls_to_scrape import FULL_URLS
 from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import (
     jaccard_similarity,
     normalize,
     sequence_similarity,
 )
-
 
 # Load environment variables from .env file
 load_dotenv()
@@ -545,7 +544,7 @@ async def process_scraped_posts(posts_data, cutoff_date):
         else:
             total_events_added += int(res)
 
-    logger.info(f"Feed processing completed.")
+    logger.info("Feed processing completed.")
     logger.warning(f"{total_failures} tasks failed with errors.")
     logger.info("\n------------------------- Summary -------------------------")
     logger.info(f"Added {total_events_added} event(s) to Supabase")
