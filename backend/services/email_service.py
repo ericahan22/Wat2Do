@@ -24,27 +24,42 @@ class EmailService:
         self.base_url = "https://api.resend.com/emails"
 
     def _get_events_added_today(self):
-        """Fetch events that were added to the database today"""
-        today = date.today()
+        """Fetch events that were added to the database since yesterday at midnight"""
+        from datetime import timedelta
+        from django.utils import timezone
 
+        # Get yesterday at midnight (12:00 AM)
+        yesterday_midnight = timezone.now().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        ) - timedelta(days=1)
+
+        # Get events added since yesterday midnight, prefetch their dates
         events = (
-            Events.objects.filter(added_at__date=today)
-            .select_related()
-            .order_by("dtstart_utc", "dtend_utc")
+            Events.objects.filter(added_at__gte=yesterday_midnight)
+            .prefetch_related("event_dates")
+            .distinct()
         )
 
         events_data = []
         for event in events:
-            # Format the event data for email template
-            event_date = event.dtstart_utc.strftime("%B %d, %Y")
+            # Get the earliest event date for this event
+            event_date_obj = event.event_dates.order_by("dtstart_utc").first()
 
-            # Format time range
-            start_time = event.dtstart_utc.strftime("%I:%M %p").lstrip("0")
-            if event.dtend_utc:
-                end_time = event.dtend_utc.strftime("%I:%M %p").lstrip("0")
-                time_range = f"{start_time} - {end_time}"
+            if event_date_obj:
+                # Format the event data for email template
+                event_date = event_date_obj.dtstart_utc.strftime("%B %d, %Y")
+
+                # Format time range
+                start_time = event_date_obj.dtstart_utc.strftime("%I:%M %p").lstrip("0")
+                if event_date_obj.dtend_utc:
+                    end_time = event_date_obj.dtend_utc.strftime("%I:%M %p").lstrip("0")
+                    time_range = f"{start_time} - {end_time}"
+                else:
+                    time_range = f"Starting at {start_time}"
             else:
-                time_range = f"Starting at {start_time}"
+                # If no event dates, use placeholder values
+                event_date = "Date TBD"
+                time_range = "Time TBD"
 
             club_name = (
                 event.ig_handle
@@ -53,14 +68,15 @@ class EmailService:
                 or event.tiktok_handle
                 or event.fb_handle
                 or event.school
+                or "Unknown Club"
             )
 
             events_data.append(
                 {
-                    "name": event.title,
+                    "name": event.title or "Untitled Event",
                     "date": event_date,
                     "time": time_range,
-                    "location": event.location,
+                    "location": event.location or "Location TBD",
                     "description": event.description or "No description available.",
                     "club": club_name,
                     "image_url": event.source_image_url,
