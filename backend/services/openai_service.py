@@ -339,6 +339,12 @@ class OpenAIService:
             # Return empty list if API call fails
             return []
 
+    def _format_image_list_for_prompt(self, urls):
+        """Format list of image URLs for the prompt."""
+        if not urls:
+            return "No images provided."
+        return "\n".join([f"Image {i}: {url}" for i, url in enumerate(urls)])
+
 
 # Singleton instance
 openai_service = OpenAIService()
