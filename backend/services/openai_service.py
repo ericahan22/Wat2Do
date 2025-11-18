@@ -114,8 +114,12 @@ class OpenAIService:
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
 
-        # Use post creation time if provided, otherwise use current time
-        context_datetime = post_created_at if post_created_at else now
+        # Use post creation time if provided, else current time
+        if post_created_at and isinstance(post_created_at, datetime):
+            post_created_at_str = post_created_at.isoformat()
+        else:
+            post_created_at_str = ""
+        context_datetime = post_created_at_str if post_created_at_str else now
         context_datetime = pytz_timezone("America/Toronto").localize(
             context_datetime.replace(tzinfo=None)
         )
