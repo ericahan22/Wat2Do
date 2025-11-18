@@ -20,6 +20,16 @@ from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import insert_event_to_db
 
 
+def _get_all_images(post):
+    """
+    Returns all image URLs for a post.
+    """
+    images = post.get("images", [])
+    # Fallback to displayUrl if images missing
+    if not images and post.get("displayUrl"):
+        images = [post["displayUrl"]]
+    return images
+
 class EventProcessor:
     def __init__(self, concurrency=5):
         self.concurrency = concurrency
@@ -66,7 +76,6 @@ class EventProcessor:
     @sync_to_async(thread_sensitive=True)
     def _ignore_post(self, shortcode):
         IgnoredPost.objects.get_or_create(shortcode=shortcode)
-
     async def _process_single_post_extraction(self, post):
         """Extracts event data from a single post using OpenAI."""
         async with self.semaphore:
@@ -75,33 +84,29 @@ class EventProcessor:
 
             return await self._extract_events(
                 post.get("caption"),
-                post.get("source_image_url"), # Using S3 URL
+                post.get("all_s3_urls"),
                 post_dt
             )
 
     async def process(self, posts_data, cutoff_date):
-        """Main entry point to process a list of raw posts."""
         logger.info(f"Processing {len(posts_data)} posts...")
-        
+
         seen_shortcodes = await self._get_seen_shortcodes()
         valid_posts = []
 
         # 1. Filter Posts
         for post in posts_data:
             url = post.get("url")
-            if not url or "/p/" not in url: continue
-            
-            # Basic validation
-            if not post.get("caption") or not post.get("displayUrl"): continue
-
-            # Date Check
+            if not url or "/p/" not in url:
+                continue
+            if not post.get("caption"):
+                continue
             post_dt = parse_utc_datetime(post.get("timestamp"))
-            if not post_dt or post_dt < cutoff_date: continue
-
-            # Duplicate Check
+            if not post_dt or post_dt < cutoff_date:
+                continue
             shortcode = url.strip("/").split("/")[-1]
-            if shortcode in seen_shortcodes: continue
-
+            if shortcode in seen_shortcodes:
+                continue
             valid_posts.append(post)
 
         if not valid_posts:
@@ -110,15 +115,29 @@ class EventProcessor:
 
         logger.info(f"Found {len(valid_posts)} new posts. Starting image uploads...")
 
-        # 2. Upload Images
-        upload_tasks = [self._upload_image(p.get("displayUrl")) for p in valid_posts]
-        s3_urls = await asyncio.gather(*upload_tasks)
-        for post, s3_url in zip(valid_posts, s3_urls, strict=False):
-            post["source_image_url"] = s3_url
+        # 2. Upload all images for each post (with carousel support)
+        all_image_tasks = []
+        for post in valid_posts:
+            image_urls = _get_all_images(post)
+            post["all_image_urls"] = image_urls
+            all_image_tasks.append([self._upload_image(img_url) for img_url in image_urls])
+        flat_tasks = [task for sublist in all_image_tasks for task in sublist]
+        flat_results = await asyncio.gather(*flat_tasks)
+        # Map uploaded S3 URLs back to posts
+        idx = 0
+        for post in valid_posts:
+            n_imgs = len(post["all_image_urls"])
+            post["all_s3_urls"] = flat_results[idx:idx + n_imgs]
+            idx += n_imgs
 
         # 3. Extract Events
         logger.info("Extracting event data...")
-        extract_tasks = [self._process_single_post_extraction(p) for p in valid_posts]
+        extract_tasks = []
+        for post in valid_posts:
+            extract_tasks.append(self._process_single_post_extraction({
+                **post,
+                "all_s3_urls": post["all_s3_urls"]
+            }))
         results = await asyncio.gather(*extract_tasks)
 
         # 4. Save to DB
@@ -127,15 +146,44 @@ class EventProcessor:
             ig_handle = post.get("ownerUsername")
             source_url = post.get("url")
             shortcode = source_url.strip("/").split("/")[-1]
-            club_type = self._get_club_type(ig_handle)
+            all_s3_urls = post.get("all_s3_urls", [])
 
             if not extracted_events:
-                # Mark as ignored if AI found nothing
                 await self._ignore_post(shortcode)
                 continue
 
+            if not isinstance(extracted_events, list):
+                extracted_events = [extracted_events]
+
+            # If 1 image is provided, but AI returned multiple event objects,
+            # merge them into a single "Weekly/Summary" event.
+            if len(all_s3_urls) == 1 and len(extracted_events) > 1:
+                base_event = extracted_events[0]
+                
+                # 1. Consolidate all dates from all events into the first event
+                combined_occurrences = []
+                for evt in extracted_events:
+                    combined_occurrences.extend(evt.get("occurrences") or [])
+                base_event["occurrences"] = combined_occurrences
+                
+                # 2. Update title/description to reflect it's a summary
+                club_name = post.get("ownerFullName") or ig_handle or "Club"
+                base_event["title"] = f"{club_name} Weekly Events"
+                base_event["description"] = (base_event.get("description") or "") + "\n\n(Condensed from multiple events)"
+                
+                extracted_events = [base_event]
+                
             for event_data in extracted_events:
-                success = await self._save_event(event_data, ig_handle, source_url, club_type)
-                if success: saved_count += 1
+                # Map the correct picture to the event.
+                image_idx = event_data.get("image_index")
+                if image_idx is not None and isinstance(image_idx, int) and 0 <= image_idx < len(all_s3_urls):
+                    event_data["source_image_url"] = all_s3_urls[image_idx]
+                else:
+                    # Fallback: Use the first image (cover) if no index specified
+                    event_data["source_image_url"] = all_s3_urls[0]
+
+                success = await self._save_event(event_data, ig_handle, source_url, self._get_club_type(ig_handle))
+                if success:
+                    saved_count += 1
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")

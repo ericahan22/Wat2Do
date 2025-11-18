@@ -99,6 +99,7 @@ class OpenAIService:
     def extract_events_from_caption(
         self,
         caption_text: str | None = None,
+        all_s3_urls: list[str] | None = None,
         source_image_url: str | None = None,
         post_created_at: datetime | None = None,
         school: str = "University of Waterloo",
@@ -126,7 +127,7 @@ class OpenAIService:
         categories_str = "\n".join(f"- {cat}" for cat in EVENT_CATEGORIES)
 
         prompt = f"""
-    Analyze the following Instagram caption and image and extract event information if it's an event post.
+    Analyze the following Instagram caption and list of images. Extract event information if it's an event post.
 
     School context: This post is from {school}. Use this to guide location and timezone decisions.
     Current context: Today is {current_day_of_week}, {current_date}
@@ -134,6 +135,9 @@ class OpenAIService:
     Current semester end date: {semester_end_time}
 
     Caption: {caption_text}
+    
+    Images (0-indexed):
+    {self._format_image_list_for_prompt(all_s3_urls) or []}
 
     STRICT CONTENT POLICY:
     - ONLY extract an event if the post is clearly announcing or describing a real-world event with BOTH:
@@ -156,6 +160,7 @@ class OpenAIService:
         "price": number or null,
         "food": string,
         "registration": boolean,
+        "image_index": integer,
         "occurrences": [
             {{
                 "dtstart_utc": string,  // UTC start "YYYY-MM-DDTHH:MM:SSZ"
@@ -165,10 +170,15 @@ class OpenAIService:
             }}
         ],
         "school": string,
-        "source_image_url": string,
         "categories": list            // one or more of the following, as a JSON array of strings: {categories_str}
     }}
 
+    IMAGE MAPPING RULES:
+    - You are provided with a list of images.
+    - For each extracted event, identify which specific image contains the relevant details (e.g., date/time/location).
+    - Set "image_index" to the 0-based index of that image.
+    - Otherwise, set "image_index": 0.
+    
     OCCURRENCE RULES (CRITICAL):
     - Every event MUST include at least one occurrence with a concrete UTC start time.
     - Return ALL explicit dates and times mentioned in the post as separate entries in the occurrences array.
@@ -195,7 +205,6 @@ class OpenAIService:
     - For description: Make this the caption text word-for-word. If there is no caption text, use the image text.
     - If information is not available, use empty string for strings, null for price/coordinates, and false for booleans.
     - Return ONLY the JSON array text, no extra commentary.
-        {f"- An image is provided at: {source_image_url}. If there are conflicts between caption and image information, prioritize the caption text." if source_image_url else ""}
     """
 
         try:
@@ -259,12 +268,15 @@ class OpenAIService:
                     "source_image_url",
                     "categories",
                     "occurrences",
+                    "image_index"
                 ]
 
                 for event_obj in events_list:
                     for field in required_fields:
                         if field not in event_obj:
-                            if field in ["price", "latitude", "longitude"]:
+                            if field == "image_index":
+                                event_obj[field] = 0
+                            elif field in ["price", "latitude", "longitude"]:
                                 event_obj[field] = None
                             elif field in ["registration"]:
                                 event_obj[field] = False

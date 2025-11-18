@@ -72,16 +72,15 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
     if is_duplicate_event(event_data):
         return "duplicate"
 
-    # Get club_type by matching ig_handle from Events to ig of Clubs
-    try:
-        club = Clubs.objects.get(ig=ig_handle)
-        club_type = club.club_type
-    except Clubs.DoesNotExist:
-        club_type = None
-        logger.warning(
-            f"Club with handle {ig_handle} not found, inserting event with club_type NULL"
-        )
-
+    # Only fetch if club_type wasn't passed in
+    if club_type is None:
+        try:
+            club = Clubs.objects.get(ig=ig_handle)
+            club_type = club.club_type
+        except Clubs.DoesNotExist:
+            club_type = None
+            logger.warning(f"Club {ig_handle} not found, setting club_type NULL")
+    
     create_kwargs = {
         "ig_handle": ig_handle,
         "title": title,

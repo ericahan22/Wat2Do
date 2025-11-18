@@ -10,8 +10,8 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from backend.scraping.event_processor import EventProcessor
-from backend.scraping.instagram_scraper import InstagramScraper
+from scraping.event_processor import EventProcessor
+from scraping.instagram_scraper import InstagramScraper
 from django.utils import timezone
 
 from scraping.logging_config import logger
