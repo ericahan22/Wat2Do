@@ -66,6 +66,7 @@ jobs:
       - name: Run Scraper for Single User
         working-directory: backend/scraping
         run: |
+          set -o pipefail
           python -u main.py 2>&1 | tee logs/scraping.log
 
       - name: Upload logs as artifacts

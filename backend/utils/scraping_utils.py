@@ -1,13 +1,14 @@
-import re
 import csv
 import json
-from pathlib import Path
+import re
 from difflib import SequenceMatcher
+from pathlib import Path
 
-from scraping.logging_config import logger
-from apps.events.models import Events, EventDates
-from apps.clubs.models import Clubs
 from date_utils import parse_utc_datetime
+
+from apps.clubs.models import Clubs
+from apps.events.models import EventDates, Events
+from scraping.logging_config import logger
 
 
 def normalize(s):

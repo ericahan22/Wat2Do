@@ -1,6 +1,6 @@
-# CLAUDE.md
+# copilot-instructions.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to GitHub Copilot when working with code in this repository.
 
 ## Project Overview
 
@@ -758,16 +758,14 @@ const adminClient = new AdminAPIClient(baseClient);
 ### Scraping Infrastructure (`/backend/scraping/`)
 
 **Key Files:**
-- `instagram_feed.py` - Main Instagram scraping logic (Apify-based)
-- `generate_static_data.py` - Static file generation (events.json, rss.xml)
-- `process_single_user.py` - Single user scraping workflow
-- `wusa_club_directory_scraper.py` - Club directory scraping
+- `main.py` - Orchestrates all Instagram scraping and post-processing (entrypoint for daily and single-user scrapes)
+- `instagram_scraper.py` - Apify Instagram API client logic
+- `event_processor.py` - Post-processing logic for scraped events (image upload, AI extraction, DB insert)
 
 **Features:**
 - **Fast scraping**: Captures all student club events within 10 minutes
-- Apify-based Instagram scraping (replaced Instaloader)
+- Apify-based Instagram scraping
 - AI-powered event extraction from posts using GPT-4o-mini
-- Static file generation for performance (events.json, rss.xml)
 - Ignored post tracking to avoid duplicates
 - Automated scraping via GitHub Actions on schedule
 

@@ -1,53 +1,59 @@
+import asyncio
 import os
 import sys
-import asyncio
 from datetime import timedelta
 
 # 1. Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import django
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
+from backend.scraping.event_processor import EventProcessor
+from backend.scraping.instagram_scraper import InstagramScraper
 from django.utils import timezone
-from scraping.apify_client import run_apify_scraper
-from scraping.post_processing import process_scraped_posts
+
 from scraping.logging_config import logger
 from shared.constants.urls_to_scrape import FULL_URLS
 
-def get_scrape_mode():
+
+def get_targets():
+    """
+    Determine if we are in 'Single User' mode or 'Batch' mode.
+    """
     username = os.getenv("TARGET_USERNAME")
     if username:
         return "single", [username]
     
-    return "batch", [
+    batch_users = [
         url.split("instagram.com/")[1].split("/")[0]
         for url in FULL_URLS
         if "instagram.com/" in url
     ]
+    return "batch", batch_users
 
 def main():
-    mode, usernames = get_scrape_mode()
-    logger.info(f"--- Starting Scrape: {mode.upper()} ---")
-    
-    cutoff_date = timezone.now() - timedelta(days=1)
-    
-    if mode == "single":
-        # Only latest post
-        posts_data = run_apify_scraper(usernames[0], results_limit=1)
-    else:
-        posts_data = run_apify_scraper(usernames)
+    mode, targets = get_targets()
+    logger.info(f"--- Workflow Started: {mode.upper()} ---")
+    scraper = InstagramScraper()
+    processor = EventProcessor(concurrency=5)
 
-    if not posts_data:
-        logger.warning("No posts returned from Apify.")
+    # Configure run
+    if mode == "single":
+        posts = scraper.scrape(targets[0], results_limit=1)
+    else:
+        posts = scraper.scrape(targets)
+
+    if not posts:
+        logger.info("No posts retrieved. Exiting.")
         sys.exit(0)
 
-    logger.info("Starting processing...")
+    cutoff_date = timezone.now() - timedelta(days=1)
     try:
-        asyncio.run(process_scraped_posts(posts_data, cutoff_date))
-        logger.info("Workflow complete.")
+        asyncio.run(processor.process(posts, cutoff_date))
     except Exception as e:
-        logger.error(f"Critical error: {e}", exc_info=True)
+        logger.error(f"Critical error in processing: {e}", exc_info=True)
         sys.exit(1)
 
 if __name__ == "__main__":
