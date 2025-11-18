@@ -13,21 +13,15 @@ def setup_logging():
         return
     for handler in list(root_logger.handlers):
         root_logger.removeHandler(handler)
-
-    logging.getLogger("urllib3").setLevel(logging.WARNING)
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("botocore").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("openai").setLevel(logging.WARNING)
-    logging.getLogger("PIL").setLevel(logging.WARNING)
     logging.getLogger("apify_client").setLevel(logging.WARNING)
-
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("openai").setLevel(logging.WARNING)
     fmt = "%(asctime)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
     ]
-    logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
+    logging.basicConfig(level=logging.INFO, format=fmt, handlers=handlers)
     root_logger._wat2do_configured = True
     root_logger.propagate = False
 

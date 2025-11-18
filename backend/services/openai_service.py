@@ -189,7 +189,7 @@ class OpenAIService:
         * If both "non-member" / "general admission" and "member" prices appear, use the non-member/general admission numeric price.
         * If only member prices are given and non-member price is absent, use the listed member price.
         * If multiple ticket tiers are listed (e.g., "early bird" and "regular"), use the lowest applicable price (e.g., early bird price).
-        * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). Use 0 for free events and null for when price is not mentioned.
+        * Parse dollar amounts and return a numeric value (e.g., "$15" -> 15.0). If the event is free, use 0.0. If the price is not mentioned, use null.
     - For food: Only set this field if the post says food or drinks will be served, provided, or available for attendees. If specific food or beverage items are mentioned (e.g., "pizza", "bubble tea", "snacks"), list them separated by commas and capitalize ONLY the first item. If the post explicitly says food is provided but does not specify what kind (e.g., "free food", "food provided", "there will be food"), output "Yes!" (exactly). If there is no mention of food or drinks, output an empty string "".
     - For registration: only set to true if there is a clear instruction to register, RSVP, or sign up, otherwise set to false.
     - For description: Make this the caption text word-for-word. If there is no caption text, use the image text.

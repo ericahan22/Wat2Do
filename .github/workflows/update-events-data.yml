@@ -64,7 +64,7 @@ jobs:
       - name: Run scraper
         working-directory: backend/scraping
         run: |
-          python -u instagram_feed.py 2>&1 | tee logs/scraping.log
+          python -u main.py 2>&1 | tee logs/scraping.log
         continue-on-error: false
 
       - name: Upload logs as artifacts

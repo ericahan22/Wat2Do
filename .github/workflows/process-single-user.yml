@@ -66,7 +66,7 @@ jobs:
       - name: Run Scraper for Single User
         working-directory: backend/scraping
         run: |
-          python -u process_single_user.py 2>&1 | tee logs/scraping.log
+          python -u main.py 2>&1 | tee logs/scraping.log
 
       - name: Upload logs as artifacts
         if: always()
