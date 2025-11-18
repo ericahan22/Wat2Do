@@ -4,7 +4,7 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from date_utils import parse_utc_datetime
+from utils.date_utils import parse_utc_datetime
 
 from apps.clubs.models import Clubs
 from apps.events.models import EventDates, Events
