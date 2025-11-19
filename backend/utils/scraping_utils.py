@@ -207,10 +207,8 @@ def append_event_to_csv(
     added_to_db="success",
     club_type=None,
 ):
-    logs_dir = Path(__file__).parent / "logs"
-    logs_dir.mkdir(parents=True, exist_ok=True)
-    csv_file = logs_dir / "events_scraped.csv"
-
+    csv_file = Path(__file__).parent.parent / "scraping" / "events_scraped.csv"
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
 
     occurrences = event_data.get("occurrences", []) or []

@@ -1,7 +1,6 @@
 import asyncio
 import os
 import sys
-from functools import lru_cache
 
 # Set up Django
 if "django" not in sys.modules:
@@ -35,9 +34,8 @@ class EventProcessor:
         self.concurrency = concurrency
         self.semaphore = asyncio.Semaphore(concurrency)
 
-    @staticmethod
-    @lru_cache(maxsize=512)
-    def _get_club_type(ig_handle):
+    @sync_to_async(thread_sensitive=True)
+    def _get_club_type(self, ig_handle):
         try:
             return Clubs.objects.get(ig=ig_handle).club_type
         except Clubs.DoesNotExist:

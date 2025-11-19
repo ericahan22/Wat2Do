@@ -75,7 +75,7 @@ jobs:
         with:
           name: logs-${{ github.run_number }}
           path: |
-            backend/scraping/logs/events_scraped.csv
-            backend/scraping/logs/scraping.log
+            backend/scraping/events_scraped.csv
+            backend/scraping/scraping.log
             backend/scraping/apify_raw_results.json
           if-no-files-found: 'ignore'

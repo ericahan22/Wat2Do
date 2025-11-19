@@ -1,7 +1,9 @@
 import asyncio
+import json
 import os
 import sys
 from datetime import timedelta
+from pathlib import Path
 
 # 1. Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -44,6 +46,10 @@ def main():
         posts = scraper.scrape(targets[0], results_limit=1)
     else:
         posts = scraper.scrape(targets)
+
+    raw_path = Path(__file__).parent / "apify_raw_results.json"
+    with raw_path.open("w", encoding="utf-8") as f:
+        json.dump(posts, f, ensure_ascii=False, indent=2)
 
     if not posts:
         logger.info("No posts retrieved. Exiting.")
