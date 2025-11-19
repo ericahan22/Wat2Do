@@ -191,7 +191,8 @@ class EventProcessor:
                     # Fallback: Use the first image (cover) if no index specified
                     event_data["source_image_url"] = all_s3_urls[0]
 
-                success = await self._save_event(event_data, ig_handle, source_url, self._get_club_type(ig_handle))
+                club_type = await self._get_club_type(ig_handle)
+                success = await self._save_event(event_data, ig_handle, source_url, club_type)
                 if success:
                     saved_count += 1
 
