@@ -97,18 +97,26 @@ class EventProcessor:
         # 1. Filter Posts
         for post in posts_data:
             url = post.get("url")
+            shortcode = url.strip("/").split("/")[-1] if url else "UNKNOWN"
+
             if not url or "/p/" not in url:
+                logger.info(f"Skipping {shortcode}: Invalid URL format")
                 continue
             if not post.get("caption"):
+                logger.info(f"Skipping {shortcode}: No caption")
                 continue
+            
             post_dt = parse_utc_datetime(post.get("timestamp"))
             if not post_dt or post_dt < cutoff_date:
+                logger.info(f"Skipping {shortcode}: Date {post_dt} is older than cutoff {cutoff_date}")
                 continue
-            shortcode = url.strip("/").split("/")[-1]
+            
             if shortcode in seen_shortcodes:
+                logger.info(f"Skipping {shortcode}: Already exists in DB")
                 continue
+                
             valid_posts.append(post)
-
+            
         if not valid_posts:
             logger.info("No new valid posts found.")
             return

@@ -21,7 +21,7 @@ def setup_logging():
         logging.StreamHandler(sys.stdout),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
     ]
-    logging.basicConfig(level=logging.INFO, format=fmt, handlers=handlers)
+    logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)
     root_logger._wat2do_configured = True
     root_logger.propagate = False
 
