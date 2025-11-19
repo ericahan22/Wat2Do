@@ -227,9 +227,13 @@ class OpenAIService:
                 {"role": "user", "content": [{"type": "text", "text": prompt}]},
             ]
 
-            # Add image to the message if provided
-            if source_image_url:
-                logger.debug(f"Including image analysis from: {source_image_url}")
+            if all_s3_urls:
+                logger.debug(f"Including {len(all_s3_urls)} images for analysis")
+                for img_url in all_s3_urls:
+                    messages[1]["content"].append(
+                        {"type": "image_url", "image_url": {"url": img_url}}
+                    )
+            elif source_image_url:
                 messages[1]["content"].append(
                     {"type": "image_url", "image_url": {"url": source_image_url}}
                 )

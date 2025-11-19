@@ -61,9 +61,14 @@ class EventProcessor:
         return upload_image_from_url(url)
 
     @sync_to_async(thread_sensitive=False)
-    def _extract_events(self, caption, img_url, post_time):
+    def _extract_events(self, caption, all_s3_urls, post_time):
         from services.openai_service import extract_events_from_caption
-        return extract_events_from_caption(caption, img_url, post_time)
+        return extract_events_from_caption(
+            caption_text=caption,
+            all_s3_urls=all_s3_urls,
+            post_created_at=post_time,
+            source_image_url=None 
+        )
 
     @sync_to_async(thread_sensitive=True)
     def _save_event(self, event_data, ig_handle, source_url, club_type):
