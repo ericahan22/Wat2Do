@@ -12,11 +12,11 @@ if "django" not in sys.modules:
 from asgiref.sync import sync_to_async
 
 from apps.clubs.models import Clubs
-from apps.events.models import Events, IgnoredPost
+from apps.events.models import Events
 from scraping.logging_config import logger
 from services.storage_service import upload_image_from_url
 from utils.date_utils import parse_utc_datetime
-from utils.scraping_utils import insert_event_to_db
+from utils.scraping_utils import insert_event_to_db, append_event_to_csv
 
 
 def _get_all_images(post):
@@ -72,9 +72,6 @@ class EventProcessor:
     def _save_event(self, event_data, ig_handle, source_url, club_type):
         return insert_event_to_db(event_data, ig_handle, source_url, club_type)
 
-    @sync_to_async(thread_sensitive=True)
-    def _ignore_post(self, shortcode):
-        IgnoredPost.objects.get_or_create(shortcode=shortcode)
     async def _process_single_post_extraction(self, post):
         """Extracts event data from a single post using OpenAI."""
         async with self.semaphore:
@@ -96,24 +93,29 @@ class EventProcessor:
         # 1. Filter Posts
         for post in posts_data:
             url = post.get("url")
+            ig_handle = post.get("ownerUsername") or "UNKNOWN"
             shortcode = url.strip("/").split("/")[-1] if url else "UNKNOWN"
 
             if not url or "/p/" not in url:
-                logger.info(f"Skipping {shortcode}: Invalid URL format")
+                logger.info(f"[{ig_handle}] Skipping: Invalid URL format ({url})")
                 continue
-            if not post.get("caption"):
-                logger.info(f"Skipping {shortcode}: No caption")
-                continue
-            
+
             post_dt = parse_utc_datetime(post.get("timestamp"))
             if not post_dt or post_dt < cutoff_date:
-                logger.info(f"Skipping {shortcode}: Date {post_dt} is older than cutoff {cutoff_date}")
+                append_event_to_csv(post, ig_handle, url, added_to_db="past_date")
+                logger.info(f"[{ig_handle}] [{shortcode}] Skipping: Date {post_dt} is older than cutoff {cutoff_date}")
                 continue
-            
+
             if shortcode in seen_shortcodes:
-                logger.info(f"Skipping {shortcode}: Already exists in DB")
+                try:
+                    event = await sync_to_async(Events.objects.get)(source_url=url)
+                    event_name = event.title
+                except Exception:
+                    event_name = "UNKNOWN"
+                append_event_to_csv(post, ig_handle, url, added_to_db="duplicate")
+                logger.info(f"[{ig_handle}] [{shortcode}] Skipping: Event '{event_name}' already exists in DB")
                 continue
-                
+
             valid_posts.append(post)
             
         if not valid_posts:
@@ -138,7 +140,7 @@ class EventProcessor:
             idx += n_imgs
 
         # 3. Extract Events
-        logger.info("Extracting event data...")
+        logger.info(f"[{ig_handle}] [{shortcode}] Extracting event data...")
         extract_tasks = []
         for post in valid_posts:
             extract_tasks.append(self._process_single_post_extraction({
@@ -156,7 +158,7 @@ class EventProcessor:
             all_s3_urls = post.get("all_s3_urls", [])
 
             if not extracted_events:
-                logger.info(f"No events found for {shortcode}, skipping")
+                logger.info(f"[{ig_handle}] [{shortcode}] No events found in post, skipping")
                 continue
 
             if not isinstance(extracted_events, list):
@@ -190,8 +192,15 @@ class EventProcessor:
                     event_data["source_image_url"] = all_s3_urls[0]
 
                 club_type = await self._get_club_type(ig_handle)
-                success = await self._save_event(event_data, ig_handle, source_url, club_type)
+                try:
+                    success = await self._save_event(event_data, ig_handle, source_url, club_type)
+                except Exception as e:
+                    append_event_to_csv(event_data, ig_handle, source_url, added_to_db="error", club_type=club_type)
+                    logger.error(f"[{ig_handle}] [{shortcode}] Error saving event: {e}")
+                    continue
                 if success:
+                    append_event_to_csv(event_data, ig_handle, source_url, added_to_db="success", club_type=club_type)
+                    logger.info(f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'")
                     saved_count += 1
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")

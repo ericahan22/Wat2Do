@@ -164,9 +164,6 @@ npm run dev  # Development server on port 5173
    - Fields: event (FK), user_id (Clerk ID), created_at
    - Unique constraint: (event, user_id)
 
-4. **IgnoredPost** - Tracks ignored Instagram posts
-   - Fields: shortcode (unique), added_at
-
 **API Endpoints:**
 ```
 GET  /api/events/                        - List events with filters, cursor pagination
@@ -766,7 +763,6 @@ const adminClient = new AdminAPIClient(baseClient);
 - **Fast scraping**: Captures all student club events within 10 minutes
 - Apify-based Instagram scraping
 - AI-powered event extraction from posts using GPT-4o-mini
-- Ignored post tracking to avoid duplicates
 - Automated scraping via GitHub Actions on schedule
 
 ---

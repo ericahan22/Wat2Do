@@ -181,6 +181,7 @@ class OpenAIService:
     OCCURRENCE RULES (CRITICAL):
     - Every event MUST include at least one occurrence with a concrete UTC start time.
     - Return ALL explicit dates and times mentioned in the post as separate entries in the occurrences array.
+    - DO NOT include registration, signup, RSVP, or application deadlines as occurrences. Only include actual event dates/times.
     - Do NOT infer or compress recurrence patterns. List each date/time exactly as given.
     - Always convert local times to UTC. The JSON must use ISO 8601 format with a trailing "Z" (e.g., "2025-11-05T22:00:00Z").
     - If an end time is not provided, leave "dtend_utc" as an empty string.
@@ -288,8 +289,14 @@ class OpenAIService:
                             else:
                                 event_obj[field] = ""
 
-                    if source_image_url and not event_obj.get("source_image_url"):
-                        event_obj["source_image_url"] = source_image_url
+                    # Coerce price to 0.0 for free events
+                    price_val = event_obj.get("price")
+                    food_val = (event_obj.get("food") or "").lower()
+                    caption_val = (event_obj.get("description") or "").lower()
+                    if price_val is None and (
+                        "free" in caption_val or "free" in food_val
+                    ):
+                        event_obj["price"] = 0.0
 
                     if not isinstance(event_obj.get("categories"), list):
                         event_obj["categories"] = (

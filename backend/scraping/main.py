@@ -35,6 +35,13 @@ def get_targets():
     ]
     return "batch", batch_users
 
+def filter_valid_posts(posts):
+    return [
+        post for post in posts
+        if not post.get("error") and not post.get("errorDescription")
+        and post.get("url") and "/p/" in post.get("url")
+    ]
+
 def main():
     mode, targets = get_targets()
     logger.info(f"--- Workflow Started: {mode.upper()} ---")
@@ -51,6 +58,8 @@ def main():
     with raw_path.open("w", encoding="utf-8") as f:
         json.dump(posts, f, ensure_ascii=False, indent=2)
 
+    # Filter out results not containing posts before processing
+    posts = filter_valid_posts(posts)
     if not posts:
         logger.info("No posts retrieved. Exiting.")
         sys.exit(0)

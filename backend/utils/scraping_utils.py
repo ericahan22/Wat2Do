@@ -4,6 +4,8 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
+from django.db import transaction
+
 from utils.date_utils import parse_utc_datetime
 
 from apps.clubs.models import Clubs
@@ -50,85 +52,86 @@ def get_post_image_url(post):
 
 def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
     """Map scraped event data to Event model fields, insert to DB"""
-    title = event_data.get("title", "")
-    source_image_url = event_data.get("source_image_url") or ""
-    description = event_data.get("description", "") or ""
-    location = event_data.get("location")
-    price = event_data.get("price", None)
-    food = event_data.get("food", None)
-    registration = bool(event_data.get("registration", False))
-    school = event_data.get("school", "")
-    categories = event_data.get("categories", [])
-    occurrences = event_data.get("occurrences")
+    with transaction.atomic():
+        title = event_data.get("title", "")
+        source_image_url = event_data.get("source_image_url") or ""
+        description = event_data.get("description", "") or ""
+        location = event_data.get("location")
+        price = event_data.get("price", None)
+        food = event_data.get("food", None)
+        registration = bool(event_data.get("registration", False))
+        school = event_data.get("school", "")
+        categories = event_data.get("categories", [])
+        occurrences = event_data.get("occurrences")
 
-    if not occurrences:
-        logger.warning(f"Event '{title}' missing occurrences; skipping insert")
-        return "missing_occurrence"
+        if not occurrences:
+            logger.warning(f"Event '{title}' missing occurrences; skipping insert")
+            return "missing_occurrence"
 
-    if not categories or not isinstance(categories, list):
-        logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
-        categories = ["Uncategorized"]
+        if not categories or not isinstance(categories, list):
+            logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
+            categories = ["Uncategorized"]
 
-    if is_duplicate_event(event_data):
-        return "duplicate"
+        if is_duplicate_event(event_data):
+            return "duplicate"
 
-    # Only fetch if club_type wasn't passed in
-    if club_type is None:
+        # Only fetch if club_type wasn't passed in
+        if club_type is None:
+            try:
+                club = Clubs.objects.get(ig=ig_handle)
+                club_type = club.club_type
+            except Clubs.DoesNotExist:
+                club_type = None
+                logger.warning(f"Club {ig_handle} not found, setting club_type NULL")
+        
+        create_kwargs = {
+            "ig_handle": ig_handle,
+            "title": title,
+            "source_url": source_url,
+            "club_type": club_type,
+            "location": location,
+            "food": food or None,
+            "price": price or None,
+            "registration": registration,
+            "description": description or None,
+            "reactions": {},
+            "source_image_url": source_image_url or None,
+            "status": "CONFIRMED",
+            "school": school,
+            "categories": categories,
+        }
+
         try:
-            club = Clubs.objects.get(ig=ig_handle)
-            club_type = club.club_type
-        except Clubs.DoesNotExist:
-            club_type = None
-            logger.warning(f"Club {ig_handle} not found, setting club_type NULL")
-    
-    create_kwargs = {
-        "ig_handle": ig_handle,
-        "title": title,
-        "source_url": source_url,
-        "club_type": club_type,
-        "location": location,
-        "food": food or None,
-        "price": price or None,
-        "registration": registration,
-        "description": description or None,
-        "reactions": {},
-        "source_image_url": source_image_url or None,
-        "status": "CONFIRMED",
-        "school": school,
-        "categories": categories,
-    }
+            event = Events.objects.create(**create_kwargs)
+            event_dates = []
 
-    try:
-        event = Events.objects.create(**create_kwargs)
-        event_dates = []
-
-        for occ in occurrences:
-            dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
-            dtend_utc_raw = occ.get("dtend_utc")
-            dtend_utc = (
-                parse_utc_datetime(dtend_utc_raw)
-                if dtend_utc_raw and dtend_utc_raw.strip()
-                else None
-            )
-
-            event_dates.append(
-                EventDates(
-                    event=event,
-                    dtstart_utc=dtstart_utc,
-                    dtend_utc=dtend_utc,
-                    duration=occ.get("duration") or None,
-                    tz=occ.get("tz") or None,
+            for occ in occurrences:
+                dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
+                dtend_utc_raw = occ.get("dtend_utc")
+                dtend_utc = (
+                    parse_utc_datetime(dtend_utc_raw)
+                    if dtend_utc_raw and dtend_utc_raw.strip()
+                    else None
                 )
-            )
 
-        EventDates.objects.bulk_create(event_dates)
-        logger.debug(
-            f"Created {len(event_dates)} EventDates entries for event {event.id}"
-        )
-        return True
-    except Exception as e:
-        logger.error(f"Error inserting event to DB: {e}")
-        return False
+                event_dates.append(
+                    EventDates(
+                        event=event,
+                        dtstart_utc=dtstart_utc,
+                        dtend_utc=dtend_utc,
+                        duration=occ.get("duration") or None,
+                        tz=occ.get("tz") or None,
+                    )
+                )
+
+            EventDates.objects.bulk_create(event_dates)
+            logger.debug(
+                f"Created {len(event_dates)} EventDates entries for event {event.id}"
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Error inserting event to DB: {e}")
+            return False
 
 
 def is_duplicate_event(event_data):

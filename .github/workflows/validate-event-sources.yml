@@ -46,10 +46,6 @@ jobs:
       - name: Create logs directory
         run: mkdir -p logs
 
-      - name: Purge old IgnoredPost rows
-        run: |
-          python purge_old_ignored_posts.py
-
       - name: Run validation script
         run: |
           python validate_event_sources.py --school "University of Waterloo" --workers 10 2>&1 | tee logs/validation.log
