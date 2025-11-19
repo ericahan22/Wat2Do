@@ -47,14 +47,10 @@ class EventProcessor:
     def _get_seen_shortcodes(self):
         """Fetch existing shortcodes to avoid processing duplicates."""
         try:
-            # Get shortcodes from successful events
+            # Get shortcodes only from successful events
             events = Events.objects.filter(source_url__contains="/p/").values_list("source_url", flat=True)
             event_codes = {url.strip("/").split("/")[-1] for url in events}
-            
-            # Get shortcodes from explicitly ignored posts
-            ignored = IgnoredPost.objects.values_list("shortcode", flat=True)
-            
-            return event_codes.union(ignored)
+            return event_codes
         except Exception as e:
             logger.error(f"Error fetching seen shortcodes: {e}")
             return set()
@@ -157,7 +153,7 @@ class EventProcessor:
             all_s3_urls = post.get("all_s3_urls", [])
 
             if not extracted_events:
-                await self._ignore_post(shortcode)
+                logger.info(f"No events found for {shortcode}, skipping")
                 continue
 
             if not isinstance(extracted_events, list):
