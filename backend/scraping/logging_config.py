@@ -26,7 +26,7 @@ def setup_logging():
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
-    fmt = "%(asctime)s - %(levelname)s - %(message)s"
+    fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stderr),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),

@@ -150,10 +150,20 @@ def is_duplicate_event(event_data):
     if not target_start:
         return False
 
+    from datetime import timedelta
+    day_start = target_start.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = day_start + timedelta(days=1)
+
     try:
         candidates = EventDates.objects.select_related("event").filter(
-            dtstart_utc__date=target_start.date()
+            dtstart_utc__gte=day_start,
+            dtstart_utc__lt=day_end
         )
+        if candidates:
+            logger.debug(f"Found {len(candidates)} existing events on {day_start.date()} for duplicate check.")
+            for i, cand in enumerate(candidates[:3]):
+                evt = cand.event
+                logger.debug(f"  Candidate #{i+1}: '{evt.title}' @ {cand.dtstart_utc}")
 
         for candidate in candidates:
             existing_event = candidate.event
@@ -166,10 +176,6 @@ def is_duplicate_event(event_data):
             c_start = candidate.dtstart_utc
 
             if not c_start:
-                continue
-
-            # Compare same-day occurrences with fuzzy matching on title/location/description.
-            if c_start.date() != target_start.date():
                 continue
 
             norm_title = normalize(title)

@@ -128,11 +128,16 @@ class EventProcessor:
         # 2. Upload all images for each post (with carousel support)
         all_image_tasks = []
         for post in valid_posts:
+            ig_handle = post.get("ownerUsername")
+            shortcode = post.get("url", "").strip("/").split("/")[-1]
+            logger.info(f"[{ig_handle}] [{shortcode}] Uploading images...")
             image_urls = _get_all_images(post)
             post["all_image_urls"] = image_urls
             all_image_tasks.append([self._upload_image(img_url) for img_url in image_urls])
+        
         flat_tasks = [task for sublist in all_image_tasks for task in sublist]
         flat_results = await asyncio.gather(*flat_tasks)
+        
         # Map uploaded S3 URLs back to posts
         idx = 0
         for post in valid_posts:
@@ -141,9 +146,11 @@ class EventProcessor:
             idx += n_imgs
 
         # 3. Extract Events
-        logger.info(f"[{ig_handle}] [{shortcode}] Extracting event data...")
         extract_tasks = []
         for post in valid_posts:
+            ig_handle = post.get("ownerUsername")
+            shortcode = post.get("url", "").strip("/").split("/")[-1]
+            logger.info(f"[{ig_handle}] [{shortcode}] Extracting event data...")
             extract_tasks.append(self._process_single_post_extraction({
                 **post,
                 "all_s3_urls": post["all_s3_urls"]

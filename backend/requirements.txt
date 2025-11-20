@@ -9,7 +9,6 @@ pgvector==0.4.1
 django-ratelimit==3.0.1
 
 # Scraping and web utilities
---find-links=./wheels
 setuptools>=65.5.0
 apify_client
 python-dotenv

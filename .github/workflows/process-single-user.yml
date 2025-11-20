@@ -1,4 +1,5 @@
 name: Process Single User
+run-name: Process @${{ github.event.client_payload.username }}
 
 on:
   repository_dispatch:

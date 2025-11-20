@@ -78,7 +78,7 @@ def main():
             sys.exit(0)
         else:
             logger.info("No new events were added")
-            sys.exit(2)
+            sys.exit(0)
     except Exception as e:
         logger.error(f"Critical error in processing: {e}", exc_info=True)
         sys.exit(1)
