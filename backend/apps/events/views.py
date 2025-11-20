@@ -73,10 +73,16 @@ def get_events(request):
         # Upcoming events filter: show all live and future events by default
         if not dtstart_utc_param:
             now = timezone.now()
+            ninety_minutes_ago = now - timedelta(minutes=90)
             events_queryset = events_queryset.filter(
                 Q(
                     event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now
-                )  # Live
+                )  # Live events with dtend_utc
+                | Q(
+                    event_dates__dtstart_utc__gte=ninety_minutes_ago,
+                    event_dates__dtstart_utc__lte=now,
+                    event_dates__dtend_utc__isnull=True
+                )  # Live events without dtend_utc (started within last 90 minutes)
                 | Q(event_dates__dtstart_utc__gte=now)  # Upcoming
             ).distinct()
         else:
@@ -175,18 +181,24 @@ def get_events(request):
 
         for event in events_list:
             all_dates = list(event.event_dates.all())
+            ninety_minutes_ago = now - timedelta(minutes=90)
             # Find the next upcoming or currently live date
             upcoming_or_live_dates = [
                 date
                 for date in all_dates
                 if date.dtstart_utc
                 and (
-                    date.dtstart_utc >= now
+                    date.dtstart_utc >= now  # Future events
                     or (
                         date.dtstart_utc <= now
                         and date.dtend_utc
                         and date.dtend_utc >= now
-                    )
+                    )  # Live events with dtend_utc
+                    or (
+                        date.dtstart_utc >= ninety_minutes_ago
+                        and date.dtstart_utc <= now
+                        and not date.dtend_utc
+                    )  # Live events without dtend_utc (started within last 90 minutes)
                 )
             ]
             selected_date = (
