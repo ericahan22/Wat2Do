@@ -26,6 +26,8 @@ def setup_logging():
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("botocore").setLevel(logging.WARNING)
+    logging.getLogger("s3transfer").setLevel(logging.WARNING)
     fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     handlers = [
         logging.StreamHandler(sys.stderr),
