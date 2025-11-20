@@ -13,14 +13,22 @@ def setup_logging():
         return
     for handler in list(root_logger.handlers):
         root_logger.removeHandler(handler)
-    logging.getLogger("apify_client").setLevel(logging.ERROR)
-    logging.getLogger("apify").setLevel(logging.ERROR)
-    logging.getLogger("cheerio").setLevel(logging.ERROR)
+    apify_logger = logging.getLogger("apify_client")
+    apify_logger.setLevel(logging.CRITICAL)
+    apify_logger.propagate = False
+    for h in list(apify_logger.handlers):
+        apify_logger.removeHandler(h)
+        
+    logging.getLogger("apify").setLevel(logging.CRITICAL)
+    logging.getLogger("cheerio").setLevel(logging.CRITICAL)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("openai").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
     fmt = "%(asctime)s - %(levelname)s - %(message)s"
     handlers = [
-        logging.StreamHandler(sys.stdout),
+        logging.StreamHandler(sys.stderr),
         logging.FileHandler(LOG_FILE, encoding="utf-8"),
     ]
     logging.basicConfig(level=logging.DEBUG, format=fmt, handlers=handlers)

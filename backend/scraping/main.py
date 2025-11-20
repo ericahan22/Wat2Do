@@ -48,11 +48,13 @@ def main():
     scraper = InstagramScraper()
     processor = EventProcessor(concurrency=5)
 
-    # Configure run
+    # Configure run based on mode
     if mode == "single":
-        posts = scraper.scrape(targets[0], results_limit=1)
+        # Single user: 1 day lookback, 1 post limit
+        posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
     else:
-        posts = scraper.scrape(targets)
+        # Batch mode: 2 days lookback, 1 post per account
+        posts = scraper.scrape(targets, results_limit=1, cutoff_days=2)
 
     raw_path = Path(__file__).parent / "apify_raw_results.json"
     with raw_path.open("w", encoding="utf-8") as f:
@@ -66,7 +68,17 @@ def main():
 
     cutoff_date = timezone.now() - timedelta(days=1)
     try:
-        asyncio.run(processor.process(posts, cutoff_date))
+        saved_count = asyncio.run(processor.process(posts, cutoff_date))
+
+        # 0 = success (events added)
+        # 2 = warning (no events added)
+        # 1 = error (exception occurred)
+        if saved_count > 0:
+            logger.info(f"Successfully added {saved_count} event(s)")
+            sys.exit(0)
+        else:
+            logger.info("No new events were added")
+            sys.exit(2)
     except Exception as e:
         logger.error(f"Critical error in processing: {e}", exc_info=True)
         sys.exit(1)

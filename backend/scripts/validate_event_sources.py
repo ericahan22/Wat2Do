@@ -32,9 +32,10 @@ from scraping.logging_config import logger  # noqa: E402
 class EventSourceValidator:
     """Validates event source URLs and removes invalid events"""
 
-    def __init__(self, max_concurrent=2):
+    def __init__(self, max_concurrent=2, delay_between_requests=1.0):
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         self.max_concurrent = max_concurrent
+        self.delay_between_requests = delay_between_requests
 
         # Track statistics
         self.stats = {
@@ -44,6 +45,7 @@ class EventSourceValidator:
             "deleted_events": 0,
             "deleted_event_dates": 0,
             "errors": 0,
+            "rate_limited": 0,
         }
 
         # Track events to delete (populated during async validation)
@@ -60,10 +62,16 @@ class EventSourceValidator:
     async def check_instagram_post(self, session, url):
         """
         Check if an Instagram post is still available.
-        Returns: (is_valid: bool, reason: str)
+        Returns: (is_valid: bool | None, reason: str)
+        - True: Post is valid
+        - False: Post is definitely invalid (404, unavailable message)
+        - None: Indeterminate (rate-limited, timeout, error) - do not delete
         """
         try:
             logger.info(f"Checking Instagram URL: {url}")
+
+            if self.delay_between_requests > 0:
+                await asyncio.sleep(self.delay_between_requests)
 
             # Try to access the post
             async with session.get(
@@ -77,10 +85,11 @@ class EventSourceValidator:
                     logger.warning(f"Instagram post not found (404): {url}")
                     return False, "404 Not Found"
 
-                # Check if redirected to login page or error page
+                # Check for rate-limiting (redirected to login/error page)
                 if "login" in final_url.lower() or "error" in final_url.lower():
-                    logger.warning(f"Instagram post redirected to login/error: {url}")
-                    return False, "Redirected to login/error page"
+                    logger.warning(f"Instagram rate-limiting detected (login redirect): {url}")
+                    self.stats["rate_limited"] += 1
+                    return None, "Rate-limited (login redirect)"
 
                 # Check page content for "Sorry, this page isn't available"
                 if (
@@ -102,11 +111,11 @@ class EventSourceValidator:
                     logger.info(f"Instagram post is valid: {url}")
                     return True, "Valid"
 
-                # Other status codes - consider invalid
+                # Other status codes
                 logger.warning(
                     f"Instagram post returned status {response.status}: {url}"
                 )
-                return False, f"HTTP {response.status}"
+                return None, f"HTTP {response.status} (indeterminate)"
 
         except asyncio.TimeoutError:
             logger.error(f"Timeout checking Instagram URL: {url}")
@@ -322,6 +331,7 @@ class EventSourceValidator:
         logger.info(f"Total events checked:     {self.stats['total_checked']}")
         logger.info(f"Valid URLs:               {self.stats['valid']}")
         logger.info(f"Invalid URLs:             {self.stats['invalid']}")
+        logger.info(f"Rate-limited (skipped):   {self.stats['rate_limited']}")
         logger.info(f"Errors/Timeouts:          {self.stats['errors']}")
         logger.info(f"Events deleted:           {self.stats['deleted_events']}")
         logger.info(f"Event dates deleted:      {self.stats['deleted_event_dates']}")
@@ -342,10 +352,13 @@ def main():
     parser.add_argument(
         "--workers", type=int, default=2, help="Max concurrent requests (default: 2)"
     )
+    parser.add_argument(
+        "--delay", type=float, default=1.0, help="Delay between requests in seconds (default: 1.0)"
+    )
 
     args = parser.parse_args()
 
-    validator = EventSourceValidator(max_concurrent=args.workers)
+    validator = EventSourceValidator(max_concurrent=args.workers, delay_between_requests=args.delay)
     validator.validate_all_events(limit=args.limit, school=args.school)
 
 

@@ -224,11 +224,14 @@ class OpenAIService:
             ]
 
             if all_s3_urls:
-                logger.debug(f"Including {len(all_s3_urls)} images for analysis")
-                for img_url in all_s3_urls:
-                    messages[1]["content"].append(
-                        {"type": "image_url", "image_url": {"url": img_url}}
-                    )
+                # Filter out None/null URLs
+                valid_urls = [url for url in all_s3_urls if url]
+                if valid_urls:
+                    logger.debug(f"Including {len(valid_urls)} images for analysis")
+                    for img_url in valid_urls:
+                        messages[1]["content"].append(
+                            {"type": "image_url", "image_url": {"url": img_url}}
+                        )
             elif source_image_url:
                 messages[1]["content"].append(
                     {"type": "image_url", "image_url": {"url": source_image_url}}

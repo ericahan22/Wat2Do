@@ -48,7 +48,7 @@ jobs:
 
       - name: Run validation script
         run: |
-          python validate_event_sources.py --school "University of Waterloo" --workers 10 2>&1 | tee logs/validation.log
+          python validate_event_sources.py --school "University of Waterloo" --workers 3 --delay 1.5 2>&1 | tee logs/validation.log
         continue-on-error: false
 
       - name: Upload logs as artifacts
@@ -56,9 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: validation-logs-${{ github.run_number }}
-          path: |
-            logs/
-            *.log
+          path: backend/scripts/logs/
           retention-days: 30
 
       - name: Check for deleted events

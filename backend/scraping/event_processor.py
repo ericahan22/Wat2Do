@@ -10,6 +10,7 @@ if "django" not in sys.modules:
     django.setup()
 
 from asgiref.sync import sync_to_async
+from django.utils import timezone
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
@@ -120,7 +121,7 @@ class EventProcessor:
             
         if not valid_posts:
             logger.info("No new valid posts found.")
-            return
+            return 0
 
         logger.info(f"Found {len(valid_posts)} new posts. Starting image uploads...")
 
@@ -183,6 +184,15 @@ class EventProcessor:
                 extracted_events = [base_event]
                 
             for event_data in extracted_events:
+                # Check for past date
+                occurrences = event_data.get("occurrences", [])
+                if occurrences:
+                    first_occurrence = occurrences[0]
+                    dtstart_utc = parse_utc_datetime(first_occurrence.get("dtstart_utc"))
+                    if dtstart_utc and dtstart_utc < timezone.now():
+                        logger.info(f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - past date")
+                        continue
+
                 # Map the correct picture to the event.
                 image_idx = event_data.get("image_index")
                 if image_idx is not None and isinstance(image_idx, int) and 0 <= image_idx < len(all_s3_urls):
@@ -204,3 +214,4 @@ class EventProcessor:
                     saved_count += 1
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")
+        return saved_count
