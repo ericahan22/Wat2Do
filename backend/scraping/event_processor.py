@@ -103,8 +103,8 @@ class EventProcessor:
 
             post_dt = parse_utc_datetime(post.get("timestamp"))
             if not post_dt or post_dt < cutoff_date:
-                append_event_to_csv(post, ig_handle, url, added_to_db="past_date")
-                logger.info(f"[{ig_handle}] [{shortcode}] Skipping: Date {post_dt} is older than cutoff {cutoff_date}")
+                append_event_to_csv(post, ig_handle, url, added_to_db="old_post")
+                logger.info(f"[{ig_handle}] [{shortcode}] Skipping: Post date {post_dt} is older than cutoff {cutoff_date}")
                 continue
 
             if shortcode in seen_shortcodes:
@@ -113,7 +113,7 @@ class EventProcessor:
                     event_name = event.title
                 except Exception:
                     event_name = "UNKNOWN"
-                append_event_to_csv(post, ig_handle, url, added_to_db="duplicate")
+                append_event_to_csv(post, ig_handle, url, added_to_db="duplicate_post")
                 logger.info(f"[{ig_handle}] [{shortcode}] Skipping: Event '{event_name}' already exists in DB")
                 continue
 
@@ -136,13 +136,18 @@ class EventProcessor:
             all_image_tasks.append([self._upload_image(img_url) for img_url in image_urls])
         
         flat_tasks = [task for sublist in all_image_tasks for task in sublist]
-        flat_results = await asyncio.gather(*flat_tasks)
+        flat_results = await asyncio.gather(*flat_tasks, return_exceptions=True)
+        for i, res in enumerate(flat_results):
+            if isinstance(res, Exception):
+                logger.error(f"Image upload failed: {res}")
+                flat_results[i] = None
         
         # Map uploaded S3 URLs back to posts
         idx = 0
         for post in valid_posts:
             n_imgs = len(post["all_image_urls"])
-            post["all_s3_urls"] = flat_results[idx:idx + n_imgs]
+            # Filter out failed uploads
+            post["all_s3_urls"] = [url for url in flat_results[idx:idx + n_imgs] if url]
             idx += n_imgs
 
         # 3. Extract Events
@@ -197,7 +202,8 @@ class EventProcessor:
                     first_occurrence = occurrences[0]
                     dtstart_utc = parse_utc_datetime(first_occurrence.get("dtstart_utc"))
                     if dtstart_utc and dtstart_utc < timezone.now():
-                        logger.info(f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - past date")
+                        append_event_to_csv(event_data, ig_handle, source_url, added_to_db="event_past_date")
+                        logger.info(f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past")
                         continue
 
                 # Map the correct picture to the event.

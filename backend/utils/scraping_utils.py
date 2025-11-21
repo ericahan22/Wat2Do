@@ -52,6 +52,9 @@ def get_post_image_url(post):
 
 def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
     """Map scraped event data to Event model fields, insert to DB"""
+    shortcode = source_url.split("/")[-1] if source_url else "UNKNOWN"
+    log_prefix = f"[{ig_handle}] [{shortcode}]"
+
     with transaction.atomic():
         title = event_data.get("title", "")
         source_image_url = event_data.get("source_image_url") or ""
@@ -65,14 +68,14 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
         occurrences = event_data.get("occurrences")
 
         if not occurrences:
-            logger.warning(f"Event '{title}' missing occurrences; skipping insert")
+            logger.warning(f"{log_prefix} Event '{title}' missing occurrences; skipping insert")
             return "missing_occurrence"
 
         if not categories or not isinstance(categories, list):
-            logger.warning(f"Event '{title}' missing categories, assigning 'Uncategorized'")
+            logger.warning(f"{log_prefix} Event '{title}' missing categories, assigning 'Uncategorized'")
             categories = ["Uncategorized"]
 
-        if is_duplicate_event(event_data):
+        if is_duplicate_event(event_data, ig_handle=ig_handle, source_url=source_url):
             return "duplicate"
 
         # Only fetch if club_type wasn't passed in
@@ -82,7 +85,7 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
                 club_type = club.club_type
             except Clubs.DoesNotExist:
                 club_type = None
-                logger.warning(f"Club {ig_handle} not found, setting club_type NULL")
+                logger.warning(f"{log_prefix} Club not found, setting club_type NULL")
         
         create_kwargs = {
             "ig_handle": ig_handle,
@@ -126,21 +129,23 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
 
             EventDates.objects.bulk_create(event_dates)
             logger.debug(
-                f"Created {len(event_dates)} EventDates entries for event {event.id}"
+                f"{log_prefix} Created {len(event_dates)} EventDates entries for event {event.id}"
             )
             return True
         except Exception as e:
-            logger.error(f"Error inserting event to DB: {e}")
+            logger.error(f"{log_prefix} Error inserting event to DB: {e}")
             return False
 
 
-def is_duplicate_event(event_data):
+def is_duplicate_event(event_data, ig_handle=None, source_url=None):
     """Check for duplicate events using title, occurrences, location, and description."""
 
     title = event_data.get("title") or ""
     location = event_data.get("location") or ""
     description = event_data.get("description") or ""
     occurrences = event_data.get("occurrences")
+
+    log_prefix = f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}]"
 
     if not occurrences:
         return False
@@ -160,10 +165,10 @@ def is_duplicate_event(event_data):
             dtstart_utc__lt=day_end
         )
         if candidates:
-            logger.debug(f"Found {len(candidates)} existing events on {day_start.date()} for duplicate check.")
+            logger.debug(f"{log_prefix} Found {len(candidates)} existing events on {day_start.date()} for duplicate check.")
             for i, cand in enumerate(candidates[:3]):
                 evt = cand.event
-                logger.debug(f"  Candidate #{i+1}: '{evt.title}' @ {cand.dtstart_utc}")
+                logger.debug(f"{log_prefix}   Candidate #{i+1}: '{evt.title}' @ {cand.dtstart_utc}")
 
         for candidate in candidates:
             existing_event = candidate.event
@@ -191,7 +196,7 @@ def is_duplicate_event(event_data):
 
             if substring_match:
                 logger.warning(
-                    f"Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
+                    f"{log_prefix} Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
                 )
                 return True
 
@@ -199,12 +204,12 @@ def is_duplicate_event(event_data):
                 loc_sim > 0.5 and desc_sim > 0.3
             ):
                 logger.warning(
-                    f"Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
+                    f"{log_prefix} Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
                     f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
                 )
                 return True
     except Exception as exc:
-        logger.error(f"Error during duplicate check: {exc!s}")
+        logger.error(f"{log_prefix} Error during duplicate check: {exc!s}")
 
     return False
 
@@ -292,4 +297,4 @@ def append_event_to_csv(
                 "status": "CONFIRMED",
             }
         )
-        logger.info(f"Event written to CSV with status: {added_to_db}")
+        logger.info(f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}] Event written to CSV: '{title}' - Status: {added_to_db}")

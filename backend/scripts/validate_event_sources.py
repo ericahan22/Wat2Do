@@ -8,6 +8,7 @@ import asyncio
 import os
 import re
 import sys
+import random
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -33,7 +34,7 @@ class EventSourceValidator:
     """Validates event source URLs and removes invalid events"""
 
     def __init__(self, max_concurrent=2, delay_between_requests=1.0):
-        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         self.max_concurrent = max_concurrent
         self.delay_between_requests = delay_between_requests
 
@@ -71,7 +72,8 @@ class EventSourceValidator:
             logger.info(f"Checking Instagram URL: {url}")
 
             if self.delay_between_requests > 0:
-                await asyncio.sleep(self.delay_between_requests)
+                jitter = random.uniform(0.5, 2.0)
+                await asyncio.sleep(self.delay_between_requests + jitter)
 
             # Try to access the post
             async with session.get(
@@ -87,8 +89,9 @@ class EventSourceValidator:
 
                 # Check for rate-limiting (redirected to login/error page)
                 if "login" in final_url.lower() or "error" in final_url.lower():
-                    logger.warning(f"Instagram rate-limiting detected (login redirect): {url}")
+                    logger.warning(f"Instagram rate-limiting detected (login redirect): {url}. Backing off for 60s...")
                     self.stats["rate_limited"] += 1
+                    await asyncio.sleep(60)
                     return None, "Rate-limited (login redirect)"
 
                 # Check page content for "Sorry, this page isn't available"
@@ -305,7 +308,11 @@ class EventSourceValidator:
         async with aiohttp.ClientSession(
             connector=connector,
             timeout=timeout,
-            headers={"User-Agent": self.user_agent},
+            headers={
+                "User-Agent": self.user_agent,
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
         ) as session:
             # Process events in batches for better progress tracking
             batch_size = 50
@@ -353,7 +360,7 @@ def main():
         "--workers", type=int, default=2, help="Max concurrent requests (default: 2)"
     )
     parser.add_argument(
-        "--delay", type=float, default=1.0, help="Delay between requests in seconds (default: 1.0)"
+        "--delay", type=float, default=2.0, help="Delay between requests in seconds (default: 2.0)"
     )
 
     args = parser.parse_args()

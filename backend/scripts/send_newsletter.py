@@ -19,6 +19,7 @@ django.setup()
 # Import Django modules after setup
 from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
 from services.email_service import email_service  # noqa: E402
+from scraping.logging_config import logger  # noqa: E402
 
 
 def send_newsletter_to_all():
@@ -28,10 +29,10 @@ def send_newsletter_to_all():
     active_subscribers = NewsletterSubscriber.objects.filter(is_active=True)
 
     total_subscribers = active_subscribers.count()
-    print(f"📧 Starting newsletter send to {total_subscribers} active subscribers...")
+    logger.info(f"📧 Starting newsletter send to {total_subscribers} active subscribers...")
 
     if total_subscribers == 0:
-        print("⚠️  No active subscribers found.")
+        logger.warning("⚠️  No active subscribers found.")
         return
 
     success_count = 0
@@ -59,33 +60,33 @@ def send_newsletter_to_all():
 
         if email_sent:
             success_count += 1
-            print("✅ Email sent successfully")
+            logger.info("✅ Email sent successfully")
         else:
             failed_count += 1
             failed_emails.append(subscriber.get_email())
             if error:
-                print(f"❌ Error sending email: {error}")
+                logger.error(f"❌ Error sending email: {error}")
             else:
-                print("❌ Failed to send email")
+                logger.error("❌ Failed to send email")
 
     # Print summary
-    print("\n" + "=" * 60)
-    print("📊 Newsletter Send Summary")
-    print("=" * 60)
-    print(f"Total subscribers: {total_subscribers}")
-    print(f"✅ Successfully sent: {success_count}")
-    print(f"❌ Failed: {failed_count}")
+    logger.info("\n" + "=" * 60)
+    logger.info("📊 Newsletter Send Summary")
+    logger.info("=" * 60)
+    logger.info(f"Total subscribers: {total_subscribers}")
+    logger.info(f"✅ Successfully sent: {success_count}")
+    logger.info(f"❌ Failed: {failed_count}")
 
     if failed_emails:
-        print(f"\n⚠️  {len(failed_emails)} emails failed to send")
+        logger.warning(f"\n⚠️  {len(failed_emails)} emails failed to send")
 
-    print("=" * 60)
+    logger.info("=" * 60)
 
     # Return non-zero exit code if any emails failed
     if failed_count > 0:
         sys.exit(1)
 
-    print("\n🎉 Newsletter send completed successfully!")
+    logger.info("\n🎉 Newsletter send completed successfully!")
 
 
 if __name__ == "__main__":
