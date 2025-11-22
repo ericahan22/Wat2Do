@@ -30,49 +30,45 @@ function Navbar() {
               className="cursor-pointer h-14 w-14"
             />
             {/* Desktop Navigation */}
-            <div className="hidden md:flex gap-2">
+            <div className="hidden md:flex gap-1">
               <Button
-                variant="link"
+                variant="ghost"
                 onMouseDown={() => navigate("/events")}
-                className={`text-sm font-medium ${
-                  isActive("/events")
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors hover:underline ${isActive("/events") || isActive("/")
+                  ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  }`}
               >
                 Events
               </Button>
 
               <Button
-                variant="link"
+                variant="ghost"
                 onMouseDown={() => navigate("/clubs")}
-                className={`text-sm font-medium ${
-                  isActive("/clubs")
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors hover:underline ${isActive("/clubs")
+                  ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  }`}
               >
                 Clubs
               </Button>
               <Button
-                variant="link"
+                variant="ghost"
                 onMouseDown={() => navigate("/about")}
-                className={`text-sm font-medium ${
-                  isActive("/about")
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors hover:underline ${isActive("/about")
+                  ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  }`}
               >
                 About
               </Button>
               <Button
-                variant="link"
+                variant="ghost"
                 onMouseDown={() => navigate("/contact")}
-                className={`text-sm font-medium ${
-                  isActive("/contact")
-                    ? "text-gray-900 dark:text-white"
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors hover:underline ${isActive("/contact")
+                  ? "bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  }`}
               >
                 Contact
               </Button>
