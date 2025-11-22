@@ -105,6 +105,9 @@ function EventsPage() {
         description="Browse and discover exciting club events at the University of Waterloo. Find upcoming events, filter by date, and stay connected with campus activities."
         url="/events"
         keywords={[
+          "Waterloo events",
+          "UW events",
+          "UWaterloo events",
           "University of Waterloo events",
           "UW club events",
           "campus events",

@@ -1,52 +1,57 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/wat2do-logo.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#3B82F6" />
-    <meta name="description" content="Discover exciting club events at the University of Waterloo. Browse upcoming events, explore campus clubs, and stay connected with the UW community through our comprehensive event discovery platform." />
-    <meta name="keywords" content="University of Waterloo, UW events, campus clubs, student events, Waterloo university, club directory, event discovery, UW community, student life, campus activities" />
-    <meta name="author" content="Wat2Do" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Wat2Do - Discover University of Waterloo Club Events" />
-    <meta property="og:description" content="Find and explore exciting club events at the University of Waterloo. Browse upcoming events, discover campus clubs, and stay connected with the UW community." />
-    <meta property="og:image" content="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/wat2do-email.svg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:url" content="https://wat2do.ca" />
-    <meta property="og:site_name" content="Wat2Do" />
-    <meta property="og:locale" content="en_CA" />
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Wat2Do - Discover University of Waterloo Club Events" />
-    <meta name="twitter:description" content="Find and explore exciting club events at the University of Waterloo. Browse upcoming events, discover campus clubs, and stay connected with the UW community." />
-    <meta name="twitter:image" content="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/open-graph-image.png" />
-    <meta name="twitter:site" content="@wat2do_ca" />
-    <meta name="twitter:creator" content="@wat2do_ca" />
-    
-    <!-- Additional Meta Tags -->
-    <meta name="application-name" content="Wat2Do" />
-    <meta name="apple-mobile-web-app-title" content="Wat2Do" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    
-    <!-- Favicon and Icons -->
-    <link rel="apple-touch-icon" href="/wat2do-logo.svg" />
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/wat2do-logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3B82F6" />
+  <meta name="description"
+    content="Discover exciting events at the University of Waterloo. Your go-to source for Waterloo events, UW events, and UWaterloo club activities. Stay connected with the campus community." />
+  <meta name="keywords"
+    content="University of Waterloo, Waterloo events, UW events, UWaterloo events, campus clubs, student events, Waterloo university, club directory, event discovery, UW community, student life, campus activities" />
+  <meta name="author" content="Wat2Do" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Wat2Do - Waterloo Events & UW Club Activities" />
+  <meta property="og:description"
+    content="Find and explore exciting events at the University of Waterloo. Your central hub for Waterloo events, UW events, and UWaterloo club activities." />
+  <meta property="og:image" content="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/wat2do-email.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:url" content="https://wat2do.ca" />
+  <meta property="og:site_name" content="Wat2Do" />
+  <meta property="og:locale" content="en_CA" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Wat2Do - Waterloo Events & UW Club Activities" />
+  <meta name="twitter:description"
+    content="Find and explore exciting events at the University of Waterloo. Your central hub for Waterloo events, UW events, and UWaterloo club activities." />
+  <meta name="twitter:image" content="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/open-graph-image.png" />
+  <meta name="twitter:site" content="@wat2do_ca" />
+  <meta name="twitter:creator" content="@wat2do_ca" />
+
+  <!-- Additional Meta Tags -->
+  <meta name="application-name" content="Wat2Do" />
+  <meta name="apple-mobile-web-app-title" content="Wat2Do" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+  <!-- Favicon and Icons -->
+  <link rel="apple-touch-icon" href="/wat2do-logo.svg" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "Wat2Do",
-      "description": "Discover exciting club events at the University of Waterloo. Browse upcoming events, explore campus clubs, and stay connected with the UW community.",
+      "description": "Discover exciting events at the University of Waterloo. Your go-to source for Waterloo events, UW events, and UWaterloo club activities.",
       "url": "https://wat2do.ca",
       "image": "https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/open-graph-image.png",
       "author": {
@@ -64,11 +69,13 @@
       }
     }
     </script>
-    
-    <title>Wat2Do - Discover UW Club Events</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/app/main.tsx"></script>
-  </body>
+
+  <title>Wat2Do - Discover UW Club Events</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/app/main.tsx"></script>
+</body>
+
 </html>

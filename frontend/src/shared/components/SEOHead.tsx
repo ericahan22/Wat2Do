@@ -34,6 +34,7 @@ function SEOHead({
     if (title) document.title = title;
 
     if (description) upsertMeta("name", "description", description);
+    if (keywords && keywords.length > 0) upsertMeta("name", "keywords", keywords.join(", "));
     if (title) upsertMeta("property", "og:title", title);
     if (description) upsertMeta("property", "og:description", description);
     if (url) upsertMeta("property", "og:url", url);

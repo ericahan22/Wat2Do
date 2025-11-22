@@ -4,11 +4,14 @@ import { SEOHead } from "@/shared/components/SEOHead";
 const ContactPage: React.FC = () => {
   return (
     <div className="min-h-[60vh]">
-      <SEOHead 
+      <SEOHead
         title="Contact Wat2Do - Get in Touch"
         description="Have questions, ideas, or feedback about Wat2Do? Contact us to help improve the University of Waterloo event discovery platform."
         url="/contact"
         keywords={[
+          'Waterloo events',
+          'UW events',
+          'UWaterloo events',
           'contact Wat2Do',
           'feedback',
           'support',

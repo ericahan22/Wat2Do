@@ -12,29 +12,29 @@ import { useApi } from "@/shared/hooks/useApi";
 const EventDetailSkeleton = () => {
   return (
     <div className="max-w-xl mx-auto mt-8">
-        {/* Event Card Skeleton */}
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
-          {/* Image Skeleton */}
-          <Skeleton className="w-full h-64 rounded-lg mb-4" />
+      {/* Event Card Skeleton */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg dark:shadow-gray-700 p-4">
+        {/* Image Skeleton */}
+        <Skeleton className="w-full h-64 rounded-lg mb-4" />
 
-          {/* Title Skeleton */}
-          <Skeleton className="h-8 w-3/4 mx-auto mb-4" />
+        {/* Title Skeleton */}
+        <Skeleton className="h-8 w-3/4 mx-auto mb-4" />
 
-          {/* Description Skeleton */}
-          <div className="space-y-2 mb-4">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
+        {/* Description Skeleton */}
+        <div className="space-y-2 mb-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
 
-          {/* Details Skeletons */}
-          <div className="space-y-2">
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-            <Skeleton className="h-16 w-full rounded-lg" />
-          </div>
+        {/* Details Skeletons */}
+        <div className="space-y-2">
+          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-lg" />
+          <Skeleton className="h-16 w-full rounded-lg" />
         </div>
       </div>
+    </div>
   );
 };
 
@@ -107,12 +107,15 @@ function EventDetailPage() {
           event.title,
           event.location || "",
           event.display_handle || "",
+          "Waterloo events",
+          "UW events",
+          "UWaterloo events",
           "University of Waterloo",
           "event",
           "campus event",
         ].filter(Boolean)}
       />
-      <EventPreview event={event}/>
+      <EventPreview event={event} />
     </>
   );
 }

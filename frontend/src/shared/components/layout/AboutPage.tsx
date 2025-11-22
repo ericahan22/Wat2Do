@@ -10,6 +10,9 @@ const AboutPage: React.FC = () => {
         description="Learn about Wat2Do, the platform helping University of Waterloo students discover exciting club events and campus activities. Built by students, for students."
         url="/about"
         keywords={[
+          "Waterloo events",
+          "UW events",
+          "UWaterloo events",
           "about Wat2Do",
           "University of Waterloo events platform",
           "campus event discovery",

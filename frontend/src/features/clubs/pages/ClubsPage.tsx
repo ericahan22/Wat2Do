@@ -32,11 +32,11 @@ function ClubsPage() {
 
   const documentTitle = useMemo(() => {
     const title = `${totalCount} Total Clubs - Wat2Do`;
-    
+
     if (!isLoading) {
       previousTitleRef.current = title;
     }
-    
+
     return previousTitleRef.current;
   }, [totalCount, isLoading]);
 
@@ -44,11 +44,14 @@ function ClubsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <SEOHead 
+      <SEOHead
         title="Clubs - University of Waterloo Student Organizations"
         description="Explore student clubs and organizations at the University of Waterloo. Discover campus clubs, find your interests, and connect with like-minded students."
         url="/clubs"
         keywords={[
+          'Waterloo events',
+          'UW events',
+          'UWaterloo events',
           'University of Waterloo clubs',
           'UW student organizations',
           'campus clubs',
