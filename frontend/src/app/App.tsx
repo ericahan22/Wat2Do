@@ -17,6 +17,7 @@ import {
   NotFoundPage,
   TopBanner,
 } from "@/shared";
+import { BackToTopButton } from "@/shared/components/common/BackToTopButton";
 import { CLERK_ROUTES } from "@/shared/config/clerk";
 
 function App() {
@@ -69,13 +70,13 @@ function App() {
           {/* Clerk Auth Routes */}
           <Route path={CLERK_ROUTES.SIGN_IN} element={<SignInPage />} />
           <Route path={CLERK_ROUTES.SIGN_UP} element={<SignUpPage />} />
-          <Route 
-            path={`${CLERK_ROUTES.USER_PROFILE}/*`} 
+          <Route
+            path={`${CLERK_ROUTES.USER_PROFILE}/*`}
             element={
               <ProtectedRoute allowAdmins={true}>
                 <UserProfilePage />
               </ProtectedRoute>
-            } 
+            }
           />
 
           <Route
@@ -98,6 +99,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
+      <BackToTopButton />
     </div>
   );
 }
