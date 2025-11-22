@@ -3,6 +3,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Search, X } from "lucide-react";
 import { useRef, useEffect, memo } from "react";
 import { useSearchState } from "@/features/search";
+import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -17,6 +18,19 @@ const SearchInput = memo(
     useEffect(() => {
       inputRef.current?.focus();
     }, []);
+
+    // Keyboard shortcuts
+    useKeyboardShortcuts({
+      onSlash: () => {
+        inputRef.current?.focus();
+      },
+      onEscape: () => {
+        if (inputValue) {
+          handleClear();
+          inputRef.current?.blur();
+        }
+      },
+    });
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
@@ -43,9 +57,8 @@ const SearchInput = memo(
           value={inputValue}
           onChange={onChange}
           onKeyDown={onKeyDown}
-          className={`shadow-none text-sm border-none ${
-            inputValue ? "pr-20" : "pr-12"
-          }`}
+          className={`shadow-none text-sm border-none ${inputValue ? "pr-20" : "pr-12"
+            }`}
         />
         {inputValue && (
           <ClearButton onClear={onClear} />
