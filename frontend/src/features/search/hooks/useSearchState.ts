@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLocalStorage } from "react-use";
+import { toast } from "sonner";
+import { useApi } from "@/shared/hooks/useApi";
 
 const SEARCH_STORAGE_KEY = "lastSearch";
 
 export function useSearchState() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [lastSearch, setLastSearch] = useLocalStorage<string>(SEARCH_STORAGE_KEY, "");
-  
+  const navigate = useNavigate();
+  const { eventsAPIClient } = useApi();
+
   const searchParam = searchParams.get("search") || "";
   const [inputValue, setInputValue] = useState(searchParam || lastSearch || "");
 
@@ -29,10 +33,31 @@ export function useSearchState() {
         return nextParams;
       });
     }
-  }, [lastSearch, searchParams, setSearchParams]); 
+  }, [lastSearch, searchParams, setSearchParams]);
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useCallback(async () => {
     const trimmedValue = inputValue.trim();
+
+    // Easter egg: typing "random" navigates to a random event
+    if (trimmedValue.toLowerCase() === "random") {
+      try {
+        // Fetch all events and pick a random one
+        const response = await eventsAPIClient.getEvents({ all: true });
+        if (response.results.length > 0) {
+          const randomEvent = response.results[Math.floor(Math.random() * response.results.length)];
+          toast.success(`Taking you to: ${randomEvent.title}`);
+          navigate(`/events/${randomEvent.id}`);
+          setInputValue("");
+        } else {
+          toast.error("No events found to randomize!");
+        }
+      } catch (error) {
+        toast.error("Failed to find a random event");
+        console.error(error);
+      }
+      return;
+    }
+
     if (trimmedValue) {
       setLastSearch(trimmedValue);
       setSearchParams((prev) => {
@@ -49,7 +74,7 @@ export function useSearchState() {
         return nextParams;
       });
     }
-  }, [inputValue, setLastSearch, setSearchParams]);
+  }, [inputValue, setLastSearch, setSearchParams, eventsAPIClient, navigate]);
 
   const handleClear = useCallback(() => {
     setInputValue("");
@@ -72,4 +97,3 @@ export function useSearchState() {
     handleChange,
   };
 }
-

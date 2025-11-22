@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-react";
 import { ArrowLeft } from "lucide-react";
@@ -8,6 +8,7 @@ import { formatEventDate } from "@/shared/lib/dateUtils";
 import { EventEditForm } from "@/features/events/components/EventEditForm";
 import { EventPreview } from "@/features/events/components/EventPreview";
 import { useApi } from "@/shared/hooks/useApi";
+import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 
 const EventDetailSkeleton = () => {
   return (
@@ -43,6 +44,14 @@ function EventDetailPage() {
   const { user } = useUser();
   const isAdmin = user?.publicMetadata?.role === "admin";
   const { eventsAPIClient } = useApi();
+  const navigate = useNavigate();
+
+  // Keyboard shortcut to go back
+  useKeyboardShortcuts({
+    onEscape: () => {
+      navigate("/events");
+    },
+  });
 
   const { data: event, isLoading, error } = useQuery({
     queryKey: ["event", eventId],

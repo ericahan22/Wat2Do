@@ -25,6 +25,7 @@ import { getClubTypeColor } from "@/shared/lib/clubTypeColors";
 import { Event } from "@/features/events";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { IconButton } from "@/shared/components/ui/icon-button";
+import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 
 const locales = {
   "en-US": enUS,
@@ -97,7 +98,7 @@ const EventPopup: React.FC<{
       {event.title}
     </h2>
     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-      {event.display_handle}
+      @{event.display_handle}
     </p>
 
     <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
@@ -105,14 +106,14 @@ const EventPopup: React.FC<{
         <CalendarIcon className="h-4 w-4 flex-shrink-0" />
         <span>{formatEventDate(event.dtstart_utc, event.dtend_utc)}</span>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <Clock className="h-4 w-4 flex-shrink-0" />
         <span>
           {formatTimeRange(event.dtstart_utc, event.dtend_utc)}
         </span>
       </div>
-      
+
       {event.location && (
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 flex-shrink-0" />
@@ -137,7 +138,7 @@ const EventPopup: React.FC<{
           </span>
         </div>
       )}
-      
+
 
       {event.registration && (
         <div className="italic">Registration required</div>
@@ -207,12 +208,21 @@ const CustomToolbar: React.FC<ToolbarProps<any, object>> = ({
 const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  
+
   // Use react-use's useLocalStorage for view persistence, default to "day"
   const [currentView, setCurrentView] = useLocalStorage<View>("eventsCalendarView", "day");
-  
+
   const [selectedEvent, setSelectedEvent] = useState<(Event & { start: Date; end: Date; title: string }) | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
+
+  // Keyboard shortcut to close popup
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (selectedEvent) {
+        closePopup();
+      }
+    },
+  });
 
   // Auto-scroll to 4pm (16:00) in day and week view
   useEffect(() => {
@@ -231,7 +241,7 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
 
       return () => clearTimeout(timer);
     }
-  }, [currentView, currentDate]); 
+  }, [currentView, currentDate]);
 
   const calendarEvents = events.map((event) => {
     const start = new Date(event.dtstart_utc);
@@ -353,8 +363,8 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   };
 
   return (
-    <div 
-      className="events-calendar-container relative" 
+    <div
+      className="events-calendar-container relative"
       onMouseDown={closePopup}
       ref={calendarContainerRef}
     >
