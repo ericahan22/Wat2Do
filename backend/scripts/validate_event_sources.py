@@ -19,7 +19,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 import aiohttp  # noqa: E402
-from django.db import transaction  # noqa: E402
+from django.db import transaction, connection  # noqa: E402
 
 from apps.events.models import (  # noqa: E402
     EventDates,
@@ -203,6 +203,9 @@ class EventSourceValidator:
     def delete_event(self, event, reason):
         """Delete an event and all its related data"""
         try:
+            # Close existing database connections to prevent SSL SYSCALL errors
+            connection.close()
+            
             with transaction.atomic():
                 event_id = event.id
                 event_title = event.title or "Untitled"
@@ -229,6 +232,8 @@ class EventSourceValidator:
 
         except Exception as e:
             logger.error(f"Error deleting event {event.id}: {e}")
+            # Close connection on error to ensure clean state
+            connection.close()
             raise
 
     async def validate_events_batch(self, session, events, semaphore):
@@ -285,6 +290,9 @@ class EventSourceValidator:
 
         # Run async validation
         asyncio.run(self._async_validate_all(events, total_events))
+
+        # Close stale database connections before deletion
+        connection.close()
 
         # Delete invalid events (must be done in sync context, not inside asyncio.run)
         logger.info(f"\nDeleting {len(self.events_to_delete)} invalid events...")

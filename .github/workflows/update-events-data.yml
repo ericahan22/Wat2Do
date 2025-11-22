@@ -2,7 +2,7 @@ name: Scrape Instagram, Update Events DB, Update Static Data
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # 4am EST (UTC-5)
+    - cron: '0 9 */2 * *'   # Every 2 days at 4am EST (UTC-5)
 
 jobs:
   update_events_data:

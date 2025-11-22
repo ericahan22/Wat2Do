@@ -3,7 +3,7 @@ name: Validate Event Sources
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 9 * * *' # 9am UTC daily
+    - cron: '0 9 * * 1' # 9am UTC every Monday (4am EST)
 
 jobs:
   validate-events:

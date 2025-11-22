@@ -1,11 +1,27 @@
+"""
+Account Rotation System
+This script implements smart account rotation to reduce Apify credits while
+maintaining full event coverage.
+
+Usage:
+    python backend/scraping/main_rotated.py
+
+How it works:
+    - Splits accounts into 3 groups
+    - Group A: Scraped on Mon, Thu, Sun
+    - Group B: Scraped on Tue, Fri
+    - Group C: Scraped on Wed, Sat
+    - Each account checked 2-3x per week
+"""
+
 import asyncio
 import json
 import os
 import sys
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
-# 1. Setup Django
+# Setup Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import django
 
@@ -20,20 +36,68 @@ from scraping.logging_config import logger
 from shared.constants.urls_to_scrape import FULL_URLS
 
 
+def get_rotation_group():
+    """
+    Determine which group of accounts to scrape based on day of week.
+    Returns: (group_name, account_indices)
+    """
+    day_of_week = datetime.now().weekday()  # 0=Monday, 6=Sunday
+    
+    # Group A: Monday (0), Thursday (3), Sunday (6)
+    # Group B: Tuesday (1), Friday (4)
+    # Group C: Wednesday (2), Saturday (5)
+    
+    rotation_schedule = {
+        0: ("A", 0),  # Monday -> Group A
+        1: ("B", 1),  # Tuesday -> Group B
+        2: ("C", 2),  # Wednesday -> Group C
+        3: ("A", 0),  # Thursday -> Group A
+        4: ("B", 1),  # Friday -> Group B
+        5: ("C", 2),  # Saturday -> Group C
+        6: ("A", 0),  # Sunday -> Group A
+    }
+    
+    return rotation_schedule[day_of_week]
+
+
+def split_accounts_into_groups(accounts, num_groups=3):
+    """
+    Split accounts into N groups evenly.
+    Returns: list of lists
+    """
+    groups = [[] for _ in range(num_groups)]
+    for i, account in enumerate(accounts):
+        groups[i % num_groups].append(account)
+    return groups
+
+
 def get_targets():
     """
-    Determine if we are in 'Single User' mode or 'Batch' mode.
+    Get Instagram accounts to scrape based on rotation schedule.
     """
     username = os.getenv("TARGET_USERNAME")
     if username:
+        # Single user mode - no rotation
         return "single", [username]
     
-    batch_users = [
+    # Get all Instagram accounts
+    all_accounts = [
         url.split("instagram.com/")[1].split("/")[0]
         for url in FULL_URLS
         if "instagram.com/" in url
     ]
-    return "batch", batch_users
+    
+    # Split into groups
+    groups = split_accounts_into_groups(all_accounts, num_groups=3)
+    
+    # Get today's group
+    group_name, group_index = get_rotation_group()
+    today_accounts = groups[group_index]
+    
+    logger.info(f"Rotation Group {group_name} ({len(today_accounts)}/{len(all_accounts)} accounts)")
+    
+    return "rotated", today_accounts
+
 
 def filter_valid_posts(posts):
     return [
@@ -41,6 +105,7 @@ def filter_valid_posts(posts):
         if not post.get("error") and not post.get("errorDescription")
         and post.get("url") and "/p/" in post.get("url")
     ]
+
 
 def main():
     mode, targets = get_targets()
@@ -53,8 +118,8 @@ def main():
         # Single user: 1 day lookback, 1 post limit
         posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
     else:
-        # Batch mode: 4 days lookback, 1 post per account
-        posts = scraper.scrape(targets, results_limit=1, cutoff_days=4)
+        # Rotated mode: 5 days lookback, 1 post per account
+        posts = scraper.scrape(targets, results_limit=1, cutoff_days=5)
 
     raw_path = Path(__file__).parent / "apify_raw_results.json"
     with raw_path.open("w", encoding="utf-8") as f:
@@ -70,9 +135,6 @@ def main():
     try:
         saved_count = asyncio.run(processor.process(posts, cutoff_date))
 
-        # 0 = success (events added)
-        # 2 = warning (no events added)
-        # 1 = error (exception occurred)
         if saved_count > 0:
             logger.info(f"Successfully added {saved_count} event(s)")
             sys.exit(0)
@@ -82,6 +144,7 @@ def main():
     except Exception as e:
         logger.error(f"Critical error in processing: {e}", exc_info=True)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
