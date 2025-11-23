@@ -75,8 +75,50 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             logger.warning(f"{log_prefix} Event '{title}' missing categories, assigning 'Uncategorized'")
             categories = ["Uncategorized"]
 
-        if is_duplicate_event(event_data, ig_handle=ig_handle, source_url=source_url):
-            return "duplicate"
+        detector = EventDuplicateDetector()
+        has_match, matched_event = detector.find_match(event_data, ig_handle=ig_handle, source_url=source_url)
+        
+        if has_match:
+            # If event is from same club, update event info
+            if matched_event and matched_event.ig_handle == ig_handle:
+                logger.info(f"{log_prefix} Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new information")
+                
+                matched_event.title = title
+                matched_event.location = location
+                matched_event.description = description or None
+                matched_event.price = price or None
+                matched_event.food = food or None
+                matched_event.registration = registration
+                matched_event.source_image_url = source_image_url or None
+                matched_event.categories = categories
+                matched_event.source_url = source_url
+                matched_event.save()
+                
+                # Delete old event dates and create new ones
+                EventDates.objects.filter(event=matched_event).delete()
+                event_dates = []
+                for occ in occurrences:
+                    dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
+                    dtend_utc_raw = occ.get("dtend_utc")
+                    dtend_utc = (
+                        parse_utc_datetime(dtend_utc_raw)
+                        if dtend_utc_raw and dtend_utc_raw.strip()
+                        else None
+                    )
+                    event_dates.append(
+                        EventDates(
+                            event=matched_event,
+                            dtstart_utc=dtstart_utc,
+                            dtend_utc=dtend_utc,
+                            duration=occ.get("duration") or None,
+                            tz=occ.get("tz") or None,
+                        )
+                    )
+                EventDates.objects.bulk_create(event_dates)
+                logger.info(f"{log_prefix} Updated event with {len(event_dates)} new date(s)")
+                return "updated"
+            else:
+                return "duplicate"
 
         # Only fetch if club_type wasn't passed in
         if club_type is None:
@@ -137,33 +179,102 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             return False
 
 
-def is_duplicate_event(event_data, ig_handle=None, source_url=None):
-    """Check for duplicate events using title, occurrences, location, and description."""
+class EventDuplicateDetector:
+    """Handles duplicate event detection"""
+    
+    def __init__(self):
+        self.SAME_CLUB_TITLE_THRESHOLD = 0.8
+        self.TITLE_SIMILARITY_THRESHOLD = 0.7
+        self.LOCATION_SIMILARITY_THRESHOLD = 0.5
+        self.DESCRIPTION_SIMILARITY_THRESHOLD = 0.3
+    
+    def find_match(self, event_data, ig_handle=None, source_url=None):
+        """
+        Check for duplicate events using title, occurrences, location, and description.
+        Returns:
+            tuple: (has_match: bool, matched_event: Event | None)
+            - has_match: True if a matching event was found (could be duplicate or update)
+            - matched_event: The matching event object if found, None otherwise
+        """
+        title = event_data.get("title") or ""
+        location = event_data.get("location") or ""
+        description = event_data.get("description") or ""
+        occurrences = event_data.get("occurrences")
 
-    title = event_data.get("title") or ""
-    location = event_data.get("location") or ""
-    description = event_data.get("description") or ""
-    occurrences = event_data.get("occurrences")
+        log_prefix = f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}]"
 
-    log_prefix = f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}]"
+        if not occurrences:
+            return False, None
 
-    if not occurrences:
-        return False
+        target_start_str = occurrences[0].get("dtstart_utc")
+        target_start = parse_utc_datetime(target_start_str)
+        if not target_start:
+            return False, None
 
-    target_start_str = occurrences[0].get("dtstart_utc")
-    target_start = parse_utc_datetime(target_start_str)
-    if not target_start:
-        return False
+        try:
+            # Strategy 1: Check for same-club updates (regardless of date)
+            matched_event = self._check_same_club_update(
+                ig_handle, title, log_prefix
+            )
+            if matched_event:
+                return True, matched_event
+            
+            # Strategy 2: Check for same-day duplicates
+            matched_event = self._check_same_day_duplicate(
+                target_start, title, location, description, ig_handle, log_prefix
+            )
+            if matched_event:
+                return True, matched_event
+                
+        except Exception as exc:
+            logger.error(f"{log_prefix} Error during duplicate check: {exc!s}")
 
-    from datetime import timedelta
-    day_start = target_start.replace(hour=0, minute=0, second=0, microsecond=0)
-    day_end = day_start + timedelta(days=1)
-
-    try:
+        return False, None
+    
+    def _check_same_club_update(self, ig_handle, title, log_prefix):
+        """
+        Check if the same club has posted a similar event before (regardless of date).
+        This catches updates where the club reposts with a new date/location.
+        Returns:
+            Event | None: The matched event if found, None otherwise
+        """
+        if not ig_handle:
+            return None
+            
+        same_club_events = Events.objects.filter(ig_handle=ig_handle)
+        for existing_event in same_club_events:
+            c_title = getattr(existing_event, "title", "") or ""
+            
+            title_sim = max(
+                jaccard_similarity(c_title, title),
+                sequence_similarity(c_title, title),
+            )
+            
+            if title_sim > self.SAME_CLUB_TITLE_THRESHOLD:
+                logger.warning(
+                    f"{log_prefix} Potential update detected: '{title}' matches existing event '{c_title}' "
+                    f"from same club (title_sim={title_sim:.3f}). This will be updated."
+                )
+                return existing_event
+        
+        return None
+    
+    def _check_same_day_duplicate(self, target_start, title, location, description, ig_handle, log_prefix):
+        """
+        Check for duplicate events on the same day using title, location, and description similarity.
+        Returns:
+            Event | None: The matched event if found, None otherwise
+        """
+        from datetime import timedelta
+        
+        day_start = target_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        
         candidates = EventDates.objects.select_related("event").filter(
             dtstart_utc__gte=day_start,
             dtstart_utc__lt=day_end
         )
+        
         if candidates:
             logger.debug(f"{log_prefix} Found {len(candidates)} existing events on {day_start.date()} for duplicate check.")
             for i, cand in enumerate(candidates[:3]):
@@ -183,10 +294,12 @@ def is_duplicate_event(event_data, ig_handle=None, source_url=None):
             if not c_start:
                 continue
 
+            # Check substring match
             norm_title = normalize(title)
             norm_c_title = normalize(c_title)
             substring_match = norm_c_title in norm_title or norm_title in norm_c_title
 
+            # Calculate similarities
             title_sim = max(
                 jaccard_similarity(c_title, title),
                 sequence_similarity(c_title, title),
@@ -194,24 +307,32 @@ def is_duplicate_event(event_data, ig_handle=None, source_url=None):
             loc_sim = jaccard_similarity(c_loc, location)
             desc_sim = jaccard_similarity(c_desc, description)
 
+            # Check if substring match + similar location
             if substring_match:
-                logger.warning(
-                    f"{log_prefix} Duplicate by substring match: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}'"
-                )
-                return True
+                similar_location = loc_sim > self.LOCATION_SIMILARITY_THRESHOLD
+                if similar_location:
+                    logger.warning(
+                        f"{log_prefix} Duplicate by substring match + location: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
+                        f"(ig_handle: {ig_handle} vs {existing_event.ig_handle}, loc_sim={loc_sim:.3f})"
+                    )
+                    return existing_event
+                else:
+                    logger.debug(
+                        f"{log_prefix} Substring match but different location: '{title}' ({ig_handle}) @ '{location}' vs '{c_title}' ({existing_event.ig_handle}) @ '{c_loc}' (loc_sim={loc_sim:.3f})"
+                    )
+                    continue
 
-            if (title_sim > 0.7 and loc_sim > 0.5) or (
-                loc_sim > 0.5 and desc_sim > 0.3
+            # Check similarity thresholds
+            if (title_sim > self.TITLE_SIMILARITY_THRESHOLD and loc_sim > self.LOCATION_SIMILARITY_THRESHOLD) or (
+                loc_sim > self.LOCATION_SIMILARITY_THRESHOLD and desc_sim > self.DESCRIPTION_SIMILARITY_THRESHOLD
             ):
                 logger.warning(
                     f"{log_prefix} Duplicate by similarity: '{title}' @ '{location}' matches '{c_title}' @ '{c_loc}' "
                     f"(title_sim={title_sim:.3f}, loc_sim={loc_sim:.3f}, desc_sim={desc_sim:.3f})"
                 )
-                return True
-    except Exception as exc:
-        logger.error(f"{log_prefix} Error during duplicate check: {exc!s}")
-
-    return False
+                return existing_event
+        
+        return None
 
 
 def append_event_to_csv(

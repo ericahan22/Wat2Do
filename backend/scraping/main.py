@@ -23,10 +23,15 @@ from shared.constants.urls_to_scrape import FULL_URLS
 def get_targets():
     """
     Determine if we are in 'Single User' mode or 'Batch' mode.
+    Returns:
+        tuple: (mode: str, targets: list)
+        - mode: "single" if TARGET_USERNAME env var is set, "batch" otherwise
+        - targets: list of usernames to scrape
     """
-    username = os.getenv("TARGET_USERNAME")
-    if username:
-        return "single", [username]
+    if "TARGET_USERNAME" in os.environ:
+        username = os.getenv("TARGET_USERNAME")
+        # Return username even if empty
+        return "single", [username] if username else []
     
     batch_users = [
         url.split("instagram.com/")[1].split("/")[0]
@@ -45,6 +50,16 @@ def filter_valid_posts(posts):
 def main():
     mode, targets = get_targets()
     logger.info(f"--- Workflow Started: {mode.upper()} ---")
+    
+    # Validate targets before proceeding
+    if not targets or not any(t and t.strip() for t in targets):
+        if mode == "single":
+            logger.error("Repository dispatch triggered but no valid username provided, exiting.")
+            sys.exit(1)
+        else:
+            logger.warning("No valid targets found in batch mode, exiting.")
+            sys.exit(0)
+    
     scraper = InstagramScraper()
     processor = EventProcessor(concurrency=5)
 
