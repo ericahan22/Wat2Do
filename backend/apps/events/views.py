@@ -405,15 +405,18 @@ def _generate_ics_content(events):
         for date_obj in event_dates:
             start_date = date_obj.dtstart_utc.strftime("%Y%m%d")
             start_time = date_obj.dtstart_utc.strftime("%H%M%S")
-            end_time = (
-                date_obj.dtend_utc.strftime("%H%M%S")
-                if date_obj.dtend_utc
-                else start_time
-            )
+            
+            if date_obj.dtend_utc:
+                end_date = date_obj.dtend_utc.strftime("%Y%m%d")
+                end_time = date_obj.dtend_utc.strftime("%H%M%S")
+            else:
+                # If no end time, use start time
+                end_date = start_date
+                end_time = start_time
 
             lines.append("BEGIN:VEVENT")
             lines.append(f"DTSTART:{start_date}T{start_time}Z")
-            lines.append(f"DTEND:{start_date}T{end_time}Z")
+            lines.append(f"DTEND:{end_date}T{end_time}Z")
             lines.append(f"DTSTAMP:{dtstamp}")
             lines.append(f"SUMMARY:{escape_text(event.title)}")
 
@@ -497,14 +500,17 @@ def get_google_calendar_urls(request):
             # Format dates for Google Calendar (YYYYMMDDTHHMMSSZ for UTC)
             start_date = date_obj.dtstart_utc.strftime("%Y%m%d")
             start_time = date_obj.dtstart_utc.strftime("%H%M%S")
-            end_time = (
-                date_obj.dtend_utc.strftime("%H%M%S")
-                if date_obj.dtend_utc
-                else start_time
-            )
+            
+            if date_obj.dtend_utc:
+                end_date = date_obj.dtend_utc.strftime("%Y%m%d")
+                end_time = date_obj.dtend_utc.strftime("%H%M%S")
+            else:
+                # If no end time, use start time
+                end_date = start_date
+                end_time = start_time
 
             start_datetime = f"{start_date}T{start_time}Z"
-            end_datetime = f"{start_date}T{end_time}Z"
+            end_datetime = f"{end_date}T{end_time}Z"
 
             # Build details field
             details_parts = []

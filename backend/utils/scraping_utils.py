@@ -52,7 +52,7 @@ def get_post_image_url(post):
 
 def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
     """Map scraped event data to Event model fields, insert to DB"""
-    shortcode = source_url.split("/")[-1] if source_url else "UNKNOWN"
+    shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
     log_prefix = f"[{ig_handle}] [{shortcode}]"
 
     with transaction.atomic():
@@ -133,16 +133,16 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             "ig_handle": ig_handle,
             "title": title,
             "source_url": source_url,
-            "club_type": club_type,
+            "club_type": club_type[:50] if club_type else None,
             "location": location,
-            "food": food or None,
+            "food": food[:255] if food else None,
             "price": price or None,
             "registration": registration,
             "description": description or None,
             "reactions": {},
             "source_image_url": source_image_url or None,
             "status": "CONFIRMED",
-            "school": school,
+            "school": school[:255] if school else "",
             "categories": categories,
         }
 

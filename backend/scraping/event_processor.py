@@ -196,6 +196,14 @@ class EventProcessor:
                 extracted_events = [base_event]
                 
             for event_data in extracted_events:
+                # Map correct picture to event
+                image_idx = event_data.get("image_index")
+                if image_idx is not None and isinstance(image_idx, int) and 0 <= image_idx < len(all_s3_urls):
+                    event_data["source_image_url"] = all_s3_urls[image_idx]
+                else:
+                    # Fallback: Use first image
+                    event_data["source_image_url"] = all_s3_urls[0] if all_s3_urls else ""
+
                 # Check for past date
                 occurrences = event_data.get("occurrences", [])
                 if occurrences:
@@ -205,14 +213,6 @@ class EventProcessor:
                         append_event_to_csv(event_data, ig_handle, source_url, added_to_db="event_past_date")
                         logger.info(f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past")
                         continue
-
-                # Map the correct picture to the event.
-                image_idx = event_data.get("image_index")
-                if image_idx is not None and isinstance(image_idx, int) and 0 <= image_idx < len(all_s3_urls):
-                    event_data["source_image_url"] = all_s3_urls[image_idx]
-                else:
-                    # Fallback: Use the first image (cover) if no index specified
-                    event_data["source_image_url"] = all_s3_urls[0]
 
                 club_type = await self._get_club_type(ig_handle)
                 try:

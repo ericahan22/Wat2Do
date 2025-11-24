@@ -24,6 +24,7 @@ import { Calendar, LayoutGrid, Sparkles, Heart, Clock } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
 import NumberFlow from "@number-flow/react";
 import { EVENT_CATEGORIES } from "@/data/staticData";
+import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 
 function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,6 +65,7 @@ function EventsPage() {
     handleToggleNewEvents,
     handleToggleInterested,
     handleToggleAllEvents,
+    clearAllFilters,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -73,10 +75,21 @@ function EventsPage() {
     isSelectMode,
     selectedEvents,
     toggleSelectMode,
+    clearSelection,
     toggleEventSelection,
     exportToCalendar,
     exportToGoogleCalendar,
   } = useEventSelection(view);
+
+  // ESC key clears all filters and exit export mode
+  const handleEscape = useCallback(() => {
+    clearAllFilters();
+    clearSelection();
+  }, [clearAllFilters, clearSelection]);
+
+  useKeyboardShortcuts({
+    onEscape: handleEscape,
+  });
 
   const todayString = getTodayString();
   const isShowingPastEvents = Boolean(

@@ -41,7 +41,7 @@ export function useEventSelection(view: "grid" | "calendar") {
   const exportToCalendar = async () => {
     const eventIds = Array.from(selectedEvents).join(",");
     const blob = await eventsAPIClient.exportEventsICS({ ids: eventIds });
-    
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -56,7 +56,7 @@ export function useEventSelection(view: "grid" | "calendar") {
   const exportToGoogleCalendar = async () => {
     const eventIds = Array.from(selectedEvents).join(",");
     const data = await eventsAPIClient.getGoogleCalendarUrls({ ids: eventIds });
-    
+
     data.urls.forEach((url) => {
       window.open(url, "_blank");
     });

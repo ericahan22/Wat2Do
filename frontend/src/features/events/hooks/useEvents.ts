@@ -223,6 +223,23 @@ export function useEvents() {
     });
   };
 
+  const clearAllFilters = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+      // Keep only the view parameter
+      const currentView = nextParams.get("view");
+      nextParams.delete("search");
+      nextParams.delete("categories");
+      nextParams.delete("dtstart_utc");
+      nextParams.delete("added_at");
+      nextParams.delete("interested");
+      if (currentView) {
+        nextParams.set("view", currentView);
+      }
+      return nextParams;
+    });
+  };
+
   return {
     events: filteredEvents,
     totalCount,
@@ -238,6 +255,7 @@ export function useEvents() {
     handleToggleNewEvents,
     handleToggleInterested,
     handleToggleAllEvents,
+    clearAllFilters,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
