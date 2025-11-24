@@ -94,9 +94,13 @@ class EventSourceValidator:
                     await asyncio.sleep(60)
                     return None, "Rate-limited (login redirect)"
 
-                # Check page content for "Sorry, this page isn't available"
+                # Check page content for Instagram's error messages
                 if (
-                    b"Sorry, this page isn't available" in content
+                    b"Post isn't available" in content
+                    or b"post isn't available" in content
+                    or b"The link may be broken" in content
+                    or b"profile may have been removed" in content
+                    or b"Sorry, this page isn't available" in content
                     or b"The link you followed may be broken" in content
                 ):
                     logger.warning(
