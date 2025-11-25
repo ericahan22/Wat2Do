@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 
 from django.db import transaction
+from django.utils import timezone
 
 from utils.date_utils import parse_utc_datetime
 
@@ -92,6 +93,7 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
                 matched_event.source_image_url = source_image_url or None
                 matched_event.categories = categories
                 matched_event.source_url = source_url
+                matched_event.added_at = timezone.now() # Bump to top
                 matched_event.save()
                 
                 # Delete old event dates and create new ones
@@ -201,7 +203,8 @@ class EventDuplicateDetector:
         description = event_data.get("description") or ""
         occurrences = event_data.get("occurrences")
 
-        log_prefix = f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}]"
+        shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
+        log_prefix = f"[{ig_handle}] [{shortcode}]"
 
         if not occurrences:
             return False, None
@@ -418,4 +421,5 @@ def append_event_to_csv(
                 "status": "CONFIRMED",
             }
         )
-        logger.info(f"[{ig_handle}] [{source_url.split('/')[-1] if source_url else 'UNKNOWN'}] Event written to CSV: '{title}' - Status: {added_to_db}")
+        shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
+        logger.info(f"[{ig_handle}] [{shortcode}] Event written to CSV - Status: {added_to_db}")

@@ -127,13 +127,18 @@ class EventProcessor:
 
         # 2. Upload all images for each post (with carousel support)
         all_image_tasks = []
+        
+        async def _upload_image_bounded(url):
+            async with self.semaphore:
+                return await self._upload_image(url)
+
         for post in valid_posts:
             ig_handle = post.get("ownerUsername")
             shortcode = post.get("url", "").strip("/").split("/")[-1]
             logger.info(f"[{ig_handle}] [{shortcode}] Uploading images...")
             image_urls = _get_all_images(post)
             post["all_image_urls"] = image_urls
-            all_image_tasks.append([self._upload_image(img_url) for img_url in image_urls])
+            all_image_tasks.append([_upload_image_bounded(img_url) for img_url in image_urls])
         
         flat_tasks = [task for sublist in all_image_tasks for task in sublist]
         flat_results = await asyncio.gather(*flat_tasks, return_exceptions=True)
@@ -216,15 +221,23 @@ class EventProcessor:
 
                 club_type = await self._get_club_type(ig_handle)
                 try:
-                    success = await self._save_event(event_data, ig_handle, source_url, club_type)
+                    result = await self._save_event(event_data, ig_handle, source_url, club_type)
                 except Exception as e:
                     append_event_to_csv(event_data, ig_handle, source_url, added_to_db="error", club_type=club_type)
                     logger.error(f"[{ig_handle}] [{shortcode}] Error saving event: {e}")
                     continue
-                if success:
+
+                if result is True:
                     append_event_to_csv(event_data, ig_handle, source_url, added_to_db="success", club_type=club_type)
                     logger.info(f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'")
                     saved_count += 1
+                elif result == "updated":
+                    append_event_to_csv(event_data, ig_handle, source_url, added_to_db="updated", club_type=club_type)
+                    logger.info(f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'")
+                    saved_count += 1
+                elif result == "duplicate":
+                    append_event_to_csv(event_data, ig_handle, source_url, added_to_db="duplicate_post", club_type=club_type)
+                    logger.info(f"[{ig_handle}] [{shortcode}] Duplicate event (no changes): '{event_data.get('title', '')}'")
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")
         return saved_count

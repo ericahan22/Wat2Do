@@ -53,13 +53,21 @@ class StorageService:
 
     def _download_image_from_url(self, image_url: str) -> bytes | None:
         """Download image from URL"""
-        try:
-            response = requests.get(image_url, timeout=60)
-            response.raise_for_status()
-            return response.content
-        except Exception as e:
-            logger.error(f"Failed to download image from {image_url}: {e}")
-            return None
+        import time
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(image_url, timeout=60)
+                response.raise_for_status()
+                return response.content
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"Failed to download image from {image_url} after {max_retries} attempts: {e}")
+                    return None
+                wait_time = 2 ** attempt
+                logger.warning(f"Download failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_time}s...")
+                time.sleep(wait_time)
+        return None
 
     def upload_image_from_url(
         self, image_url: str, filename: str | None = None
