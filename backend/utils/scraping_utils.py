@@ -82,16 +82,10 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
         if has_match:
             # If event is from same club, update event info
             if matched_event and matched_event.ig_handle == ig_handle:
-                logger.info(f"{log_prefix} Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new information")
+                logger.info(f"{log_prefix} Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new date/time/location")
                 
-                matched_event.title = title
+                # Only update location, date, and time
                 matched_event.location = location
-                matched_event.description = description or None
-                matched_event.price = price or None
-                matched_event.food = food or None
-                matched_event.registration = registration
-                matched_event.source_image_url = source_image_url or None
-                matched_event.categories = categories
                 matched_event.source_url = source_url
                 matched_event.added_at = timezone.now() # Bump to top
                 matched_event.save()

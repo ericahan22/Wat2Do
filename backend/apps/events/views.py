@@ -100,6 +100,8 @@ def get_events(request):
         filtered_queryset = filterset.qs.distinct()
 
         if search_term:
+            import re
+            
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
@@ -108,6 +110,7 @@ def get_events(request):
             # Build OR query: match any of the search terms in any field
             or_queries = Q()
             for term in search_terms:
+                # Search with original term (exact/partial matches)
                 term_query = (
                     Q(title__icontains=term)
                     | Q(location__icontains=term)
@@ -121,6 +124,23 @@ def get_events(request):
                     | Q(tiktok_handle__icontains=term)
                     | Q(fb_handle__icontains=term)
                 )
+                
+                # Search with normalized term
+                normalized_term = re.sub(r'[^a-z0-9]', '', term.lower())
+                if normalized_term and normalized_term != term.lower():
+                    term_query |= (
+                        Q(title__icontains=normalized_term)
+                        | Q(location__icontains=normalized_term)
+                        | Q(description__icontains=normalized_term)
+                        | Q(food__icontains=normalized_term)
+                        | Q(club_type__icontains=normalized_term)
+                        | Q(ig_handle__icontains=normalized_term)
+                        | Q(discord_handle__icontains=normalized_term)
+                        | Q(x_handle__icontains=normalized_term)
+                        | Q(tiktok_handle__icontains=normalized_term)
+                        | Q(fb_handle__icontains=normalized_term)
+                    )
+                
                 or_queries |= term_query
 
             filtered_queryset = filtered_queryset.filter(or_queries)
