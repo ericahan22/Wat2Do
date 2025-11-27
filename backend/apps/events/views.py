@@ -101,16 +101,27 @@ def get_events(request):
 
         if search_term:
             import re
+            from django.db.models import Func, Value, F
             
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
             ]
 
-            # Build OR query: match any of the search terms in any field
+            # Define character mapping for translate
+            # Common accented chars
+            accents_from = "àáâãäåèéêëìíîïòóôõöùúûüýÿñç"
+            accents_to   = "aaaaaaeeeeiiiiooooouuuuyync"
+            
+            # Special chars to remove
+            special_from = "-_.,!?:;()[]{}|/\\ "
+            map_from = accents_from + special_from
+            map_to   = accents_to
+            
+            # Build OR query
             or_queries = Q()
             for term in search_terms:
-                # Search with original term (exact/partial matches)
+                # 1. Standard search (exact/partial matches)
                 term_query = (
                     Q(title__icontains=term)
                     | Q(location__icontains=term)
@@ -125,20 +136,39 @@ def get_events(request):
                     | Q(fb_handle__icontains=term)
                 )
                 
-                # Search with normalized term
+                # 2. Normalized search using translate
                 normalized_term = re.sub(r'[^a-z0-9]', '', term.lower())
                 if normalized_term and normalized_term != term.lower():
-                    term_query |= (
-                        Q(title__icontains=normalized_term)
-                        | Q(location__icontains=normalized_term)
-                        | Q(description__icontains=normalized_term)
-                        | Q(food__icontains=normalized_term)
-                        | Q(club_type__icontains=normalized_term)
-                        | Q(ig_handle__icontains=normalized_term)
-                        | Q(discord_handle__icontains=normalized_term)
-                        | Q(x_handle__icontains=normalized_term)
-                        | Q(tiktok_handle__icontains=normalized_term)
-                        | Q(fb_handle__icontains=normalized_term)
+                    # Func for translate:
+                    # translate(lower(field), map_from, map_to)                    
+                    class Translate(Func):
+                        function = 'TRANSLATE'
+                        template = "%(function)s(LOWER(%(expressions)s), '%(from)s', '%(to)s')"
+                    
+                    # Use .extra() to filter on normalized fields (Django doesn't support function calls in filter keys)
+                    translate_sql = f"TRANSLATE(LOWER({{}}), '{map_from}', '{map_to}') LIKE %s"
+                    like_param = f"%{normalized_term}%"
+                    fields = [
+                        "title", "location", "description", "food", 
+                        "club_type", "ig_handle", "discord_handle", 
+                        "x_handle", "tiktok_handle", "fb_handle"
+                    ]
+                    where_clauses = []
+                    params = []
+                    for field in fields:
+                        # Handle COALESCE for nullable fields
+                        col_ref = field
+                        if field not in ["title"]: # title is nullable but usually present, others might be null
+                             col_ref = f"COALESCE({field}, '')"
+                        where_clauses.append(translate_sql.format(col_ref))
+                        params.append(like_param)
+                    
+                    full_where = " OR ".join(where_clauses)
+                    term_query |= Q(
+                        id__in=filtered_queryset.extra(
+                            where=[full_where],
+                            params=params
+                        ).values_list('id', flat=True)
                     )
                 
                 or_queries |= term_query

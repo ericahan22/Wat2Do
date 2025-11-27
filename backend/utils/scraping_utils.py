@@ -132,7 +132,7 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             "club_type": club_type[:50] if club_type else None,
             "location": location,
             "food": food[:255] if food else None,
-            "price": price or None,
+            "price": price,
             "registration": registration,
             "description": description or None,
             "reactions": {},
@@ -238,8 +238,22 @@ class EventDuplicateDetector:
         if not ig_handle:
             return None
             
-        same_club_events = Events.objects.filter(ig_handle=ig_handle)
+        same_club_events = Events.objects.filter(ig_handle=ig_handle).prefetch_related("event_dates")
+        now = timezone.now()
+
         for existing_event in same_club_events:
+            # Check if event is in the past
+            dates = list(existing_event.event_dates.all())
+            if not dates:
+                continue
+                
+            # Get the latest end time (or start time)
+            latest_end = max((d.dtend_utc or d.dtstart_utc) for d in dates)
+            
+            # If the event has already passed, treat as new event
+            if latest_end < now:
+                continue
+
             c_title = getattr(existing_event, "title", "") or ""
             
             title_sim = max(
