@@ -113,7 +113,7 @@ def get_events(request):
             accents_to   = "aaaaaaeeeeiiiiooooouuuuyync"
             
             # Special chars to remove
-            special_from = "-_.,!?:;()[]{}|/\\ "
+            special_from = "-_.,!?:;()[]|/ "
             map_from = accents_from + special_from
             map_to   = accents_to
             
@@ -148,10 +148,11 @@ def get_events(request):
                     ]
                     where_clauses = []
                     params = []
+                    
                     for field in fields:
                         # Handle COALESCE for nullable fields
                         col_ref = field
-                        if field not in ["title"]: # title is nullable but usually present, others might be null
+                        if field not in ["title"]: 
                              col_ref = f"COALESCE({field}, '')"
                         clause = f"TRANSLATE(LOWER({col_ref}), '{map_from}', '{map_to}') LIKE %s"
                         where_clauses.append(clause)
