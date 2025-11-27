@@ -101,7 +101,6 @@ def get_events(request):
 
         if search_term:
             import re
-            from django.db.models import Func, Value, F
             
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
@@ -138,15 +137,9 @@ def get_events(request):
                 
                 # 2. Normalized search using translate
                 normalized_term = re.sub(r'[^a-z0-9]', '', term.lower())
+                
+                # Use normalized search if we have a term
                 if normalized_term:
-                    # Func for translate:
-                    # translate(lower(field), map_from, map_to)                    
-                    class Translate(Func):
-                        function = 'TRANSLATE'
-                        template = "%(function)s(LOWER(%(expressions)s), '%(from)s', '%(to)s')"
-                    
-                    # Use .extra() to filter on normalized fields (Django doesn't support function calls in filter keys)
-                    translate_sql = f"TRANSLATE(LOWER({{}}), '{map_from}', '{map_to}') LIKE %s"
                     like_param = f"%{normalized_term}%"
                     fields = [
                         "title", "location", "description", "food", 
@@ -160,7 +153,8 @@ def get_events(request):
                         col_ref = field
                         if field not in ["title"]: # title is nullable but usually present, others might be null
                              col_ref = f"COALESCE({field}, '')"
-                        where_clauses.append(translate_sql.format(col_ref))
+                        clause = f"TRANSLATE(LOWER({col_ref}), '{map_from}', '{map_to}') LIKE %s"
+                        where_clauses.append(clause)
                         params.append(like_param)
                     
                     full_where = " OR ".join(where_clauses)
