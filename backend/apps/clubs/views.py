@@ -36,8 +36,7 @@ def get_clubs(request):
             
             # 2. Normalized search using translate
             normalized_term = re.sub(r'[^a-z0-9]', '', search_term.lower())
-            
-            if normalized_term and normalized_term != search_term.lower():
+            if normalized_term:
                 # Common accented chars
                 accents_from = "àáâãäåèéêëìíîïòóôõöùúûüýÿñç"
                 accents_to   = "aaaaaaeeeeiiiiooooouuuuyync"

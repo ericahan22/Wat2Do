@@ -138,7 +138,7 @@ def get_events(request):
                 
                 # 2. Normalized search using translate
                 normalized_term = re.sub(r'[^a-z0-9]', '', term.lower())
-                if normalized_term and normalized_term != term.lower():
+                if normalized_term:
                     # Func for translate:
                     # translate(lower(field), map_from, map_to)                    
                     class Translate(Func):
