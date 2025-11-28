@@ -114,7 +114,9 @@ class OpenAIService:
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
 
-        context_datetime = post_created_at if isinstance(post_created_at, datetime) else now
+        context_datetime = (
+            post_created_at if isinstance(post_created_at, datetime) else now
+        )
         context_datetime = pytz_timezone("America/Toronto").localize(
             context_datetime.replace(tzinfo=None)
         )
@@ -275,7 +277,7 @@ class OpenAIService:
                     "source_image_url",
                     "categories",
                     "occurrences",
-                    "image_index"
+                    "image_index",
                 ]
 
                 for event_obj in events_list:

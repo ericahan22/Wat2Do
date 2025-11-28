@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "apps.promotions",
     "apps.newsletter",
     "apps.payments",
+    "apps.waitlist",
 ]
 
 MIDDLEWARE = [

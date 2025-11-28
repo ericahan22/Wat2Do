@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-LOG_DIR = Path(".")
+LOG_DIR = Path()
 LOG_DIR.mkdir(exist_ok=True)
 LOG_FILE = LOG_DIR / "scraping.log"
 
@@ -18,7 +18,7 @@ def setup_logging():
     apify_logger.propagate = False
     for h in list(apify_logger.handlers):
         apify_logger.removeHandler(h)
-        
+
     logging.getLogger("apify").setLevel(logging.CRITICAL)
     logging.getLogger("cheerio").setLevel(logging.CRITICAL)
     logging.getLogger("requests").setLevel(logging.WARNING)

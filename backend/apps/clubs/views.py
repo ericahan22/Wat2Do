@@ -29,34 +29,36 @@ def get_clubs(request):
         # Apply search filter
         if search_term:
             import re
+
             from django.db.models import Q
-            
+
             # 1. Standard search
             search_query = Q(club_name__icontains=search_term)
-            
+
             # 2. Normalized search using translate
-            normalized_term = re.sub(r'[^a-z0-9]', '', search_term.lower())
+            normalized_term = re.sub(r"[^a-z0-9]", "", search_term.lower())
             if normalized_term:
                 # Common accented chars
                 accents_from = "àáâãäåèéêëìíîïòóôõöùúûüýÿñç"
-                accents_to   = "aaaaaaeeeeiiiiooooouuuuyync"
-                
+                accents_to = "aaaaaaeeeeiiiiooooouuuuyync"
+
                 # Special chars to remove
                 special_from = "-_.,!?:;()[]{}|/\\ "
-                
+
                 map_from = accents_from + special_from
-                map_to   = accents_to
-                
-                translate_sql = f"TRANSLATE(LOWER(club_name), '{map_from}', '{map_to}') LIKE %s"
+                map_to = accents_to
+
+                translate_sql = (
+                    f"TRANSLATE(LOWER(club_name), '{map_from}', '{map_to}') LIKE %s"
+                )
                 like_param = f"%{normalized_term}%"
-                
+
                 search_query |= Q(
                     id__in=queryset.extra(
-                        where=[translate_sql],
-                        params=[like_param]
-                    ).values_list('id', flat=True)
+                        where=[translate_sql], params=[like_param]
+                    ).values_list("id", flat=True)
                 )
-            
+
             queryset = queryset.filter(search_query)
 
         # Apply category filter

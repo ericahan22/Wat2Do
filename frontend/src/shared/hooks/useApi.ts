@@ -7,6 +7,7 @@ import EventsAPIClient from '@/shared/api/EventsAPIClient';
 import NewsletterAPIClient from '@/shared/api/NewsletterAPIClient';
 import ClubsAPIClient from '@/shared/api/ClubsAPIClient';
 import AdminAPIClient from '@/shared/api/AdminAPIClient';
+import WaitlistAPIClient from '@/shared/api/WaitlistAPIClient';
 
 export const useApi = () => {
   const { getToken } = useAuth();
@@ -22,12 +23,14 @@ export const useApi = () => {
     const newsletterAPIClient = new NewsletterAPIClient(baseApiClient);
     const clubsAPIClient = new ClubsAPIClient(baseApiClient);
     const adminAPIClient = new AdminAPIClient(baseApiClient);
+    const waitlistAPIClient = new WaitlistAPIClient(baseApiClient);
 
     return {
       eventsAPIClient,
       newsletterAPIClient,
       clubsAPIClient,
       adminAPIClient,
+      waitlistAPIClient,
     };
   }, [getToken]);
 
