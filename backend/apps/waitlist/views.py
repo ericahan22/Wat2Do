@@ -18,11 +18,13 @@ def get_school_info(request, school_slug):
         )
 
     config = SCHOOL_CONFIG[school_slug]
-    return Response({
-        "slug": school_slug,
-        "name": config["name"],
-        "domains": config["domains"],
-    })
+    return Response(
+        {
+            "slug": school_slug,
+            "name": config["name"],
+            "domains": config["domains"],
+        }
+    )
 
 
 @api_view(["GET"])

@@ -213,7 +213,7 @@ const AboutPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-6">Going With Friends</h2>
         <p className="mb-4">
           Events without registration are easier to bail on if they're not your
-          vibe. The "food" filter is also useful — free food events tend to be
+          vibe. The "food" filter is also useful - free food events tend to be
           more casual and people actually talk to each other.
         </p>
         <p className="mb-8">

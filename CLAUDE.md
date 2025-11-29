@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Built with Django REST API backend and React + TypeScript frontend, Wat2Do uses AI to extract event details from Instagram posts.
 
 **Tech Stack:**
-- **Backend**: Django 5.1 + Django REST Framework, PostgreSQL/SQLite
+- **Backend**: Django 5.1 + Django REST Framework, PostgreSQL
 - **Frontend**: React 19 + TypeScript, Vite, TanStack Query, Zustand
 - **Authentication**: Clerk (JWT-based)
 - **AI**: OpenAI GPT-4o-mini for event extraction
@@ -35,11 +35,6 @@ Built with Django REST API backend and React + TypeScript frontend, Wat2Do uses 
 docker compose up --build
 ```
 
-**Option 2: SQLite (Quick local development)**
-```bash
-export USE_SQLITE=1  # Set this before running Django
-```
-
 **Option 3: Local PostgreSQL**
 - Install PostgreSQL locally and configure in `backend/config/settings/development.py`
 
@@ -61,8 +56,6 @@ python manage.py fix_sequences
 # Start development server
 python manage.py runserver 8000
 ```
-
-**Important**: If using SQLite for quick local development, set `export USE_SQLITE=1` before running Django commands.
 
 ### Frontend (React + TypeScript)
 ```bash
@@ -907,7 +900,7 @@ def admin_view(request):
 
 ### Critical Development Requirements
 
-- **Database setup**: Use Docker Compose (recommended), SQLite (`export USE_SQLITE=1`), or local PostgreSQL
+- **Database setup**: Use Docker Compose (recommended),  or local PostgreSQL
 - Backend must be running for frontend to work (ports 8000 and 5173)
 - Frontend path mapping: `@/*` maps to `./src/*`
 - Backend uses environment-based settings (development.py, production.py)
@@ -984,7 +977,6 @@ Events endpoints vary by operation type:
 ### Backend (Vercel + PostgreSQL)
 - Configured for Vercel serverless deployment
 - PostgreSQL database (production)
-- SQLite database (local development with `USE_SQLITE=1`)
 - Database migrations handled automatically in production
 - Environment variables required:
   - `CLERK_SECRET_KEY` - Clerk authentication
@@ -1045,6 +1037,6 @@ Events endpoints vary by operation type:
 - Check GitHub issues for known problems
 - Review error logs in browser console (frontend) or terminal (backend)
 - Use `/health/` endpoint to verify backend is running
-- Verify database setup (Docker, SQLite, or PostgreSQL)
+- Verify database setup (Docker,  , or PostgreSQL)
 - Check that both frontend and backend servers are running
 - Ensure Clerk environment variables are set correctly

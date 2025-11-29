@@ -1,13 +1,12 @@
 from django.db import models
 
-
 # School configuration with slug, display name, and valid email domains
 SCHOOL_CONFIG = {
     "utsg": {
         "name": "University of Toronto St. George",
         "domains": ["utoronto.ca", "mail.utoronto.ca"],
     },
-    "york-university": {
+    "york": {
         "name": "York University",
         "domains": ["yorku.ca"],
     },
