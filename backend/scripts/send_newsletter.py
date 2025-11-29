@@ -17,9 +17,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
 # Import Django modules after setup
-from apps.newsletter.models import NewsletterSubscriber  # noqa: E402
-from services.email_service import email_service  # noqa: E402
-from scraping.logging_config import logger  # noqa: E402
+from apps.newsletter.models import NewsletterSubscriber
+from scraping.logging_config import logger
+from services.email_service import email_service
 
 
 def send_newsletter_to_all():
@@ -29,7 +29,9 @@ def send_newsletter_to_all():
     active_subscribers = NewsletterSubscriber.objects.filter(is_active=True)
 
     total_subscribers = active_subscribers.count()
-    logger.info(f"📧 Starting newsletter send to {total_subscribers} active subscribers...")
+    logger.info(
+        f"📧 Starting newsletter send to {total_subscribers} active subscribers..."
+    )
 
     if total_subscribers == 0:
         logger.warning("⚠️  No active subscribers found.")

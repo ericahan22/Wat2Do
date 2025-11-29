@@ -12,10 +12,10 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from scraping.event_processor import EventProcessor
-from scraping.instagram_scraper import InstagramScraper
 from django.utils import timezone
 
+from scraping.event_processor import EventProcessor
+from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
 from shared.constants.urls_to_scrape import FULL_URLS
 
@@ -32,7 +32,7 @@ def get_targets():
         username = os.getenv("TARGET_USERNAME")
         # Return username even if empty
         return "single", [username] if username else []
-    
+
     batch_users = [
         url.split("instagram.com/")[1].split("/")[0]
         for url in FULL_URLS
@@ -40,26 +40,33 @@ def get_targets():
     ]
     return "batch", batch_users
 
+
 def filter_valid_posts(posts):
     return [
-        post for post in posts
-        if not post.get("error") and not post.get("errorDescription")
-        and post.get("url") and "/p/" in post.get("url")
+        post
+        for post in posts
+        if not post.get("error")
+        and not post.get("errorDescription")
+        and post.get("url")
+        and "/p/" in post.get("url")
     ]
+
 
 def main():
     mode, targets = get_targets()
     logger.info(f"--- Workflow Started: {mode.upper()} ---")
-    
+
     # Validate targets before proceeding
     if not targets or not any(t and t.strip() for t in targets):
         if mode == "single":
-            logger.error("Repository dispatch triggered but no valid username provided, exiting.")
+            logger.error(
+                "Repository dispatch triggered but no valid username provided, exiting."
+            )
             sys.exit(1)
         else:
             logger.warning("No valid targets found in batch mode, exiting.")
             sys.exit(0)
-    
+
     scraper = InstagramScraper()
     processor = EventProcessor(concurrency=5)
 
@@ -97,6 +104,7 @@ def main():
     except Exception as e:
         logger.error(f"Critical error in processing: {e}", exc_info=True)
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -6,9 +6,9 @@ Uses async/concurrent requests for fast validation.
 
 import asyncio
 import os
+import random
 import re
 import sys
-import random
 from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,16 +18,16 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-import aiohttp  # noqa: E402
-from django.db import transaction, connection  # noqa: E402
+import aiohttp
+from django.db import connection, transaction
 
-from apps.events.models import (  # noqa: E402
+from apps.events.models import (
     EventDates,
     EventInterest,
     Events,
     EventSubmission,
 )
-from scraping.logging_config import logger  # noqa: E402
+from scraping.logging_config import logger
 
 
 class EventSourceValidator:
@@ -89,7 +89,9 @@ class EventSourceValidator:
 
                 # Check for rate-limiting (redirected to login/error page)
                 if "login" in final_url.lower() or "error" in final_url.lower():
-                    logger.warning(f"Instagram rate-limiting detected (login redirect): {url}. Backing off for 60s...")
+                    logger.warning(
+                        f"Instagram rate-limiting detected (login redirect): {url}. Backing off for 60s..."
+                    )
                     self.stats["rate_limited"] += 1
                     await asyncio.sleep(60)
                     return None, "Rate-limited (login redirect)"
@@ -209,7 +211,7 @@ class EventSourceValidator:
         try:
             # Close existing database connections to prevent SSL SYSCALL errors
             connection.close()
-            
+
             with transaction.atomic():
                 event_id = event.id
                 event_title = event.title or "Untitled"
@@ -372,12 +374,17 @@ def main():
         "--workers", type=int, default=2, help="Max concurrent requests (default: 2)"
     )
     parser.add_argument(
-        "--delay", type=float, default=2.0, help="Delay between requests in seconds (default: 2.0)"
+        "--delay",
+        type=float,
+        default=2.0,
+        help="Delay between requests in seconds (default: 2.0)",
     )
 
     args = parser.parse_args()
 
-    validator = EventSourceValidator(max_concurrent=args.workers, delay_between_requests=args.delay)
+    validator = EventSourceValidator(
+        max_concurrent=args.workers, delay_between_requests=args.delay
+    )
     validator.validate_all_events(limit=args.limit, school=args.school)
 
 

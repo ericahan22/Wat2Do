@@ -28,10 +28,10 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from scraping.event_processor import EventProcessor
-from scraping.instagram_scraper import InstagramScraper
 from django.utils import timezone
 
+from scraping.event_processor import EventProcessor
+from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
 from shared.constants.urls_to_scrape import FULL_URLS
 
@@ -42,11 +42,11 @@ def get_rotation_group():
     Returns: (group_name, account_indices)
     """
     day_of_week = datetime.now().weekday()  # 0=Monday, 6=Sunday
-    
+
     # Group A: Monday (0), Thursday (3), Sunday (6)
     # Group B: Tuesday (1), Friday (4)
     # Group C: Wednesday (2), Saturday (5)
-    
+
     rotation_schedule = {
         0: ("A", 0),  # Monday -> Group A
         1: ("B", 1),  # Tuesday -> Group B
@@ -56,7 +56,7 @@ def get_rotation_group():
         5: ("C", 2),  # Saturday -> Group C
         6: ("A", 0),  # Sunday -> Group A
     }
-    
+
     return rotation_schedule[day_of_week]
 
 
@@ -79,31 +79,36 @@ def get_targets():
     if username:
         # Single user mode - no rotation
         return "single", [username]
-    
+
     # Get all Instagram accounts
     all_accounts = [
         url.split("instagram.com/")[1].split("/")[0]
         for url in FULL_URLS
         if "instagram.com/" in url
     ]
-    
+
     # Split into groups
     groups = split_accounts_into_groups(all_accounts, num_groups=3)
-    
+
     # Get today's group
     group_name, group_index = get_rotation_group()
     today_accounts = groups[group_index]
-    
-    logger.info(f"Rotation Group {group_name} ({len(today_accounts)}/{len(all_accounts)} accounts)")
-    
+
+    logger.info(
+        f"Rotation Group {group_name} ({len(today_accounts)}/{len(all_accounts)} accounts)"
+    )
+
     return "rotated", today_accounts
 
 
 def filter_valid_posts(posts):
     return [
-        post for post in posts
-        if not post.get("error") and not post.get("errorDescription")
-        and post.get("url") and "/p/" in post.get("url")
+        post
+        for post in posts
+        if not post.get("error")
+        and not post.get("errorDescription")
+        and post.get("url")
+        and "/p/" in post.get("url")
     ]
 
 

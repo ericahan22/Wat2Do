@@ -39,7 +39,10 @@ class BaseAPIClient {
       if (!response.ok) {
         // Handle HTTP errors (e.g., 4xx, 5xx)
         const errorData = await response.json().catch(() => ({})); // Try to parse error, otherwise empty object
-        throw new Error(errorData.message || errorData.detail || `HTTP error! status: ${response.status}`);
+        const error = new Error(errorData.error || errorData.message || errorData.detail || `HTTP error! status: ${response.status}`);
+        // Attach the full error data for components that need it
+        (error as Error & { data?: unknown }).data = errorData;
+        throw error;
       }
       
       // For DELETE or other methods that might not return a body

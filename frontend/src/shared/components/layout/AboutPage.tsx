@@ -128,13 +128,14 @@ const AboutPage: React.FC = () => {
           goals.
         </p>
 
-        <h2 className="text-2xl font-bold mb-6">Networking</h2>
+        <h2 className="text-2xl font-bold mb-6">Meeting People in Industry</h2>
         <p className="mb-4">
-          Skip the generic LinkedIn messages. The best networking happens at
-          events where people are in-person, sharing the present with you.
+          A lot of company events fly under the radar because they're only
+          posted on club Instagrams. We've met people from Atlassian, Bloomberg,
+          and Point72 at events we only found out about the day before.
         </p>
         <p className="mb-8">
-          Check out events like{" "}
+          Look for events like{" "}
           <a
             href="/events/2"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
@@ -148,59 +149,75 @@ const AboutPage: React.FC = () => {
           >
             Innovation Open House
           </a>
-          , and{" "}
+          , or{" "}
           <a
             href="/events/33"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             WiE x Bloomberg Fall Kick Off
-          </a>{" "}
-          for industry connections.
+          </a>
+          .
         </p>
 
-        <h2 className="text-2xl font-bold  mb-6">Finding Your Crowd</h2>
-        <p className=" mb-4">
-          Don't just join clubs that match your major. The most interesting
-          people often come from completely different fields. Use our filters to
-          discover niche communities you never knew existed.
+        <h2 className="text-2xl font-bold mb-6">Random Stuff You Didn't Know Existed</h2>
+        <p className="mb-4">
+          Honestly the best part of building this was discovering clubs we had
+          no idea were on campus. There's a{" "}
+          <a
+            href="/events/47"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Repair Club
+          </a>{" "}
+          where you can fix broken electronics, a{" "}
+          <a
+            href="/events/13"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Gatka
+          </a>{" "}
+          (Sikh martial arts) class, and{" "}
+          <a
+            href="/events/44"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            roller skating nights
+          </a>
+          .
         </p>
-        <p className=" mb-8">
-          Try events like{" "}
+        <p className="mb-8">
+          Some examples:{" "}
+          <a
+            href="/events/47"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Repair Club
+          </a>
+          ,{" "}
           <a
             href="/events/13"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Gatka Classes
           </a>
-          ,{" "}
+          , or{" "}
           <a
             href="/events/44"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Retro Rollers
           </a>
-          , and{" "}
-          <a
-            href="/events/47"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Repair Club First Meeting
-          </a>{" "}
-          to find unexpected communities.
+          .
         </p>
 
-        <h2 className="text-2xl font-bold  mb-6">
-          Making Memories With Yourself or Your Friends
-        </h2>
-        <p className=" mb-4">
-          The best events for groups are the ones that don't require
-          registration. You can show up with friends, leave early if it's not
-          fun, or split up and meet different people. Pro tip: check the "food"
-          filter for events with free meals, we experience them to be more
-          social and less formal.
+        <h2 className="text-2xl font-bold mb-6">Going With Friends</h2>
+        <p className="mb-4">
+          Events without registration are easier to bail on if they're not your
+          vibe. The "food" filter is also useful - free food events tend to be
+          more casual and people actually talk to each other.
         </p>
-        <p className=" mb-8">
-          Great for groups:{" "}
+        <p className="mb-8">
+          Things like{" "}
           <a
             href="/events/3"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
@@ -214,14 +231,14 @@ const AboutPage: React.FC = () => {
           >
             Fall BBQ Smash
           </a>
-          , and{" "}
+          , or{" "}
           <a
             href="/events/38"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Trivia Night
-          </a>
-          .
+          </a>{" "}
+          work well for groups.
         </p>
 
         <h2 className="text-2xl font-bold  mb-6">Start Exploring</h2>

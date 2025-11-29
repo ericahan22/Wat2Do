@@ -39,10 +39,12 @@ def get_latest_update(request):
         )
 
         if latest_event and latest_event.added_at:
-            return Response({
-                "lastUpdated": latest_event.added_at.isoformat(),
-                "latestEventTitle": latest_event.title
-            })
+            return Response(
+                {
+                    "lastUpdated": latest_event.added_at.isoformat(),
+                    "latestEventTitle": latest_event.title,
+                }
+            )
 
         return Response({"lastUpdated": None, "latestEventTitle": None})
     except Exception as e:
@@ -81,7 +83,7 @@ def get_events(request):
                 | Q(
                     event_dates__dtstart_utc__gte=ninety_minutes_ago,
                     event_dates__dtstart_utc__lte=now,
-                    event_dates__dtend_utc__isnull=True
+                    event_dates__dtend_utc__isnull=True,
                 )  # Live events without dtend_utc (started within last 90 minutes)
                 | Q(event_dates__dtstart_utc__gte=now)  # Upcoming
             ).distinct()
@@ -101,7 +103,7 @@ def get_events(request):
 
         if search_term:
             import re
-            
+
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
@@ -110,13 +112,13 @@ def get_events(request):
             # Define character mapping for translate
             # Common accented chars
             accents_from = "àáâãäåèéêëìíîïòóôõöùúûüýÿñç"
-            accents_to   = "aaaaaaeeeeiiiiooooouuuuyync"
-            
+            accents_to = "aaaaaaeeeeiiiiooooouuuuyync"
+
             # Special chars to remove
             special_from = "-_.,!?:;()[]|/ "
             map_from = accents_from + special_from
-            map_to   = accents_to
-            
+            map_to = accents_to
+
             # Build OR query
             or_queries = Q()
             for term in search_terms:
@@ -134,38 +136,44 @@ def get_events(request):
                     | Q(tiktok_handle__icontains=term)
                     | Q(fb_handle__icontains=term)
                 )
-                
+
                 # 2. Normalized search using translate
-                normalized_term = re.sub(r'[^a-z0-9]', '', term.lower())
-                
+                normalized_term = re.sub(r"[^a-z0-9]", "", term.lower())
+
                 # Use normalized search if we have a term
                 if normalized_term:
                     like_param = f"%{normalized_term}%"
                     fields = [
-                        "title", "location", "description", "food", 
-                        "club_type", "ig_handle", "discord_handle", 
-                        "x_handle", "tiktok_handle", "fb_handle"
+                        "title",
+                        "location",
+                        "description",
+                        "food",
+                        "club_type",
+                        "ig_handle",
+                        "discord_handle",
+                        "x_handle",
+                        "tiktok_handle",
+                        "fb_handle",
                     ]
                     where_clauses = []
                     params = []
-                    
+
                     for field in fields:
                         # Handle COALESCE for nullable fields
                         col_ref = field
-                        if field not in ["title"]: 
-                             col_ref = f"COALESCE({field}, '')"
+                        if field not in ["title"]:
+                            col_ref = f"COALESCE({field}, '')"
                         clause = f"TRANSLATE(LOWER({col_ref}), '{map_from}', '{map_to}') LIKE %s"
                         where_clauses.append(clause)
                         params.append(like_param)
-                    
+
                     full_where = " OR ".join(where_clauses)
                     term_query |= Q(
                         id__in=filtered_queryset.extra(
-                            where=[full_where],
-                            params=params
-                        ).values_list('id', flat=True)
+                            where=[full_where], params=params
+                        ).values_list("id", flat=True)
                     )
-                
+
                 or_queries |= term_query
 
             filtered_queryset = filtered_queryset.filter(or_queries)
@@ -450,7 +458,7 @@ def _generate_ics_content(events):
         for date_obj in event_dates:
             start_date = date_obj.dtstart_utc.strftime("%Y%m%d")
             start_time = date_obj.dtstart_utc.strftime("%H%M%S")
-            
+
             if date_obj.dtend_utc:
                 end_date = date_obj.dtend_utc.strftime("%Y%m%d")
                 end_time = date_obj.dtend_utc.strftime("%H%M%S")
@@ -545,7 +553,7 @@ def get_google_calendar_urls(request):
             # Format dates for Google Calendar (YYYYMMDDTHHMMSSZ for UTC)
             start_date = date_obj.dtstart_utc.strftime("%Y%m%d")
             start_time = date_obj.dtstart_utc.strftime("%H%M%S")
-            
+
             if date_obj.dtend_utc:
                 end_date = date_obj.dtend_utc.strftime("%Y%m%d")
                 end_time = date_obj.dtend_utc.strftime("%H%M%S")

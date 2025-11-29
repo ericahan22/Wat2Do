@@ -27,3 +27,11 @@ export type {
 export { default as ClubsAPIClient } from './ClubsAPIClient';
 export type { Club } from '@/features/clubs/types/clubs';
 export type { ClubsResponse, ClubsQueryParams } from './ClubsAPIClient';
+
+export { default as WaitlistAPIClient } from './WaitlistAPIClient';
+export type {
+  School,
+  SchoolsResponse,
+  JoinWaitlistRequest,
+  JoinWaitlistResponse,
+} from './WaitlistAPIClient';

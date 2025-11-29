@@ -10,8 +10,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.development")
 django.setup()
 
-from apps.events.models import Events  # noqa: E402
-from shared.constants.event_categories import EVENT_CATEGORIES  # noqa: E402
+from apps.events.models import Events
+from shared.constants.event_categories import EVENT_CATEGORIES
 
 DEFAULT_CATEGORY = "Uncategorized"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")

@@ -54,6 +54,7 @@ class StorageService:
     def _download_image_from_url(self, image_url: str) -> bytes | None:
         """Download image from URL"""
         import time
+
         max_retries = 3
         for attempt in range(max_retries):
             try:
@@ -62,10 +63,14 @@ class StorageService:
                 return response.content
             except Exception as e:
                 if attempt == max_retries - 1:
-                    logger.error(f"Failed to download image from {image_url} after {max_retries} attempts: {e}")
+                    logger.error(
+                        f"Failed to download image from {image_url} after {max_retries} attempts: {e}"
+                    )
                     return None
-                wait_time = 2 ** attempt
-                logger.warning(f"Download failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_time}s...")
+                wait_time = 2**attempt
+                logger.warning(
+                    f"Download failed (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_time}s..."
+                )
                 time.sleep(wait_time)
         return None
 
