@@ -45,6 +45,19 @@ class Events(models.Model):
         blank=True,
         help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}",
     )
+    posted_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True,
+        help_text="When the event was originally posted (e.g., on Instagram)",
+    )
+    comments_count = models.IntegerField(
+        default=0,
+        help_text="Number of comments on the original post",
+    )
+    likes_count = models.IntegerField(
+        default=0,
+        help_text="Number of likes on the original post",
+    )
     food = models.CharField(
         max_length=255, blank=True, null=True, help_text="'Free pizza and drinks'"
     )
