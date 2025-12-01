@@ -34,12 +34,17 @@ def filter_valid_posts(posts):
 
 def main():
     parser = argparse.ArgumentParser(description="Run Big Scrape")
-    parser.add_argument("--dry-run", action="store_true", help="Run in dry-run mode (no DB writes)")
+    parser.add_argument("--dry-run", action="store_true", help="Dry run (1 account only)")
     parser.add_argument("--limit", type=int, default=100, help="Max posts per user to scrape")
     args = parser.parse_args()
 
     targets = list(set(ALL_URLS))
-    logger.info(f"--- Big Scrape Workflow Started: {len(targets)} targets (Dry Run: {args.dry_run}) ---")
+    
+    if args.dry_run:
+        targets = targets[:1]
+        logger.info(f"--- Big Scrape Workflow Started: {len(targets)} targets (DRY RUN) ---")
+    else:
+        logger.info(f"--- Big Scrape Workflow Started: {len(targets)} targets (FULL SCRAPE) ---")
 
     scraper = InstagramScraper()
     processor = EventProcessor(concurrency=5, big_scrape=True, dry_run=args.dry_run)
