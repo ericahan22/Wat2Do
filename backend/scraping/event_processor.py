@@ -33,9 +33,11 @@ def _get_all_images(post):
 
 
 class EventProcessor:
-    def __init__(self, concurrency=5):
+    def __init__(self, concurrency=5, big_scrape=False, dry_run=False):
         self.concurrency = concurrency
         self.semaphore = asyncio.Semaphore(concurrency)
+        self.big_scrape = big_scrape
+        self.dry_run = dry_run
 
     @sync_to_async(thread_sensitive=True)
     def _get_club_type(self, ig_handle):
@@ -75,8 +77,15 @@ class EventProcessor:
         )
 
     @sync_to_async(thread_sensitive=True)
-    def _save_event(self, event_data, ig_handle, source_url, club_type):
-        return insert_event_to_db(event_data, ig_handle, source_url, club_type)
+    def _save_event(self, event_data, ig_handle, source_url, club_type, big_scrape=False):
+        return insert_event_to_db(
+            event_data,
+            ig_handle,
+            source_url,
+            club_type,
+            big_scrape,
+            dry_run=self.dry_run,
+        )
 
     async def _process_single_post_extraction(self, post):
         """Extracts event data from a single post using OpenAI."""
@@ -113,16 +122,19 @@ class EventProcessor:
                 continue
 
             if shortcode in seen_shortcodes:
-                try:
-                    event = await sync_to_async(Events.objects.get)(source_url=url)
-                    event_name = event.title
-                except Exception:
-                    event_name = "UNKNOWN"
-                append_event_to_csv(post, ig_handle, url, added_to_db="duplicate_post")
-                logger.info(
-                    f"[{ig_handle}] [{shortcode}] Skipping: Event '{event_name}' already exists in DB"
-                )
-                continue
+                if not self.big_scrape:
+                    try:
+                        event = await sync_to_async(Events.objects.get)(source_url=url)
+                        event_name = event.title
+                    except Exception:
+                        event_name = "UNKNOWN"
+                    append_event_to_csv(post, ig_handle, url, added_to_db="duplicate_post")
+                    logger.info(
+                        f"[{ig_handle}] [{shortcode}] Skipping: Event '{event_name}' already exists in DB"
+                    )
+                    continue
+                else:
+                    logger.info(f"[{ig_handle}] [{shortcode}] Reprocessing to update data.")
 
             valid_posts.append(post)
 
@@ -186,6 +198,12 @@ class EventProcessor:
             source_url = post.get("url")
             shortcode = source_url.strip("/").split("/")[-1]
             all_s3_urls = post.get("all_s3_urls", [])
+            
+            # New fields
+            comments_count = post.get("commentsCount", 0)
+            likes_count = post.get("likesCount", 0)
+            posted_at_str = post.get("timestamp")
+            posted_at = parse_utc_datetime(posted_at_str)
 
             if not extracted_events:
                 logger.info(
@@ -230,6 +248,11 @@ class EventProcessor:
                     event_data["source_image_url"] = (
                         all_s3_urls[0] if all_s3_urls else ""
                     )
+                
+                # Add new field values
+                event_data["comments_count"] = comments_count
+                event_data["likes_count"] = likes_count
+                event_data["posted_at"] = posted_at
 
                 # Check for past date
                 occurrences = event_data.get("occurrences", [])
@@ -238,7 +261,7 @@ class EventProcessor:
                     dtstart_utc = parse_utc_datetime(
                         first_occurrence.get("dtstart_utc")
                     )
-                    if dtstart_utc and dtstart_utc < timezone.now():
+                    if not self.big_scrape and dtstart_utc and dtstart_utc < timezone.now():
                         append_event_to_csv(
                             event_data,
                             ig_handle,
@@ -253,7 +276,7 @@ class EventProcessor:
                 club_type = await self._get_club_type(ig_handle)
                 try:
                     result = await self._save_event(
-                        event_data, ig_handle, source_url, club_type
+                        event_data, ig_handle, source_url, club_type, self.big_scrape
                     )
                 except Exception as e:
                     append_event_to_csv(
@@ -288,6 +311,18 @@ class EventProcessor:
                     )
                     logger.info(
                         f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'"
+                    )
+                    saved_count += 1
+                elif result == "updated_data":
+                    append_event_to_csv(
+                        event_data,
+                        ig_handle,
+                        source_url,
+                        added_to_db="updated_data",
+                        club_type=club_type,
+                    )
+                    logger.info(
+                        f"[{ig_handle}] [{shortcode}] Updated event data: '{event_data.get('title', '')}'"
                     )
                     saved_count += 1
                 elif result == "duplicate":

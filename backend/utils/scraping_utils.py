@@ -50,7 +50,14 @@ def get_post_image_url(post):
         return None
 
 
-def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
+def insert_event_to_db(
+    event_data,
+    ig_handle,
+    source_url,
+    club_type=None,
+    big_scrape=False,
+    dry_run=False,
+):
     """Map scraped event data to Event model fields, insert to DB"""
     shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
     log_prefix = f"[{ig_handle}] [{shortcode}]"
@@ -67,6 +74,11 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
         categories = event_data.get("categories", [])
         occurrences = event_data.get("occurrences")
 
+        # New data fields
+        comments_count = event_data.get("comments_count", 0)
+        likes_count = event_data.get("likes_count", 0)
+        posted_at = event_data.get("posted_at")
+
         if not occurrences:
             logger.warning(
                 f"{log_prefix} Event '{title}' missing occurrences; skipping insert"
@@ -79,51 +91,83 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             )
             categories = ["Uncategorized"]
 
-        detector = EventDuplicateDetector()
-        has_match, matched_event = detector.find_match(
-            event_data, ig_handle=ig_handle, source_url=source_url
-        )
-
-        if has_match:
-            # If event is from same club, update event info
-            if matched_event and matched_event.ig_handle == ig_handle:
-                logger.info(
-                    f"{log_prefix} Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new date/time/location"
-                )
-
-                # Only update location, date, and time
-                matched_event.location = location
-                matched_event.source_url = source_url
-                matched_event.added_at = timezone.now()  # Bump to top
-                matched_event.save()
-
-                # Delete old event dates and create new ones
-                EventDates.objects.filter(event=matched_event).delete()
-                event_dates = []
-                for occ in occurrences:
-                    dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
-                    dtend_utc_raw = occ.get("dtend_utc")
-                    dtend_utc = (
-                        parse_utc_datetime(dtend_utc_raw)
-                        if dtend_utc_raw and dtend_utc_raw.strip()
-                        else None
+        # Check for duplicate by source_url ONLY
+        if big_scrape:
+            try:
+                existing_event = Events.objects.get(source_url=source_url)
+                if dry_run:
+                    logger.info(
+                        f"{log_prefix} [DRY RUN] Found existing event '{existing_event.title}' by source_url. Updating data (food, comments, likes, posted_at)."
                     )
-                    event_dates.append(
-                        EventDates(
-                            event=matched_event,
-                            dtstart_utc=dtstart_utc,
-                            dtend_utc=dtend_utc,
-                            duration=occ.get("duration") or None,
-                            tz=occ.get("tz") or None,
+                    return "updated_data"
+
+                logger.info(
+                    f"{log_prefix} Found existing event '{existing_event.title}' by source_url. Updating data (food, comments, likes, posted_at)."
+                )
+                existing_event.food = food[:255] if food else None
+                existing_event.comments_count = comments_count
+                existing_event.likes_count = likes_count
+                if posted_at:
+                    existing_event.posted_at = posted_at
+                existing_event.save()
+                return "updated_data"
+            except Events.DoesNotExist:
+                # If not found, proceed to DB insertion
+                pass
+
+        # Normal Mode: Use fuzzy duplicate detection
+        if not big_scrape:
+            detector = EventDuplicateDetector()
+            has_match, matched_event = detector.find_match(
+                event_data, ig_handle=ig_handle, source_url=source_url
+            )
+
+            if has_match:
+                # If event is from same club, update event info
+                if matched_event and matched_event.ig_handle == ig_handle:
+                    if dry_run:
+                        logger.info(
+                            f"{log_prefix} [DRY RUN] Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new date/time/location"
                         )
+                        return "updated"
+
+                    logger.info(
+                        f"{log_prefix} Updating existing event '{matched_event.title}' (ID: {matched_event.id}) with new date/time/location"
                     )
-                EventDates.objects.bulk_create(event_dates)
-                logger.info(
-                    f"{log_prefix} Updated event with {len(event_dates)} new date(s)"
-                )
-                return "updated"
-            else:
-                return "duplicate"
+
+                    # Only update location, date, and time
+                    matched_event.location = location
+                    matched_event.source_url = source_url
+                    matched_event.added_at = timezone.now()  # Bump to top
+                    matched_event.save()
+
+                    # Delete old event dates and create new ones
+                    EventDates.objects.filter(event=matched_event).delete()
+                    event_dates = []
+                    for occ in occurrences:
+                        dtstart_utc = parse_utc_datetime(occ.get("dtstart_utc"))
+                        dtend_utc_raw = occ.get("dtend_utc")
+                        dtend_utc = (
+                            parse_utc_datetime(dtend_utc_raw)
+                            if dtend_utc_raw and dtend_utc_raw.strip()
+                            else None
+                        )
+                        event_dates.append(
+                            EventDates(
+                                event=matched_event,
+                                dtstart_utc=dtstart_utc,
+                                dtend_utc=dtend_utc,
+                                duration=occ.get("duration") or None,
+                                tz=occ.get("tz") or None,
+                            )
+                        )
+                    EventDates.objects.bulk_create(event_dates)
+                    logger.info(
+                        f"{log_prefix} Updated event with {len(event_dates)} new date(s)"
+                    )
+                    return "updated"
+                else:
+                    return "duplicate"
 
         # Only fetch if club_type wasn't passed in
         if club_type is None:
@@ -149,7 +193,16 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             "status": "CONFIRMED",
             "school": school[:255] if school else "",
             "categories": categories,
+            "comments_count": comments_count,
+            "likes_count": likes_count,
+            "posted_at": posted_at,
         }
+
+        if dry_run:
+            logger.info(
+                f"{log_prefix} [DRY RUN] Creating new event '{title}'"
+            )
+            return True
 
         try:
             event = Events.objects.create(**create_kwargs)
