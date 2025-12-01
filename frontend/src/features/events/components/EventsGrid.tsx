@@ -101,7 +101,6 @@ const EventsGrid = memo(
     hasNextPage,
     isFetchingNextPage,
   }: EventsGridProps) => {
-    const navigate = useNavigate();
     const loadMoreRef = useRef<HTMLDivElement>(null);
     const prevEventIdsRef = useRef<Set<number>>(new Set());
     const { isAdmin } = useAdmin();
