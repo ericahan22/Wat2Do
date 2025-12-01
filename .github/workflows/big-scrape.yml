@@ -3,8 +3,8 @@ name: Big Scrape (F25)
 on:
   workflow_dispatch:
     inputs:
-      test_mode:
-        description: 'Test mode (1 account only)'
+      dry_run:
+        description: 'Dry run (1 account only)'
         required: false
         default: 'true'
         type: boolean
@@ -12,11 +12,6 @@ on:
         description: 'Max posts per user to scrape'
         required: false
         default: '100'
-        type: string
-      max_accounts:
-        description: 'Max accounts to scrape (ignored in test mode)'
-        required: false
-        default: ''
         type: string
 
 jobs:
@@ -80,8 +75,8 @@ jobs:
         working-directory: backend/scraping
         run: |
           python -u main_big_scrape.py \
+            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }} \
             --limit ${{ inputs.limit }} \
-            --max-accounts ${{ inputs.test_mode == 'true' && '1' || inputs.max_accounts }} \
             2>&1 | tee logs/scraping.log
         continue-on-error: false
 
