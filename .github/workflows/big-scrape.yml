@@ -3,7 +3,7 @@ name: Big Scrape (F25)
 on:
   workflow_dispatch:
     inputs:
-      test_mode:
+      dry_run:
         description: 'Dry run (1 account only)'
         required: false
         default: 'true'
