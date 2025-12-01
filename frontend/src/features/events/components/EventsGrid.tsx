@@ -245,7 +245,7 @@ const EventsGrid = memo(
                   onClick={(e) => {
                     if (!isSelectMode) {
                       e.stopPropagation();
-                      navigate(`/events/${event.id}`);
+                      window.open(`/events/${event.id}`, '_blank');
                     }
                   }}
                 />
