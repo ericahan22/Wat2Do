@@ -242,7 +242,7 @@ const EventsGrid = memo(
                   alt={event.title}
                   loading="lazy"
                   className="w-full h-40 object-cover rounded-t-xl cursor-pointer"
-                  onMouseDown={(e) => {
+                  onClick={(e) => {
                     if (!isSelectMode) {
                       e.stopPropagation();
                       navigate(`/events/${event.id}`);
