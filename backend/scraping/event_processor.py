@@ -62,8 +62,10 @@ class EventProcessor:
 
     # --- Async Wrappers ---
     @sync_to_async(thread_sensitive=False)
-    def _upload_image(self, url):
-        return upload_image_from_url(url)
+    def _upload_image(self, url, filename=None, skip_if_exists=False):
+        return upload_image_from_url(
+            url, filename=filename, skip_if_exists=skip_if_exists
+        )
 
     @sync_to_async(thread_sensitive=False)
     def _extract_events(self, caption, all_s3_urls, post_time):
@@ -147,9 +149,11 @@ class EventProcessor:
         # 2. Upload all images for each post (with carousel support)
         all_image_tasks = []
 
-        async def _upload_image_bounded(url):
+        async def _upload_image_bounded(url, filename=None, skip_if_exists=False):
             async with self.semaphore:
-                return await self._upload_image(url)
+                return await self._upload_image(
+                    url, filename=filename, skip_if_exists=skip_if_exists
+                )
 
         for post in valid_posts:
             ig_handle = post.get("ownerUsername")
@@ -157,9 +161,17 @@ class EventProcessor:
             logger.info(f"[{ig_handle}] [{shortcode}] Uploading images...")
             image_urls = _get_all_images(post)
             post["all_image_urls"] = image_urls
-            all_image_tasks.append(
-                [_upload_image_bounded(img_url) for img_url in image_urls]
-            )
+            
+            tasks = []
+            for i, img_url in enumerate(image_urls):
+                # Use deterministic filename to avoid re-uploading
+                filename = f"events/{shortcode}_{i}.jpg"
+                tasks.append(
+                    _upload_image_bounded(
+                        img_url, filename=filename, skip_if_exists=True
+                    )
+                )
+            all_image_tasks.append(tasks)
 
         flat_tasks = [task for sublist in all_image_tasks for task in sublist]
         flat_results = await asyncio.gather(*flat_tasks, return_exceptions=True)
@@ -193,149 +205,164 @@ class EventProcessor:
 
         # 4. Save to DB
         saved_count = 0
-        for post, extracted_events in zip(valid_posts, results, strict=False):
-            ig_handle = post.get("ownerUsername")
-            source_url = post.get("url")
-            shortcode = source_url.strip("/").split("/")[-1]
-            all_s3_urls = post.get("all_s3_urls", [])
-            
-            # New fields
-            comments_count = post.get("commentsCount", 0)
-            likes_count = post.get("likesCount", 0)
-            posted_at_str = post.get("timestamp")
-            posted_at = parse_utc_datetime(posted_at_str)
-
-            if not extracted_events:
-                logger.info(
-                    f"[{ig_handle}] [{shortcode}] No events found in post, skipping"
-                )
-                continue
-
-            if not isinstance(extracted_events, list):
-                extracted_events = [extracted_events]
-
-            # If 1 image is provided, but AI returned multiple event objects,
-            # merge them into a single "Weekly/Summary" event.
-            if len(all_s3_urls) == 1 and len(extracted_events) > 1:
-                base_event = extracted_events[0]
-
-                # 1. Consolidate all dates from all events into the first event
-                combined_occurrences = []
-                for evt in extracted_events:
-                    combined_occurrences.extend(evt.get("occurrences") or [])
-                base_event["occurrences"] = combined_occurrences
-
-                # 2. Update title/description to reflect it's a summary
-                club_name = post.get("ownerFullName") or ig_handle or "Club"
-                base_event["title"] = f"{club_name} Weekly Events"
-                base_event["description"] = (
-                    base_event.get("description") or ""
-                ) + "\n\n(Condensed from multiple events)"
-
-                extracted_events = [base_event]
-
-            for event_data in extracted_events:
-                # Map correct picture to event
-                image_idx = event_data.get("image_index")
-                if (
-                    image_idx is not None
-                    and isinstance(image_idx, int)
-                    and 0 <= image_idx < len(all_s3_urls)
-                ):
-                    event_data["source_image_url"] = all_s3_urls[image_idx]
-                else:
-                    # Fallback: Use first image
-                    event_data["source_image_url"] = (
-                        all_s3_urls[0] if all_s3_urls else ""
-                    )
+        try:
+            for post, extracted_events in zip(valid_posts, results, strict=False):
+                ig_handle = post.get("ownerUsername")
+                source_url = post.get("url")
+                shortcode = source_url.strip("/").split("/")[-1]
+                all_s3_urls = post.get("all_s3_urls", [])
                 
-                # Add new field values
-                event_data["comments_count"] = comments_count
-                event_data["likes_count"] = likes_count
-                event_data["posted_at"] = posted_at
+                # New fields
+                comments_count = post.get("commentsCount", 0)
+                likes_count = post.get("likesCount", 0)
+                posted_at_str = post.get("timestamp")
+                posted_at = parse_utc_datetime(posted_at_str)
 
-                # Check for past date
-                occurrences = event_data.get("occurrences", [])
-                if occurrences:
-                    first_occurrence = occurrences[0]
-                    dtstart_utc = parse_utc_datetime(
-                        first_occurrence.get("dtstart_utc")
+                if not extracted_events:
+                    logger.info(
+                        f"[{ig_handle}] [{shortcode}] No events found in post, skipping"
                     )
-                    if not self.big_scrape and dtstart_utc and dtstart_utc < timezone.now():
+                    continue
+
+                if not isinstance(extracted_events, list):
+                    extracted_events = [extracted_events]
+
+                # If 1 image is provided, but AI returned multiple event objects,
+                # merge them into a single "Weekly/Summary" event.
+                if len(all_s3_urls) == 1 and len(extracted_events) > 1:
+                    base_event = extracted_events[0]
+
+                    # 1. Consolidate all dates from all events into the first event
+                    combined_occurrences = []
+                    for evt in extracted_events:
+                        combined_occurrences.extend(evt.get("occurrences") or [])
+                    base_event["occurrences"] = combined_occurrences
+
+                    # 2. Update title/description to reflect it's a summary
+                    club_name = post.get("ownerFullName") or ig_handle or "Club"
+                    base_event["title"] = f"{club_name} Weekly Events"
+                    base_event["description"] = (
+                        base_event.get("description") or ""
+                    ) + "\n\n(Condensed from multiple events)"
+
+                    extracted_events = [base_event]
+
+                for event_data in extracted_events:
+                    # Map correct picture to event
+                    image_idx = event_data.get("image_index")
+                    if (
+                        image_idx is not None
+                        and isinstance(image_idx, int)
+                        and 0 <= image_idx < len(all_s3_urls)
+                    ):
+                        event_data["source_image_url"] = all_s3_urls[image_idx]
+                    else:
+                        # Fallback: Use first image
+                        event_data["source_image_url"] = (
+                            all_s3_urls[0] if all_s3_urls else ""
+                        )
+                    
+                    # Add new field values
+                    event_data["comments_count"] = comments_count
+                    event_data["likes_count"] = likes_count
+                    event_data["posted_at"] = posted_at
+
+                    # Check for past date
+                    occurrences = event_data.get("occurrences", [])
+                    if occurrences:
+                        first_occurrence = occurrences[0]
+                        dtstart_utc = parse_utc_datetime(
+                            first_occurrence.get("dtstart_utc")
+                        )
+                        if not self.big_scrape and dtstart_utc and dtstart_utc < timezone.now():
+                            append_event_to_csv(
+                                event_data,
+                                ig_handle,
+                                source_url,
+                                added_to_db="event_past_date",
+                            )
+                            logger.info(
+                                f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past"
+                            )
+                            continue
+
+                    club_type = await self._get_club_type(ig_handle)
+                    try:
+                        result = await self._save_event(
+                            event_data, ig_handle, source_url, club_type, self.big_scrape
+                        )
+                    except Exception as e:
                         append_event_to_csv(
                             event_data,
                             ig_handle,
                             source_url,
-                            added_to_db="event_past_date",
+                            added_to_db="error",
+                            club_type=club_type,
                         )
-                        logger.info(
-                            f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past"
-                        )
+                        logger.error(f"[{ig_handle}] [{shortcode}] Error saving event: {e}")
                         continue
 
-                club_type = await self._get_club_type(ig_handle)
-                try:
-                    result = await self._save_event(
-                        event_data, ig_handle, source_url, club_type, self.big_scrape
-                    )
-                except Exception as e:
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="error",
-                        club_type=club_type,
-                    )
-                    logger.error(f"[{ig_handle}] [{shortcode}] Error saving event: {e}")
-                    continue
-
-                if result is True:
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="success",
-                        club_type=club_type,
-                    )
-                    logger.info(
-                        f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'"
-                    )
-                    saved_count += 1
-                elif result == "updated":
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="updated",
-                        club_type=club_type,
-                    )
-                    logger.info(
-                        f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'"
-                    )
-                    saved_count += 1
-                elif result == "updated_data":
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="updated_data",
-                        club_type=club_type,
-                    )
-                    logger.info(
-                        f"[{ig_handle}] [{shortcode}] Updated event data: '{event_data.get('title', '')}'"
-                    )
-                    saved_count += 1
-                elif result == "duplicate":
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="duplicate_post",
-                        club_type=club_type,
-                    )
-                    logger.info(
-                        f"[{ig_handle}] [{shortcode}] Duplicate event (no changes): '{event_data.get('title', '')}'"
-                    )
+                    if result is True:
+                        append_event_to_csv(
+                            event_data,
+                            ig_handle,
+                            source_url,
+                            added_to_db="success",
+                            club_type=club_type,
+                        )
+                        logger.info(
+                            f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'"
+                        )
+                        saved_count += 1
+                    elif result == "updated":
+                        append_event_to_csv(
+                            event_data,
+                            ig_handle,
+                            source_url,
+                            added_to_db="updated",
+                            club_type=club_type,
+                        )
+                        logger.info(
+                            f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'"
+                        )
+                        saved_count += 1
+                    elif result == "updated_data":
+                        append_event_to_csv(
+                            event_data,
+                            ig_handle,
+                            source_url,
+                            added_to_db="updated_data",
+                            club_type=club_type,
+                        )
+                        logger.info(
+                            f"[{ig_handle}] [{shortcode}] Updated event data: '{event_data.get('title', '')}'"
+                        )
+                        saved_count += 1
+                    elif result == "duplicate":
+                        append_event_to_csv(
+                            event_data,
+                            ig_handle,
+                            source_url,
+                            added_to_db="duplicate_post",
+                            club_type=club_type,
+                        )
+                        logger.info(
+                            f"[{ig_handle}] [{shortcode}] Duplicate event (no changes): '{event_data.get('title', '')}'"
+                        )
+        except Exception as e:
+            logger.error(f"Critical error during DB save: {e}")
+            # Dump to file
+            import json
+            timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+            dump_file = f"crash_dump_{timestamp}.json"
+            dump_data = []
+            for p, res in zip(valid_posts, results, strict=False):
+                dump_data.append({"post": p, "extracted_events": res})
+            
+            with open(dump_file, "w") as f:
+                json.dump(dump_data, f, default=str)
+            logger.info(f"Dumped intermediate data to {dump_file}")
+            raise e
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")
         return saved_count

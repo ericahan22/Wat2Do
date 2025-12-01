@@ -103,7 +103,7 @@ class OpenAIService:
         source_image_url: str | None = None,
         post_created_at: datetime | None = None,
         school: str = "University of Waterloo",
-        model: str = "gpt-5-mini",
+        model: str = "gpt-4o-mini",
     ) -> list[dict[str, str | bool | float | None]]:
         """Extract ZERO OR MORE events from caption text/image.
 

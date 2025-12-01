@@ -75,10 +75,20 @@ class StorageService:
         return None
 
     def upload_image_from_url(
-        self, image_url: str, filename: str | None = None
+        self,
+        image_url: str,
+        filename: str | None = None,
+        skip_if_exists: bool = False,
     ) -> str | None:
         """Upload image from URL to S3"""
         try:
+            if filename and skip_if_exists and self.file_exists(filename):
+                public_url = f"https://{self.bucket_name}.s3.{self.region}.amazonaws.com/{filename}"
+                logger.info(
+                    f"Image already exists, skipping upload: {filename} -> {public_url}"
+                )
+                return public_url
+
             image_data = self._download_image_from_url(image_url)
             if not image_data:
                 return None
@@ -198,6 +208,17 @@ class StorageService:
             logger.exception("Unexpected error listing S3 objects")
             raise
 
+    def file_exists(self, filename: str) -> bool:
+        """Check if a file exists in S3"""
+        try:
+            self.s3_client.head_object(Bucket=self.bucket_name, Key=filename)
+            return True
+        except ClientError:
+            return False
+        except Exception:
+            logger.exception(f"Error checking if file exists: {filename}")
+            return False
+
 
 # Singleton instance
 storage_service = StorageService()
@@ -207,3 +228,4 @@ upload_image_from_url = storage_service.upload_image_from_url
 upload_image_data = storage_service.upload_image_data
 delete_images = storage_service.delete_images
 list_all_s3_objects = storage_service.list_all_s3_objects
+file_exists = storage_service.file_exists
