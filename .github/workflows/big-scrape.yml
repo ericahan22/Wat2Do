@@ -1,0 +1,92 @@
+name: Big Scrape (F25)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no DB writes)'
+        required: false
+        default: 'true'
+        type: boolean
+      limit:
+        description: 'Max posts per user to scrape'
+        required: false
+        default: '100'
+        type: string
+
+jobs:
+  big_scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      # --- Django & App Config ---
+      PRODUCTION: '1'
+      DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      # --- Database Config ---
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      # --- Service Keys ---
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+      EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
+      EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
+      # --- Apify Token ---
+      APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Create logs directory
+        working-directory: backend/scraping
+        run: mkdir -p logs
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install --prefer-binary -r requirements.txt
+
+      - name: Run scraper
+        working-directory: backend/scraping
+        run: |
+          python -u main_big_scrape.py \
+            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            --limit ${{ inputs.limit }} \
+            2>&1 | tee logs/scraping.log
+        continue-on-error: false
+
+      - name: Upload logs as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-big-scrape-${{ github.run_number }}
+          path: |
+            backend/scraping/events_scraped.csv
+            backend/scraping/scraping.log
+            backend/scraping/apify_raw_results.json
+          if-no-files-found: 'ignore'
