@@ -47,7 +47,7 @@ def main():
         logger.info(f"--- Big Scrape Workflow Started: {len(targets)} targets (FULL SCRAPE) ---")
 
     scraper = InstagramScraper()
-    processor = EventProcessor(concurrency=5, big_scrape=True, dry_run=args.dry_run)
+    processor = EventProcessor(concurrency=5, big_scrape=True)
 
     # Scrape since Sep 1, 2025
     sep_1 = datetime(2025, 9, 1, tzinfo=dt_timezone.utc)

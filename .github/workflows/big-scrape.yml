@@ -75,7 +75,7 @@ jobs:
         working-directory: backend/scraping
         run: |
           python -u main_big_scrape.py \
-            ${{ inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
             --limit ${{ inputs.limit }} \
             2>&1 | tee logs/scraping.log
         continue-on-error: false
