@@ -194,7 +194,7 @@ class OpenAIService:
     - Prioritize caption text; use image text if missing details.
     - Title-case event titles.
     - If year not found, infer the NEXT occurrence of that date relative to the post creation date ({context_date}). If end time < start time (e.g., 7pm-12am), set end to the next day.
-    - When no explicit date is found but there are relative terms like "tonight", "tomorrow", use the current date context and the date the post was made to determine the date.
+    - When no explicit date is found but there are relative terms like "tonight", "tomorrow", interpret these relative to the POST CREATION DATE ({context_date}).
     - For location: Use the exact location as stated in the caption or image. If the location is a building or room on campus, use only that (e.g., "SLC 3223", "DC Library"). Include city/province if the event is off-campus and the address is provided.
     - For latitude/longitude: attempt to geocode the location if it's a specific address or well-known place (e.g., "DC Library"). Otherwise, attempt geocoding using the school context. Use null if location is too vague or cannot be geocoded.
     - For price: this represents REGISTRATION COST ONLY. When multiple prices are mentioned, prefer the price that applies to NON-MEMBERS (or general admission). Rules:
