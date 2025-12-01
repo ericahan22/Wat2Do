@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import json
 import os
 import sys
@@ -27,6 +28,31 @@ def filter_valid_posts(posts):
     ]
 
 
+async def process_posts(posts, sep_1):
+    processor = EventProcessor(concurrency=5, big_scrape=True)
+    
+    total_saved = 0
+    batch_size = 50
+    
+    for i in range(0, len(posts), batch_size):
+        batch = posts[i : i + batch_size]
+        logger.info(f"Processing batch {i // batch_size + 1}/{(len(posts) + batch_size - 1) // batch_size} ({len(batch)} posts)")
+        
+        try:
+            # Process batch using existing processor instance
+            saved_count = await processor.process(batch, sep_1)
+            total_saved += saved_count
+            
+            await asyncio.sleep(2)
+            
+        except Exception as e:
+            logger.error(f"Error processing batch starting at index {i}: {e}")
+            # Continue to next batch
+            continue
+
+    return total_saved
+
+
 def main():
     # Get JSON file path from command line argument
     if len(sys.argv) < 2:
@@ -47,35 +73,17 @@ def main():
     logger.info(f"Loaded {len(posts)} posts from JSON file")
 
     posts = filter_valid_posts(posts)
-    logger.info(f"Filtered to {len(posts)} valid posts")
+    logger.info(f"Found {len(posts)} valid posts to process")
 
-    if not posts:
-        logger.info("No valid posts to process. Exiting.")
-        sys.exit(0)
-
-    # Process with EventProcessor in big_scrape mode
-    processor = EventProcessor(concurrency=20, big_scrape=True)
-    
     # Use Sep 1, 2025 as cutoff
     sep_1 = datetime(2025, 9, 1, tzinfo=dt_timezone.utc)
 
-    # Chunk posts into batches of 50
-    batch_size = 50
-    total_saved = 0
-    
-    for i in range(0, len(posts), batch_size):
-        batch = posts[i : i + batch_size]
-        logger.info(f"Processing batch {i // batch_size + 1}/{(len(posts) + batch_size - 1) // batch_size} ({len(batch)} posts)")
-        
-        try:
-            saved_count = asyncio.run(processor.process(batch, sep_1))
-            total_saved += saved_count
-        except Exception as e:
-            logger.error(f"Error processing batch starting at index {i}: {e}")
-            logger.error("Stopping processing due to error.")
-            sys.exit(1)
-
-    logger.info(f"Successfully processed {total_saved} events in total")
+    try:
+        total_saved = asyncio.run(process_posts(posts, sep_1))
+        logger.info(f"Successfully processed {total_saved} events in total")
+    except Exception as e:
+        logger.error(f"Critical error in processing: {e}", exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -239,17 +239,39 @@ class OpenAIService:
                     {"type": "image_url", "image_url": {"url": source_image_url}}
                 )
 
-            try:
-                response = self.client.chat.completions.create(
-                    model=model, messages=messages
-                )
-            except Exception as e:
-                logger.exception(f"OpenAI API call failed: {e}")
+            retries = 5
+            base_delay = 2
+            response = None
+            
+            for attempt in range(retries):
+                try:
+                    response = self.client.chat.completions.create(
+                        model=model,
+                        messages=messages,
+                        max_tokens=1000,
+                        temperature=0.1,
+                    )
+                    break
+                except Exception as e:
+                    # Check for rate limit error (429)
+                    error_msg = str(e)
+                    if "429" in error_msg or "rate limit" in error_msg.lower():
+                        if attempt == retries - 1:
+                            logger.error(f"OpenAI Rate Limit exceeded after {retries} attempts.")
+                            raise e
+                        wait_time = base_delay * (2 ** attempt)
+                        logger.warning(f"OpenAI Rate Limit hit. Retrying in {wait_time}s... (Attempt {attempt + 1}/{retries})")
+                        import time
+                        time.sleep(wait_time)
+                    else:
+                        logger.exception(f"OpenAI API call failed: {e}")
+                        return []
+
+            if not response:
                 return []
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
-
             # Try to parse the JSON response
             try:
                 # Remove any markdown formatting if present
