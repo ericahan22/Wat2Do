@@ -9,6 +9,7 @@ from . import views
 urlpatterns = [
     path("", views.get_events, name="events"),
     path("latest-update/", views.get_latest_update, name="latest_update"),
+    path("heatmap/", views.get_heatmap_data, name="heatmap_data"),
     path("<int:event_id>/", views.get_event, name="event_detail"),
     path("<int:event_id>/update/", views.update_event, name="update_event"),
     path("<int:event_id>/delete/", views.delete_event, name="delete_event"),

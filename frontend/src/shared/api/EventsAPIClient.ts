@@ -3,6 +3,10 @@ import type { Event } from '@/features/events/types/events';
 import type { SubmissionFormData } from '@/features/events/schemas/submissionSchema';
 import BaseAPIClient from '@/shared/api/BaseAPIClient';
 
+export interface HeatmapDataPoint {
+  date: string; // e.g., "2025-09-01"
+  count: number;
+}
 // Re-export types for external use
 export type { Event, EventSubmission, SubmissionFormData };
 
@@ -51,7 +55,19 @@ class EventsAPIClient {
   /**
    * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
    */
-  constructor(private apiClient: BaseAPIClient) {}
+  constructor(private apiClient: BaseAPIClient) { }
+
+  /**
+   * Gets heatmap data (event counts per day).
+   * Corresponds to a GET request to /api/events/heatmap/
+   */
+  async getHeatmapData(params?: { start_date?: string; end_date?: string }): Promise<{
+    data: HeatmapDataPoint[];
+  }> {
+    const queryString = params ? buildQueryString(params as EventsQueryParams) : '';
+    const endpoint = queryString ? `events/heatmap/?${queryString}` : 'events/heatmap/';
+    return this.apiClient.get(endpoint);
+  }
 
   /**
    * Fetches events from the backend with cursor-based pagination.
@@ -117,31 +133,31 @@ class EventsAPIClient {
   }> {
     const dataForm = new FormData();
     dataForm.append('screenshot', screenshot);
-    
+
     const token = await this.apiClient.getAuthToken();
     const headers: HeadersInit = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    
+
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/extract/`, {
       method: 'POST',
       headers,
       body: dataForm,
     });
-    
+
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Failed to extract event data');
     }
-    
+
     return response.json();
   }
 
   async submitEvent(formData: SubmissionFormData): Promise<EventSubmissionResponse> {
     // Payload is now flat - all event fields at top level
     const payload = { ...formData };
-    
+
     // For JSON payload
     const token = await this.apiClient.getAuthToken();
     const headers: HeadersInit = {
@@ -150,13 +166,13 @@ class EventsAPIClient {
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    
+
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/submit/`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
     });
-    
+
     if (!response.ok) {
       let message = `Submission failed (status ${response.status})`;
       try {
@@ -169,7 +185,7 @@ class EventsAPIClient {
       }
       throw new Error(message);
     }
-    
+
     return response.json();
   }
 
@@ -209,22 +225,22 @@ class EventsAPIClient {
   async exportEventsICS(params: EventsQueryParams = {}): Promise<Blob> {
     const queryString = buildQueryString(params);
     const endpoint = queryString ? `events/export.ics?${queryString}` : 'events/export.ics';
-    
+
     const token = await this.apiClient.getAuthToken();
     const headers: HeadersInit = {};
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
-    
+
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/${endpoint}`, {
       method: 'GET',
       headers,
     });
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return response.blob();
   }
 

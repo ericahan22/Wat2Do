@@ -1251,3 +1251,93 @@ def boost_event_view(request, event_id):
         },
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@ratelimit(key="ip", rate="600/hr", block=True)
+def get_heatmap_data(request):
+    """Get event counts per day for heatmap visualization
+    
+    Query params:
+    - start_date: YYYY-MM-DD (optional, defaults to 4 months ago)
+    - end_date: YYYY-MM-DD (optional, defaults to today)
+    
+    Returns:
+    {
+      "data": [
+        {"date": "2025/09/01", "count": 5},
+        {"date": "2025/09/02", "count": 3},
+        ...
+      ]
+    }
+    """
+    try:
+        from datetime import datetime, timedelta
+        from django.db.models import Count
+        from django.db.models.functions import TruncDate
+        
+        # Parse date parameters
+        start_date_str = request.GET.get("start_date", "").strip()
+        end_date_str = request.GET.get("end_date", "").strip()
+        
+        # Default to last 4 months if not specified
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            try:
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return Response(
+                    {"message": "Invalid end_date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        
+        if not start_date_str:
+            start_date = end_date - timedelta(days=120)  # ~4 months
+        else:
+            try:
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                return Response(
+                    {"message": "Invalid start_date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        
+        # Convert to datetime for filtering
+        start_datetime = timezone.make_aware(
+            datetime.combine(start_date, datetime.min.time())
+        )
+        end_datetime = timezone.make_aware(
+            datetime.combine(end_date, datetime.max.time())
+        )
+        
+        # Query event dates and group by day
+        event_counts = (
+            EventDates.objects.filter(
+                dtstart_utc__gte=start_datetime,
+                dtstart_utc__lte=end_datetime,
+                event__status="CONFIRMED",
+                event__school="University of Waterloo",
+            )
+            .annotate(date=TruncDate("dtstart_utc"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+        
+        # Format the response
+        data = [
+            {
+                "date": item["date"].strftime("%Y/%m/%d"),
+                "count": item["count"],
+            }
+            for item in event_counts
+        ]
+        
+        return Response({"data": data}, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
