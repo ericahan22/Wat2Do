@@ -4,7 +4,11 @@ import EventDetailPage from "@/features/events/pages/EventDetailPage";
 import { SubmitEventPage } from "@/features/events/pages/SubmitEventPage";
 import { MySubmissionsPage } from "@/features/events/pages/MySubmissionsPage";
 import { ClubsPage } from "@/features/clubs";
-import { AdminPage, PromotionsPage, SubmissionsReviewPage } from "@/features/admin";
+import {
+  AdminPage,
+  PromotionsPage,
+  SubmissionsReviewPage,
+} from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
 import { WaitlistPage } from "@/features/waitlist";
 import { SignInPage, SignUpPage, UserProfilePage } from "@/features/auth/pages";
@@ -20,6 +24,7 @@ import {
 } from "@/shared";
 import { BackToTopButton } from "@/shared/components/common/BackToTopButton";
 import { CLERK_ROUTES } from "@/shared/config/clerk";
+import HeatmapPage from "@/features/heatmap/pages/HeatmapPage";
 
 function App() {
   return (
@@ -68,6 +73,8 @@ function App() {
           />
           <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
           <Route path="/waitlist/:schoolSlug" element={<WaitlistPage />} />
+
+          <Route path="/heatmap" element={<HeatmapPage />} />
 
           {/* Clerk Auth Routes */}
           <Route path={CLERK_ROUTES.SIGN_IN} element={<SignInPage />} />
