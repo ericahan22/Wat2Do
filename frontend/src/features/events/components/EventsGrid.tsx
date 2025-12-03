@@ -101,7 +101,6 @@ const EventsGrid = memo(
     hasNextPage,
     isFetchingNextPage,
   }: EventsGridProps) => {
-    const navigate = useNavigate();
     const loadMoreRef = useRef<HTMLDivElement>(null);
     const prevEventIdsRef = useRef<Set<number>>(new Set());
     const { isAdmin } = useAdmin();
@@ -242,10 +241,10 @@ const EventsGrid = memo(
                   alt={event.title}
                   loading="lazy"
                   className="w-full h-40 object-cover rounded-t-xl cursor-pointer"
-                  onMouseDown={(e) => {
+                  onClick={(e) => {
                     if (!isSelectMode) {
                       e.stopPropagation();
-                      navigate(`/events/${event.id}`);
+                      window.open(`/events/${event.id}`, '_blank');
                     }
                   }}
                 />
