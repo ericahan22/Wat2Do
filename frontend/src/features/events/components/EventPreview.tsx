@@ -50,7 +50,11 @@ export function EventPreview({ event }: EventPreviewProps) {
   });
 
   const handleBack = () => {
-    navigate(-1);
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/events");
+    }
   };
 
   const handleExternalLink = () => {

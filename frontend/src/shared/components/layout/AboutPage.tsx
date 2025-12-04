@@ -43,7 +43,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          remote controlled car hackathon,{" "}
+          remote-controlled car hackathon,{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Food%20and%20Drink/Fork%20And%20Knife%20With%20Plate.webp"
             alt="Fork And Knife With Plate"
@@ -51,15 +51,14 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          italian cooking lessons in a culinary school, a free 2-hr{" "}
-          <img
-            src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/People/Mechanical%20Arm.webp"
-            alt="Mechanical Arm"
-            width="25"
-            height="25"
-            className="inline mx-1"
-          />{" "}
-          curling lesson, a $20{" "}
+          Italian cooking lessons at a culinary school, a free two-hour{" "}
+          <a
+            href="/events/2588"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            curling lesson
+          </a>
+          , a $20{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Travel%20and%20Places/Motor%20Boat.webp"
             alt="Motor Boat"
@@ -67,7 +66,14 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          harbour boat cruise, a $30 trip to the Stratford Festival to watch{" "}
+          harbour boat cruise, a $30{" "}
+          <a
+            href="/events/2463"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            trip to the Stratford Festival
+          </a>
+          {" "}to watch{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Activity/Performing%20Arts.webp"
             alt="Performing Arts"
@@ -83,7 +89,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          Canada's Wonderland, and tons of great company{" "}
+          visiting Canada's Wonderland (then missing the bus back to Waterloo), and meeting tons of great company at{" "}
           <img
             src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/People/Handshake.webp"
             alt="Handshake"
@@ -91,22 +97,7 @@ const AboutPage: React.FC = () => {
             height="25"
             className="inline mx-1"
           />{" "}
-          networking events (
-          <a
-            href="/events/136"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Atlassian
-          </a>
-          , Patreon,{" "}
-          <a
-            href="/events/143"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Point72
-          </a>
-          ). We realized we were missing out on so much happening around campus
-          and built this for ourselves in{" "}
+          networking events. We didn't want to miss other cool things happening on campus, so we built this for ourselves in{" "}
           <a
             href="https://bug-free-octo-spork.s3.us-east-2.amazonaws.com/Screenshot+2025-10-08+at+4.20.42%E2%80%AFAM.png"
             target="_blank"
@@ -115,7 +106,7 @@ const AboutPage: React.FC = () => {
           >
             August 2025
           </a>
-          . After 2 months we're extroardinarily excited to be sharing it with
+          . Two months later, and we're extroardinarily excited to be sharing it with
           the rest of you! All art is done by Erica. P.S. We don't run ads,
           everything runs out of our own pockets.
         </p>
@@ -123,129 +114,125 @@ const AboutPage: React.FC = () => {
         <p className="text-lg font-bold mb-12">— Tony & Erica</p>
 
         <p className="text-lg mb-12">
-          We believe there are helpful tips to making the most out of this site,
-          so we went ahead and created a little guide for you, depending on your
-          goals.
+          To make the most out of this site, here are some of our helpful tips, depending on your goals.
         </p>
 
-        <h2 className="text-2xl font-bold mb-6">Meeting People in Industry</h2>
+        <h2 className="text-2xl font-bold mb-6">Expanding Your Professional Network</h2>
         <p className="mb-4">
-          A lot of company events fly under the radar because they're only
-          posted on club Instagrams. We've met people from Atlassian, Bloomberg,
-          and Point72 at events we only found out about the day before.
-        </p>
-        <p className="mb-8">
-          Look for events like{" "}
+          A lot of company-sponsored events might fly under your radar, making it easy to miss out on crucial networking opportunities. We've met recruiters from{" "}
           <a
-            href="/events/2"
+            href="/events/1823"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            All Things Legal Panel
+            Atlassian
           </a>
           ,{" "}
           <a
-            href="/events/27"
+            href="/events/2657"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            Innovation Open House
+            Bloomberg
           </a>
-          , or{" "}
+          , and{" "}
           <a
-            href="/events/33"
+            href="/events/1694"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            WiE x Bloomberg Fall Kick Off
+            Point72
+          </a>{" "}
+          from events we just found out about the day before.
+        </p>
+        <p className="mb-8">
+          Check out similar events like{" "}
+          <a
+            href="/events/2406"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Navigating Co-op
+          </a>
+          ,{" "}
+          <a
+            href="/events/3169"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Explore ActSci at Equitable
+          </a>
+          , and{" "}
+          <a
+            href="/events/2753"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Ctrl+Alt+Innovate
           </a>
           .
         </p>
 
-        <h2 className="text-2xl font-bold mb-6">Random Stuff You Didn't Know Existed</h2>
+        <h2 className="text-2xl font-bold mb-6">Random Events You Didn't Know Existed</h2>
         <p className="mb-4">
-          Honestly the best part of building this was discovering clubs we had
+          Honestly, the best part about building this project was discovering clubs we had
           no idea were on campus. There's a{" "}
           <a
-            href="/events/47"
+            href="/events/2278"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
             Repair Club
           </a>{" "}
-          where you can fix broken electronics, a{" "}
+          where you can fix your broken electronics, the Iranian Students' Association's{" "}
           <a
-            href="/events/13"
+            href="/events/934"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            Gatka
+            Persian Zumba
           </a>{" "}
-          (Sikh martial arts) class, and{" "}
+          class, and Strength Club's{" "}
           <a
-            href="/events/44"
+            href="/events/1358"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            roller skating nights
+            Battle of the Barbells
           </a>
           .
         </p>
         <p className="mb-8">
-          Some examples:{" "}
-          <a
-            href="/events/47"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Repair Club
-          </a>
-          ,{" "}
-          <a
-            href="/events/13"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Gatka Classes
-          </a>
-          , or{" "}
-          <a
-            href="/events/44"
-            className="underline hover:text-gray-500 dark:hover:text-gray-200"
-          >
-            Retro Rollers
-          </a>
-          .
         </p>
 
-        <h2 className="text-2xl font-bold mb-6">Going With Friends</h2>
+        <h2 className="text-2xl font-bold mb-6">Search Tips</h2>
         <p className="mb-4">
-          Events without registration are easier to bail on if they're not your
-          vibe. The "food" filter is also useful - free food events tend to be
-          more casual and people actually talk to each other.
+          Category filters can help you find events that you are interested in. "Food," "Price," and "Registration Required" tags let you know what to expect. Try searching for what you are looking for, and see what comes up!
         </p>
         <p className="mb-8">
-          Things like{" "}
+          If you're with your friends, try{" "}
           <a
-            href="/events/3"
+            href="/events/1636"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            Nature Hike
+            Pho Night
           </a>
           ,{" "}
           <a
-            href="/events/20"
+            href="/events/2304"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            Fall BBQ Smash
+            Campfire Jam
           </a>
           , or{" "}
           <a
-            href="/events/38"
+            href="/events/2212"
             className="underline hover:text-gray-500 dark:hover:text-gray-200"
           >
-            Trivia Night
+            Global Games Night
           </a>{" "}
-          work well for groups.
+          .
         </p>
 
         <h2 className="text-2xl font-bold  mb-6">Start Exploring</h2>
-        <p className=" mb-8">
-          Check Wat2Do regularly for new events. Subscribe to our newsletter for
+        <p className=" mb-4">
+          Check Wat2Do regularly for new events as events are added (almost) live! Or, subscribe to our newsletter for
           daily updates. Don't be afraid to attend events alone! The best
-          connections happen when you show up.
+          connections happen when you just show up.
+        </p>
+        <p className="mb-8">
+          (P.S. You can enter "random" in the search bar to generate a random upcoming event!)
         </p>
 
         <div className="flex gap-4">

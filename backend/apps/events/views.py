@@ -102,27 +102,16 @@ def get_events(request):
         filtered_queryset = filterset.qs.distinct()
 
         if search_term:
-            import re
 
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
             ]
 
-            # Define character mapping for translate
-            # Common accented chars
-            accents_from = "àáâãäåèéêëìíîïòóôõöùúûüýÿñç"
-            accents_to = "aaaaaaeeeeiiiiooooouuuuyync"
-
-            # Special chars to remove
-            special_from = "-_.,!?:;()[]|/ "
-            map_from = accents_from + special_from
-            map_to = accents_to
-
             # Build OR query
             or_queries = Q()
             for term in search_terms:
-                # 1. Standard search (exact/partial matches)
+                # Standard search (case-insensitive partial matches)
                 term_query = (
                     Q(title__icontains=term)
                     | Q(location__icontains=term)
@@ -136,43 +125,6 @@ def get_events(request):
                     | Q(tiktok_handle__icontains=term)
                     | Q(fb_handle__icontains=term)
                 )
-
-                # 2. Normalized search using translate
-                normalized_term = re.sub(r"[^a-z0-9]", "", term.lower())
-
-                # Use normalized search if we have a term
-                if normalized_term:
-                    like_param = f"%{normalized_term}%"
-                    fields = [
-                        "title",
-                        "location",
-                        "description",
-                        "food",
-                        "club_type",
-                        "ig_handle",
-                        "discord_handle",
-                        "x_handle",
-                        "tiktok_handle",
-                        "fb_handle",
-                    ]
-                    where_clauses = []
-                    params = []
-
-                    for field in fields:
-                        # Handle COALESCE for nullable fields
-                        col_ref = field
-                        if field not in ["title"]:
-                            col_ref = f"COALESCE({field}, '')"
-                        clause = f"TRANSLATE(LOWER({col_ref}), '{map_from}', '{map_to}') LIKE %s"
-                        where_clauses.append(clause)
-                        params.append(like_param)
-
-                    full_where = " OR ".join(where_clauses)
-                    term_query |= Q(
-                        id__in=filtered_queryset.extra(
-                            where=[full_where], params=params
-                        ).values_list("id", flat=True)
-                    )
 
                 or_queries |= term_query
 
@@ -328,27 +280,47 @@ def get_events(request):
 def get_event(request, event_id):
     """Get a single event by ID with dates"""
     try:
-        event = Events.objects.get(id=event_id)
+        from django.db.models import Prefetch
+
+        # Use prefetch_related to fetch submission and dates efficiently.
+        # This reduces the query count to 2 (one for event + submission, one for dates).
+        event = get_object_or_404(
+            Events.objects.prefetch_related(
+                Prefetch(
+                    "submission",
+                    queryset=EventSubmission.objects.all(),
+                    to_attr="prefetched_submission_list",
+                )
+            ).prefetch_related(
+                Prefetch(
+                    "event_dates",
+                    queryset=EventDates.objects.order_by("dtstart_utc"),
+                    to_attr="prefetched_occurrences",
+                )
+            ),
+            id=event_id,
+        )
+
+        # Extract prefetched data
+        submission = event.prefetched_submission_list[0] if event.prefetched_submission_list else None
 
         # Convert model instance to dictionary
         event_data = model_to_dict(event)
 
         event_data["display_handle"] = events_utils.determine_display_handle(event)
 
-        submission = EventSubmission.objects.filter(created_event_id=event_id).first()
-
+        # Use extracted submission object
         event_data["is_submitter"] = (
             submission
             and request.user_id
             and str(submission.submitted_by) == str(request.user_id)
         )
 
-        # Get all event dates
-        event_data["occurrences"] = list(
-            EventDates.objects.filter(event_id=event_id)
-            .order_by("dtstart_utc")
-            .values("dtstart_utc", "dtend_utc")
-        )
+        # Construct dictionary format from prefetched model instances
+        event_data["occurrences"] = [
+            {"dtstart_utc": occ.dtstart_utc, "dtend_utc": occ.dtend_utc}
+            for occ in event.prefetched_occurrences
+        ]
 
         return Response(event_data)
 
@@ -360,7 +332,6 @@ def get_event(request, event_id):
         return Response(
             {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -771,6 +742,7 @@ def submit_event(request):
             event.source_url = f"https://wat2do.ca/events/{event.id}"
             event.save()
 
+            event_dates_to_create = []
             # Create EventDates for each occurrence
             for occ in cleaned["occurrences"]:
                 dtstart_utc = parse_utc_datetime(occ["dtstart_utc"])
@@ -780,13 +752,19 @@ def submit_event(request):
                     else None
                 )
 
-                EventDates.objects.create(
-                    event=event,
-                    dtstart_utc=dtstart_utc,
-                    dtend_utc=dtend_utc,
-                    duration=dtend_utc - dtstart_utc if dtend_utc else None,
-                    tz=occ.get("tz", "America/Toronto"),
+                event_dates_to_create.append(
+                    EventDates(
+                        event=event,
+                        dtstart_utc=dtstart_utc,
+                        dtend_utc=dtend_utc,
+                        duration=dtend_utc - dtstart_utc if dtend_utc else None,
+                        tz=occ.get("tz", "America/Toronto"),
+                    )
                 )
+
+            # Use bulk_create for mass insertion
+            if event_dates_to_create:
+                EventDates.objects.bulk_create(event_dates_to_create)
 
             EventSubmission.objects.create(
                 submitted_by=request.user_id,
@@ -1102,6 +1080,8 @@ def update_event(request, event_id):
         # Update occurrences if provided
         if cleaned.get("occurrences"):
             EventDates.objects.filter(event=event).delete()
+            
+            event_dates_to_create = []
             for occ in cleaned["occurrences"]:
                 dtstart_utc = parse_utc_datetime(occ["dtstart_utc"])
                 dtend_utc = (
@@ -1110,13 +1090,19 @@ def update_event(request, event_id):
                     else None
                 )
 
-                EventDates.objects.create(
-                    event=event,
-                    dtstart_utc=dtstart_utc,
-                    dtend_utc=dtend_utc,
-                    duration=dtend_utc - dtstart_utc if dtend_utc else None,
-                    tz=occ.get("tz", "America/Toronto"),
+                event_dates_to_create.append(
+                    EventDates(
+                        event=event,
+                        dtstart_utc=dtstart_utc,
+                        dtend_utc=dtend_utc,
+                        duration=dtend_utc - dtstart_utc if dtend_utc else None,
+                        tz=occ.get("tz", "America/Toronto"),
+                    )
                 )
+
+            # Use bulk_create for mass insertion
+            if event_dates_to_create:
+                EventDates.objects.bulk_create(event_dates_to_create)
 
         event.save()
 

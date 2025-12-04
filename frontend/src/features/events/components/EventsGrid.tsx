@@ -31,7 +31,7 @@ import {
   OrganizationBadge,
 } from "@/shared/components/badges/EventBadges";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/shared/hooks/useApi";
@@ -75,16 +75,16 @@ const InterestButton = ({ event }: { event: Event }) => {
       variant="outline"
       size="sm"
       className="flex-1 w-full"
-      onMouseDown={(e) => {
+      onClick={(e) => {
+        e.preventDefault();
         e.stopPropagation();
         handleClick();
       }}
       disabled={toggleInterest.isPending}
     >
       <Heart
-        className={`h-3.5 w-3.5 ${
-          viewerHasInterested ? "fill-red-500 text-red-500" : ""
-        }`}
+        className={`h-3.5 w-3.5 ${viewerHasInterested ? "fill-red-500 text-red-500" : ""
+          }`}
       />
     </Button>
   );
@@ -210,16 +210,14 @@ const EventsGrid = memo(
           }}
           style={{ pointerEvents: "auto" }}
         >
-          <Card
-            className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full ${
-              isSelectMode ? "cursor-pointer" : ""
-            } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
-            onMouseDown={() =>
-              isSelectMode && onToggleEvent?.(event.id.toString())
-            }
-          >
-            {/* Selection Circle */}
-            {isSelectMode && (
+
+          {isSelectMode ? (
+            <Card
+              className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full cursor-pointer ${isSelected ? "ring-2 ring-blue-500" : ""
+                }`}
+              onMouseDown={() => onToggleEvent?.(event.id.toString())}
+            >
+              {/* Selection Circle */}
               <div
                 className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full border-2 border-white bg-gray-800/70 dark:bg-gray-200/70 flex items-center justify-center cursor-pointer"
                 onMouseDown={(e) => {
@@ -231,138 +229,146 @@ const EventsGrid = memo(
                   <Check className="h-4 w-4 text-white dark:text-gray-800" />
                 )}
               </div>
-            )}
-
-            <div className="relative min-h-40">
-              {/* Event Image */}
-              {event.source_image_url && (
-                <img
-                  src={event.source_image_url}
-                  alt={event.title}
-                  loading="lazy"
-                  className="w-full h-40 object-cover rounded-t-xl cursor-pointer"
-                  onClick={(e) => {
-                    if (!isSelectMode) {
-                      e.stopPropagation();
-                      window.location.href = `/events/${event.id}`;
-                    }
-                  }}
-                />
-              )}
-              <EventStatusBadge event={event} />
-              <NewEventBadge event={event} />
-              <OrganizationBadge event={event} isSelectMode={isSelectMode} />
-            </div>
-            <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
-              <CardTitle
-                className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white"
-                title={event.title}
-              >
-                {event.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-0">
-              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {formatRelativeEventDate(event.dtstart_utc)}
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">
-                  {formatTimeRange(event.dtstart_utc, event.dtend_utc)}
-                </span>
-              </div>
-
-              {event.location && (
-                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                  <MapPin className="flex-shrink-0 h-3.5 w-3.5" />
-                  <span className="line-clamp-1" title={event.location}>
-                    {event.location}
-                  </span>
-                </div>
-              )}
-
-              {event.price !== null && (
-                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                  <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="truncate">
-                    {event.price === 0 ? "Free" : `$${event.price}`}
-                  </span>
-                </div>
-              )}
-
-              {event.food && (
-                <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-                  <Utensils className="h-3.5 w-3.5 flex-shrink-0" />
-                  <span className="line-clamp-1" title={event.food}>
-                    {event.food}
-                  </span>
-                </div>
-              )}
-
-              {event.registration && (
-                <div className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
-                  Registration required
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              {!isSelectMode && (
-                <div className="flex space-x-2 pt-2 w-full mt-auto">
-                  <InterestButton event={event} />
-                  {event.source_url && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-shrink-0"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        if (event.source_url) {
-                          window.open(
-                            event.source_url,
-                            "_blank",
-                            "noopener,noreferrer"
-                          );
-                        }
-                      }}
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
-                  {isAdmin && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex-1 text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        if (
-                          confirm(
-                            `Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`
-                          )
-                        ) {
-                          deleteEventMutation.mutate(event.id);
-                        }
-                      }}
-                      disabled={deleteEventMutation.isPending}
-                    >
-                      {deleteEventMutation.isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-3.5 w-3.5" />
-                      )}
-                    </Button>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              {renderCardContent(event, isSelectMode)}
+            </Card>
+          ) : (
+            <Link to={`/events/${event.id}`} className="block h-full">
+              <Card className="border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full">
+                {renderCardContent(event, isSelectMode)}
+              </Card>
+            </Link>
+          )}
         </motion.div>
       );
     };
+
+    const renderCardContent = (event: Event, isSelectMode: boolean) => (
+      <>
+        <div className="relative min-h-40">
+          {/* Event Image */}
+          {event.source_image_url && (
+            <img
+              src={event.source_image_url}
+              alt={event.title}
+              loading="lazy"
+              className="w-full h-40 object-cover rounded-t-xl"
+            />
+          )}
+          <EventStatusBadge event={event} />
+          <NewEventBadge event={event} />
+          <OrganizationBadge event={event} isSelectMode={isSelectMode} />
+        </div>
+        <CardHeader className="p-3.5 pb-0 border-gray-200 dark:border-gray-700 border-l border-r">
+          <CardTitle
+            className="text-sm line-clamp-2 leading-tight text-gray-900 dark:text-white"
+            title={event.title}
+          >
+            {event.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex border-gray-200 dark:border-gray-700 flex-col border-b border-l rounded-b-xl border-r gap-1 h-full p-3.5 pt-0">
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">
+              {formatRelativeEventDate(event.dtstart_utc)}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">
+              {formatTimeRange(event.dtstart_utc, event.dtend_utc)}
+            </span>
+          </div>
+
+          {event.location && (
+            <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+              <MapPin className="flex-shrink-0 h-3.5 w-3.5" />
+              <span className="line-clamp-1" title={event.location}>
+                {event.location}
+              </span>
+            </div>
+          )}
+
+          {event.price !== null && (
+            <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+              <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="truncate">
+                {event.price === 0 ? "Free" : `$${event.price}`}
+              </span>
+            </div>
+          )}
+
+          {event.food && (
+            <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+              <Utensils className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="line-clamp-1" title={event.food}>
+                {event.food}
+              </span>
+            </div>
+          )}
+
+          {event.registration && (
+            <div className="text-xs text-gray-600 dark:text-gray-400 italic mt-1">
+              Registration required
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          {!isSelectMode && (
+            <div className="flex space-x-2 pt-2 w-full mt-auto">
+              <InterestButton event={event} />
+              {event.source_url && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-shrink-0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (event.source_url) {
+                      window.open(
+                        event.source_url,
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }
+                  }}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1 text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (
+                      confirm(
+                        `Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`
+                      )
+                    ) {
+                      deleteEventMutation.mutate(event.id);
+                    }
+                  }}
+                  disabled={deleteEventMutation.isPending}
+                >
+                  {deleteEventMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </>
+    );
+
 
     return (
       <div className="space-y-8 mt-4">
