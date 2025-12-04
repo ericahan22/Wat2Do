@@ -101,7 +101,16 @@ class Events(models.Model):
 
     class Meta:
         db_table = "events"
-        indexes = []
+        indexes = [
+            # Primary query filter: status + school combination
+            models.Index(fields=["status", "school"], name="events_status_school_idx"),
+            # For filtering by status alone
+            models.Index(fields=["status"], name="events_status_idx"),
+            # For "newly added" filter and ordering
+            models.Index(fields=["added_at"], name="events_added_at_idx"),
+            # For price range filters
+            models.Index(fields=["price"], name="events_price_idx"),
+        ]
 
     def __str__(self):
         return f"{self.title[:50] if self.title else 'untitled'}"

@@ -27,6 +27,11 @@ from utils.validation import validate_event_data
 
 from .models import EventDates, EventInterest, Events, EventSubmission
 
+# Events without an end time are considered "live" for this duration after their start time.
+# After this period, they're no longer shown in the default "upcoming" view.
+# This handles events like "drop-in" activities that don't have a specific end time.
+LIVE_EVENT_WINDOW_MINUTES = 90
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -75,16 +80,16 @@ def get_events(request):
         # Upcoming events filter: show all live and future events by default
         if not dtstart_utc_param:
             now = timezone.now()
-            ninety_minutes_ago = now - timedelta(minutes=90)
+            live_window_start = now - timedelta(minutes=LIVE_EVENT_WINDOW_MINUTES)
             events_queryset = events_queryset.filter(
                 Q(
                     event_dates__dtstart_utc__lte=now, event_dates__dtend_utc__gte=now
                 )  # Live events with dtend_utc
                 | Q(
-                    event_dates__dtstart_utc__gte=ninety_minutes_ago,
+                    event_dates__dtstart_utc__gte=live_window_start,
                     event_dates__dtstart_utc__lte=now,
                     event_dates__dtend_utc__isnull=True,
-                )  # Live events without dtend_utc (started within last 90 minutes)
+                )  # Live events without dtend_utc (started within LIVE_EVENT_WINDOW_MINUTES)
                 | Q(event_dates__dtstart_utc__gte=now)  # Upcoming
             ).distinct()
         else:
@@ -183,10 +188,10 @@ def get_events(request):
         # Build results with the next upcoming occurrence date
         results = []
         now = timezone.now()
+        live_window_start = now - timedelta(minutes=LIVE_EVENT_WINDOW_MINUTES)
 
         for event in events_list:
             all_dates = list(event.event_dates.all())
-            ninety_minutes_ago = now - timedelta(minutes=90)
             # Find the next upcoming or currently live date
             upcoming_or_live_dates = [
                 date
@@ -200,10 +205,10 @@ def get_events(request):
                         and date.dtend_utc >= now
                     )  # Live events with dtend_utc
                     or (
-                        date.dtstart_utc >= ninety_minutes_ago
+                        date.dtstart_utc >= live_window_start
                         and date.dtstart_utc <= now
                         and not date.dtend_utc
-                    )  # Live events without dtend_utc (started within last 90 minutes)
+                    )  # Live events without dtend_utc (within LIVE_EVENT_WINDOW_MINUTES)
                 )
             ]
             selected_date = (
@@ -333,13 +338,18 @@ def get_event(request, event_id):
             {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+# Maximum number of events that can be exported at once
+MAX_EXPORT_IDS = 100
+
+
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def export_events_ics(request):
     """Export events as .ics file for calendar import.
 
     Query params:
-    - ids: comma-separated list of event IDs
+    - ids: comma-separated list of event IDs (max 100)
 
     Returns: .ics file with Content-Type: text/calendar
     """
@@ -359,6 +369,13 @@ def export_events_ics(request):
         except ValueError:
             return Response(
                 {"message": "IDs must be a comma-separated list of integers"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Limit number of IDs to prevent DoS
+        if len(id_list) > MAX_EXPORT_IDS:
+            return Response(
+                {"message": f"Cannot export more than {MAX_EXPORT_IDS} events at once"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -466,7 +483,7 @@ def get_google_calendar_urls(request):
     """Generate Google Calendar URLs for given event IDs.
 
     Query params:
-    - ids: comma-separated list of event IDs
+    - ids: comma-separated list of event IDs (max 100)
 
     Returns:
     {
@@ -493,6 +510,13 @@ def get_google_calendar_urls(request):
         if len(id_list) == 0:
             return Response(
                 {"message": "No valid event IDs provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Limit number of IDs to prevent DoS
+        if len(id_list) > MAX_EXPORT_IDS:
+            return Response(
+                {"message": f"Cannot generate URLs for more than {MAX_EXPORT_IDS} events at once"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
