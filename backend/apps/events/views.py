@@ -1,8 +1,10 @@
 import json
+import logging
 import uuid
 from datetime import timedelta
 
 import pytz
+from clerk_backend_api import Clerk
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
@@ -18,6 +20,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from apps.core.auth import admin_required, jwt_required, optional_jwt
+
+logger = logging.getLogger(__name__)
 from services.openai_service import extract_events_from_caption
 from services.storage_service import storage_service
 from utils import events_utils
@@ -107,7 +111,6 @@ def get_events(request):
         filtered_queryset = filterset.qs.distinct()
 
         if search_term:
-
             # Parse semicolon-separated filters (for OR query)
             search_terms = [
                 term.strip() for term in search_term.split(";") if term.strip()
@@ -307,7 +310,11 @@ def get_event(request, event_id):
         )
 
         # Extract prefetched data
-        submission = event.prefetched_submission_list[0] if event.prefetched_submission_list else None
+        submission = (
+            event.prefetched_submission_list[0]
+            if event.prefetched_submission_list
+            else None
+        )
 
         # Convert model instance to dictionary
         event_data = model_to_dict(event)
@@ -516,7 +523,9 @@ def get_google_calendar_urls(request):
         # Limit number of IDs to prevent DoS
         if len(id_list) > MAX_EXPORT_IDS:
             return Response(
-                {"message": f"Cannot generate URLs for more than {MAX_EXPORT_IDS} events at once"},
+                {
+                    "message": f"Cannot generate URLs for more than {MAX_EXPORT_IDS} events at once"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -790,8 +799,12 @@ def submit_event(request):
             if event_dates_to_create:
                 EventDates.objects.bulk_create(event_dates_to_create)
 
+            # Fetch user email from Clerk at submission time
+            submitted_by_email = _get_user_email_from_clerk(request.user_id)
+
             EventSubmission.objects.create(
                 submitted_by=request.user_id,
+                submitted_by_email=submitted_by_email,
                 created_event=event,
             )
 
@@ -806,6 +819,25 @@ def submit_event(request):
         )
 
 
+def _get_user_email_from_clerk(user_id: str) -> str | None:
+    """Fetch user email from Clerk by user ID."""
+    try:
+        clerk = Clerk(bearer_auth=settings.CLERK_SECRET_KEY)
+        user = clerk.users.get(user_id=user_id)
+        if user and user.email_addresses:
+            # Return primary email or first available
+            primary = next(
+                (e for e in user.email_addresses if e.id == user.primary_email_address_id),
+                None,
+            )
+            if primary:
+                return primary.email_address
+            return user.email_addresses[0].email_address
+    except Exception as e:
+        logger.warning(f"Failed to fetch email for user {user_id}: {e}")
+    return None
+
+
 @api_view(["GET"])
 @ratelimit(key="ip", rate="100/hr", block=True)
 @admin_required
@@ -816,6 +848,7 @@ def get_submissions(request):
             .all()
             .order_by("-submitted_at")
         )
+
         data = [
             {
                 "id": s.id,
@@ -828,7 +861,8 @@ def get_submissions(request):
                 if s.reviewed_at
                 else "pending",
                 "submitted_at": s.submitted_at,
-                "submitted_by": s.submitted_by,
+                # Use stored email if available, fall back to user ID for old submissions
+                "submitted_by": s.submitted_by_email or s.submitted_by,
                 "event_title": s.created_event.title if s.created_event else None,
                 "event_id": s.created_event_id,
             }
@@ -1104,7 +1138,7 @@ def update_event(request, event_id):
         # Update occurrences if provided
         if cleaned.get("occurrences"):
             EventDates.objects.filter(event=event).delete()
-            
+
             event_dates_to_create = []
             for occ in cleaned["occurrences"]:
                 dtstart_utc = parse_utc_datetime(occ["dtstart_utc"])

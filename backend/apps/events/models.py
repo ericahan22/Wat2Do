@@ -128,6 +128,12 @@ class EventSubmission(models.Model):
     submitted_by = models.CharField(
         max_length=255, help_text="Clerk user ID who submitted this event"
     )
+    submitted_by_email = models.EmailField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Email of the user at time of submission",
+    )
 
     # Timestamps
     submitted_at = models.DateTimeField(auto_now_add=True, db_index=True)
