@@ -110,16 +110,20 @@ class OpenAIService:
         - Return an array of JSON objects, each object representing a unique event.
         """
         # Get current date and day of week for context
-        now = datetime.now()
+        toronto_tz = pytz_timezone("America/Toronto")
+        now = datetime.now(toronto_tz)
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
 
         context_datetime = (
             post_created_at if isinstance(post_created_at, datetime) else now
         )
-        context_datetime = pytz_timezone("America/Toronto").localize(
-            context_datetime.replace(tzinfo=None)
-        )
+        
+        if context_datetime.tzinfo is None:
+            context_datetime = toronto_tz.localize(context_datetime)
+        else:
+            context_datetime = context_datetime.astimezone(toronto_tz)
+
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
         context_time = context_datetime.strftime("%H:%M")

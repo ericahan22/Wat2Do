@@ -4,7 +4,7 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 
 from apps.clubs.models import Clubs
@@ -179,6 +179,9 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
                 f"{log_prefix} Created {len(event_dates)} EventDates entries for event {event.id}"
             )
             return True
+        except IntegrityError:
+            logger.warning(f"{log_prefix} Duplicate event detected (IntegrityError) - likely race condition")
+            return "duplicate"
         except Exception as e:
             logger.error(f"{log_prefix} Error inserting event to DB: {e}")
             return False

@@ -31,7 +31,10 @@ class Events(models.Model):
     )
 
     source_url = models.TextField(
-        null=True, blank=True, help_text="'https://university.edu/events/career-fair'"
+        null=True,
+        blank=True,
+        unique=True,
+        help_text="'https://university.edu/events/career-fair'",
     )
     source_image_url = models.TextField(
         null=True,
