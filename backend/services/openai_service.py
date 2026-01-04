@@ -253,6 +253,7 @@ class OpenAIService:
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
+            logger.debug(f"OpenAI Raw Response: {response_text}")
 
             # Try to parse the JSON response
             try:
