@@ -43,6 +43,7 @@ jobs:
       # --- Apify Token ---
       APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
       TARGET_USERNAME: ${{ github.event.client_payload.username || inputs.username }}
+      IGNORE_CUTOFF: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
       MAX_CONCURRENT_TASKS: 1
 
     steps:

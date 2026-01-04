@@ -71,9 +71,16 @@ def main():
     processor = EventProcessor(concurrency=5)
 
     # Configure run based on mode
+    ignore_cutoff = os.getenv("IGNORE_CUTOFF", "false").lower() == "true"
+    
     if mode == "single":
-        # Single user: 1 day lookback, 1 post limit
-        posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
+        # Single user
+        if ignore_cutoff:
+            logger.info("Ignoring old post cutoff...")
+            posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=365 * 5)
+        else:
+            # Standard: 1 day lookback
+            posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
     else:
         # Batch mode: 4 days lookback, 1 post per account
         posts = scraper.scrape(targets, results_limit=1, cutoff_days=4)
@@ -88,7 +95,10 @@ def main():
         logger.info("No posts retrieved. Exiting.")
         sys.exit(0)
 
-    cutoff_date = timezone.now() - timedelta(days=1)
+    if ignore_cutoff:
+        cutoff_date = timezone.now() - timedelta(days=365 * 5)
+    else:
+        cutoff_date = timezone.now() - timedelta(days=1)
     try:
         saved_count = asyncio.run(processor.process(posts, cutoff_date))
 
