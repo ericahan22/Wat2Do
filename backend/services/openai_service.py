@@ -145,14 +145,14 @@ class OpenAIService:
     {self._format_image_list_for_prompt(all_s3_urls) or []}
 
     STRICT CONTENT POLICY:
-    - ONLY extract an event if the post is clearly announcing or describing a real-world event with BOTH:
-        * a specific date (e.g., "October 31", "Friday", "tomorrow")
-        * AND a specific start time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening").
-    - DO NOT extract an event if there is no explicit mention of a start time. Do NOT default to midnight or any other time if none is given.
+    - ONLY extract an event if the post is clearly announcing or describing a real-world event.
+    - Ideally, the post should have BOTH a specific date AND a specific start time.
+    - EXCEPTION: For major events (e.g., full-day, multi-day, overnight), you MAY extract the event even if a specific start time is not explicitly stated, provided there is a specific DATE or date range.
+    - For these major events ONLY, if no time is given, you may default the start time to 00:00 (midnight) or a logical start time implied by the context.
     - DO NOT extract an event if:
         * The post is a meme, personal photo dump, or generic post with no time/place.
         * The post is inappropriate (nudity, explicit sexual content, or graphic violence).
-        * There is no explicit mention of BOTH a date (e.g., "October 31", "Friday", "tomorrow") AND a time (e.g., "at 2pm", "from 10am-4pm", "noon", "evening") in the caption or image.
+        * There is NO mention of a date at all.
         * The post only introduces people or some topic, UNLESS there is a clear call to attend or participate in an actual event (such as a meeting, workshop, performance, or competition).
 
     If you determine that there is NO event in the post, return the JSON value: null (not an object, not an array, just the literal null). Otherwise, return an array of JSON objects with ALL of the following fields:
@@ -253,7 +253,6 @@ class OpenAIService:
 
             # Extract the JSON response
             response_text = response.choices[0].message.content.strip()
-            logger.debug(f"OpenAI Raw Response: {response_text}")
 
             # Try to parse the JSON response
             try:
