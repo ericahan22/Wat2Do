@@ -33,7 +33,6 @@ class Events(models.Model):
     source_url = models.TextField(
         null=True,
         blank=True,
-        unique=True,
         help_text="'https://university.edu/events/career-fair'",
     )
     source_image_url = models.TextField(
@@ -49,8 +48,8 @@ class Events(models.Model):
         help_text="{'likes': 25, 'bookmarks': 12, 'shares': 8}",
     )
     posted_at = models.DateTimeField(
-        auto_now_add=True,
         null=True,
+        blank=True,
         help_text="When the event was originally posted (e.g., on Instagram)",
     )
     comments_count = models.IntegerField(

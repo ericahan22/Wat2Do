@@ -75,8 +75,9 @@ class EventProcessor:
         )
 
     @sync_to_async(thread_sensitive=True)
-    def _save_event(self, event_data, ig_handle, source_url, club_type):
-        return insert_event_to_db(event_data, ig_handle, source_url, club_type)
+    def _save_event(self, event_data):
+        """Save event to database. event_data should contain all metadata."""
+        return insert_event_to_db(event_data)
 
     async def _process_single_post_extraction(self, post):
         """Extracts event data from a single post using OpenAI."""
@@ -106,7 +107,9 @@ class EventProcessor:
 
             post_dt = parse_utc_datetime(post.get("timestamp"))
             if not post_dt or post_dt < cutoff_date:
-                append_event_to_csv(post, ig_handle, url, added_to_db="old_post")
+                # Create minimal event_data for logging
+                log_data = {"ig_handle": ig_handle, "source_url": url, "posted_at": post_dt}
+                append_event_to_csv(log_data, added_to_db="old_post")
                 logger.info(
                     f"[{ig_handle}] [{shortcode}] Skipping: Post date {post_dt} is older than cutoff {cutoff_date}"
                 )
@@ -118,7 +121,9 @@ class EventProcessor:
                     event_name = event.title
                 except Exception:
                     event_name = "UNKNOWN"
-                append_event_to_csv(post, ig_handle, url, added_to_db="duplicate_post")
+                # Create minimal event_data for logging
+                log_data = {"ig_handle": ig_handle, "source_url": url}
+                append_event_to_csv(log_data, added_to_db="duplicate_post")
                 logger.info(
                     f"[{ig_handle}] [{shortcode}] Skipping: Event '{event_name}' already exists in DB"
                 )
@@ -239,65 +244,41 @@ class EventProcessor:
                         first_occurrence.get("dtstart_utc")
                     )
                     if dtstart_utc and dtstart_utc < timezone.now():
-                        append_event_to_csv(
-                            event_data,
-                            ig_handle,
-                            source_url,
-                            added_to_db="event_past_date",
-                        )
+                        append_event_to_csv(event_data, added_to_db="event_past_date")
                         logger.info(
                             f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past"
                         )
                         continue
 
-                club_type = await self._get_club_type(ig_handle)
+                # Add metadata to event_data
+                event_data["ig_handle"] = ig_handle
+                event_data["source_url"] = source_url
+                event_data["club_type"] = await self._get_club_type(ig_handle)
+                event_data["likes_count"] = post.get("likesCount") or post.get("likeCount") or 0
+                event_data["comments_count"] = post.get("commentsCount") or post.get("commentCount") or 0
+                event_data["posted_at"] = post_dt
+
                 try:
-                    result = await self._save_event(
-                        event_data, ig_handle, source_url, club_type
-                    )
+                    result = await self._save_event(event_data)
                 except Exception as e:
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="error",
-                        club_type=club_type,
-                    )
+                    append_event_to_csv(event_data, added_to_db="error")
                     logger.error(f"[{ig_handle}] [{shortcode}] Error saving event: {e}")
                     continue
 
                 if result is True:
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="success",
-                        club_type=club_type,
-                    )
+                    append_event_to_csv(event_data, added_to_db="success")
                     logger.info(
                         f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'"
                     )
                     saved_count += 1
                 elif result == "updated":
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="updated",
-                        club_type=club_type,
-                    )
+                    append_event_to_csv(event_data, added_to_db="updated")
                     logger.info(
                         f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'"
                     )
                     saved_count += 1
                 elif result == "duplicate":
-                    append_event_to_csv(
-                        event_data,
-                        ig_handle,
-                        source_url,
-                        added_to_db="duplicate_post",
-                        club_type=club_type,
-                    )
+                    append_event_to_csv(event_data, added_to_db="duplicate_post")
                     logger.info(
                         f"[{ig_handle}] [{shortcode}] Duplicate event (no changes): '{event_data.get('title', '')}'"
                     )

@@ -50,8 +50,31 @@ def get_post_image_url(post):
         return None
 
 
-def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
-    """Map scraped event data to Event model fields, insert to DB"""
+def insert_event_to_db(event_data):
+    """
+    Map scraped event data to Event model fields, insert to DB.
+    
+    Args:
+        event_data: Dictionary containing all event data and metadata:
+            - title, description, location, price, food, registration, school, categories, occurrences
+            - source_image_url, ig_handle, source_url, club_type
+            - likes_count, comments_count, posted_at
+    
+    Returns:
+        True: Event created successfully
+        "updated": Event updated successfully
+        "duplicate": Duplicate event found (no changes)
+        "missing_occurrence": Event missing occurrence data
+        False: Error occurred
+    """
+    # Extract metadata from event_data
+    ig_handle = event_data.get("ig_handle")
+    source_url = event_data.get("source_url")
+    club_type = event_data.get("club_type")
+    likes_count = event_data.get("likes_count", 0)
+    comments_count = event_data.get("comments_count", 0)
+    posted_at = event_data.get("posted_at")
+    
     shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
     log_prefix = f"[{ig_handle}] [{shortcode}]"
 
@@ -95,6 +118,11 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
                 matched_event.location = location
                 matched_event.source_url = source_url
                 matched_event.added_at = timezone.now()  # Bump to top
+                
+                # Update stats
+                matched_event.likes_count = likes_count
+                matched_event.comments_count = comments_count
+                
                 matched_event.save()
 
                 # Delete old event dates and create new ones
@@ -149,6 +177,9 @@ def insert_event_to_db(event_data, ig_handle, source_url, club_type=None):
             "status": "CONFIRMED",
             "school": school[:255] if school else "",
             "categories": categories,
+            "likes_count": likes_count,
+            "comments_count": comments_count,
+            "posted_at": posted_at,
         }
 
         try:
@@ -367,13 +398,22 @@ class EventDuplicateDetector:
         return None
 
 
-def append_event_to_csv(
-    event_data,
-    ig_handle,
-    source_url,
-    added_to_db="success",
-    club_type=None,
-):
+def append_event_to_csv(event_data, added_to_db="success"):
+    """
+    Append event data to CSV file for logging/debugging.
+    
+    Args:
+        event_data: Dictionary containing all event data and metadata
+        added_to_db: Status of the database operation (success, error, duplicate_post, etc.)
+    """
+    # Extract metadata from event_data
+    ig_handle = event_data.get("ig_handle")
+    source_url = event_data.get("source_url")
+    club_type = event_data.get("club_type")
+    likes_count = event_data.get("likes_count", 0)
+    comments_count = event_data.get("comments_count", 0)
+    posted_at = event_data.get("posted_at")
+    
     csv_file = Path(__file__).parent.parent / "scraping" / "events_scraped.csv"
     csv_file.parent.mkdir(parents=True, exist_ok=True)
     file_exists = csv_file.exists()
@@ -419,6 +459,9 @@ def append_event_to_csv(
         "occurrences",
         "added_to_db",
         "status",
+        "likes_count",
+        "comments_count",
+        "posted_at",
     ]
 
     with open(csv_file, "a", newline="", encoding="utf-8") as csvfile:
@@ -443,11 +486,14 @@ def append_event_to_csv(
                 "tz": tz,
                 "school": school,
                 "source_image_url": source_image_url,
-                "club_type": club_type or event_data.get("club_type") or "",
+                "club_type": club_type or "",
                 "categories": json.dumps(categories, ensure_ascii=False),
                 "occurrences": json.dumps(occurrences, ensure_ascii=False),
                 "added_to_db": added_to_db,
                 "status": "CONFIRMED",
+                "likes_count": likes_count,
+                "comments_count": comments_count,
+                "posted_at": posted_at,
             }
         )
         shortcode = source_url.strip("/").split("/")[-1] if source_url else "UNKNOWN"
