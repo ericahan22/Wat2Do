@@ -100,6 +100,8 @@ class EventProcessor:
             url = post.get("url")
             ig_handle = post.get("ownerUsername") or "UNKNOWN"
             shortcode = url.strip("/").split("/")[-1] if url else "UNKNOWN"
+            
+            logger.info(f"[{ig_handle}] [{shortcode}] Processing Instagram post...")
 
             if not url or "/p/" not in url:
                 logger.info(f"[{ig_handle}] Skipping: Invalid URL format ({url})")
