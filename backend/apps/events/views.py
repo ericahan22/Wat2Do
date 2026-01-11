@@ -897,6 +897,26 @@ def review_submission(request, event_id):
             submission.reviewed_at = timezone.now()
             submission.reviewed_by = request.user_id
             submission.save()
+            
+            # Send approval email notification
+            if submission.submitted_by_email:
+                try:
+                    from services.email_service import email_service
+                    
+                    # Get event details for the email
+                    event_url = f"https://wat2do.ca/events/{event.id}"
+                    
+                    # Send the email
+                    email_service.send_event_approval_email(
+                        to_email=submission.submitted_by_email,
+                        event_title=event.title or "Your Event",
+                        event_url=event_url,
+                    )
+                    logger.info(f"Approval email sent to {submission.submitted_by_email} for event {event.id}")
+                except Exception as e:
+                    # Log the error but don't fail the approval
+                    logger.error(f"Failed to send approval email for event {event.id}: {e}")
+            
             return Response({"message": "Event approved", "event_id": event.id})
 
         elif action == "reject":
@@ -914,7 +934,7 @@ def review_submission(request, event_id):
         )
     except Exception as e:
         return Response(
-            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
 

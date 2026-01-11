@@ -1168,6 +1168,229 @@ class EmailService:
             print(f"Error sending password reset email: {e}")
             return False
 
+    def generate_event_approval_email_html(self, event_title, event_url):
+        """Generate HTML email for event approval notification"""
+        return f"""<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
+  </head>
+  <body style="background-color:#f3f3f5">
+    <table
+      border="0"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      align="center">
+      <tbody>
+        <tr>
+          <td
+            style="background-color:#f3f3f5;font-family:HelveticaNeue,Helvetica,Arial,sans-serif">
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="max-width:600px;width:100%;margin:0 auto;background-color:#ffffff">
+              <tbody>
+                <tr style="width:100%">
+                  <td>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="display:flex;background:#f3f3f5;padding:20px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h1 style="font-size:28px;font-weight:bold;color:#0c0d0e;margin:0">
+                              Wat2Do 🎉
+                            </h1>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="border-radius:5px 5px 0 0;display:flex;flex-direciont:column;background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation">
+                              <tbody style="width:100%">
+                                <tr style="width:100%">
+                                  <td
+                                    data-id="__react-email-column"
+                                    style="padding:40px 30px">
+                                    <div style="font-size:48px;margin-bottom:16px;text-align:center">✅</div>
+                                    <h1
+                                      style="color:#fff;font-size:32px;font-weight:bold;line-height:38px;margin:0 0 12px 0;text-align:center">
+                                      Your Event is Approved!
+                                    </h1>
+                                    <p
+                                      style="font-size:18px;line-height:26px;color:#fff;margin:0;text-align:center">
+                                      Congratulations! Your event is now live on Wat2Do.
+                                    </p>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table
+                      align="center"
+                      width="100%"
+                      border="0"
+                      cellpadding="0"
+                      cellspacing="0"
+                      role="presentation"
+                      style="padding:30px 30px 40px 30px">
+                      <tbody>
+                        <tr>
+                          <td>
+                            <h2
+                              style="margin:0 0 20px;font-weight:bold;font-size:24px;line-height:28px;color:#0c0d0e">
+                              {event_title}
+                            </h2>
+                            <p
+                              style="font-size:15px;line-height:22px;color:#3c3f44;margin:0 0 24px 0">
+                              Great news! Your event submission has been reviewed and approved by our team. It's now visible to everyone.
+                            </p>
+                            
+                            <hr
+                              style="width:100%;border:none;border-top:1px solid #eaeaea;margin:30px 0" />
+                            
+                            <table
+                              align="center"
+                              width="100%"
+                              border="0"
+                              cellpadding="0"
+                              cellspacing="0"
+                              role="presentation"
+                              style="margin-top:24px;display:block">
+                              <tbody>
+                                <tr>
+                                  <td style="text-align:center">
+                                    <a
+                                      href="{event_url}"
+                                      style="color:#fff;text-decoration-line:none;background-color:#10b981;border:1px solid #059669;font-size:16px;line-height:16px;padding:14px 24px;border-radius:6px;display:inline-block;font-weight:600"
+                                      target="_blank"
+                                      >View Your Event</a
+                                    >
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                            
+                            <p
+                              style="font-size:14px;line-height:20px;color:#6a737c;margin:24px 0 0 0;text-align:center">
+                              Share your event with friends using this link: {event_url}!
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="width:600px;max-width:100%;margin:32px auto 0 auto;padding:0 30px">
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="font-size:12px;line-height:18px;color:#9199a1;margin:0;margin-bottom:16px">
+                      You're receiving this email because you submitted an event to Wat2Do.
+                    </p>
+                    <a
+                      href="https://wat2do.ca/dashboard"
+                      style="color:#9199a1;text-decoration-line:none;display:inline-block;text-decoration:underline;font-size:12px;margin-right:16px"
+                      target="_blank"
+                      >View all of your submissions on Wat2Do</a
+                    >
+                    <hr
+                      style="width:100%;border:none;border-top:1px solid #eaeaea;margin:24px 0;border-color:#d6d8db" />
+                    <p
+                      style="font-size:12px;line-height:18px;margin:4px 0;color:#9199a1">
+                      <strong>Wat2Do</strong> - Your guide to UWaterloo events
+                    </p>
+                    <p
+                      style="font-size:11px;line-height:14px;border-radius:3px;border:1px solid #d6d9dc;padding:8px 10px;font-family:Consolas,monospace;color:#667eea;max-width:min-content;margin:16px 0 32px 0">
+                      Made with 💜 for UWaterloo
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>"""
+
+    def send_event_approval_email(self, to_email, event_title, event_url):
+        """Send event approval notification email to user"""
+        if not self.api_key:
+            print("Warning: RESEND_API_KEY not set. Email not sent.")
+            return False
+
+        if not to_email:
+            print("Error: No email address provided.")
+            return False
+
+        html_content = self.generate_event_approval_email_html(
+            event_title, event_url
+        )
+
+        payload = {
+            "from": f"Wat2Do <{self.from_email}>",
+            "to": [to_email],
+            "subject": f"Your Event is Now Live!",
+            "html": html_content,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            response.raise_for_status()
+            print(f"Event approval email sent to {to_email} for event: {event_title}")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending event approval email: {e}")
+            return False
+
 
 # Singleton instance
 email_service = EmailService()
