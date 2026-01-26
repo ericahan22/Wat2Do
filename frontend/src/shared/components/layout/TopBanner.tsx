@@ -19,7 +19,7 @@ function TopBanner() {
           className="hover:text-gray-200 cursor-pointer"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatEventDate("2026--01-26")} - School Day Today, Events are Cancelled!
+            {formatEventDate("2026-01-26")} - UW campuses are closed today - all scheduled events are cancelled!
           </span>
         </a>
         <IconButton
