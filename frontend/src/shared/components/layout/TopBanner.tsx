@@ -3,12 +3,10 @@ import { X } from "lucide-react";
 import { IconButton } from "@/shared/components/ui/icon-button";
 import { formatEventDate } from "@/shared/lib/dateUtils";
 import { useLocalStorage } from "react-use";
-import { useNavigate } from "react-router-dom";
 
 function TopBanner() {
   const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", true);
 
-  const navigate = useNavigate();
   if (!isVisible) return null;
 
   return (
