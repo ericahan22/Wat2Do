@@ -1,6 +1,7 @@
 version: 2
 multi-ecosystem-groups:
   all-dependencies:
+    applies-to: security-updates
     schedule:
       interval: "weekly"
     patterns:
