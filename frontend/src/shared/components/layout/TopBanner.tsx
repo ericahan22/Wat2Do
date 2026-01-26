@@ -12,14 +12,14 @@ function TopBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="w-full !bg-[#0056D6]">
+    <div className="w-full bg-[#0488FE]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 relative flex items-center justify-center">
         <a
           onClick={() => navigate("/auth-sign-in")}
           className="hover:text-gray-200 cursor-pointer"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatEventDate("2025-11-16")} - Events added in real time!
+            {formatEventDate("2026--01-26")} - School Day Today, Events are Cancelled!
           </span>
         </a>
         <IconButton
