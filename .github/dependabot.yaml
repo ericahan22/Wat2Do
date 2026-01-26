@@ -9,15 +9,25 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
   - package-ecosystem: "pip"
     directory: "/"
     multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
     multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
   - package-ecosystem: "docker-compose"
     directory: "/"
     multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
   - package-ecosystem: "docker"
     directory: "/"
     multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
