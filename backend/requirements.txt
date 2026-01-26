@@ -1,23 +1,23 @@
 # Django and core dependencies
-Django==4.2.7
-djangorestframework==3.14.0
-django-filter==25.1
-psycopg2-binary==2.9.10
-django-cors-headers==4.3.1
-whitenoise==6.6.0
-pgvector==0.4.1 
-django-ratelimit==3.0.1
+Django==6.0.1
+djangorestframework==3.16.1
+django-filter==25.2
+psycopg2-binary==2.9.11
+django-cors-headers==4.9.0
+whitenoise==6.11.0
+pgvector==0.4.2 
+django-ratelimit==4.1.0
 
 # Scraping and web utilities
 setuptools>=65.5.0
 apify_client
 python-dotenv
 python-dateutil==2.9.0.post0
-requests==2.31.0
+requests==2.32.5
 aiohttp>=3.9.0
 beautifulsoup4
 openai
-geopy==2.4.0
+geopy==2.4.1
 
 # Email service
 
@@ -26,8 +26,8 @@ cryptography>=45.0.0
 clerk-backend-api
 
 # AWS S3 for image storage
-boto3==1.34.0
+boto3==1.42.34
 Pillow>=10.0.0
 
 # Development and deployment
-gunicorn==21.2.0 
+gunicorn==24.1.1 

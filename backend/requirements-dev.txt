@@ -1,5 +1,5 @@
 # Development and testing dependencies
-ruff==0.6.9
-pytest==8.1.1
-pytest-django==4.8.0
-pyyaml==6.0.1
+ruff==0.14.14
+pytest==9.0.2
+pytest-django==4.11.1
+pyyaml==6.0.3
