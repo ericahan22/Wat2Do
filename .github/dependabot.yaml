@@ -1,0 +1,23 @@
+version: 1
+multi-ecosystem-groups:
+  all-dependencies:
+    schedule:
+      interval: "weekly"
+    patterns:
+      - "*"
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+  - package-ecosystem: "pip"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+  - package-ecosystem: "docker"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
