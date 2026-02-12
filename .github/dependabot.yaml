@@ -1,0 +1,37 @@
+version: 2
+multi-ecosystem-groups:
+  all-dependencies:
+    applies-to: security-updates
+    schedule:
+      interval: "weekly"
+    patterns:
+      - "*"
+updates:
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+  - package-ecosystem: "pip"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
+  - package-ecosystem: "docker"
+    directories:
+      - "/frontend"
+      - "/backend"
+      - "/db"
+    multi-ecosystem-group: "all-dependencies"
+    patterns:
+      - "*"
