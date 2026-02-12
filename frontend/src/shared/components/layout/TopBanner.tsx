@@ -1,7 +1,6 @@
 import React from "react";
 import { X } from "lucide-react";
 import { IconButton } from "@/shared/components/ui/icon-button";
-import { formatEventDate } from "@/shared/lib/dateUtils";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
@@ -13,13 +12,14 @@ function TopBanner() {
     <div className="w-full bg-[#0488FE]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 relative flex items-center justify-center">
         <a
-          href="https://uwaterloo.ca/campus-status/"
-          target="_blank" 
+          href="https://status.supabase.com/"
+          target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-gray-200 cursor-pointer flex items-center"
+          className="hover:text-gray-200 cursor-pointer"
         >
           <span className="text-sm font-small text-center !text-white">
-            {formatEventDate("2026-01-26")} - UW campuses are closed today - all scheduled events are cancelled!
+            February 12, 2026: App is down due to Supabase. Learn more
+            https://status.supabase.com/
           </span>
         </a>
         <IconButton
