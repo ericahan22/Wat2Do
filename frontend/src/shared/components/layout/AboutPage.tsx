@@ -107,8 +107,10 @@ const AboutPage: React.FC = () => {
             August 2025
           </a>
           . Two months later, and we're extroardinarily excited to be sharing it with
-          the rest of you! All art is done by Erica. P.S. We don't run ads,
-          everything runs out of our own pockets.
+          the rest of you! All art is done by Erica. P.S. We don't run ads; while
+          much of this still runs out of our own pockets, we're grateful for funding
+          support from the Student Life Endowment Fund (SLEF) at the University of
+          Waterloo.
         </p>
 
         <p className="text-lg font-bold mb-12">— Tony & Erica</p>

@@ -104,6 +104,13 @@ function Footer() {
               © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights
               reserved.
             </p>
+            <p>
+              Funded in part by the{" "}
+              <span className="font-semibold">
+                Student Life Endowment Fund (SLEF)
+              </span>{" "}
+              at the University of Waterloo.
+            </p>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center">
             <a

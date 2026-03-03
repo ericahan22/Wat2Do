@@ -25,6 +25,10 @@ Waterloo, scraped directly from Instagram by capturing all student club events w
 - **Club directory:** Explore all clubs with links to their website/Instagram
 - **Email newsletter:** Subscribe to get the latest events in your inbox, once daily
 
+## 🧡 Funding
+
+Wat2Do is funded in part by the **Student Life Endowment Fund (SLEF)** at the University of Waterloo.
+
 ### Environment Setup
 
 #### Database
