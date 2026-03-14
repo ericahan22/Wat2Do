@@ -4,7 +4,7 @@ import { IconButton } from "@/shared/components/ui/icon-button";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
-  const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", true);
+  const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", false);
 
   if (!isVisible) return null;
 

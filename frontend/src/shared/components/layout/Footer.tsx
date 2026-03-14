@@ -98,9 +98,9 @@ function Footer() {
         </div>
 
         {/* Footer Links */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-sm">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-8 text-sm">
           <div className="space-y-1">
-            <p>
+            <p className="h-9 flex items-center">
               © {new Date().getFullYear()} Wat2Do in UWaterloo. All rights
               reserved.
             </p>
@@ -111,8 +111,14 @@ function Footer() {
               </span>{" "}
               at the University of Waterloo.
             </p>
+            <img
+              src="/SLEF Logo_Color Logo Name.png"
+              alt="SLEF Logo"
+              width="120"
+              className="h-auto"
+            />
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center flex-wrap gap-2">
             <a
               href="https://wat2do.instatus.com/"
               target="_blank"

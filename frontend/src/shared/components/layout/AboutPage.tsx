@@ -107,15 +107,37 @@ const AboutPage: React.FC = () => {
             August 2025
           </a>
           . Two months later, and we're extroardinarily excited to be sharing it with
-          the rest of you! All art is done by Erica. P.S. We don't run ads; while
-          much of this still runs out of our own pockets, we're grateful for funding
-          support from the Student Life Endowment Fund (SLEF) at the University of
-          Waterloo.
+          the rest of you!
         </p>
 
         <p className="text-lg font-bold mb-12">— Tony & Erica</p>
 
-        <p className="text-lg mb-12">
+        <p className="text-lg mb-0">
+          We are extremely grateful for funding
+          support from the{" "}
+          <a
+            href="https://wusa.ca/about/your-money/funding/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-500 dark:hover:text-gray-200"
+          >
+            Student Life Endowment Fund (SLEF)
+          </a>{" "}
+          of the Waterloo Undergraduate Student Association (WUSA).
+        </p>
+
+        <div className="flex justify-center -mt-10 -mb-2">
+          <img
+            src="/SLEF Logo_Color Logo Name.png"
+            alt="SLEF Logo"
+            width="500"
+            className="h-auto"
+          />
+        </div>
+
+        <hr className="my-0 border-gray-300 dark:border-gray-600" />
+
+        <p className="text-lg mt-12 mb-6">
           To make the most out of this site, here are some of our helpful tips, depending on your goals.
         </p>
 

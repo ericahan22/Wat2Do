@@ -25,18 +25,14 @@ Waterloo, scraped directly from Instagram by capturing all student club events w
 - **Club directory:** Explore all clubs with links to their website/Instagram
 - **Email newsletter:** Subscribe to get the latest events in your inbox, once daily
 
-## 🧡 Funding
+## 🚀 Environment Setup
 
-Wat2Do is funded in part by the **Student Life Endowment Fund (SLEF)** at the University of Waterloo.
-
-### Environment Setup
-
-#### Database
+### Database
 ```bash
 docker compose up --build
 ```
 
-#### Backend 
+### Backend
 <!-- (expose PRODUCTION=1 in /backend/.env for supabase db, else defaults to local postgres db) -->
 ```bash
 cd backend
@@ -51,7 +47,7 @@ python manage.py fix_sequences
 python manage.py runserver 8000
 ```
 
-#### Frontend
+### Frontend
 ```bash
 cd frontend
 npm install 
@@ -63,3 +59,9 @@ npm run dev
 If you have questions or feedback, please reach out at <a href="https://wat2do.ca/contact" target="_blank">wat2do.ca/contact</a> or add a <a href="https://github.com/ericahan22/bug-free-octo-spork/issues" target="_blank">GitHub issue</a>.
 
 Enjoy discovering events!
+
+## 💙 Funding
+
+Wat2Do is proudly funded by the <a href="https://wusa.ca/about/your-money/funding/" target="_blank">**Student Life Endowment Fund (SLEF)**</a> of the Waterloo Undergraduate Student Association (WUSA).
+
+<img src="frontend/public/SLEF Logo_Color Logo Name.png" alt="SLEF Logo" width="300"/>
