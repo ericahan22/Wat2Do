@@ -4,11 +4,6 @@ import { IconButton } from "@/shared/components/ui/icon-button";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
-  // Banner is currently disabled - return null to hide it
-  // To enable: uncomment the code below and set isVisible default to true
-  return null;
-
-  /* 
   const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", false);
 
   if (!isVisible) return null;
@@ -37,7 +32,6 @@ function TopBanner() {
       </div>
     </div>
   );
-  */
 }
 
 export default React.memo(TopBanner);
