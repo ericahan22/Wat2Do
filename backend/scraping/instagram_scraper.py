@@ -47,8 +47,7 @@ class InstagramScraper:
         )
         try:
             run = self.client.actor(self.ACTOR_ID).start(
-                run_input=run_input,
-                build="0.0.381"
+                run_input=run_input
             )
 
             # Poll for completion

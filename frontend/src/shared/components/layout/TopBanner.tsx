@@ -4,6 +4,11 @@ import { IconButton } from "@/shared/components/ui/icon-button";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
+  // Banner is currently disabled - return null to hide it
+  // To enable: uncomment the code below and set isVisible default to true
+  return null;
+
+  /* 
   const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", false);
 
   if (!isVisible) return null;
@@ -18,8 +23,7 @@ function TopBanner() {
           className="hover:text-gray-200 cursor-pointer"
         >
           <span className="text-sm font-small text-center !text-white">
-            February 12, 2026: App is down due to Supabase. Learn more
-            https://status.supabase.com/
+            Your message here
           </span>
         </a>
         <IconButton
@@ -33,6 +37,7 @@ function TopBanner() {
       </div>
     </div>
   );
+  */
 }
 
 export default React.memo(TopBanner);
