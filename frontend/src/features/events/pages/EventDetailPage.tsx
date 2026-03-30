@@ -92,7 +92,7 @@ function EventDetailPage() {
         <SEOHead
           title={`${event.title} - Edit Event`}
           description="Edit pending event details"
-          url={`/event/${event.id}`}
+          url={`/events/${event.id}`}
         />
         <EventEditForm event={event} />
       </>
@@ -111,7 +111,7 @@ function EventDetailPage() {
             event.dtend_utc
           )}`
         }
-        url={`/event/${event.id}`}
+        url={`/events/${event.id}`}
         keywords={[
           event.title,
           event.location || "",
