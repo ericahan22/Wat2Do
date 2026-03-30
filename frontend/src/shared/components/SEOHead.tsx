@@ -9,6 +9,15 @@ type Props = {
   children?: React.ReactNode;
 };
 
+function toAbsoluteUrl(value: string) {
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  const origin = window.location.origin;
+  return new URL(value, origin).toString();
+}
+
 function upsertMeta(attrName: "name" | "property", key: string, content: string) {
   if (!content) return;
   const selector = `meta[${attrName}="${key}"]`;
@@ -31,25 +40,28 @@ function SEOHead({
 }: Props) {
   useEffect(() => {
     const prevTitle = document.title;
+    const absoluteUrl = url ? toAbsoluteUrl(url) : undefined;
+    const absoluteImage = image ? toAbsoluteUrl(image) : undefined;
+
     if (title) document.title = title;
 
     if (description) upsertMeta("name", "description", description);
     if (keywords && keywords.length > 0) upsertMeta("name", "keywords", keywords.join(", "));
     if (title) upsertMeta("property", "og:title", title);
     if (description) upsertMeta("property", "og:description", description);
-    if (url) upsertMeta("property", "og:url", url);
-    if (image) upsertMeta("property", "og:image", image);
-    upsertMeta("name", "twitter:card", image ? "summary_large_image" : "summary");
+    if (absoluteUrl) upsertMeta("property", "og:url", absoluteUrl);
+    if (absoluteImage) upsertMeta("property", "og:image", absoluteImage);
+    upsertMeta("name", "twitter:card", absoluteImage ? "summary_large_image" : "summary");
 
     // canonical link
-    if (url) {
+    if (absoluteUrl) {
       let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
       if (!link) {
         link = document.createElement("link");
         link.setAttribute("rel", "canonical");
         document.head.appendChild(link);
       }
-      link.setAttribute("href", url);
+      link.setAttribute("href", absoluteUrl);
     }
 
     return () => {

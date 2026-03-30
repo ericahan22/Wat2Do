@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, useParams } from "react-router-dom";
 import { EventsPage } from "@/features/events";
 import EventDetailPage from "@/features/events/pages/EventDetailPage";
 import { SubmitEventPage } from "@/features/events/pages/SubmitEventPage";
@@ -21,6 +21,16 @@ import {
 import { BackToTopButton } from "@/shared/components/common/BackToTopButton";
 import { CLERK_ROUTES } from "@/shared/config/clerk";
 
+function LegacyEventRedirect() {
+  const { eventId } = useParams<{ eventId: string }>();
+
+  if (!eventId) {
+    return <Navigate to="/events" replace />;
+  }
+
+  return <Navigate to={`/events/${eventId}`} replace />;
+}
+
 function App() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
@@ -31,6 +41,7 @@ function App() {
           <Route path="/" element={<EventsPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
+          <Route path="/event/:eventId" element={<LegacyEventRedirect />} />
           <Route
             path="/submit"
             element={
