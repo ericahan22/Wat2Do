@@ -139,8 +139,10 @@ if os.getenv("PRODUCTION") == "1":
             "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
             "HOST": os.getenv("POSTGRES_HOST"),
             "PORT": os.getenv("POSTGRES_PORT", "6543"),
+            "CONN_MAX_AGE": 60,  # Recycle connections every 60 seconds
             "OPTIONS": {
                 "options": "-c pool_mode=session",
+                "keepalives": 1,
                 "sslmode": "require",
             },
         }
@@ -154,6 +156,13 @@ else:
             "PASSWORD": os.getenv("LOCAL_POSTGRES_PASSWORD", "postgres"),
             "HOST": os.getenv("LOCAL_POSTGRES_HOST", "localhost"),
             "PORT": os.getenv("LOCAL_POSTGRES_PORT", "5432"),
+            "CONN_MAX_AGE": 60,  # Recycle connections every 60 seconds
+            "OPTIONS": {
+                "keepalives": 1,
+                # Avoid breaking local dev if Postgres isn't configured for SSL.
+                # Set LOCAL_POSTGRES_SSLMODE=require to force SSL locally.
+                "sslmode": os.getenv("LOCAL_POSTGRES_SSLMODE", "prefer"),
+            },
         }
     }
 
