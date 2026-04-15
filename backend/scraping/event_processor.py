@@ -21,6 +21,26 @@ from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import append_event_to_csv, insert_event_to_db
 
 
+MIT_BLOCKLIST_TERMS = (
+    "mit",
+    "massachusetts institute of technology",
+    "mit.edu",
+)
+
+
+def _is_mit_post(post):
+    """Quick guardrail to avoid ingesting MIT content."""
+    haystack = " ".join(
+        [
+            str(post.get("ownerUsername") or ""),
+            str(post.get("ownerFullName") or ""),
+            str(post.get("caption") or ""),
+            str(post.get("url") or ""),
+        ]
+    ).lower()
+    return any(term in haystack for term in MIT_BLOCKLIST_TERMS)
+
+
 def _get_all_images(post):
     """
     Returns all image URLs for a post.
@@ -102,6 +122,14 @@ class EventProcessor:
             shortcode = url.strip("/").split("/")[-1] if url else "UNKNOWN"
             
             logger.info(f"[{ig_handle}] [{shortcode}] Processing Instagram post...")
+
+            if _is_mit_post(post):
+                log_data = {"ig_handle": ig_handle, "source_url": url}
+                append_event_to_csv(log_data, added_to_db="blocked_school")
+                logger.info(
+                    f"[{ig_handle}] [{shortcode}] Skipping: blocked MIT-related post"
+                )
+                continue
 
             if not url or "/p/" not in url:
                 logger.info(f"[{ig_handle}] Skipping: Invalid URL format ({url})")
