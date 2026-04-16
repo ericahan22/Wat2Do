@@ -92,4 +92,11 @@ class InstagramScraper:
             logger.error(f"Failed to fetch dataset items: {e}")
             return []
 
+        pinned_returned = any(bool(item.get("isPinned")) for item in dataset_items)
+        if results_limit == 1 and pinned_returned:
+            warning_message = "Apify returned a pinned post while resultsLimit=1"
+            logger.warning(warning_message)
+            if os.getenv("GITHUB_ACTIONS", "").lower() == "true":
+                print(f"::warning::{warning_message}")
+
         return dataset_items
