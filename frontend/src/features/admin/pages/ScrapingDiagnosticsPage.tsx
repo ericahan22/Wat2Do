@@ -160,9 +160,6 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
               <td className="p-2 whitespace-nowrap">{formatDate(account.last_notification_at)}</td>
               <td className="p-2 whitespace-nowrap">
                 {formatDate(account.last_scrape_at)}
-                {account.last_scrape_status && (
-                  <span className="ml-1 text-xs text-gray-400">({account.last_scrape_status})</span>
-                )}
               </td>
               <td className="p-2 whitespace-nowrap">
                 {account.last_event_at ? (
