@@ -206,16 +206,25 @@ def insert_event_to_db(event_data):
                 )
 
             EventDates.objects.bulk_create(event_dates)
+            event_id = event.id
             logger.debug(
-                f"{log_prefix} Created {len(event_dates)} EventDates entries for event {event.id}"
+                f"{log_prefix} Created {len(event_dates)} EventDates entries for event {event_id}"
             )
-            return True
         except IntegrityError:
             logger.warning(f"{log_prefix} Duplicate event detected (IntegrityError) - likely race condition")
             return "duplicate"
         except Exception as e:
             logger.error(f"{log_prefix} Error inserting event to DB: {e}")
             return False
+
+    # Verify the event persisted after the transaction committed
+    if not Events.objects.filter(id=event_id).exists():
+        logger.error(
+            f"{log_prefix} EVENT LOST: event {event_id} '{title}' was created but not found after commit"
+        )
+        return False
+
+    return True
 
 
 class EventDuplicateDetector:
