@@ -2,9 +2,19 @@ import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Loading } from "@/shared/components/ui/loading";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Check, X } from "lucide-react";
 import { useScrapingDiagnostics } from "@/features/admin/hooks/useScrapingDiagnostics";
 import type { ScrapeRun, AutomateLog, GapAccount } from "@/features/admin/types/scraping";
+
+const STATUS_LABELS: Record<string, string> = {
+  success: "Success",
+  error: "Error",
+  running: "Running",
+  no_posts: "No Events Saved",
+  active: "Recent",
+  stale: "Overdue",
+  never_scraped: "Never Scraped",
+};
 
 function StatusBadge({ value }: { value: string }) {
   const variant =
@@ -13,7 +23,15 @@ function StatusBadge({ value }: { value: string }) {
       : value === "error"
         ? "destructive"
         : "secondary";
-  return <Badge variant={variant}>{value}</Badge>;
+  return <Badge variant={variant}>{STATUS_LABELS[value] ?? value}</Badge>;
+}
+
+function BooleanIcon({ value }: { value: boolean }) {
+  return value ? (
+    <Check className="h-4 w-4 text-green-500" />
+  ) : (
+    <X className="h-4 w-4 text-red-500" />
+  );
 }
 
 function formatDate(dateStr: string | null) {
@@ -32,8 +50,8 @@ function NotificationLogsTable({ logs }: { logs: AutomateLog[] }) {
           <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
             <th className="p-2 whitespace-nowrap">Time</th>
             <th className="p-2 whitespace-nowrap">Username</th>
-            <th className="p-2 whitespace-nowrap">Resolved</th>
-            <th className="p-2 whitespace-nowrap">Dispatched</th>
+            <th className="p-2 whitespace-nowrap">Username Found</th>
+            <th className="p-2 whitespace-nowrap">Scrape Triggered</th>
             <th className="p-2 whitespace-nowrap">Error</th>
           </tr>
         </thead>
@@ -43,14 +61,10 @@ function NotificationLogsTable({ logs }: { logs: AutomateLog[] }) {
               <td className="p-2 whitespace-nowrap">{formatDate(log.created_at)}</td>
               <td className="p-2">{log.ig_username || log.ig_user_id || "—"}</td>
               <td className="p-2">
-                <Badge variant={log.username_resolved ? "default" : "destructive"}>
-                  {log.username_resolved ? "yes" : "no"}
-                </Badge>
+                <BooleanIcon value={log.username_resolved} />
               </td>
               <td className="p-2">
-                <Badge variant={log.dispatch_sent ? "default" : "secondary"}>
-                  {log.dispatch_sent ? "yes" : "no"}
-                </Badge>
+                <BooleanIcon value={log.dispatch_sent} />
               </td>
               <td className="p-2 text-red-500 text-xs">{log.error_message || ""}</td>
             </tr>
@@ -73,10 +87,10 @@ function ScrapeRunsTable({ runs }: { runs: ScrapeRun[] }) {
             <th className="p-2 whitespace-nowrap">Time</th>
             <th className="p-2 whitespace-nowrap">Username</th>
             <th className="p-2 whitespace-nowrap">Status</th>
-            <th className="p-2 whitespace-nowrap">Fetched</th>
-            <th className="p-2 whitespace-nowrap">New</th>
-            <th className="p-2 whitespace-nowrap">Extracted</th>
-            <th className="p-2 whitespace-nowrap">Saved</th>
+            <th className="p-2 whitespace-nowrap">Posts Fetched</th>
+            <th className="p-2 whitespace-nowrap">New Posts</th>
+            <th className="p-2 whitespace-nowrap">Events Extracted</th>
+            <th className="p-2 whitespace-nowrap">Events Saved</th>
             <th className="p-2 whitespace-nowrap">Notes</th>
           </tr>
         </thead>
@@ -133,8 +147,8 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
             <th className="p-2 whitespace-nowrap">IG Handle</th>
             <th className="p-2 whitespace-nowrap">Last Notification</th>
             <th className="p-2 whitespace-nowrap">Last Scrape</th>
-            <th className="p-2 whitespace-nowrap">Last Event</th>
-            <th className="p-2 whitespace-nowrap">Gap (days)</th>
+            <th className="p-2 whitespace-nowrap">Last Event Added</th>
+            <th className="p-2 whitespace-nowrap">Days Since Last Event</th>
             <th className="p-2 whitespace-nowrap">Status</th>
           </tr>
         </thead>
@@ -207,11 +221,11 @@ export function ScrapingDiagnosticsPage() {
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-green-600">{gaps.summary.active_recently}</div>
-              <div className="text-sm text-gray-500">Active (7d)</div>
+              <div className="text-sm text-gray-500">Event Added in Last 7d</div>
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-amber-600">{gaps.summary.stale}</div>
-              <div className="text-sm text-gray-500">Stale</div>
+              <div className="text-sm text-gray-500">No Events in 7+ Days</div>
             </div>
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-red-600">{gaps.summary.never_scraped}</div>
@@ -222,14 +236,17 @@ export function ScrapingDiagnosticsPage() {
 
         {/* Notification Logs */}
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">
-            Notification Logs
+          <h2 className="text-xl font-semibold mb-1">
+            IG Post Notifications
             {logs && logs.unresolved_count > 0 && (
               <span className="ml-2 text-sm text-red-500">
                 ({logs.unresolved_count} unresolved)
               </span>
             )}
           </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Notifications caught by the Automate app when a club posts on Instagram.
+          </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <NotificationLogsTable logs={logs?.logs ?? []} />
           </div>
@@ -237,18 +254,24 @@ export function ScrapingDiagnosticsPage() {
 
         {/* Scrape Runs */}
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">
+          <h2 className="text-xl font-semibold mb-1">
             Scrape Runs
             {runs && <span className="ml-2 text-sm text-gray-500">({runs.total} in last 7d)</span>}
           </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Individual scraping jobs that fetch posts and extract events.
+          </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <ScrapeRunsTable runs={runs?.runs ?? []} />
           </div>
         </section>
 
-        {/* Gaps */}
+        {/* Club Scraping Health */}
         <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Stale Accounts</h2>
+          <h2 className="text-xl font-semibold mb-1">Club Scraping Health</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            How recently each club has had events added to the site.
+          </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <GapsTable accounts={gaps?.accounts ?? []} />
           </div>
