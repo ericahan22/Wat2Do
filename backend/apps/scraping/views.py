@@ -132,32 +132,43 @@ def get_gap_analysis(request):
     clubs = Clubs.objects.all()
     now = timezone.now()
 
-    accounts = []
+    handle_to_club = {}
     for club in clubs:
         ig_handle = _extract_ig_username(club.ig)
-        if not ig_handle:
-            continue
+        if ig_handle:
+            handle_to_club[ig_handle] = club.club_name
 
-        last_scrape = (
-            ScrapeRun.objects.filter(ig_username=ig_handle)
-            .order_by("-started_at")
-            .values("started_at", "status")
-            .first()
-        )
+    ig_handles = list(handle_to_club.keys())
 
-        last_event = (
-            Events.objects.filter(ig_handle=ig_handle)
-            .order_by("-added_at")
-            .values("added_at", "title")
-            .first()
-        )
+    latest_scrapes = {
+        s["ig_username"]: s
+        for s in ScrapeRun.objects.filter(ig_username__in=ig_handles)
+        .order_by("ig_username", "-started_at")
+        .distinct("ig_username")
+        .values("ig_username", "started_at", "status")
+    }
 
-        last_notification = (
-            AutomateLog.objects.filter(ig_username=ig_handle)
-            .order_by("-created_at")
-            .values("created_at")
-            .first()
-        )
+    latest_events = {
+        e["ig_handle"]: e
+        for e in Events.objects.filter(ig_handle__in=ig_handles)
+        .order_by("ig_handle", "-added_at")
+        .distinct("ig_handle")
+        .values("ig_handle", "added_at", "title")
+    }
+
+    latest_notifications = {
+        n["ig_username"]: n
+        for n in AutomateLog.objects.filter(ig_username__in=ig_handles)
+        .order_by("ig_username", "-created_at")
+        .distinct("ig_username")
+        .values("ig_username", "created_at")
+    }
+
+    accounts = []
+    for ig_handle, club_name in handle_to_club.items():
+        last_scrape = latest_scrapes.get(ig_handle)
+        last_event = latest_events.get(ig_handle)
+        last_notification = latest_notifications.get(ig_handle)
 
         last_event_at = last_event["added_at"] if last_event else None
         gap_days = (now - last_event_at).days if last_event_at else None
@@ -175,7 +186,7 @@ def get_gap_analysis(request):
         accounts.append(
             {
                 "ig_handle": ig_handle,
-                "club_name": club.club_name,
+                "club_name": club_name,
                 "last_notification_at": last_notification["created_at"] if last_notification else None,
                 "last_scrape_at": last_scrape["started_at"] if last_scrape else None,
                 "last_scrape_status": last_scrape["status"] if last_scrape else None,

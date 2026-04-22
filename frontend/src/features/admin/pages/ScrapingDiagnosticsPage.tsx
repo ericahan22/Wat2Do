@@ -140,7 +140,7 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
   }
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="min-w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
             <th className="p-2 whitespace-nowrap">Club</th>
@@ -155,8 +155,8 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
         <tbody>
           {accounts.map((account) => (
             <tr key={account.ig_handle} className="border-b border-gray-200 dark:border-gray-700">
-              <td className="p-2">{account.club_name}</td>
-              <td className="p-2 text-gray-500 dark:text-gray-400">@{account.ig_handle}</td>
+              <td className="p-2 whitespace-nowrap">{account.club_name}</td>
+              <td className="p-2 whitespace-nowrap text-gray-500 dark:text-gray-400">@{account.ig_handle}</td>
               <td className="p-2 whitespace-nowrap">{formatDate(account.last_notification_at)}</td>
               <td className="p-2 whitespace-nowrap">
                 {formatDate(account.last_scrape_at)}
@@ -173,8 +173,8 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
                   "—"
                 )}
               </td>
-              <td className="p-2">{account.gap_days ?? "—"}</td>
-              <td className="p-2">
+              <td className="p-2 whitespace-nowrap">{account.gap_days ?? "—"}</td>
+              <td className="p-2 whitespace-nowrap">
                 <StatusBadge value={account.status} />
               </td>
             </tr>
@@ -189,12 +189,6 @@ export function ScrapingDiagnosticsPage() {
   const navigate = useNavigate();
   const { logs, logsLoading, runs, runsLoading, gaps, gapsLoading } =
     useScrapingDiagnostics();
-
-  const isLoading = logsLoading || runsLoading || gapsLoading;
-
-  if (isLoading) {
-    return <Loading message="Loading scraping diagnostics..." />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -213,7 +207,16 @@ export function ScrapingDiagnosticsPage() {
         </div>
 
         {/* Summary */}
-        {gaps && (
+        {gapsLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 animate-pulse">
+                <div className="h-8 w-12 bg-gray-200 dark:bg-gray-700 rounded mb-1" />
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : gaps && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold">{gaps.summary.total_clubs}</div>
@@ -248,7 +251,11 @@ export function ScrapingDiagnosticsPage() {
             Notifications caught by the Automate app when a club posts on Instagram.
           </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <NotificationLogsTable logs={logs?.logs ?? []} />
+            {logsLoading ? (
+              <Loading message="Loading notifications..." />
+            ) : (
+              <NotificationLogsTable logs={logs?.logs ?? []} />
+            )}
           </div>
         </section>
 
@@ -262,7 +269,11 @@ export function ScrapingDiagnosticsPage() {
             Individual scraping jobs that fetch posts and extract events.
           </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <ScrapeRunsTable runs={runs?.runs ?? []} />
+            {runsLoading ? (
+              <Loading message="Loading scrape runs..." />
+            ) : (
+              <ScrapeRunsTable runs={runs?.runs ?? []} />
+            )}
           </div>
         </section>
 
@@ -273,7 +284,11 @@ export function ScrapingDiagnosticsPage() {
             How recently each club has had events added to the site.
           </p>
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <GapsTable accounts={gaps?.accounts ?? []} />
+            {gapsLoading ? (
+              <Loading message="Loading club health..." />
+            ) : (
+              <GapsTable accounts={gaps?.accounts ?? []} />
+            )}
           </div>
         </section>
       </div>
