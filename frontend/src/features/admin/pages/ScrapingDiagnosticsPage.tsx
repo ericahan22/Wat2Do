@@ -23,23 +23,23 @@ function formatDate(dateStr: string | null) {
 
 function NotificationLogsTable({ logs }: { logs: AutomateLog[] }) {
   if (logs.length === 0) {
-    return <p className="text-sm text-gray-500">No logs in the last 7 days.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">No logs in the last 7 days.</p>;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left">
-            <th className="p-2">Time</th>
-            <th className="p-2">Username</th>
-            <th className="p-2">Resolved</th>
-            <th className="p-2">Dispatched</th>
-            <th className="p-2">Error</th>
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
+            <th className="p-2 whitespace-nowrap">Time</th>
+            <th className="p-2 whitespace-nowrap">Username</th>
+            <th className="p-2 whitespace-nowrap">Resolved</th>
+            <th className="p-2 whitespace-nowrap">Dispatched</th>
+            <th className="p-2 whitespace-nowrap">Error</th>
           </tr>
         </thead>
         <tbody>
           {logs.map((log) => (
-            <tr key={log.id} className="border-b">
+            <tr key={log.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2 whitespace-nowrap">{formatDate(log.created_at)}</td>
               <td className="p-2">{log.ig_username || log.ig_user_id || "—"}</td>
               <td className="p-2">
@@ -63,26 +63,26 @@ function NotificationLogsTable({ logs }: { logs: AutomateLog[] }) {
 
 function ScrapeRunsTable({ runs }: { runs: ScrapeRun[] }) {
   if (runs.length === 0) {
-    return <p className="text-sm text-gray-500">No scrape runs in the last 7 days.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">No scrape runs in the last 7 days.</p>;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left">
-            <th className="p-2">Time</th>
-            <th className="p-2">Username</th>
-            <th className="p-2">Status</th>
-            <th className="p-2">Fetched</th>
-            <th className="p-2">New</th>
-            <th className="p-2">Extracted</th>
-            <th className="p-2">Saved</th>
-            <th className="p-2">Notes</th>
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
+            <th className="p-2 whitespace-nowrap">Time</th>
+            <th className="p-2 whitespace-nowrap">Username</th>
+            <th className="p-2 whitespace-nowrap">Status</th>
+            <th className="p-2 whitespace-nowrap">Fetched</th>
+            <th className="p-2 whitespace-nowrap">New</th>
+            <th className="p-2 whitespace-nowrap">Extracted</th>
+            <th className="p-2 whitespace-nowrap">Saved</th>
+            <th className="p-2 whitespace-nowrap">Notes</th>
           </tr>
         </thead>
         <tbody>
           {runs.map((run) => (
-            <tr key={run.id} className="border-b">
+            <tr key={run.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2 whitespace-nowrap">{formatDate(run.started_at)}</td>
               <td className="p-2">{run.ig_username}</td>
               <td className="p-2">
@@ -122,27 +122,27 @@ function ScrapeRunsTable({ runs }: { runs: ScrapeRun[] }) {
 
 function GapsTable({ accounts }: { accounts: GapAccount[] }) {
   if (accounts.length === 0) {
-    return <p className="text-sm text-gray-500">No clubs found.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">No clubs found.</p>;
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b text-left">
-            <th className="p-2">Club</th>
-            <th className="p-2">IG Handle</th>
-            <th className="p-2">Last Notification</th>
-            <th className="p-2">Last Scrape</th>
-            <th className="p-2">Last Event</th>
-            <th className="p-2">Gap (days)</th>
-            <th className="p-2">Status</th>
+          <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
+            <th className="p-2 whitespace-nowrap">Club</th>
+            <th className="p-2 whitespace-nowrap">IG Handle</th>
+            <th className="p-2 whitespace-nowrap">Last Notification</th>
+            <th className="p-2 whitespace-nowrap">Last Scrape</th>
+            <th className="p-2 whitespace-nowrap">Last Event</th>
+            <th className="p-2 whitespace-nowrap">Gap (days)</th>
+            <th className="p-2 whitespace-nowrap">Status</th>
           </tr>
         </thead>
         <tbody>
           {accounts.map((account) => (
-            <tr key={account.ig_handle} className="border-b">
+            <tr key={account.ig_handle} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2">{account.club_name}</td>
-              <td className="p-2 text-gray-500">@{account.ig_handle}</td>
+              <td className="p-2 text-gray-500 dark:text-gray-400">@{account.ig_handle}</td>
               <td className="p-2 whitespace-nowrap">{formatDate(account.last_notification_at)}</td>
               <td className="p-2 whitespace-nowrap">
                 {formatDate(account.last_scrape_at)}
@@ -150,7 +150,7 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
                   <span className="ml-1 text-xs text-gray-400">({account.last_scrape_status})</span>
                 )}
               </td>
-              <td className="p-2">
+              <td className="p-2 whitespace-nowrap">
                 {account.last_event_at ? (
                   <span title={account.last_event_title || ""}>
                     {new Date(account.last_event_at).toLocaleDateString()}
@@ -201,19 +201,19 @@ export function ScrapingDiagnosticsPage() {
         {/* Summary */}
         {gaps && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold">{gaps.summary.total_clubs}</div>
               <div className="text-sm text-gray-500">Total Clubs</div>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-green-600">{gaps.summary.active_recently}</div>
               <div className="text-sm text-gray-500">Active (7d)</div>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-amber-600">{gaps.summary.stale}</div>
               <div className="text-sm text-gray-500">Stale</div>
             </div>
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border">
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
               <div className="text-2xl font-bold text-red-600">{gaps.summary.never_scraped}</div>
               <div className="text-sm text-gray-500">Never Scraped</div>
             </div>
@@ -230,7 +230,7 @@ export function ScrapingDiagnosticsPage() {
               </span>
             )}
           </h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <NotificationLogsTable logs={logs?.logs ?? []} />
           </div>
         </section>
@@ -241,7 +241,7 @@ export function ScrapingDiagnosticsPage() {
             Scrape Runs
             {runs && <span className="ml-2 text-sm text-gray-500">({runs.total} in last 7d)</span>}
           </h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <ScrapeRunsTable runs={runs?.runs ?? []} />
           </div>
         </section>
@@ -249,7 +249,7 @@ export function ScrapingDiagnosticsPage() {
         {/* Gaps */}
         <section className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Stale Accounts</h2>
-          <div className="bg-white dark:bg-gray-800 rounded-lg border p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <GapsTable accounts={gaps?.accounts ?? []} />
           </div>
         </section>
