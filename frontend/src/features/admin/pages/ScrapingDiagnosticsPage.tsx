@@ -140,7 +140,7 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
   }
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm">
+      <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 dark:border-gray-700 text-left text-gray-600 dark:text-gray-300">
             <th className="p-2 whitespace-nowrap">Club</th>
@@ -155,8 +155,8 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
         <tbody>
           {accounts.map((account) => (
             <tr key={account.ig_handle} className="border-b border-gray-200 dark:border-gray-700">
-              <td className="p-2 whitespace-nowrap">{account.club_name}</td>
-              <td className="p-2 whitespace-nowrap text-gray-500 dark:text-gray-400">@{account.ig_handle}</td>
+              <td className="p-2">{account.club_name}</td>
+              <td className="p-2 text-gray-500 dark:text-gray-400">@{account.ig_handle}</td>
               <td className="p-2 whitespace-nowrap">{formatDate(account.last_notification_at)}</td>
               <td className="p-2 whitespace-nowrap">
                 {formatDate(account.last_scrape_at)}
@@ -173,8 +173,8 @@ function GapsTable({ accounts }: { accounts: GapAccount[] }) {
                   "—"
                 )}
               </td>
-              <td className="p-2 whitespace-nowrap">{account.gap_days ?? "—"}</td>
-              <td className="p-2 whitespace-nowrap">
+              <td className="p-2">{account.gap_days ?? "—"}</td>
+              <td className="p-2">
                 <StatusBadge value={account.status} />
               </td>
             </tr>
