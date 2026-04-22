@@ -1,12 +1,17 @@
-import type { 
-  PromoteEventRequest, 
-  UpdatePromotionRequest, 
-  PromoteEventResponse, 
-  UpdatePromotionResponse, 
-  UnpromoteEventResponse, 
-  PromotedEventsResponse, 
-  PromotionStatusResponse 
+import type {
+  PromoteEventRequest,
+  UpdatePromotionRequest,
+  PromoteEventResponse,
+  UpdatePromotionResponse,
+  UnpromoteEventResponse,
+  PromotedEventsResponse,
+  PromotionStatusResponse
 } from '@/features/admin/types/promotion';
+import type {
+  AutomateLogsResponse,
+  ScrapeRunsResponse,
+  GapAnalysisResponse,
+} from '@/features/admin/types/scraping';
 import BaseAPIClient from './BaseAPIClient';
 
 /**
@@ -65,6 +70,28 @@ class AdminAPIClient {
    */
   async deletePromotion(promotionId: string): Promise<{ message: string }> {
     return this.apiClient.delete(`promotions/${promotionId}/`);
+  }
+
+  async getAutomateLogs(params?: { limit?: number; days?: number; username?: string }): Promise<AutomateLogsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.append('limit', String(params.limit));
+    if (params?.days) searchParams.append('days', String(params.days));
+    if (params?.username) searchParams.append('username', params.username);
+    const qs = searchParams.toString();
+    return this.apiClient.get(`scraping/logs/${qs ? `?${qs}` : ''}`);
+  }
+
+  async getScrapeRuns(params?: { limit?: number; days?: number; username?: string }): Promise<ScrapeRunsResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.append('limit', String(params.limit));
+    if (params?.days) searchParams.append('days', String(params.days));
+    if (params?.username) searchParams.append('username', params.username);
+    const qs = searchParams.toString();
+    return this.apiClient.get(`scraping/runs/${qs ? `?${qs}` : ''}`);
+  }
+
+  async getGapAnalysis(): Promise<GapAnalysisResponse> {
+    return this.apiClient.get('scraping/gaps/');
   }
 }
 

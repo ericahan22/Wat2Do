@@ -2,7 +2,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, FileText } from "lucide-react";
+import { Sparkles, FileText, Activity } from "lucide-react";
 
 function AdminPage() {
   const { signOut } = useClerk();
@@ -26,6 +26,13 @@ function AdminPage() {
       icon: FileText,
       route: "/admin/submissions",
       color: "text-blue-600 dark:text-blue-400",
+    },
+    {
+      title: "Scraping Diagnostics",
+      description: "Monitor scraping pipeline and find missing posts",
+      icon: Activity,
+      route: "/admin/scraping",
+      color: "text-orange-600 dark:text-orange-400",
     },
   ];
 

@@ -59,7 +59,10 @@ INSTALLED_APPS = [
     "apps.newsletter",
     "apps.payments",
     "apps.waitlist",
+    "apps.scraping",
 ]
+
+AUTOMATE_WEBHOOK_KEY = os.getenv("AUTOMATE_WEBHOOK_KEY")
 
 MIDDLEWARE = [
     "apps.core.middleware.HealthCheckMiddleware",

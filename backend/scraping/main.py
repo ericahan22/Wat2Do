@@ -14,6 +14,7 @@ django.setup()
 
 from django.utils import timezone
 
+from apps.scraping.models import ScrapeRun
 from scraping.event_processor import EventProcessor
 from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
@@ -67,12 +68,25 @@ def main():
             logger.warning("No valid targets found in batch mode, exiting.")
             sys.exit(0)
 
+    github_run_id = os.getenv("GITHUB_RUN_ID")
+    scrape_runs = {}
+    for username in targets:
+        if username and username.strip():
+            try:
+                run = ScrapeRun.objects.create(
+                    ig_username=username.strip(),
+                    github_run_id=github_run_id,
+                )
+                scrape_runs[username.strip()] = run
+            except Exception as e:
+                logger.warning(f"Failed to create ScrapeRun for {username}: {e}")
+
     scraper = InstagramScraper()
     processor = EventProcessor(concurrency=5)
 
     # Configure run based on mode
     ignore_cutoff = os.getenv("IGNORE_CUTOFF", "false").lower() == "true"
-    
+
     if mode == "single":
         # Single user
         if ignore_cutoff:
@@ -89,10 +103,36 @@ def main():
     with raw_path.open("w", encoding="utf-8") as f:
         json.dump(posts, f, ensure_ascii=False, indent=2)
 
+    # Update posts_fetched counts per username
+    for username, run in scrape_runs.items():
+        try:
+            user_posts = [p for p in posts if p.get("ownerUsername") == username]
+            run.posts_fetched = len(user_posts)
+            run.save(update_fields=["posts_fetched"])
+        except Exception as e:
+            logger.warning(f"Failed to update posts_fetched for {username}: {e}")
+
+    # Detect pinned post warning
+    pinned_returned = any(bool(item.get("isPinned")) for item in posts)
+    if pinned_returned:
+        for run in scrape_runs.values():
+            try:
+                run.pinned_post_warning = True
+                run.save(update_fields=["pinned_post_warning"])
+            except Exception:
+                pass
+
     # Filter out results not containing posts before processing
     posts = filter_valid_posts(posts)
     if not posts:
         logger.info("No posts retrieved. Exiting.")
+        for run in scrape_runs.values():
+            try:
+                run.status = "no_posts"
+                run.finished_at = timezone.now()
+                run.save(update_fields=["status", "finished_at"])
+            except Exception:
+                pass
         sys.exit(0)
 
     if ignore_cutoff:
@@ -100,11 +140,18 @@ def main():
     else:
         cutoff_date = timezone.now() - timedelta(days=1)
     try:
-        saved_count = asyncio.run(processor.process(posts, cutoff_date))
+        saved_count = asyncio.run(
+            processor.process(posts, cutoff_date, scrape_runs=scrape_runs)
+        )
 
-        # 0 = success (events added)
-        # 2 = warning (no events added)
-        # 1 = error (exception occurred)
+        for run in scrape_runs.values():
+            try:
+                run.status = "success" if run.events_saved > 0 else "no_posts"
+                run.finished_at = timezone.now()
+                run.save(update_fields=["status", "finished_at"])
+            except Exception:
+                pass
+
         if saved_count > 0:
             logger.info(f"Successfully added {saved_count} event(s)")
             sys.exit(0)
@@ -113,6 +160,14 @@ def main():
             sys.exit(0)
     except Exception as e:
         logger.error(f"Critical error in processing: {e}", exc_info=True)
+        for run in scrape_runs.values():
+            try:
+                run.status = "error"
+                run.error_message = str(e)
+                run.finished_at = timezone.now()
+                run.save(update_fields=["status", "error_message", "finished_at"])
+            except Exception:
+                pass
         sys.exit(1)
 
 

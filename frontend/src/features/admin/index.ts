@@ -23,3 +23,4 @@ export type {
 export { default as AdminPage } from './pages/AdminPage';
 export { PromotionsPage } from './pages/PromotionsPage';
 export { SubmissionsReviewPage } from './pages/SubmissionsReviewPage';
+export { ScrapingDiagnosticsPage } from './pages/ScrapingDiagnosticsPage';

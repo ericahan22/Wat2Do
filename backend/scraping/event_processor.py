@@ -89,7 +89,7 @@ class EventProcessor:
                 post.get("caption"), post.get("all_s3_urls"), post_dt
             )
 
-    async def process(self, posts_data, cutoff_date):
+    async def process(self, posts_data, cutoff_date, scrape_runs=None):
         logger.info(f"Processing {len(posts_data)} posts...")
 
         seen_shortcodes = await self._get_seen_shortcodes()
@@ -100,7 +100,7 @@ class EventProcessor:
             url = post.get("url")
             ig_handle = post.get("ownerUsername") or "UNKNOWN"
             shortcode = url.strip("/").split("/")[-1] if url else "UNKNOWN"
-            
+
             logger.info(f"[{ig_handle}] [{shortcode}] Processing Instagram post...")
 
             if not url or "/p/" not in url:
@@ -132,6 +132,18 @@ class EventProcessor:
                 continue
 
             valid_posts.append(post)
+
+        # Update posts_new on ScrapeRun
+        if scrape_runs:
+            for post in valid_posts:
+                run = scrape_runs.get(post.get("ownerUsername"))
+                if run:
+                    run.posts_new += 1
+            for run in scrape_runs.values():
+                try:
+                    await sync_to_async(run.save)(update_fields=["posts_new"])
+                except Exception:
+                    pass
 
         if not valid_posts:
             logger.info("No new valid posts found.")
@@ -199,6 +211,15 @@ class EventProcessor:
                     f"[{ig_handle}] [{shortcode}] No events found in post, skipping"
                 )
                 continue
+
+            if scrape_runs:
+                run = scrape_runs.get(ig_handle)
+                if run:
+                    run.events_extracted += len(extracted_events) if isinstance(extracted_events, list) else 1
+                    try:
+                        await sync_to_async(run.save)(update_fields=["events_extracted"])
+                    except Exception:
+                        pass
 
             if not isinstance(extracted_events, list):
                 extracted_events = [extracted_events]
@@ -273,12 +294,28 @@ class EventProcessor:
                         f"[{ig_handle}] [{shortcode}] Saved event: '{event_data.get('title', '')}'"
                     )
                     saved_count += 1
+                    if scrape_runs:
+                        run = scrape_runs.get(ig_handle)
+                        if run:
+                            run.events_saved += 1
+                            try:
+                                await sync_to_async(run.save)(update_fields=["events_saved"])
+                            except Exception:
+                                pass
                 elif result == "updated":
                     append_event_to_csv(event_data, added_to_db="updated")
                     logger.info(
                         f"[{ig_handle}] [{shortcode}] Updated event: '{event_data.get('title', '')}'"
                     )
                     saved_count += 1
+                    if scrape_runs:
+                        run = scrape_runs.get(ig_handle)
+                        if run:
+                            run.events_saved += 1
+                            try:
+                                await sync_to_async(run.save)(update_fields=["events_saved"])
+                            except Exception:
+                                pass
                 elif result == "duplicate":
                     append_event_to_csv(event_data, added_to_db="duplicate_post")
                     logger.info(
