@@ -234,7 +234,13 @@ class OpenAIService:
                 valid_urls = [url for url in all_s3_urls if url]
                 if valid_urls:
                     logger.debug(f"Including {len(valid_urls)} images for analysis")
-                    for img_url in valid_urls:
+                    # A position-marker text block immediately before each image
+                    # block makes vision models far more accurate at reporting
+                    # which image an extracted event came from (image_index).
+                    for i, img_url in enumerate(valid_urls):
+                        messages[1]["content"].append(
+                            {"type": "text", "text": f"Image {i}:"}
+                        )
                         messages[1]["content"].append(
                             {"type": "image_url", "image_url": {"url": img_url}}
                         )
