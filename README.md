@@ -1,4 +1,4 @@
-# Wat2Do
+# Wat2Do 
 
 <p align="center">
   <img src="frontend/public/wat2do-logo.svg" alt="Wat2Do Logo" width="180"/>
