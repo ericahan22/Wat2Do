@@ -57,7 +57,7 @@ class InstagramScraper:
             logger.info(f"Scrape started (Run ID: {run_id}). Waiting for completion...")
 
             start_time = time.time()
-            timeout_secs = 600  # 10 minutes
+            timeout_secs = 3600  # 1 hour
 
             while True:
                 if time.time() - start_time > timeout_secs:

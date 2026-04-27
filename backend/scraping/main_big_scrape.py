@@ -36,6 +36,12 @@ from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
 
 
+# How many handles to send to Apify in one actor run. Each chunk gets its own
+# 1-hour timeout. Larger chunks = fewer actor starts but more risk of timing
+# out; smaller chunks = more actor starts but each finishes faster.
+HANDLES_PER_APIFY_RUN = 100
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Big Scrape entry point")
     parser.add_argument(
@@ -140,9 +146,20 @@ def main() -> None:
         dry_run=args.dry_run,
     )
 
-    posts = scraper.scrape(
-        handles, results_limit=args.limit, cutoff_days=args.cutoff_days
-    )
+    posts: list[dict] = []
+    chunks = [
+        handles[i : i + HANDLES_PER_APIFY_RUN]
+        for i in range(0, len(handles), HANDLES_PER_APIFY_RUN)
+    ]
+    for i, chunk in enumerate(chunks, start=1):
+        logger.info(f"Apify chunk {i}/{len(chunks)}: scraping {len(chunk)} accounts")
+        chunk_posts = scraper.scrape(
+            chunk, results_limit=args.limit, cutoff_days=args.cutoff_days
+        )
+        logger.info(
+            f"Apify chunk {i}/{len(chunks)}: returned {len(chunk_posts)} posts"
+        )
+        posts.extend(chunk_posts)
 
     raw_path = Path(__file__).parent / "apify_raw_results.json"
     with raw_path.open("w", encoding="utf-8") as f:
