@@ -10,8 +10,7 @@ Usage:
         --school NAME \\
         --limit N \\
         --cutoff-days N \\
-        [--dry-run] \\
-        [--per-image-carousel-parsing]
+        [--dry-run]
 """
 
 import argparse
@@ -70,11 +69,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Process only the first URL in the file.",
     )
-    parser.add_argument(
-        "--per-image-carousel-parsing",
-        action="store_true",
-        help="Run AI extraction once per carousel image (default: batched).",
-    )
     return parser.parse_args()
 
 
@@ -112,8 +106,7 @@ def main() -> None:
     args = parse_args()
     logger.info(
         f"--- Big Scrape Started: school={args.school!r}, urls_file={args.urls_file}, "
-        f"dry_run={args.dry_run}, limit={args.limit}, cutoff_days={args.cutoff_days}, "
-        f"per_image_carousel_parsing={args.per_image_carousel_parsing} ---"
+        f"dry_run={args.dry_run}, limit={args.limit}, cutoff_days={args.cutoff_days} ---"
     )
 
     urls = read_urls_file(args.urls_file)
@@ -144,7 +137,6 @@ def main() -> None:
     processor = EventProcessor(
         concurrency=5,
         school=args.school,
-        per_image_parsing=args.per_image_carousel_parsing,
         dry_run=args.dry_run,
     )
 

@@ -25,11 +25,6 @@ on:
         required: true
         type: boolean
         default: true
-      per_image_carousel_parsing:
-        description: 'Run AI extraction once per carousel image (slower, costs more)'
-        required: true
-        type: boolean
-        default: false
 
 jobs:
   big_scrape:
@@ -109,7 +104,6 @@ jobs:
             --limit ${{ inputs.limit }} \
             --cutoff-days ${{ inputs.cutoff_days }} \
             ${{ inputs.dry_run && '--dry-run' || '' }} \
-            ${{ inputs.per_image_carousel_parsing && '--per-image-carousel-parsing' || '' }} \
             2>&1 | tee logs/scraping.log
         continue-on-error: false
 
