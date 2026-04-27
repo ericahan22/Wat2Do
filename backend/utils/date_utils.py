@@ -30,6 +30,11 @@ UNIVERSITY_SEMESTER_END_TIMES = {
         "20260531T235959Z",  # Spring semester (ends May 31)
         "20260831T235959Z",  # Summer semester (ends August 31)
     ],
+    "Massachusetts Institute of Technology": [
+        "20251231T235959Z",  # Fall semester (ends December 31)
+        "20260531T235959Z",  # Spring semester (ends May 31)
+        "20260831T235959Z",  # Summer semester (ends August 31)
+    ],
 }
 
 UNIVERSITY_DEFAULT_TIMEZONES = {
@@ -37,6 +42,7 @@ UNIVERSITY_DEFAULT_TIMEZONES = {
     "University of Pennsylvania": "America/New_York",
     "New York University": "America/New_York",
     "Columbia University": "America/New_York",
+    "Massachusetts Institute of Technology": "America/New_York",
 }
 
 

@@ -12,6 +12,7 @@ on:
           - 'University of Pennsylvania'
           - 'New York University'
           - 'Columbia University'
+          - 'Massachusetts Institute of Technology'
       limit:
         description: 'Max posts per user to scrape'
         required: true
@@ -100,6 +101,9 @@ jobs:
               ;;
             "Columbia University")
               URLS_FILE=../shared/constants/urls_columbia.txt
+              ;;
+            "Massachusetts Institute of Technology")
+              URLS_FILE=../shared/constants/urls_mit.txt
               ;;
             *)
               echo "Unknown school: ${{ inputs.school }}"
