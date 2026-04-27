@@ -104,7 +104,9 @@ class EventProcessor:
     async def process(self, posts_data, cutoff_date, scrape_runs=None):
         logger.info(f"Processing {len(posts_data)} posts...")
 
-        seen_shortcodes = await self._get_seen_shortcodes()
+        # In dry-run, we want every post to flow through to AI extraction so we
+        # can eyeball LLM output, even for posts already in DB.
+        seen_shortcodes = set() if self.dry_run else await self._get_seen_shortcodes()
         valid_posts = []
 
         # 1. Filter Posts

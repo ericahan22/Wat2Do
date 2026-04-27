@@ -25,6 +25,11 @@ on:
         required: true
         type: boolean
         default: true
+      target_username:
+        description: 'Single Instagram username to target (overrides school URLs file when set)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   big_scrape:
@@ -86,18 +91,24 @@ jobs:
       - name: Run scraper
         working-directory: backend/scraping
         run: |
-          case "${{ inputs.school }}" in
-            "University of Waterloo")
-              URLS_FILE=../shared/constants/urls_uwaterloo.txt
-              ;;
-            "University of Pennsylvania")
-              URLS_FILE=../shared/constants/urls_upenn.txt
-              ;;
-            *)
-              echo "Unknown school: ${{ inputs.school }}"
-              exit 1
-              ;;
-          esac
+          if [ -n "${{ inputs.target_username }}" ]; then
+            URLS_FILE=$(mktemp)
+            echo "https://instagram.com/${{ inputs.target_username }}" > "$URLS_FILE"
+            echo "Ad-hoc target: ${{ inputs.target_username }} (URLs file: $URLS_FILE)"
+          else
+            case "${{ inputs.school }}" in
+              "University of Waterloo")
+                URLS_FILE=../shared/constants/urls_uwaterloo.txt
+                ;;
+              "University of Pennsylvania")
+                URLS_FILE=../shared/constants/urls_upenn.txt
+                ;;
+              *)
+                echo "Unknown school: ${{ inputs.school }}"
+                exit 1
+                ;;
+            esac
+          fi
           python -u main_big_scrape.py \
             --urls-file "$URLS_FILE" \
             --school "${{ inputs.school }}" \
