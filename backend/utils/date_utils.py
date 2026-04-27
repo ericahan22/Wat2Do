@@ -14,8 +14,23 @@ UNIVERSITY_SEMESTER_END_TIMES = {
         "20251231T235959Z",  # Fall semester (ends December 31)
         "20260430T235959Z",  # Winter semester (ends April 30)
         "20260831T235959Z",  # Summer semester (ends August 31)
-    ]
+    ],
+    "University of Pennsylvania": [
+        "20251231T235959Z",  # Fall semester (ends December 31)
+        "20260531T235959Z",  # Spring semester (ends May 31)
+        "20260831T235959Z",  # Summer semester (ends August 31)
+    ],
 }
+
+UNIVERSITY_DEFAULT_TIMEZONES = {
+    "University of Waterloo": "America/Toronto",
+    "University of Pennsylvania": "America/New_York",
+}
+
+
+def get_default_timezone(university: str = "University of Waterloo") -> str:
+    """Return IANA timezone for a school. Falls back to America/Toronto."""
+    return UNIVERSITY_DEFAULT_TIMEZONES.get(university, "America/Toronto")
 
 
 def get_current_semester_end_time(university: str = "University of Waterloo") -> str:
@@ -34,7 +49,9 @@ def get_current_semester_end_time(university: str = "University of Waterloo") ->
     - Summer: May 1 - August 31
     """
 
-    semester_end_times = UNIVERSITY_SEMESTER_END_TIMES[university]
+    semester_end_times = UNIVERSITY_SEMESTER_END_TIMES.get(
+        university, UNIVERSITY_SEMESTER_END_TIMES["University of Waterloo"]
+    )
     now = datetime.now()
     month = now.month
 

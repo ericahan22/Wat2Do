@@ -14,11 +14,11 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from openai import OpenAI
-from pytz import timezone as pytz_timezone
+from zoneinfo import ZoneInfo
 
 from scraping.logging_config import logger
 from shared.constants.event_categories import EVENT_CATEGORIES
-from utils.date_utils import get_current_semester_end_time
+from utils.date_utils import get_current_semester_end_time, get_default_timezone
 
 
 class OpenAIService:
@@ -57,7 +57,7 @@ class OpenAIService:
 
         import re
 
-        text = re.sub(r"\s+", " ")
+        text = re.sub(r"\s+", " ", text)
 
         try:
             response = self.client.embeddings.create(
@@ -109,20 +109,20 @@ class OpenAIService:
 
         - Return an array of JSON objects, each object representing a unique event.
         """
-        # Get current date and day of week for context
-        toronto_tz = pytz_timezone("America/Toronto")
-        now = datetime.now(toronto_tz)
+        # Get current date and day of week for context, using the school's local timezone
+        local_tz = ZoneInfo(get_default_timezone(school))
+        now = datetime.now(local_tz)
         current_date = now.strftime("%Y-%m-%d")
         current_day_of_week = now.strftime("%A")
 
         context_datetime = (
             post_created_at if isinstance(post_created_at, datetime) else now
         )
-        
+
         if context_datetime.tzinfo is None:
-            context_datetime = toronto_tz.localize(context_datetime)
+            context_datetime = context_datetime.replace(tzinfo=local_tz)
         else:
-            context_datetime = context_datetime.astimezone(toronto_tz)
+            context_datetime = context_datetime.astimezone(local_tz)
 
         context_date = context_datetime.strftime("%Y-%m-%d")
         context_day = context_datetime.strftime("%A")
@@ -192,7 +192,7 @@ class OpenAIService:
     - Always convert local times to UTC. The JSON must use ISO 8601 format with a trailing "Z" (e.g., "2025-11-05T22:00:00Z").
     - If an end time is not provided, leave "dtend_utc" as an empty string.
     - If duration is not explicitly available, leave "duration" as an empty string.
-    - Use the timezone context from the caption/image (default to "America/Toronto" for {school}) for the "tz" field.
+    - Use the timezone context from the caption/image (default to "{local_tz.key}" for {school}) for the "tz" field.
 
     ADDITIONAL RULES:
     - Prioritize caption text; use image text if missing details.

@@ -3,16 +3,33 @@ name: Big Scrape (F25)
 on:
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: 'Dry run (1 account only)'
-        required: false
-        default: 'true'
-        type: boolean
+      school:
+        description: 'School to scrape'
+        required: true
+        type: choice
+        options:
+          - 'University of Waterloo'
+          - 'University of Pennsylvania'
       limit:
         description: 'Max posts per user to scrape'
-        required: false
-        default: '100'
+        required: true
         type: string
+        default: '100'
+      cutoff_days:
+        description: 'Number of days to look back for posts'
+        required: true
+        type: string
+        default: '4'
+      dry_run:
+        description: 'Dry run (process only the first URL)'
+        required: true
+        type: boolean
+        default: true
+      per_image_carousel_parsing:
+        description: 'Run AI extraction once per carousel image (slower, costs more)'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   big_scrape:
@@ -74,9 +91,25 @@ jobs:
       - name: Run scraper
         working-directory: backend/scraping
         run: |
+          case "${{ inputs.school }}" in
+            "University of Waterloo")
+              URLS_FILE=../shared/constants/urls_uwaterloo.txt
+              ;;
+            "University of Pennsylvania")
+              URLS_FILE=../shared/constants/urls_upenn.txt
+              ;;
+            *)
+              echo "Unknown school: ${{ inputs.school }}"
+              exit 1
+              ;;
+          esac
           python -u main_big_scrape.py \
-            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            --urls-file "$URLS_FILE" \
+            --school "${{ inputs.school }}" \
             --limit ${{ inputs.limit }} \
+            --cutoff-days ${{ inputs.cutoff_days }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            ${{ inputs.per_image_carousel_parsing && '--per-image-carousel-parsing' || '' }} \
             2>&1 | tee logs/scraping.log
         continue-on-error: false
 

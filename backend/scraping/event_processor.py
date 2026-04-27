@@ -33,9 +33,22 @@ def _get_all_images(post):
 
 
 class EventProcessor:
-    def __init__(self, concurrency=5):
+    def __init__(
+        self,
+        concurrency=5,
+        school="University of Waterloo",
+        per_image_parsing=False,
+        dry_run=False,
+    ):
         self.concurrency = concurrency
         self.semaphore = asyncio.Semaphore(concurrency)
+        self.school = school
+        # When True, each image in a carousel post triggers its own AI call.
+        # When False (default), all carousel images are batched into one call.
+        self.per_image_parsing = bool(per_image_parsing)
+        # When True, skip all DB writes (Events, EventDates). Reads still happen
+        # so duplicate-shortcode filtering and club-type lookups work normally.
+        self.dry_run = bool(dry_run)
 
     @sync_to_async(thread_sensitive=True)
     def _get_club_type(self, ig_handle):
@@ -72,6 +85,7 @@ class EventProcessor:
             all_s3_urls=all_s3_urls,
             post_created_at=post_time,
             source_image_url=None,
+            school=self.school,
         )
 
     @sync_to_async(thread_sensitive=True)
@@ -88,6 +102,47 @@ class EventProcessor:
             return await self._extract_events(
                 post.get("caption"), post.get("all_s3_urls"), post_dt
             )
+
+    async def _extract_events_for_post(self, post):
+        """Run AI extraction for a post.
+
+        - When ``self.per_image_parsing`` is True and the post is a carousel
+          (>1 image), fire one extraction call per image and merge the results,
+          deduping events by title (case-insensitive). ``image_index`` on each
+          event is overridden to point to the actual image it came from.
+        - Otherwise, fall back to the single-call-per-post path.
+        """
+        all_s3_urls = post.get("all_s3_urls") or []
+        if not self.per_image_parsing or len(all_s3_urls) <= 1:
+            return await self._process_single_post_extraction(post)
+
+        ig_handle = post.get("ownerUsername") or "UNKNOWN"
+        shortcode = (post.get("url") or "").strip("/").split("/")[-1] or "UNKNOWN"
+        logger.info(
+            f"[{ig_handle}] [{shortcode}] Per-image carousel parsing: {len(all_s3_urls)} call(s)"
+        )
+
+        per_image_results = await asyncio.gather(
+            *[
+                self._process_single_post_extraction({**post, "all_s3_urls": [url]})
+                for url in all_s3_urls
+            ]
+        )
+
+        seen_titles: set[str] = set()
+        merged: list[dict] = []
+        for img_idx, events in enumerate(per_image_results):
+            if not events:
+                continue
+            for evt in events:
+                evt["image_index"] = img_idx
+                title_key = (evt.get("title") or "").strip().lower()
+                if title_key and title_key in seen_titles:
+                    continue
+                if title_key:
+                    seen_titles.add(title_key)
+                merged.append(evt)
+        return merged
 
     async def process(self, posts_data, cutoff_date, scrape_runs=None):
         logger.info(f"Processing {len(posts_data)} posts...")
@@ -186,13 +241,15 @@ class EventProcessor:
             idx += n_imgs
 
         # 3. Extract Events
+        if self.per_image_parsing:
+            logger.info("Per-image carousel parsing is ENABLED")
         extract_tasks = []
         for post in valid_posts:
             ig_handle = post.get("ownerUsername")
             shortcode = post.get("url", "").strip("/").split("/")[-1]
             logger.info(f"[{ig_handle}] [{shortcode}] Extracting event data...")
             extract_tasks.append(
-                self._process_single_post_extraction(
+                self._extract_events_for_post(
                     {**post, "all_s3_urls": post["all_s3_urls"]}
                 )
             )
@@ -276,10 +333,19 @@ class EventProcessor:
                 # Add metadata to event_data
                 event_data["ig_handle"] = ig_handle
                 event_data["source_url"] = source_url
+                event_data["school"] = self.school
                 event_data["club_type"] = await self._get_club_type(ig_handle)
                 event_data["likes_count"] = post.get("likesCount") or post.get("likeCount") or 0
                 event_data["comments_count"] = post.get("commentsCount") or post.get("commentCount") or 0
                 event_data["posted_at"] = post_dt
+
+                if self.dry_run:
+                    append_event_to_csv(event_data, added_to_db="dry_run")
+                    logger.info(
+                        f"[{ig_handle}] [{shortcode}] [DRY-RUN] Would save event: '{event_data.get('title', '')}'"
+                    )
+                    saved_count += 1
+                    continue
 
                 try:
                     result = await self._save_event(event_data)
