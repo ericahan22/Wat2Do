@@ -47,7 +47,9 @@ export function useEvents() {
       showInterested ? "interested" : "",
     ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
-      const queryParams: EventsQueryParams = {};
+      const queryParams: EventsQueryParams = {
+        school: "University of Waterloo",
+      };
 
       if (pageParam) {
         queryParams.cursor = pageParam;

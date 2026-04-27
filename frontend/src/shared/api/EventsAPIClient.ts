@@ -14,6 +14,7 @@ export interface EventsQueryParams {
   cursor?: string;
   all?: boolean; // For calendar view - returns all events without pagination
   ids?: string; // Comma-separated list of event IDs for export/calendar URLs
+  school?: string;
 }
 
 export interface EventSubmissionResponse {
