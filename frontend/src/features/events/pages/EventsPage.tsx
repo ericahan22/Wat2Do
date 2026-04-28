@@ -6,6 +6,7 @@ import {
   useEventSelection,
   EventsContent,
   QuickFilters,
+  SchoolSelect,
 } from "@/features/events";
 import {
   getTodayString,
@@ -62,6 +63,8 @@ function EventsPage() {
     showInterested,
     searchTerm,
     categories,
+    school,
+    handleSchoolChange,
     handleToggleNewEvents,
     handleToggleInterested,
     handleToggleAllEvents,
@@ -165,6 +168,7 @@ function EventsPage() {
         <div className="flex flex-col sm:gap-4 gap-3.5">
           <div className="flex items-center sm:gap-4 gap-2">
             <SearchInput placeholder={placeholder} className="flex-1" />
+            <SchoolSelect value={school} onChange={handleSchoolChange} />
             <Tabs
               value={view}
               onValueChange={(value) =>

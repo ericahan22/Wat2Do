@@ -6,8 +6,9 @@ import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useApi } from "@/shared/hooks/useApi";
 import { getTodayString } from "@/shared/lib/dateUtils";
 import { useMyInterestedEvents } from "./useEventInterest";
-import { EventsResponse, type EventsQueryParams } from "@/shared/api/EventsAPIClient";
-import { Event } from "@/features/events";
+import { DEFAULT_SCHOOL } from "@/features/events/constants/events";
+import type { EventsResponse, EventsQueryParams } from "@/shared/api/EventsAPIClient";
+import type { Event } from "@/features/events";
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,6 +21,7 @@ export function useEvents() {
   const addedAt = searchParams.get("added_at") || "";
   const showInterested = searchParams.get("interested") === "true";
   const view = searchParams.get("view") || "grid";
+  const school = searchParams.get("school") || DEFAULT_SCHOOL;
 
   const { data: interestedEventIds } = useMyInterestedEvents();
 
@@ -44,11 +46,12 @@ export function useEvents() {
       dtstart_utc,
       addedAt,
       view,
+      school,
       showInterested ? "interested" : "",
     ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: EventsQueryParams = {
-        school: "University of Waterloo",
+        school,
       };
 
       if (pageParam) {
@@ -157,6 +160,18 @@ export function useEvents() {
     });
   };
 
+  const handleSchoolChange = (nextSchool: string) => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+      if (nextSchool === DEFAULT_SCHOOL) {
+        nextParams.delete("school");
+      } else {
+        nextParams.set("school", nextSchool);
+      }
+      return nextParams;
+    });
+  };
+
   const handleToggleStartDate = () => {
     setSearchParams((prev) => {
       const nextParams = new URLSearchParams(prev);
@@ -252,7 +267,9 @@ export function useEvents() {
     dtstart_utc,
     addedAt,
     showInterested,
+    school,
     handleViewChange,
+    handleSchoolChange,
     handleToggleStartDate,
     handleToggleNewEvents,
     handleToggleInterested,

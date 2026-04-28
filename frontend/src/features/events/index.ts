@@ -1,8 +1,9 @@
 export { default as EventsGrid } from './components/EventsGrid';
 export { default as EventsCalendar } from './components/EventsCalendar';
 export { default as EventLegend } from './components/EventLegend';
-export { default as QuickFilters } from './components/QuickFilters'; 
+export { default as QuickFilters } from './components/QuickFilters';
 export { default as EventsContent } from './components/EventsContent';
+export { default as SchoolSelect } from './components/SchoolSelect';
 
 // Hooks
 export { useEvents } from './hooks/useEvents';
