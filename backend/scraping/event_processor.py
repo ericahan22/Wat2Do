@@ -269,6 +269,14 @@ class EventProcessor:
                         all_s3_urls[0] if all_s3_urls else ""
                     )
 
+                # Set identifying metadata before any CSV write so every row has handle/source/etc.
+                event_data["ig_handle"] = ig_handle
+                event_data["source_url"] = source_url
+                event_data["school"] = self.school
+                event_data["posted_at"] = post_dt
+                event_data["likes_count"] = post.get("likesCount") or post.get("likeCount") or 0
+                event_data["comments_count"] = post.get("commentsCount") or post.get("commentCount") or 0
+
                 # Check for past date
                 occurrences = event_data.get("occurrences", [])
                 if occurrences:
@@ -283,14 +291,7 @@ class EventProcessor:
                         )
                         continue
 
-                # Add metadata to event_data
-                event_data["ig_handle"] = ig_handle
-                event_data["source_url"] = source_url
-                event_data["school"] = self.school
                 event_data["club_type"] = await self._get_club_type(ig_handle)
-                event_data["likes_count"] = post.get("likesCount") or post.get("likeCount") or 0
-                event_data["comments_count"] = post.get("commentsCount") or post.get("commentCount") or 0
-                event_data["posted_at"] = post_dt
 
                 if self.dry_run:
                     append_event_to_csv(event_data, added_to_db="dry_run")

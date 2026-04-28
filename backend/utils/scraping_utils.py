@@ -407,10 +407,17 @@ class EventDuplicateDetector:
         return None
 
 
+def _flatten_whitespace(value):
+    """Collapse newlines and runs of whitespace to single spaces so each CSV row stays on one line."""
+    if not value:
+        return value
+    return re.sub(r"\s+", " ", str(value)).strip()
+
+
 def append_event_to_csv(event_data, added_to_db="success"):
     """
     Append event data to CSV file for logging/debugging.
-    
+
     Args:
         event_data: Dictionary containing all event data and metadata
         added_to_db: Status of the database operation (success, error, duplicate_post, etc.)
@@ -434,11 +441,11 @@ def append_event_to_csv(event_data, added_to_db="success"):
     dtend_utc = primary_occurrence.get("dtend_utc")
     duration = primary_occurrence.get("duration")
     tz = primary_occurrence.get("tz")
-    location = event_data.get("location", "")
+    location = _flatten_whitespace(event_data.get("location", ""))
     food = event_data.get("food", "")
     price = event_data.get("price", "")
     registration = bool(event_data.get("registration", False))
-    description = event_data.get("description", "")
+    description = _flatten_whitespace(event_data.get("description", ""))
     latitude = event_data.get("latitude", None)
     longitude = event_data.get("longitude", None)
     school = event_data.get("school", "")
