@@ -76,9 +76,11 @@ def get_events(request):
         limit = 20
         all_events = request.GET.get("all", "").lower() == "true"
 
-        # Start with Events queryset
+        # Start with Events queryset; default to UW when no school is given
+        # so existing UW callers stay unaffected.
+        school_param = request.GET.get("school") or "University of Waterloo"
         events_queryset = Events.objects.filter(
-            status="CONFIRMED", school="University of Waterloo"
+            status="CONFIRMED", school=school_param
         )
 
         # Upcoming events filter: show all live and future events by default
