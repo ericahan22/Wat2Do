@@ -1,0 +1,113 @@
+name: Insert Backfilled Past Events
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'Big Scrape run ID to pull events_scraped.csv + apify_raw_results.json from'
+        required: true
+        type: string
+      dry_run:
+        description: 'Dry run (rolls back every insert; reports counts only)'
+        required: true
+        type: boolean
+        default: true
+      limit:
+        description: 'Max candidate rows to process (0 = all)'
+        required: true
+        type: string
+        default: '0'
+
+jobs:
+  insert_backfilled:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    env:
+      PRODUCTION: '1'
+      DJANGO_SETTINGS_MODULE: 'config.settings.development'
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+      EMAIL_ENCRYPTION_KEY: ${{ secrets.EMAIL_ENCRYPTION_KEY }}
+      EMAIL_HASH_KEY: ${{ secrets.EMAIL_HASH_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install --prefer-binary -r requirements.txt
+
+      - name: Download big-scrape artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          mkdir -p artifact
+          gh run download "$SOURCE_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dir artifact
+          echo "Downloaded files:"
+          find artifact -type f | sort
+
+          # Locate the CSV and JSON regardless of subdir name
+          CSV_PATH=$(find artifact -name 'events_scraped.csv' | head -1)
+          JSON_PATH=$(find artifact -name 'apify_raw_results.json' | head -1)
+          if [ -z "$CSV_PATH" ] || [ -z "$JSON_PATH" ]; then
+            echo "Missing CSV or apify JSON in artifact" >&2
+            exit 1
+          fi
+          echo "CSV_PATH=$CSV_PATH"   >> "$GITHUB_ENV"
+          echo "JSON_PATH=$JSON_PATH" >> "$GITHUB_ENV"
+
+      - name: Backfill CSV
+        working-directory: backend
+        run: |
+          python scripts/backfill_past_event_csv.py \
+            --csv   "../$CSV_PATH" \
+            --apify "../$JSON_PATH" \
+            --out   "../artifact/events_scraped.backfilled.csv"
+
+      - name: Insert backfilled past events
+        working-directory: backend
+        run: |
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then DRY_FLAG="--dry-run"; fi
+
+          LIMIT_FLAG=""
+          if [ "${{ inputs.limit }}" != "0" ]; then LIMIT_FLAG="--limit ${{ inputs.limit }}"; fi
+
+          python -u scripts/insert_backfilled_past_events.py \
+            --csv "../artifact/events_scraped.backfilled.csv" \
+            $DRY_FLAG $LIMIT_FLAG \
+            2>&1 | tee insert.log
+
+      - name: Upload backfilled CSV + log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: insert-backfilled-events-${{ github.run_number }}
+          path: |
+            artifact/events_scraped.backfilled.csv
+            backend/insert.log
+          if-no-files-found: 'ignore'
