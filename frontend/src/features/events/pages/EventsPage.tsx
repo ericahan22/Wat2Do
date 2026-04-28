@@ -143,11 +143,9 @@ function EventsPage() {
               suffix={` ${getEventTypeText()} events`}
             />
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
+          <div className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
             {isLoadingLastUpdate ? (
-              <span className="inline-flex items-center gap-2">
-                <Skeleton className="h-5 w-48 inline-block" />
-              </span>
+              <Skeleton className="h-5 w-48" />
             ) : latestUpdateData?.latestEventTitle && latestUpdateData?.lastUpdated ? (
               <>
                 <Link
@@ -162,7 +160,7 @@ function EventsPage() {
             ) : (
               "No recent updates"
             )}
-          </p>
+          </div>
         </div>
 
         <div className="flex flex-col sm:gap-4 gap-3.5">

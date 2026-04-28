@@ -4,7 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import type { EventSubmission } from '@/features/events/types/submission';
 
 export const useUserSubmissions = () => {
-  const { isSignedIn, userId } = useAuth();
+  const { isLoaded, isSignedIn, userId } = useAuth();
   const { eventsAPIClient } = useApi();
   const queryClient = useQueryClient();
 
@@ -12,7 +12,7 @@ export const useUserSubmissions = () => {
   const submissionsQuery = useQuery<EventSubmission[]>({
     queryKey: ['user-submissions', userId],
     queryFn: () => eventsAPIClient.getUserSubmissions(),
-    enabled: isSignedIn && !!userId,
+    enabled: isLoaded && isSignedIn === true && !!userId,
     staleTime: 30 * 1000,  
     gcTime: 5 * 60 * 1000,  
   });
