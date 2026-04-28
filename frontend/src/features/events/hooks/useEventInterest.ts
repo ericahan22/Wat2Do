@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, InfiniteData } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useAuth } from "@clerk/clerk-react";
 import { useApi } from "@/shared/hooks/useApi";
 import type { EventsResponse } from "@/shared/api/EventsAPIClient";
@@ -8,7 +8,7 @@ import type { Event } from "@/features/events/types/events";
  * Hook to get all event IDs the current user is interested in
  */
 export function useMyInterestedEvents() {
-  const { isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
   const { eventsAPIClient } = useApi();
 
   return useQuery({
@@ -17,7 +17,9 @@ export function useMyInterestedEvents() {
       const response = await eventsAPIClient.getMyInterestedEventIds();
       return new Set(response.event_ids); // Convert to Set for O(1) lookup
     },
-    enabled: isSignedIn,
+    // Wait for Clerk to finish loading. While `isSignedIn` is undefined,
+    // TanStack treats `enabled: undefined` as true and fires a 401.
+    enabled: isLoaded && isSignedIn === true,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     meta: {
       skipErrorToast: true,
