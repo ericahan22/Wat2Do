@@ -38,6 +38,7 @@ class EventProcessor:
         concurrency=5,
         school="University of Waterloo",
         dry_run=False,
+        model="gpt-5-mini",
     ):
         self.concurrency = concurrency
         self.semaphore = asyncio.Semaphore(concurrency)
@@ -45,6 +46,7 @@ class EventProcessor:
         # When True, skip all DB writes (Events, EventDates). Reads still happen
         # so duplicate-shortcode filtering and club-type lookups work normally.
         self.dry_run = bool(dry_run)
+        self.model = model
 
     @sync_to_async(thread_sensitive=True)
     def _get_club_type(self, ig_handle):
@@ -82,6 +84,7 @@ class EventProcessor:
             post_created_at=post_time,
             source_image_url=None,
             school=self.school,
+            model=self.model,
         )
 
     @sync_to_async(thread_sensitive=True)

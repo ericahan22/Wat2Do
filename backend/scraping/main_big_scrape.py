@@ -75,6 +75,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Process only the first URL in the file.",
     )
+    parser.add_argument(
+        "--model",
+        default="gpt-5-mini",
+        help="OpenAI model used for event extraction.",
+    )
     return parser.parse_args()
 
 
@@ -112,7 +117,8 @@ def main() -> None:
     args = parse_args()
     logger.info(
         f"--- Big Scrape Started: school={args.school!r}, urls_file={args.urls_file}, "
-        f"dry_run={args.dry_run}, limit={args.limit}, cutoff_days={args.cutoff_days} ---"
+        f"dry_run={args.dry_run}, limit={args.limit}, cutoff_days={args.cutoff_days}, "
+        f"model={args.model!r} ---"
     )
 
     urls = read_urls_file(args.urls_file)
@@ -144,6 +150,7 @@ def main() -> None:
         concurrency=5,
         school=args.school,
         dry_run=args.dry_run,
+        model=args.model,
     )
 
     posts: list[dict] = []

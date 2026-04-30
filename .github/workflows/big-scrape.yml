@@ -28,6 +28,11 @@ on:
         required: true
         type: boolean
         default: true
+      model:
+        description: 'OpenAI model for event extraction'
+        required: true
+        type: string
+        default: 'gpt-5-mini'
 
 jobs:
   big_scrape:
@@ -115,6 +120,7 @@ jobs:
             --school "${{ inputs.school }}" \
             --limit ${{ inputs.limit }} \
             --cutoff-days ${{ inputs.cutoff_days }} \
+            --model "${{ inputs.model }}" \
             ${{ inputs.dry_run && '--dry-run' || '' }} \
             2>&1 | tee logs/scraping.log
         continue-on-error: false
