@@ -32,7 +32,12 @@ class OpenAIService:
         try:
             api_key = os.getenv("OPENAI_API_KEY")
             if api_key:
-                self.client = OpenAI(api_key=api_key)
+                # max_retries=8 with the SDK's exponential backoff (~1s, 2s, 4s,
+                # 8s, 8s, ...) gives ~45-50s of total wait — long enough to ride
+                # out a TPM-exhaustion window when multiple big-scrape jobs hit
+                # the org's per-minute token cap in parallel. Default is 2,
+                # which gives up after ~3-10s and silently drops the post.
+                self.client = OpenAI(api_key=api_key, max_retries=8)
             else:
                 print(
                     "Warning: OPENAI_API_KEY not set. OpenAI functionality will be limited."
