@@ -33,6 +33,11 @@ on:
         required: true
         type: string
         default: 'gpt-5-mini'
+      apify_dataset_ids:
+        description: 'Comma-separated Apify dataset IDs (skips Apify scraping; uses these directly)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   big_scrape:
@@ -117,6 +122,7 @@ jobs:
           esac
           python -u main_big_scrape.py \
             --urls-file "$URLS_FILE" \
+            --apify-dataset-ids "${{ inputs.apify_dataset_ids }}" \
             --school "${{ inputs.school }}" \
             --limit ${{ inputs.limit }} \
             --cutoff-days ${{ inputs.cutoff_days }} \

@@ -18,6 +18,7 @@ import asyncio
 import json
 import os
 import sys
+import urllib.request
 from datetime import timedelta
 from pathlib import Path
 
@@ -46,11 +47,19 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Big Scrape entry point")
     parser.add_argument(
         "--urls-file",
-        required=True,
         type=Path,
         help=(
             "Path to a text file with one Instagram URL per line. "
-            "Blank lines and lines starting with '#' are ignored."
+            "Blank lines and lines starting with '#' are ignored. "
+            "Required unless --apify-dataset-ids is given."
+        ),
+    )
+    parser.add_argument(
+        "--apify-dataset-ids",
+        default="",
+        help=(
+            "Comma-separated Apify dataset IDs to load posts from instead of "
+            "running the actor. Skips Apify scraping; --urls-file is ignored."
         ),
     )
     parser.add_argument(
@@ -113,22 +122,74 @@ def filter_valid_posts(posts):
     ]
 
 
+def fetch_apify_dataset(dataset_id: str) -> list[dict]:
+    """Download all items from an Apify dataset by ID."""
+    url = f"https://api.apify.com/v2/datasets/{dataset_id}/items?format=json&clean=true"
+    logger.info(f"Fetching Apify dataset {dataset_id}...")
+    with urllib.request.urlopen(url, timeout=120) as r:
+        return json.load(r)
+
+
 def main() -> None:
     args = parse_args()
+    dataset_ids = [s.strip() for s in (args.apify_dataset_ids or "").split(",") if s.strip()]
+    use_datasets = bool(dataset_ids)
+
     logger.info(
-        f"--- Big Scrape Started: school={args.school!r}, urls_file={args.urls_file}, "
+        f"--- Big Scrape Started: school={args.school!r}, "
+        f"{'dataset_ids=' + str(dataset_ids) if use_datasets else 'urls_file=' + str(args.urls_file)}, "
         f"dry_run={args.dry_run}, limit={args.limit}, cutoff_days={args.cutoff_days}, "
         f"model={args.model!r} ---"
     )
 
-    urls = read_urls_file(args.urls_file)
-    handles = urls_to_handles(urls)
-    if args.dry_run:
+    if not use_datasets:
+        if not args.urls_file:
+            logger.error("--urls-file is required unless --apify-dataset-ids is given")
+            sys.exit(2)
+        urls = read_urls_file(args.urls_file)
+        handles = urls_to_handles(urls)
+    else:
+        handles = []  # populated from dataset posts later
+
+    if args.dry_run and handles:
         handles = handles[:1]
 
-    if not handles:
+    if not use_datasets and not handles:
         logger.warning(f"No valid handles found in {args.urls_file}; exiting.")
         sys.exit(0)
+
+    processor = EventProcessor(
+        concurrency=5,
+        school=args.school,
+        dry_run=args.dry_run,
+        model=args.model,
+    )
+
+    posts: list[dict] = []
+    if use_datasets:
+        for ds_id in dataset_ids:
+            ds_posts = fetch_apify_dataset(ds_id)
+            logger.info(f"Dataset {ds_id}: returned {len(ds_posts)} items")
+            posts.extend(ds_posts)
+        # Derive handles from dataset for ScrapeRun bookkeeping
+        handles = sorted({(p.get("ownerUsername") or "").strip() for p in posts if p.get("ownerUsername")})
+        if args.dry_run:
+            handles = handles[:1]
+    else:
+        scraper = InstagramScraper()
+        chunks = [
+            handles[i : i + HANDLES_PER_APIFY_RUN]
+            for i in range(0, len(handles), HANDLES_PER_APIFY_RUN)
+        ]
+        for i, chunk in enumerate(chunks, start=1):
+            logger.info(f"Apify chunk {i}/{len(chunks)}: scraping {len(chunk)} accounts")
+            chunk_posts = scraper.scrape(
+                chunk, results_limit=args.limit, cutoff_days=args.cutoff_days
+            )
+            logger.info(
+                f"Apify chunk {i}/{len(chunks)}: returned {len(chunk_posts)} posts"
+            )
+            posts.extend(chunk_posts)
 
     scrape_runs: dict[str, ScrapeRun] = {}
     if args.dry_run:
@@ -144,29 +205,6 @@ def main() -> None:
                 scrape_runs[username] = run
             except Exception as e:
                 logger.warning(f"Failed to create ScrapeRun for {username}: {e}")
-
-    scraper = InstagramScraper()
-    processor = EventProcessor(
-        concurrency=5,
-        school=args.school,
-        dry_run=args.dry_run,
-        model=args.model,
-    )
-
-    posts: list[dict] = []
-    chunks = [
-        handles[i : i + HANDLES_PER_APIFY_RUN]
-        for i in range(0, len(handles), HANDLES_PER_APIFY_RUN)
-    ]
-    for i, chunk in enumerate(chunks, start=1):
-        logger.info(f"Apify chunk {i}/{len(chunks)}: scraping {len(chunk)} accounts")
-        chunk_posts = scraper.scrape(
-            chunk, results_limit=args.limit, cutoff_days=args.cutoff_days
-        )
-        logger.info(
-            f"Apify chunk {i}/{len(chunks)}: returned {len(chunk_posts)} posts"
-        )
-        posts.extend(chunk_posts)
 
     raw_path = Path(__file__).parent / "apify_raw_results.json"
     with raw_path.open("w", encoding="utf-8") as f:
