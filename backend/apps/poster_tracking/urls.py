@@ -9,4 +9,9 @@ urlpatterns = [
         "<uuid:poster_id>/status/", views.get_poster_scan_status, name="poster-status"
     ),
     path("<uuid:poster_id>/scan/", views.record_poster_scan, name="poster-scan"),
+    path(
+        "<uuid:poster_id>/redirect/",
+        views.redirect_poster_scan,
+        name="poster-scan-redirect",
+    ),
 ]
