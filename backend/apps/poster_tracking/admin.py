@@ -12,6 +12,6 @@ class PosterCampaignAdmin(admin.ModelAdmin):
 
 @admin.register(PosterScan)
 class PosterScanAdmin(admin.ModelAdmin):
-    list_display = ("poster", "scan_number", "created_at", "latitude", "longitude")
+    list_display = ("poster", "scan_number", "created_at")
     search_fields = ("poster__label", "poster__id", "ip_address")
     readonly_fields = ("created_at",)

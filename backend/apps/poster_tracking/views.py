@@ -168,9 +168,6 @@ def record_poster_scan(request, poster_id):
         PosterScan.objects.create(
             poster=poster,
             scan_number=scan_number,
-            latitude=latitude if should_store_location else None,
-            longitude=longitude if should_store_location else None,
-            accuracy_m=accuracy if should_store_location else None,
             user_agent=request.META.get("HTTP_USER_AGENT", ""),
             ip_address=_client_ip(request),
             referrer=request.META.get("HTTP_REFERER", ""),

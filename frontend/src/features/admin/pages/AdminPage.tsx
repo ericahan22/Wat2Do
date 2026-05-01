@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Input } from "@/shared/components/ui/input";
 import type { PosterCampaign } from "@/shared/api";
 import { useApi } from "@/shared/hooks/useApi";
+import { PosterScanMap } from "@/features/posters/components/PosterScanMap";
 import { useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Sparkles, FileText, Activity, QrCode } from "lucide-react";
 
 function AdminPage() {
@@ -15,8 +16,26 @@ function AdminPage() {
   const [posterLabel, setPosterLabel] = useState("");
   const [destinationUrl, setDestinationUrl] = useState("");
   const [generatedPoster, setGeneratedPoster] = useState<PosterCampaign | null>(null);
+  const [posterCampaigns, setPosterCampaigns] = useState<PosterCampaign[]>([]);
   const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
+  const [isLoadingPosters, setIsLoadingPosters] = useState(false);
   const [posterError, setPosterError] = useState<string | null>(null);
+
+  const refreshPosterCampaigns = useCallback(async () => {
+    setIsLoadingPosters(true);
+    try {
+      const response = await posterAPIClient.listPosterCampaigns();
+      setPosterCampaigns(response.posters);
+    } catch (error) {
+      console.error("Failed to load poster campaigns", error);
+    } finally {
+      setIsLoadingPosters(false);
+    }
+  }, [posterAPIClient]);
+
+  useEffect(() => {
+    void refreshPosterCampaigns();
+  }, [refreshPosterCampaigns]);
 
   const handleLogout = () => {
     signOut();
@@ -39,6 +58,7 @@ function AdminPage() {
         base_url: window.location.origin,
       });
       setGeneratedPoster(poster);
+      await refreshPosterCampaigns();
     } catch (error) {
       setPosterError(error instanceof Error ? error.message : "Failed to create poster QR code.");
     } finally {
@@ -194,6 +214,26 @@ function AdminPage() {
                 </div>
               </div>
             )}
+
+            <div className="space-y-3 border-t border-gray-200 pt-4 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-semibold">Scan map</h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                    Markers use poster first-scan coordinates and total scan count.
+                    Individual scan rows do not store coordinates.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => void refreshPosterCampaigns()}
+                  disabled={isLoadingPosters}
+                >
+                  {isLoadingPosters ? "Refreshing..." : "Refresh"}
+                </Button>
+              </div>
+              <PosterScanMap posters={posterCampaigns} />
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -55,19 +55,6 @@ class PosterScan(models.Model):
         related_name="scans",
     )
     scan_number = models.PositiveIntegerField()
-    latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        null=True,
-        blank=True,
-    )
-    longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
-        null=True,
-        blank=True,
-    )
-    accuracy_m = models.FloatField(null=True, blank=True)
     user_agent = models.TextField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     referrer = models.TextField(null=True, blank=True)
