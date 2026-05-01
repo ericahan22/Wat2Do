@@ -44,7 +44,7 @@ export function PosterScanPage() {
   const { posterAPIClient } = useApi();
   const hasRecordedRef = useRef(false);
   const [state, setState] = useState<ScanState>("loading");
-  const [message, setMessage] = useState("Preparing your Wat2Do redirect...");
+  const [message, setMessage] = useState("Redirecting you to Wat2Do...");
 
   useEffect(() => {
     if (!posterId || hasRecordedRef.current) {
@@ -71,7 +71,11 @@ export function PosterScanPage() {
         const destinationUrl = result.destination_url || "/events";
 
         setState("recorded");
-        setMessage("Scan recorded. Redirecting you to Wat2Do...");
+        setMessage(
+          result.location_saved
+            ? "First poster location saved. Redirecting you to Wat2Do..."
+            : "Redirecting you to Wat2Do..."
+        );
 
         window.setTimeout(() => {
           if (destinationUrl.startsWith("http")) {
