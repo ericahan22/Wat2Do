@@ -40,6 +40,7 @@ export { default as PosterAPIClient } from './PosterAPIClient';
 export type {
   CreatePosterCampaignRequest,
   PosterCampaign,
+  PosterScan,
   PosterScanStatus,
   RecordPosterScanRequest,
   RecordPosterScanResponse,

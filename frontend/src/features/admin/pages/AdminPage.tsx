@@ -1,13 +1,23 @@
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
-import type { PosterCampaign } from "@/shared/api";
+import type { PosterCampaign, PosterScan } from "@/shared/api";
 import { useApi } from "@/shared/hooks/useApi";
 import { PosterScanMap } from "@/features/posters/components/PosterScanMap";
 import { useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Sparkles, FileText, Activity, QrCode } from "lucide-react";
+
+function isToday(timestamp: string) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
 
 function AdminPage() {
   const { signOut } = useClerk();
@@ -17,6 +27,7 @@ function AdminPage() {
   const [destinationUrl, setDestinationUrl] = useState("");
   const [generatedPoster, setGeneratedPoster] = useState<PosterCampaign | null>(null);
   const [posterCampaigns, setPosterCampaigns] = useState<PosterCampaign[]>([]);
+  const [posterScans, setPosterScans] = useState<PosterScan[]>([]);
   const [isGeneratingPoster, setIsGeneratingPoster] = useState(false);
   const [isLoadingPosters, setIsLoadingPosters] = useState(false);
   const [posterError, setPosterError] = useState<string | null>(null);
@@ -24,8 +35,12 @@ function AdminPage() {
   const refreshPosterCampaigns = useCallback(async () => {
     setIsLoadingPosters(true);
     try {
-      const response = await posterAPIClient.listPosterCampaigns();
-      setPosterCampaigns(response.posters);
+      const [campaignsResponse, scansResponse] = await Promise.all([
+        posterAPIClient.listPosterCampaigns(),
+        posterAPIClient.listPosterScans(),
+      ]);
+      setPosterCampaigns(campaignsResponse.posters);
+      setPosterScans(scansResponse.scans);
     } catch (error) {
       console.error("Failed to load poster campaigns", error);
     } finally {
@@ -65,6 +80,35 @@ function AdminPage() {
       setIsGeneratingPoster(false);
     }
   };
+
+  const todaysScans = useMemo(
+    () => posterScans.filter((scan) => isToday(scan.created_at)),
+    [posterScans]
+  );
+
+  const hourlyScanCounts = useMemo(() => {
+    const counts = Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      label: `${hour.toString().padStart(2, "0")}:00`,
+      count: 0,
+    }));
+
+    for (const scan of todaysScans) {
+      counts[new Date(scan.created_at).getHours()].count += 1;
+    }
+
+    return counts;
+  }, [todaysScans]);
+
+  const maxHourlyScanCount = Math.max(
+    ...hourlyScanCounts.map((bucket) => bucket.count),
+    1
+  );
+
+  const totalScanCount = posterCampaigns.reduce(
+    (total, poster) => total + poster.scan_count,
+    0
+  );
 
   const copyScanUrl = async () => {
     if (!generatedPoster) return;
@@ -220,7 +264,7 @@ function AdminPage() {
                 <div>
                   <h3 className="text-base font-semibold">Scan map</h3>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Markers use poster first-scan coordinates and total scan count.
+                    Markers use poster first-scan coordinates and today's scan count.
                     Individual scan rows do not store coordinates.
                   </p>
                 </div>
@@ -232,7 +276,63 @@ function AdminPage() {
                   {isLoadingPosters ? "Refreshing..." : "Refresh"}
                 </Button>
               </div>
-              <PosterScanMap posters={posterCampaigns} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="rounded-md border border-gray-200 p-3 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Scans today</p>
+                  <p className="text-2xl font-semibold">{todaysScans.length}</p>
+                </div>
+                <div className="rounded-md border border-gray-200 p-3 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Total scans</p>
+                  <p className="text-2xl font-semibold">{totalScanCount}</p>
+                </div>
+                <div className="rounded-md border border-gray-200 p-3 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Located posters</p>
+                  <p className="text-2xl font-semibold">
+                    {
+                      posterCampaigns.filter(
+                        (poster) =>
+                          poster.first_location.latitude != null &&
+                          poster.first_location.longitude != null
+                      ).length
+                    }
+                  </p>
+                </div>
+              </div>
+              <PosterScanMap posters={posterCampaigns} scans={todaysScans} />
+              <div className="rounded-md border border-gray-200 p-4 dark:border-gray-700">
+                <div className="mb-3 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold">Scans throughout today</h4>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {todaysScans.length} scan{todaysScans.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="flex h-28 items-end gap-1">
+                  {hourlyScanCounts.map((bucket) => (
+                    <div
+                      key={bucket.hour}
+                      className="flex min-w-0 flex-1 flex-col items-center gap-1"
+                      title={`${bucket.label}: ${bucket.count} scans`}
+                    >
+                      <div className="flex h-20 w-full items-end rounded-sm bg-gray-100 dark:bg-gray-800">
+                        <div
+                          className="w-full rounded-sm bg-blue-600 transition-all"
+                          style={{
+                            height: `${Math.max(
+                              bucket.count === 0 ? 0 : 8,
+                              (bucket.count / maxHourlyScanCount) * 100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      {bucket.hour % 4 === 0 && (
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                          {bucket.hour}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

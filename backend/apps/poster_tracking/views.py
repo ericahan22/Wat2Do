@@ -5,6 +5,7 @@ import qrcode
 import qrcode.image.svg
 from django.conf import settings
 from django.db import transaction
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -42,14 +43,27 @@ def _poster_payload(poster, base_url=None):
     }
 
 
+def _scan_payload(scan):
+    return {
+        "id": scan.id,
+        "poster_id": str(scan.poster_id),
+        "scan_number": scan.scan_number,
+        "created_at": scan.created_at.isoformat(),
+        "user_agent": scan.user_agent,
+    }
+
+
 def _build_scan_url(poster_id, base_url=None):
     root = (base_url or _default_frontend_base_url()).rstrip("/") + "/"
     return urljoin(root, f"poster/{poster_id}")
 
 
 def _default_frontend_base_url():
-    allowed_parties = getattr(settings, "ALLOWED_PARTIES", [])
-    return allowed_parties[0] if allowed_parties else "https://wat2do.ca"
+    return getattr(settings, "FRONTEND_URL", "https://wat2do.ca")
+
+
+def _default_destination_url():
+    return urljoin(_default_frontend_base_url().rstrip("/") + "/", "events")
 
 
 def _qr_svg(url):
@@ -87,6 +101,33 @@ def _parse_accuracy(value):
     return accuracy if accuracy >= 0 else None
 
 
+def _record_scan_for_poster(
+    poster, request, latitude=None, longitude=None, accuracy=None
+):
+    should_store_location = (
+        not poster.has_first_location and latitude is not None and longitude is not None
+    )
+    scan_number = poster.scan_count + 1
+
+    PosterScan.objects.create(
+        poster=poster,
+        scan_number=scan_number,
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        ip_address=_client_ip(request),
+        referrer=request.META.get("HTTP_REFERER", ""),
+    )
+
+    poster.scan_count = scan_number
+    if should_store_location:
+        poster.first_scan_latitude = latitude
+        poster.first_scan_longitude = longitude
+        poster.first_scan_accuracy_m = accuracy
+        poster.first_scan_at = timezone.now()
+    poster.save()
+
+    return should_store_location
+
+
 @api_view(["POST"])
 @admin_required
 def create_poster_campaign(request):
@@ -115,6 +156,16 @@ def list_poster_campaigns(request):
     return Response(
         {"posters": [_poster_payload(poster, base_url) for poster in posters]}
     )
+
+
+@api_view(["GET"])
+@admin_required
+def list_poster_scans(request):
+    poster_id = (request.query_params.get("poster_id") or "").strip()
+    scans = PosterScan.objects.select_related("poster")
+    if poster_id:
+        scans = scans.filter(poster_id=poster_id)
+    return Response({"scans": [_scan_payload(scan) for scan in scans[:500]]})
 
 
 @api_view(["GET"])
@@ -158,28 +209,13 @@ def record_poster_scan(request, poster_id):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        should_store_location = (
-            not poster.has_first_location
-            and latitude is not None
-            and longitude is not None
+        should_store_location = _record_scan_for_poster(
+            poster,
+            request,
+            latitude=latitude,
+            longitude=longitude,
+            accuracy=accuracy,
         )
-        scan_number = poster.scan_count + 1
-
-        PosterScan.objects.create(
-            poster=poster,
-            scan_number=scan_number,
-            user_agent=request.META.get("HTTP_USER_AGENT", ""),
-            ip_address=_client_ip(request),
-            referrer=request.META.get("HTTP_REFERER", ""),
-        )
-
-        poster.scan_count = scan_number
-        if should_store_location:
-            poster.first_scan_latitude = latitude
-            poster.first_scan_longitude = longitude
-            poster.first_scan_accuracy_m = accuracy
-            poster.first_scan_at = timezone.now()
-        poster.save()
 
     return Response(
         {
@@ -190,3 +226,21 @@ def record_poster_scan(request, poster_id):
         },
         status=status.HTTP_201_CREATED,
     )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def redirect_poster_scan(request, poster_id):
+    with transaction.atomic():
+        try:
+            poster = PosterCampaign.objects.select_for_update().get(id=poster_id)
+        except PosterCampaign.DoesNotExist:
+            return HttpResponseRedirect(_default_destination_url())
+
+        if not poster.has_first_location:
+            return HttpResponseRedirect(_build_scan_url(poster.id))
+
+        _record_scan_for_poster(poster, request)
+        destination_url = poster.destination_url or _default_destination_url()
+
+    return HttpResponseRedirect(destination_url)

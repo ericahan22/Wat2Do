@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
-import Map, { Marker } from "react-map-gl/mapbox";
+import MapboxMap, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Zap } from "lucide-react";
-import type { PosterCampaign } from "@/shared/api";
+import type { PosterCampaign, PosterScan } from "@/shared/api";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+const EMPTY_SCANS: PosterScan[] = [];
 
 interface PosterScanMapProps {
   posters: PosterCampaign[];
+  scans?: PosterScan[];
   height?: string;
 }
 
@@ -87,7 +89,17 @@ function PosterMarker({
   );
 }
 
-export function PosterScanMap({ posters, height = "420px" }: PosterScanMapProps) {
+export function PosterScanMap({ posters, scans, height = "420px" }: PosterScanMapProps) {
+  const visibleScans = scans ?? EMPTY_SCANS;
+  const hasScanFilter = scans !== undefined;
+  const scanCountByPoster = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const scan of visibleScans) {
+      counts.set(scan.poster_id, (counts.get(scan.poster_id) ?? 0) + 1);
+    }
+    return counts;
+  }, [visibleScans]);
+
   const posterLocations = useMemo(
     () =>
       posters
@@ -97,13 +109,13 @@ export function PosterScanMap({ posters, height = "420px" }: PosterScanMapProps)
           return {
             id: poster.id,
             label: poster.label,
-            scanCount: poster.scan_count,
+            scanCount: hasScanFilter ? scanCountByPoster.get(poster.id) ?? 0 : poster.scan_count,
             latitude,
             longitude,
           };
         })
         .filter((poster): poster is PosterLocation => poster !== null),
-    [posters]
+    [hasScanFilter, posters, scanCountByPoster]
   );
 
   const maxScanCount = useMemo(
@@ -148,14 +160,14 @@ export function PosterScanMap({ posters, height = "420px" }: PosterScanMapProps)
         <span className="font-medium">
           {posterLocations.length} located poster
           {posterLocations.length === 1 ? "" : "s"} •{" "}
-          {posterLocations.reduce((sum, poster) => sum + poster.scanCount, 0)} scans
+          {posterLocations.reduce((sum, poster) => sum + poster.scanCount, 0)} shown scans
         </span>
         <span className="text-gray-600 dark:text-gray-400">
           First scan locations only
         </span>
       </div>
 
-      <Map
+      <MapboxMap
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{
           longitude: center.longitude,
@@ -176,7 +188,7 @@ export function PosterScanMap({ posters, height = "420px" }: PosterScanMapProps)
             <PosterMarker poster={poster} maxScanCount={maxScanCount} />
           </Marker>
         ))}
-      </Map>
+      </MapboxMap>
     </div>
   );
 }

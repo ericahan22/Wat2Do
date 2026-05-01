@@ -30,6 +30,14 @@ export interface PosterScanStatus {
   needs_location: boolean;
 }
 
+export interface PosterScan {
+  id: number;
+  poster_id: string;
+  scan_number: number;
+  created_at: string;
+  user_agent: string | null;
+}
+
 export interface RecordPosterScanRequest {
   latitude?: number;
   longitude?: number;
@@ -54,6 +62,10 @@ class PosterAPIClient {
 
   async listPosterCampaigns(): Promise<{ posters: PosterCampaign[] }> {
     return this.apiClient.get("posters/admin/");
+  }
+
+  async listPosterScans(): Promise<{ scans: PosterScan[] }> {
+    return this.apiClient.get("posters/admin/scans/");
   }
 
   async getPosterScanStatus(posterId: string): Promise<PosterScanStatus> {
