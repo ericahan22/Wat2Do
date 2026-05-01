@@ -13,5 +13,6 @@ urlpatterns = [
     path("api/promotions/", include("apps.promotions.urls")),
     path("api/waitlist/", include("apps.waitlist.urls")),
     path("api/scraping/", include("apps.scraping.urls")),
+    path("api/posters/", include("apps.poster_tracking.urls")),
     path("api/", include("apps.core.urls")),
 ]

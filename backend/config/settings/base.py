@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "apps.payments",
     "apps.waitlist",
     "apps.scraping",
+    "apps.poster_tracking",
 ]
 
 AUTOMATE_WEBHOOK_KEY = os.getenv("AUTOMATE_WEBHOOK_KEY")

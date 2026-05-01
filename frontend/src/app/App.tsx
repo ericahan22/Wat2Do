@@ -7,6 +7,7 @@ import { ClubsPage } from "@/features/clubs";
 import { AdminPage, PromotionsPage, SubmissionsReviewPage, ScrapingDiagnosticsPage } from "@/features/admin";
 import { UnsubscribePage } from "@/features/newsletter";
 import { WaitlistPage } from "@/features/waitlist";
+import { PosterScanPage } from "@/features/posters/pages/PosterScanPage";
 import { SignInPage, SignUpPage, UserProfilePage } from "@/features/auth/pages";
 import {
   ProtectedRoute,
@@ -87,6 +88,8 @@ function App() {
           />
           <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
           <Route path="/waitlist/:schoolSlug" element={<WaitlistPage />} />
+          <Route path="/poster" element={<PosterScanPage />} />
+          <Route path="/poster/:posterId" element={<PosterScanPage />} />
 
           {/* Clerk Auth Routes */}
           <Route path={CLERK_ROUTES.SIGN_IN} element={<SignInPage />} />

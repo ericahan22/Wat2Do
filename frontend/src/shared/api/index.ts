@@ -35,3 +35,12 @@ export type {
   JoinWaitlistRequest,
   JoinWaitlistResponse,
 } from './WaitlistAPIClient';
+
+export { default as PosterAPIClient } from './PosterAPIClient';
+export type {
+  CreatePosterCampaignRequest,
+  PosterCampaign,
+  PosterScanStatus,
+  RecordPosterScanRequest,
+  RecordPosterScanResponse,
+} from './PosterAPIClient';
