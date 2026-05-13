@@ -18,6 +18,7 @@ from apps.scraping.models import ScrapeRun
 from scraping.event_processor import EventProcessor
 from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
+from utils.date_utils import parse_utc_datetime
 from shared.constants.urls_to_scrape import FULL_URLS
 
 
@@ -88,13 +89,31 @@ def main():
     ignore_cutoff = os.getenv("IGNORE_CUTOFF", "false").lower() == "true"
 
     if mode == "single":
-        # Single user
+        # Single user: Try with 1 post first
         if ignore_cutoff:
             logger.info("Ignoring old post cutoff...")
             posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=365 * 5)
         else:
             # Standard: 1 day lookback
             posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
+        
+        # Check if the fetched post is recent (within 30 minutes)
+        if posts and posts[0].get("timestamp"):
+            post_timestamp = parse_utc_datetime(posts[0]["timestamp"])
+            if post_timestamp and post_timestamp > timezone.now() - timedelta(minutes=30):
+                logger.info("Fetched post is recent, using it")
+            else:
+                logger.info("Fetched post is not recent, fetching more posts to find the most recent")
+                # Fetch more posts to ensure we get the most recent
+                if ignore_cutoff:
+                    posts = scraper.scrape(targets[0], results_limit=4, cutoff_days=365 * 5)
+                else:
+                    posts = scraper.scrape(targets[0], results_limit=4, cutoff_days=1)
+        
+        # If we fetched multiple posts, sort by timestamp and take the most recent
+        if len(posts) > 1:
+            posts.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+            posts = posts[:1]
     else:
         # Batch mode: 4 days lookback, 1 post per account
         posts = scraper.scrape(targets, results_limit=1, cutoff_days=4)
