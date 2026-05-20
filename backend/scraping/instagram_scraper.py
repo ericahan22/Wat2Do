@@ -53,7 +53,7 @@ class InstagramScraper:
             # Poll for completion
             import time
 
-            run_id = run["id"]
+            run_id = run.id
             logger.info(f"Scrape started (Run ID: {run_id}). Waiting for completion...")
 
             start_time = time.time()
@@ -82,10 +82,10 @@ class InstagramScraper:
             logger.error(f"Apify actor call failed: {e}")
             return []
 
-        logger.info(f"Scrape finished (Run ID: {run.get('id')}). Fetching results...")
+        logger.info(f"Scrape finished (Run ID: {run.id}). Fetching results...")
         try:
             dataset_items = (
-                self.client.dataset(run["defaultDatasetId"]).list_items().items
+                self.client.dataset(run.default_dataset_id).list_items().items
             )
             logger.info(f"Retrieved {len(dataset_items)} items.")
         except Exception as e:

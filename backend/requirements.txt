@@ -9,14 +9,14 @@ pgvector==0.4.1
 django-ratelimit==3.0.1
 
 # Scraping and web utilities
-setuptools>=65.5.0
-apify_client
-python-dotenv
+setuptools==75.1.0
+apify_client==1.8.0
+python-dotenv==1.0.0
 python-dateutil==2.9.0.post0
 requests==2.31.0
-aiohttp>=3.9.0
-beautifulsoup4
-openai
+aiohttp==3.9.5
+beautifulsoup4==4.12.3
+openai==1.42.0
 geopy==2.4.0
 
 # Email service
