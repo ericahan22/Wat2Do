@@ -10,7 +10,7 @@ django-ratelimit==3.0.1
 
 # Scraping and web utilities
 setuptools==75.1.0
-apify_client==1.8.0
+apify_client==2.5.1
 python-dotenv==1.0.0
 python-dateutil==2.9.0.post0
 requests==2.31.0
