@@ -9,6 +9,7 @@ This module provides methods for interacting with OpenAI's API, including:
 
 import json
 import os
+import re
 import traceback
 from datetime import datetime
 
@@ -18,7 +19,10 @@ from zoneinfo import ZoneInfo
 
 from scraping.logging_config import logger
 from shared.constants.event_categories import EVENT_CATEGORIES
-from utils.date_utils import get_current_semester_end_time, get_default_timezone
+from utils.date_utils import (
+    get_current_semester_end_time,
+    get_default_timezone,
+)
 
 
 class OpenAIService:
