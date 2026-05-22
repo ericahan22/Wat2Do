@@ -169,18 +169,18 @@ function EventsPage() {
                 handleViewChange(value as "grid" | "calendar")
               }
             >
-              <TabsList>
+              <TabsList className="inline-flex h-9 overflow-hidden rounded-xl border border-gray-300 bg-transparent p-0 dark:border-gray-700 dark:bg-transparent">
                 <TabsTrigger
                   value="grid"
                   aria-label="Grid view"
-                  className="px-2"
+                  className="inline-flex h-full min-w-[2.75rem] items-center justify-center rounded-none border-r border-gray-300 px-3.5 text-gray-500 hover:text-gray-900 data-[state=active]:bg-gray-200 data-[state=active]:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:text-gray-100 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="calendar"
                   aria-label="Calendar view"
-                  className="px-2"
+                  className="inline-flex h-full min-w-[2.75rem] items-center justify-center rounded-none first:rounded-l-xl last:rounded-r-xl px-3.5 text-gray-500 hover:text-gray-900 data-[state=active]:bg-gray-200 data-[state=active]:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 dark:data-[state=active]:bg-gray-800 dark:data-[state=active]:text-white"
                 >
                   <Calendar className="h-4 w-4" />
                 </TabsTrigger>
