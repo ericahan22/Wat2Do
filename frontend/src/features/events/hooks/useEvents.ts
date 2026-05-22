@@ -160,18 +160,6 @@ export function useEvents() {
     });
   };
 
-  const handleSchoolChange = (nextSchool: string) => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      if (nextSchool === DEFAULT_SCHOOL) {
-        nextParams.delete("school");
-      } else {
-        nextParams.set("school", nextSchool);
-      }
-      return nextParams;
-    });
-  };
-
   const handleToggleStartDate = () => {
     setSearchParams((prev) => {
       const nextParams = new URLSearchParams(prev);
@@ -267,9 +255,7 @@ export function useEvents() {
     dtstart_utc,
     addedAt,
     showInterested,
-    school,
     handleViewChange,
-    handleSchoolChange,
     handleToggleStartDate,
     handleToggleNewEvents,
     handleToggleInterested,

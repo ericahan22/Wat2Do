@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import MapboxMap, { Marker } from "react-map-gl/mapbox";
+import MapGL, { Marker } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapPin, Zap } from "lucide-react";
 import type { PosterCampaign, PosterScan } from "@/shared/api";
@@ -167,7 +167,7 @@ export function PosterScanMap({ posters, scans, height = "420px" }: PosterScanMa
         </span>
       </div>
 
-      <MapboxMap
+      <MapGL
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{
           longitude: center.longitude,
@@ -188,7 +188,7 @@ export function PosterScanMap({ posters, scans, height = "420px" }: PosterScanMa
             <PosterMarker poster={poster} maxScanCount={maxScanCount} />
           </Marker>
         ))}
-      </MapboxMap>
+      </MapGL>
     </div>
   );
 }
