@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from apps.clubs.models import Clubs
 from apps.core.auth import admin_required
 from apps.events.models import Events
+from scraping.logging_config import logger
 
 from .models import AutomateLog, ScrapeRun
 
@@ -20,6 +21,7 @@ from .models import AutomateLog, ScrapeRun
 def webhook_key_required(view_func):
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
+        # Reusing AUTOMATE_WEBHOOK_KEY for both Automate logs and Discord webhook integrations
         expected = getattr(settings, "AUTOMATE_WEBHOOK_KEY", None)
         if not expected:
             return Response(
@@ -207,3 +209,33 @@ def get_gap_analysis(request):
     }
 
     return Response({"accounts": accounts, "summary": summary})
+
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@webhook_key_required
+def discord_webhook(request):
+    from scraping.event_processor import process_discord_message
+    
+    data = request.data
+    content = data.get("content")
+    author_name = data.get("author_name")
+    message_id = data.get("message_id")
+    
+    if not content or not author_name or not message_id:
+        return Response(
+            {"error": "content, author_name, and message_id are required fields"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+        
+    try:
+        result = process_discord_message(data)
+        if result.get("status") == "error":
+            return Response(result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        elif result.get("saved_count", 0) > 0:
+            return Response(result, status=status.HTTP_201_CREATED)
+        return Response(result, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"[Discord] [{message_id}] Error in webhook processing: {e}")
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

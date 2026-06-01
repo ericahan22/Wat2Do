@@ -12,11 +12,13 @@ if "django" not in sys.modules:
 
 from asgiref.sync import sync_to_async
 from django.utils import timezone
+import re
 
 from apps.clubs.models import Clubs
 from apps.events.models import Events
 from scraping.logging_config import logger
 from services.storage_service import upload_image_from_url
+from services.openai_service import extract_events_from_caption
 from utils.date_utils import parse_utc_datetime
 from utils.scraping_utils import append_event_to_csv, insert_event_to_db
 
@@ -344,3 +346,172 @@ class EventProcessor:
 
         logger.info(f"Processing complete. Saved {saved_count} new events.")
         return saved_count
+
+
+def process_discord_message(data):
+    """
+    Core pipeline to process a Discord event message.
+    Extracts events using OpenAI, fuzzy-matches the author, uploads attachments,
+    and inserts the events into the database.
+    """
+    content = data.get("content")
+    author_name = data.get("author_name")
+    message_id = data.get("message_id")
+    
+    guild_id = data.get("guild_id", "0")
+    channel_id = data.get("channel_id", "0")
+    
+    # Build unique Discord message URL
+    source_url = f"https://discord.com/channels/{guild_id}/{channel_id}/{message_id}"
+    
+    # Deduplicate early
+    if Events.objects.filter(source_url=source_url).exists():
+        logger.info(f"[Discord] [{message_id}] Skipping duplicate event for message URL: {source_url}")
+        return {
+            "status": "duplicate",
+            "message": "Event with this message ID already exists"
+        }
+        
+    # Match club
+    club = None
+    try:
+        club = Clubs.objects.get(club_name__iexact=author_name)
+    except Clubs.DoesNotExist:
+        pass
+        
+    if not club:
+        # Fuzzy match using string cleaning and similarity utilities
+        from utils.scraping_utils import jaccard_similarity, sequence_similarity
+        clubs = Clubs.objects.all()
+        best_match = None
+        best_score = 0.0
+        for c in clubs:
+            c_cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", c.club_name.lower())
+            author_cleaned = re.sub(r"[^a-zA-Z0-9\s]", "", author_name.lower())
+            
+            if c_cleaned in author_cleaned or author_cleaned in c_cleaned:
+                score = len(c_cleaned) / len(author_cleaned) if len(author_cleaned) > len(c_cleaned) else len(author_cleaned) / len(c_cleaned)
+                if score > best_score:
+                    best_score = score
+                    best_match = c
+            else:
+                score = max(jaccard_similarity(c.club_name, author_name), sequence_similarity(c.club_name, author_name))
+                if score > 0.7 and score > best_score:
+                    best_score = score
+                    best_match = c
+        if best_match and best_score >= 0.6:
+            club = best_match
+            logger.info(f"[Discord] [{message_id}] Fuzzy matched author '{author_name}' to club '{club.club_name}' (score: {best_score:.2f})")
+            
+    # Resolve ig_handle and club_type
+    ig_handle = None
+    club_type = None
+    if club:
+        club_type = club.club_type
+        if club.ig:
+            ig_handle = club.ig.rstrip("/").split("/")[-1]
+            
+    if not ig_handle:
+        ig_handle = re.sub(r"[^a-z0-9_]", "", author_name.lower().replace(" ", "_"))
+        
+    # Parse timestamp
+    posted_at = None
+    timestamp_str = data.get("timestamp")
+    if timestamp_str:
+        try:
+            posted_at = parse_utc_datetime(timestamp_str)
+        except Exception:
+            pass
+    if not posted_at:
+        posted_at = timezone.now()
+        
+    # Upload images to S3
+    attachments = data.get("attachments", [])
+    all_s3_urls = []
+    for img_url in attachments:
+        if img_url:
+            try:
+                s3_url = upload_image_from_url(img_url)
+                if s3_url:
+                    all_s3_urls.append(s3_url)
+            except Exception as e:
+                logger.error(f"[Discord] [{message_id}] Failed to upload image {img_url} to S3: {e}")
+                
+    # Run event extraction via OpenAI
+    logger.info(f"[Discord] [{message_id}] Extracting event details from text: {content[:100]}...")
+    try:
+        extracted_events = extract_events_from_caption(
+            caption_text=content,
+            all_s3_urls=all_s3_urls,
+            post_created_at=posted_at,
+            school="University of Waterloo"
+        )
+    except Exception as e:
+        logger.error(f"[Discord] [{message_id}] OpenAI extraction failed: {e}")
+        return {
+            "status": "error",
+            "message": f"OpenAI extraction failed: {e}"
+        }
+        
+    if not extracted_events:
+        logger.info(f"[Discord] [{message_id}] No events found in Discord message.")
+        return {
+            "status": "no_events_found",
+            "message": "No events could be extracted from the message content"
+        }
+        
+    if not isinstance(extracted_events, list):
+        extracted_events = [extracted_events]
+        
+    # Save events to database
+    saved_count = 0
+    saved_events_data = []
+    for event_data in extracted_events:
+        event_data["ig_handle"] = ig_handle
+        event_data["discord_handle"] = author_name
+        event_data["source_url"] = source_url
+        event_data["school"] = "University of Waterloo"
+        event_data["posted_at"] = posted_at
+        event_data["likes_count"] = 0
+        event_data["comments_count"] = 0
+        event_data["club_type"] = club_type
+        
+        # Check for past date
+        occurrences = event_data.get("occurrences", [])
+        if occurrences:
+            first_occurrence = occurrences[0]
+            dtstart_utc = parse_utc_datetime(first_occurrence.get("dtstart_utc"))
+            if dtstart_utc and dtstart_utc < timezone.now():
+                logger.info(f"[Discord] [{message_id}] Skipping event '{event_data.get('title')}' - date {dtstart_utc} is in the past")
+                continue
+                
+        # Set source image
+        image_idx = event_data.get("image_index")
+        if (
+            image_idx is not None
+            and isinstance(image_idx, int)
+            and 0 <= image_idx < len(all_s3_urls)
+        ):
+            event_data["source_image_url"] = all_s3_urls[image_idx]
+        else:
+            event_data["source_image_url"] = all_s3_urls[0] if all_s3_urls else ""
+            
+        try:
+            result = insert_event_to_db(event_data)
+            if result is True or result == "updated":
+                saved_count += 1
+                saved_events_data.append({
+                    "title": event_data.get("title"),
+                    "location": event_data.get("location"),
+                    "dtstart_utc": occurrences[0].get("dtstart_utc") if occurrences else None,
+                    "status": "updated" if result == "updated" else "created"
+                })
+        except Exception as e:
+            logger.error(f"[Discord] [{message_id}] Error saving event to DB: {e}")
+            
+    return {
+        "status": "success",
+        "processed_count": len(extracted_events),
+        "saved_count": saved_count,
+        "events": saved_events_data
+    }

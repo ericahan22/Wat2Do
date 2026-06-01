@@ -7,4 +7,5 @@ urlpatterns = [
     path("logs/", views.get_automate_logs, name="get-automate-logs"),
     path("runs/", views.get_scrape_runs, name="get-scrape-runs"),
     path("gaps/", views.get_gap_analysis, name="get-gap-analysis"),
+    path("discord-webhook/", views.discord_webhook, name="discord-webhook"),
 ]

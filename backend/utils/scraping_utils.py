@@ -89,6 +89,7 @@ def insert_event_to_db(event_data):
         school = event_data.get("school", "")
         categories = event_data.get("categories", [])
         occurrences = event_data.get("occurrences")
+        discord_handle = event_data.get("discord_handle")
 
         if not occurrences:
             logger.warning(
@@ -180,6 +181,7 @@ def insert_event_to_db(event_data):
             "likes_count": likes_count,
             "comments_count": comments_count,
             "posted_at": posted_at,
+            "discord_handle": discord_handle,
         }
 
         try:
