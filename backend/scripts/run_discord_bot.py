@@ -123,13 +123,27 @@ async def process_and_forward_message(message):
     # Remove duplicates while keeping order
     attachments = list(dict.fromkeys(attachments))
 
+    # Default to current channel and guild
+    guild_id = str(message.guild.id) if message.guild else "0"
+    channel_id = str(message.channel.id)
+    message_id = str(message.id)
+
+    # Check if the message is a crosspost from another server's announcement channel
+    if message.flags.is_crossposted and message.reference:
+        ref = message.reference
+        if ref.guild_id and ref.channel_id and ref.message_id:
+            guild_id = str(ref.guild_id)
+            channel_id = str(ref.channel_id)
+            message_id = str(ref.message_id)
+            logger.info(f"Crosspost detected! Using original message IDs: Guild={guild_id}, Channel={channel_id}, Message={message_id}")
+
     # Build payload
     payload = {
         "content": message.content,
         "author_name": author_name,
-        "message_id": str(message.id),
-        "channel_id": str(message.channel.id),
-        "guild_id": str(message.guild.id) if message.guild else "0",
+        "message_id": message_id,
+        "channel_id": channel_id,
+        "guild_id": guild_id,
         "timestamp": message.created_at.isoformat(),
         "attachments": attachments
     }
