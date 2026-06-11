@@ -4,23 +4,17 @@ import { IconButton } from "@/shared/components/ui/icon-button";
 import { useLocalStorage } from "react-use";
 
 function TopBanner() {
-  const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", false);
+  const [isVisible, setIsVisible] = useLocalStorage("topBannerVisible", true);
 
   if (!isVisible) return null;
 
   return (
     <div className="w-full bg-[#0488FE]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 relative flex items-center justify-center">
-        <a
-          href="https://status.supabase.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-gray-200 cursor-pointer"
-        >
-          <span className="text-sm font-small text-center !text-white">
-            Your message here
-          </span>
-        </a>
+        <span className="text-sm font-small text-center !text-white">
+          Wat2Do will be under maintenance this weekend (June 12–14), from 8 PM
+          Friday to 8 PM Sunday.
+        </span>
         <IconButton
           aria-label="Close banner"
           variant="ghost"
