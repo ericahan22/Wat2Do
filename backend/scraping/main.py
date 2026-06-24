@@ -82,15 +82,33 @@ def main():
             except Exception as e:
                 logger.warning(f"Failed to create ScrapeRun for {username}: {e}")
 
+    target_school = os.getenv("TARGET_SCHOOL")
+    intended_recipient_id = os.getenv("INTENDED_RECIPIENT_ID")
+
+    if not target_school and intended_recipient_id:
+        try:
+            from shared.constants.recipient_mappings import RECIPIENT_ID_TO_SCHOOL
+            target_school = RECIPIENT_ID_TO_SCHOOL.get(intended_recipient_id)
+        except ImportError:
+            logger.warning("Could not import RECIPIENT_ID_TO_SCHOOL mapping")
+
+    if not target_school:
+        target_school = "University of Waterloo"
+
+    logger.info(f"Target school resolved: {target_school}")
+
     scraper = InstagramScraper()
-    processor = EventProcessor(concurrency=5)
+    processor = EventProcessor(concurrency=5, school=target_school)
 
     # Configure run based on mode
     ignore_cutoff = os.getenv("IGNORE_CUTOFF", "false").lower() == "true"
 
     if mode == "single":
+        # Check if the target is a post URL
+        is_post = any(isinstance(t, str) and t.startswith("http") for t in targets)
+
         # Single user: Try with 1 post first
-        if ignore_cutoff:
+        if ignore_cutoff or is_post:
             logger.info("Ignoring old post cutoff...")
             posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=365 * 5)
         else:
@@ -98,7 +116,7 @@ def main():
             posts = scraper.scrape(targets[0], results_limit=1, cutoff_days=1)
         
         # Check if the fetched post is recent (within 30 minutes)
-        if posts and posts[0].get("timestamp"):
+        if not is_post and posts and posts[0].get("timestamp"):
             post_timestamp = parse_utc_datetime(posts[0]["timestamp"])
             if post_timestamp and post_timestamp > timezone.now() - timedelta(minutes=30):
                 logger.info("Fetched post is recent, using it")
@@ -132,7 +150,10 @@ def main():
             logger.warning(f"Failed to update posts_fetched for {username}: {e}")
 
     # Detect pinned post warning
-    pinned_returned = any(bool(item.get("isPinned")) for item in posts)
+    pinned_returned = False
+    if not is_post:
+        pinned_returned = any(bool(item.get("isPinned")) for item in posts)
+
     if pinned_returned:
         for run in scrape_runs.values():
             try:

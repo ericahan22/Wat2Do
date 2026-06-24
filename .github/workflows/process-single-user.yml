@@ -10,6 +10,11 @@ on:
         description: 'Instagram username to process'
         required: true
         type: string
+      school:
+        description: 'School name'
+        required: false
+        type: string
+        default: 'University of Waterloo'
 
 jobs:
   process-post:
@@ -46,6 +51,8 @@ jobs:
       # --- Apify Token ---
       APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
       TARGET_USERNAME: ${{ github.event.client_payload.username || inputs.username }}
+      TARGET_SCHOOL: ${{ github.event.client_payload.school || inputs.school }}
+      INTENDED_RECIPIENT_ID: ${{ github.event.client_payload.intended_recipient_id }}
       IGNORE_CUTOFF: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
       MAX_CONCURRENT_TASKS: 1
 

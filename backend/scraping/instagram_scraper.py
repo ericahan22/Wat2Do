@@ -30,6 +30,9 @@ class InstagramScraper:
         if isinstance(usernames, str):
             usernames = [usernames]
 
+        # Check if we are scraping specific post URLs
+        has_post_url = any(isinstance(u, str) and u.startswith("http") for u in usernames)
+
         cutoff_date = timezone.now() - timedelta(days=cutoff_days)
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
 
@@ -99,7 +102,10 @@ class InstagramScraper:
             logger.error(f"Failed to fetch dataset items: {e}")
             return []
 
-        pinned_returned = any(bool(item.get("isPinned")) for item in dataset_items)
+        pinned_returned = False
+        if not has_post_url:
+            pinned_returned = any(bool(item.get("isPinned")) for item in dataset_items)
+
         if pinned_returned:
             warning_message = "Apify returned pinned posts despite skipPinnedPosts=True"
             logger.warning(warning_message)
