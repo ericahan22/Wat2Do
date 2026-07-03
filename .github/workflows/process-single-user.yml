@@ -81,6 +81,11 @@ jobs:
         run: |
           pip install --prefer-binary -r requirements.txt
 
+      - name: Run database migrations
+        working-directory: backend
+        run: |
+          python manage.py migrate --noinput
+
       - name: Run Scraper for Single User
         working-directory: backend/scraping
         run: |

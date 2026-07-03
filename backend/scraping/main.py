@@ -98,15 +98,14 @@ def main():
     logger.info(f"Target school resolved: {target_school}")
 
     scraper = InstagramScraper()
-    processor = EventProcessor(concurrency=5, school=target_school)
 
-    # Configure run based on mode
+    # Configure run based on mode and determine if target is a specific post
     ignore_cutoff = os.getenv("IGNORE_CUTOFF", "false").lower() == "true"
+    is_post = mode == "single" and any(isinstance(t, str) and t.startswith("http") for t in targets)
+
+    processor = EventProcessor(concurrency=5, school=target_school, bypass_seen=is_post)
 
     if mode == "single":
-        # Check if the target is a post URL
-        is_post = any(isinstance(t, str) and t.startswith("http") for t in targets)
-
         # Single user: Try with 1 post first
         if ignore_cutoff or is_post:
             logger.info("Ignoring old post cutoff...")

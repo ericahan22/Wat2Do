@@ -263,6 +263,11 @@ class EventDuplicateDetector:
             return False, None
 
         try:
+            # Strategy 0: Check for same-post updates (regardless of date)
+            matched_event = self._check_same_post_match(source_url, title, ig_handle, log_prefix)
+            if matched_event:
+                return True, matched_event
+
             # Strategy 1: Check for same-club updates (regardless of date)
             matched_event = self._check_same_club_update(ig_handle, title, log_prefix)
             if matched_event:
@@ -279,6 +284,52 @@ class EventDuplicateDetector:
             logger.error(f"{log_prefix} Error during duplicate check: {exc!s}")
 
         return False, None
+
+    def _check_same_post_match(self, source_url, title, ig_handle, log_prefix):
+        """
+        Check if an event from the exact same post (source_url) already exists.
+        This is useful for reprocessing posts to update event details/dates.
+        """
+        if not source_url:
+            return None
+
+        # Extract shortcode to handle varying formats of the same URL
+        shortcode = source_url.strip("/").split("/")[-1] if source_url else None
+        if not shortcode:
+            return None
+
+        same_post_events = list(Events.objects.filter(source_url__contains=shortcode))
+        if not same_post_events:
+            return None
+
+        # If there's only one event for this post, it must be the one
+        if len(same_post_events) == 1:
+            existing_event = same_post_events[0]
+            logger.info(
+                f"{log_prefix} Single event match by source URL: '{title}' matched to existing event '{existing_event.title}'"
+            )
+            return existing_event
+
+        # If there are multiple events from the same post, match by title similarity
+        best_match = None
+        best_sim = 0.0
+        for existing_event in same_post_events:
+            c_title = getattr(existing_event, "title", "") or ""
+            title_sim = max(
+                jaccard_similarity(c_title, title),
+                sequence_similarity(c_title, title),
+            )
+            if title_sim > best_sim:
+                best_sim = title_sim
+                best_match = existing_event
+
+        if best_match and best_sim > 0.5:
+            logger.info(
+                f"{log_prefix} Match by source URL + title similarity: '{title}' matched to existing event '{best_match.title}' (sim={best_sim:.3f})"
+            )
+            return best_match
+
+        return None
 
     def _check_same_club_update(self, ig_handle, title, log_prefix):
         """

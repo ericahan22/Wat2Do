@@ -192,7 +192,7 @@ class OpenAIService:
     - Every event MUST include at least one occurrence with a concrete UTC start time.
     - Return explicit dates and times that correspond to events as separate entries in the occurrences array.
     - DO NOT include registration, signup, RSVP, or application deadlines as occurrences.
-    - Do NOT infer or compress recurrence patterns. List each event date/time exactly as given.
+    - For recurring events (e.g., weekly), expand the recurrence and list all individual occurrences up to the semester end date ({semester_end_time}). Do NOT compress them.
     - Always convert local times to UTC. The JSON must use ISO 8601 format with a trailing "Z" (e.g., "2025-11-05T22:00:00Z").
     - If an end time is not provided, leave "dtend_utc" as an empty string.
     - If duration is not explicitly available, leave "duration" as an empty string.

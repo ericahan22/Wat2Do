@@ -40,6 +40,7 @@ class EventProcessor:
         concurrency=5,
         school="University of Waterloo",
         dry_run=False,
+        bypass_seen=False,
     ):
         self.concurrency = concurrency
         self.semaphore = asyncio.Semaphore(concurrency)
@@ -47,6 +48,7 @@ class EventProcessor:
         # When True, skip all DB writes (Events, EventDates). Reads still happen
         # so duplicate-shortcode filtering and club-type lookups work normally.
         self.dry_run = bool(dry_run)
+        self.bypass_seen = bool(bypass_seen)
 
     @sync_to_async(thread_sensitive=True)
     def _get_club_type(self, ig_handle):
@@ -108,7 +110,7 @@ class EventProcessor:
 
         # In dry-run, we want every post to flow through to AI extraction so we
         # can eyeball LLM output, even for posts already in DB.
-        seen_shortcodes = set() if self.dry_run else await self._get_seen_shortcodes()
+        seen_shortcodes = set() if (self.dry_run or self.bypass_seen) else await self._get_seen_shortcodes()
         valid_posts = []
 
         # 1. Filter Posts
@@ -282,14 +284,13 @@ class EventProcessor:
                 # Check for past date
                 occurrences = event_data.get("occurrences", [])
                 if occurrences:
-                    first_occurrence = occurrences[0]
-                    dtstart_utc = parse_utc_datetime(
-                        first_occurrence.get("dtstart_utc")
-                    )
-                    if dtstart_utc and dtstart_utc < timezone.now():
+                    last_occurrence = occurrences[-1]
+                    latest_time_str = last_occurrence.get("dtend_utc") or last_occurrence.get("dtstart_utc")
+                    latest_time = parse_utc_datetime(latest_time_str)
+                    if not self.bypass_seen and latest_time and latest_time < timezone.now():
                         append_event_to_csv(event_data, added_to_db="event_past_date")
                         logger.info(
-                            f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - event date {dtstart_utc} is in the past"
+                            f"[{ig_handle}] [{shortcode}] Skipping event '{event_data.get('title')}' - all occurrences are in the past (latest at {latest_time})"
                         )
                         continue
 
