@@ -804,11 +804,18 @@ def submit_event(request):
             # Fetch user email from Clerk at submission time
             submitted_by_email = _get_user_email_from_clerk(request.user_id)
 
-            EventSubmission.objects.create(
+            submission = EventSubmission.objects.create(
                 submitted_by=request.user_id,
                 submitted_by_email=submitted_by_email,
                 created_event=event,
             )
+
+        # Send notification email to admin after database transaction commits
+        try:
+            from services.email_service import email_service
+            email_service.send_new_submission_notification_email(submission)
+        except Exception as email_err:
+            logger.error(f"Failed to send new submission notification email: {email_err}")
 
         return Response(
             {"message": "Event submitted successfully"}, status=status.HTTP_201_CREATED

@@ -240,6 +240,7 @@ BASE_URL = (
 FRONTEND_URL = (
     "https://wat2do.ca" if os.getenv("PRODUCTION") == "1" else "http://localhost:5173"
 )
+ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL")
 
 # Global rate limiting settings
 RATELIMIT_VIEW = "ratelimit.views.ratelimited"

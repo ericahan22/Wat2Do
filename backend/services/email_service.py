@@ -1391,6 +1391,88 @@ class EmailService:
             print(f"Error sending event approval email: {e}")
             return False
 
+    def send_new_submission_notification_email(self, submission):
+        """Send notification email about a new event submission to the admin"""
+        if not self.api_key:
+            print("Warning: RESEND_API_KEY not set. Email not sent.")
+            return False
+
+        admin_email = getattr(settings, "ADMIN_NOTIFICATION_EMAIL", None)
+        if not admin_email:
+            print("Error: No admin notification email configured.")
+            return False
+
+        event = submission.created_event
+        event_title = event.title or "Untitled Event"
+        submitted_by = submission.submitted_by_email or submission.submitted_by or "Unknown"
+        
+        # Format the event dates
+        dates_list = []
+        for date_obj in event.event_dates.all():
+            dtstart = date_obj.dtstart_utc.strftime("%Y-%m-%d %H:%M UTC")
+            dates_list.append(dtstart)
+        dates_str = ", ".join(dates_list) if dates_list else "No dates specified"
+
+        admin_url = f"{settings.FRONTEND_URL}/admin/submissions"
+
+        html_content = f"""
+        <html>
+          <body>
+            <h2>New Event Submission Received!</h2>
+            <p>A new event has been submitted for review on Wat2Do.</p>
+            <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; width: 150px;">Event Title:</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{event_title}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Description:</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{event.description or "No description provided."}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Location:</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{event.location or "No location provided."}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Date & Time:</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{dates_str}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">Submitted By:</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{submitted_by}</td>
+              </tr>
+            </table>
+            <br/>
+            <p>
+              <a href="{admin_url}" style="background-color: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                Review Submission
+              </a>
+            </p>
+          </body>
+        </html>
+        """
+
+        payload = {
+            "from": f"Wat2Do Submissions <{self.from_email}>",
+            "to": [admin_email],
+            "subject": f"🔔 New Submission: {event_title}",
+            "html": html_content,
+        }
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        try:
+            response = requests.post(self.base_url, json=payload, headers=headers)
+            response.raise_for_status()
+            print(f"New submission notification email sent to {admin_email} for event: {event_title}")
+            return True
+        except requests.exceptions.RequestException as e:
+            print(f"Error sending submission notification email: {e}")
+            return False
+
 
 # Singleton instance
 email_service = EmailService()
