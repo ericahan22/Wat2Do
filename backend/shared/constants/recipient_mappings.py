@@ -25,5 +25,6 @@ RECIPIENT_ID_TO_SCHOOL = {
     "43532737476": "Université Laval",
     "48380948133": "University of Alberta",
     "42518030160": "Toronto Metropolitan University",
-    "12342599092": "University of British Columbia"
+    "12342599092": "University of British Columbia",
+    "45481970934": "University of Guelph"
 }
