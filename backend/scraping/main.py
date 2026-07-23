@@ -69,21 +69,13 @@ def main():
             logger.warning("No valid targets found in batch mode, exiting.")
             sys.exit(0)
 
-    github_run_id = os.getenv("GITHUB_RUN_ID")
-    scrape_runs = {}
-    for username in targets:
-        if username and username.strip():
-            try:
-                run = ScrapeRun.objects.create(
-                    ig_username=username.strip(),
-                    github_run_id=github_run_id,
-                )
-                scrape_runs[username.strip()] = run
-            except Exception as e:
-                logger.warning(f"Failed to create ScrapeRun for {username}: {e}")
-
     target_school = os.getenv("TARGET_SCHOOL")
     intended_recipient_id = os.getenv("INTENDED_RECIPIENT_ID")
+
+    # Exit early if this is for another school's recipient ID
+    if intended_recipient_id and intended_recipient_id.strip() != "76214170483":
+        logger.info(f"Skipping scraping and processing for non-Waterloo recipient ID: {intended_recipient_id}")
+        sys.exit(0)
 
     if not target_school and intended_recipient_id:
         try:
@@ -96,6 +88,23 @@ def main():
         target_school = "University of Waterloo"
 
     logger.info(f"Target school resolved: {target_school}")
+
+    if target_school != "University of Waterloo":
+        logger.info(f"Skipping scraping and processing for non-Waterloo school: {target_school}")
+        sys.exit(0)
+
+    github_run_id = os.getenv("GITHUB_RUN_ID")
+    scrape_runs = {}
+    for username in targets:
+        if username and username.strip():
+            try:
+                run = ScrapeRun.objects.create(
+                    ig_username=username.strip(),
+                    github_run_id=github_run_id,
+                )
+                scrape_runs[username.strip()] = run
+            except Exception as e:
+                logger.warning(f"Failed to create ScrapeRun for {username}: {e}")
 
     scraper = InstagramScraper()
 
