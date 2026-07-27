@@ -20,6 +20,7 @@ from scraping.instagram_scraper import InstagramScraper
 from scraping.logging_config import logger
 from utils.date_utils import parse_utc_datetime
 from shared.constants.urls_to_scrape import FULL_URLS
+from shared.constants.recipient_mappings import RECIPIENT_ID_TO_SCHOOL
 
 
 def get_targets():
@@ -54,9 +55,25 @@ def filter_valid_posts(posts):
     ]
 
 
+def create_github_annotation(school, username, url):
+    """
+    Creates a GitHub Actions notice annotation for the processed post.
+    """
+    if school == "Not Waterloo":
+        message = "Not Waterloo"
+    else:
+        if url:
+            message = f"{school}\n@{username}\n{url}"
+        else:
+            message = f"{school}\n@{username}"
+    escaped_message = message.replace("\n", "%0A")
+    print(f"::notice::{escaped_message}", flush=True)
+
+
 def main():
     mode, targets = get_targets()
     logger.info(f"--- Workflow Started: {mode.upper()} ---")
+
 
     # Validate targets before proceeding
     if not targets or not any(t and t.strip() for t in targets):
@@ -72,17 +89,9 @@ def main():
     target_school = os.getenv("TARGET_SCHOOL")
     intended_recipient_id = os.getenv("INTENDED_RECIPIENT_ID")
 
-    # Exit early if this is for another school's recipient ID
-    if intended_recipient_id and intended_recipient_id.strip() != "76214170483":
-        logger.info(f"Skipping scraping and processing for non-Waterloo recipient ID: {intended_recipient_id}")
-        sys.exit(0)
-
-    if not target_school and intended_recipient_id:
-        try:
-            from shared.constants.recipient_mappings import RECIPIENT_ID_TO_SCHOOL
-            target_school = RECIPIENT_ID_TO_SCHOOL.get(intended_recipient_id)
-        except ImportError:
-            logger.warning("Could not import RECIPIENT_ID_TO_SCHOOL mapping")
+    # If recipient ID is provided, resolve the school name from it
+    if intended_recipient_id:
+        target_school = RECIPIENT_ID_TO_SCHOOL.get(intended_recipient_id.strip())
 
     if not target_school:
         target_school = "University of Waterloo"
@@ -91,6 +100,8 @@ def main():
 
     if target_school != "University of Waterloo":
         logger.info(f"Skipping scraping and processing for non-Waterloo school: {target_school}")
+        if mode == "single":
+            create_github_annotation("Not Waterloo", None, None)
         sys.exit(0)
 
     github_run_id = os.getenv("GITHUB_RUN_ID")
@@ -174,6 +185,8 @@ def main():
     posts = filter_valid_posts(posts)
     if not posts:
         logger.info("No posts retrieved. Exiting.")
+        if mode == "single":
+            create_github_annotation(target_school, targets[0], None)
         for run in scrape_runs.values():
             try:
                 run.status = "no_posts"
@@ -182,6 +195,12 @@ def main():
             except Exception:
                 pass
         sys.exit(0)
+
+    if mode == "single" and posts:
+        first_post = posts[0]
+        resolved_username = first_post.get("ownerUsername")
+        resolved_url = first_post.get("url")
+        create_github_annotation(target_school, resolved_username, resolved_url)
 
     if ignore_cutoff:
         cutoff_date = timezone.now() - timedelta(days=365 * 5)
