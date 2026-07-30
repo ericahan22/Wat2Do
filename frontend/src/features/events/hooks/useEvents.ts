@@ -51,7 +51,7 @@ export function useEvents() {
     ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: EventsQueryParams = {
-        school_id: DEFAULT_SCHOOL,
+        school: DEFAULT_SCHOOL,
       };
 
       if (pageParam) {
