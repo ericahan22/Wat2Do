@@ -75,7 +75,7 @@ function buildFeedQuery(params: EventsQueryParams): string {
     page_size: "100",
   });
 
-  if (params.school) searchParams.set("school", params.school);
+  if (params.school) searchParams.set("school_id", params.school);
   if (params.search) searchParams.set("search", params.search);
   if (params.start_utc) searchParams.set("start_utc", params.start_utc);
   if (params.end_utc) searchParams.set("end_utc", params.end_utc);
@@ -192,7 +192,7 @@ function googleCalendarUrl(event: Event): string {
 }
 
 class EventsAPIClient {
-  constructor(private apiClient: BaseAPIClient) {}
+  constructor(private apiClient: BaseAPIClient) { }
 
   async getEvents(params: EventsQueryParams = {}): Promise<EventsResponse> {
     const feed = await this.apiClient.get<ApiEventFeed>(
@@ -221,8 +221,7 @@ class EventsAPIClient {
       sort_by: "added_at",
       sort_order: "desc",
     });
-    if (school) searchParams.set("school", school);
-
+    if (school) searchParams.set("school_id", school);
     const feed = await this.apiClient.get<ApiEventFeed>(
       `events/?${searchParams.toString()}`,
     );
