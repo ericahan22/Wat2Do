@@ -164,7 +164,7 @@ function normalizeEvent(event: ApiEvent): Event {
     x_handle: null,
     tiktok_handle: null,
     fb_handle: null,
-    source_url: event.source_url ?? event.organization_page ?? null,
+    source_url: event.source_url ?? null,
     display_handle: normalizedIg ?? event.organization ?? "",
     occurrences: occurrences.length ? occurrences : [primaryDate],
   };

@@ -302,7 +302,7 @@ const EventsGrid = memo(
           {!isSelectMode && (
             <div className="flex space-x-2 pt-2 w-full mt-auto">
               <InterestButton event={event} />
-              {(event.ig_handle || event.source_url) && (
+              {event.source_url && (
                 <Button
                   variant="outline"
                   size="sm"

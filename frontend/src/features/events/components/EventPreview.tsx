@@ -201,7 +201,7 @@ export function EventPreview({ event }: EventPreviewProps) {
             </div>
 
             {/* Action Button */}
-            {(event.ig_handle || event.source_url) && (
+            {event.source_url && (
               <div className="text-center pt-2">
                 <Button onClick={handleExternalLink}>
                   <ExternalLink className="h-4 w-4" />
