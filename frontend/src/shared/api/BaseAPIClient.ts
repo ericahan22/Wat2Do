@@ -1,4 +1,48 @@
-// src/api/baseApiClient.js
+// v2-compatible API client. Access tokens stay in memory; refresh lives in
+// the backend's httpOnly cookie.
+let accessToken: string | null = null;
+let refreshPromise: Promise<boolean> | null = null;
+
+const AUTH_CREDENTIAL_ENDPOINTS = new Set([
+  "auth/verify-otp",
+  "auth/refresh",
+  "auth/logout",
+]);
+
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
+export function setAccessToken(token: string): void {
+  accessToken = token;
+}
+
+export function clearAccessToken(): void {
+  accessToken = null;
+}
+
+function normalizeBaseUrl(): string {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim();
+  const baseUrl = configured || (import.meta.env.DEV ? "http://localhost:8000" : "/api");
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+
+  if (
+    import.meta.env.DEV &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/api$/i.test(normalizedBaseUrl)
+  ) {
+    return normalizedBaseUrl.replace(/\/api$/i, "");
+  }
+
+  return normalizedBaseUrl;
+}
+
+function normalizeEndpoint(endpoint: string): string {
+  return endpoint.replace(/^\/+/, "");
+}
+
+function shouldSendCredentials(endpoint: string): boolean {
+  return AUTH_CREDENTIAL_ENDPOINTS.has(normalizeEndpoint(endpoint));
+}
 
 class BaseAPIClient {
   private _getAuthToken: () => Promise<string | null>;
@@ -6,77 +50,116 @@ class BaseAPIClient {
 
   constructor(getAuthToken: () => Promise<string | null>) {
     this._getAuthToken = getAuthToken;
-    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+    this.baseUrl = normalizeBaseUrl();
   }
 
-  async request({ endpoint, method = 'GET', body = null }: {
+  getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  private async refreshAccessToken(): Promise<boolean> {
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+      try {
+        const response = await fetch(`${this.baseUrl}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!response.ok) return false;
+        const data = await response.json() as { access_token?: string };
+        if (!data.access_token) return false;
+        setAccessToken(data.access_token);
+        return true;
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        return false;
+      }
+    })().finally(() => {
+      refreshPromise = null;
+    });
+
+    return refreshPromise;
+  }
+
+  async request<T = unknown>({
+    endpoint,
+    method = "GET",
+    body = null,
+    retryCount = 0,
+  }: {
     endpoint: string;
     method?: string;
     body?: unknown;
-  }) {
+    retryCount?: number;
+  }): Promise<T> {
+    const normalizedEndpoint = normalizeEndpoint(endpoint);
     const token = await this._getAuthToken();
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
+    const headers: HeadersInit = { "Content-Type": "application/json" };
 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    // console.log('headers', headers);
-    const config: RequestInit = {
-      method,
-      headers,
-    };
-
-    if (body) {
+    const config: RequestInit = { method, headers };
+    if (shouldSendCredentials(normalizedEndpoint)) {
+      config.credentials = "include";
+    }
+    if (body !== null && body !== undefined) {
       config.body = JSON.stringify(body);
     }
 
-    try {
-      const response = await fetch(`${this.baseUrl}/${endpoint}`, config);
+    const response = await fetch(`${this.baseUrl}/${normalizedEndpoint}`, config);
+    if (response.status === 204) return undefined as T;
 
-      if (!response.ok) {
-        // Handle HTTP errors (e.g., 4xx, 5xx)
-        const errorData = await response.json().catch(() => ({})); // Try to parse error, otherwise empty object
-        const error = new Error(errorData.error || errorData.message || errorData.detail || `HTTP error! status: ${response.status}`);
-        // Attach the full error data for components that need it
-        (error as Error & { data?: unknown }).data = errorData;
-        throw error;
+    const responseBody = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      if (
+        response.status === 401 &&
+        !normalizedEndpoint.startsWith("auth/") &&
+        retryCount === 0
+      ) {
+        const refreshed = await this.refreshAccessToken();
+        if (refreshed) {
+          return this.request<T>({ endpoint, method, body, retryCount: 1 });
+        }
       }
-      
-      // For DELETE or other methods that might not return a body
-      if (response.status === 204) {
-        return null;
-      }
-      
-      return response.json();
-    } catch (error) {
-      console.error("API request failed:", error);
-      throw error; // Re-throw so it can be caught by the hook
+
+      const message =
+        responseBody?.detail ||
+        responseBody?.message ||
+        responseBody?.error ||
+        `HTTP error! status: ${response.status}`;
+      const error = new Error(message);
+      (error as Error & { data?: unknown; status?: number }).data = responseBody;
+      (error as Error & { data?: unknown; status?: number }).status = response.status;
+      throw error;
     }
+
+    return responseBody as T;
   }
 
-  // Public method to get auth token (needed for special cases like FormData)
   getAuthToken(): Promise<string | null> {
     return this._getAuthToken();
   }
 
-  // Convenience methods for each HTTP verb
-  get(endpoint: string) {
-    return this.request({ endpoint, method: 'GET' });
+  get<T = unknown>(endpoint: string): Promise<T> {
+    return this.request<T>({ endpoint, method: "GET" });
   }
 
-  post(endpoint: string, body?: unknown) {
-    return this.request({ endpoint, method: 'POST', body });
+  post<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>({ endpoint, method: "POST", body });
   }
 
-  put(endpoint: string, body?: unknown) {
-    return this.request({ endpoint, method: 'PUT', body });
+  put<T = unknown>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>({ endpoint, method: "PUT", body });
   }
 
-  delete(endpoint: string) {
-    return this.request({ endpoint, method: 'DELETE' });
+  delete<T = unknown>(endpoint: string): Promise<T> {
+    return this.request<T>({ endpoint, method: "DELETE" });
   }
 }
 

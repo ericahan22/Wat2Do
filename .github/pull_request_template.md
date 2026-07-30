@@ -17,4 +17,5 @@
 - [ ] Code follows project conventions
 - [ ] Self-reviewed the code
 - [ ] No new warnings introduced
-- [ ] Database migrations included (if applicable)
+- [ ] `npm run lint` passes in `frontend/`
+- [ ] `npm run build` passes in `frontend/`

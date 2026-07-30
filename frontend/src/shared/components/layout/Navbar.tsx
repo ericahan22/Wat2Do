@@ -1,9 +1,8 @@
-import { Moon, Sun, Menu, X, User, Settings, LogOut, LayoutDashboard } from "lucide-react";
+import { Moon, Sun, Menu, X, User, LogOut } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useNavbar } from "@/shared/hooks";
-import { useAuth, UserButton, useClerk } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { CLERK_ROUTES } from "@/shared/config/clerk";
+import { logout, useAuthState } from "@/features/auth/hooks/useAuthState";
 
 function Navbar() {
   const {
@@ -14,9 +13,12 @@ function Navbar() {
     toggleTheme,
   } = useNavbar();
   const navigate = useNavigate();
+  const { isSignedIn, user } = useAuthState();
 
-  const { isSignedIn } = useAuth();
-  const { signOut } = useClerk();
+  const handleLogout = async () => {
+    await logout();
+    navigate("/events");
+  };
 
   return (
     <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50">
@@ -29,7 +31,6 @@ function Navbar() {
               alt="Wat2Do"
               className="cursor-pointer h-14 w-14"
             />
-            {/* Desktop Navigation */}
             <div className="hidden md:flex gap-1">
               <Button
                 variant="ghost"
@@ -52,6 +53,7 @@ function Navbar() {
               >
                 Clubs
               </Button>
+
               <Button
                 variant="ghost"
                 onMouseDown={() => navigate("/about")}
@@ -62,6 +64,7 @@ function Navbar() {
               >
                 About
               </Button>
+
               <Button
                 variant="ghost"
                 onMouseDown={() => navigate("/contact")}
@@ -76,35 +79,26 @@ function Navbar() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Desktop Right Side */}
             <div className="hidden md:flex items-center gap-2">
-              {/* Auth Section */}
               {isSignedIn ? (
                 <>
+                  <span className="max-w-48 truncate text-sm text-gray-600 dark:text-gray-300">
+                    {user?.email}
+                  </span>
                   <Button
                     variant="ghost"
                     className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    onMouseDown={() => navigate(CLERK_ROUTES.DASHBOARD)}
+                    onMouseDown={handleLogout}
                   >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
+                    <LogOut className="h-4 w-4" />
+                    Sign out
                   </Button>
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "h-9 w-9",
-                      },
-                    }}
-                    afterSignOutUrl={CLERK_ROUTES.HOME}
-                    userProfileMode="navigation"
-                    userProfileUrl={CLERK_ROUTES.USER_PROFILE}
-                  />
                 </>
               ) : (
                 <Button
                   variant="default"
                   className="text-sm font-medium"
-                  onMouseDown={() => navigate(CLERK_ROUTES.SIGN_IN)}
+                  onMouseDown={() => navigate("/login")}
                 >
                   <User className="h-4 w-4" />
                   Sign in
@@ -112,7 +106,6 @@ function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
@@ -141,82 +134,71 @@ function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200/50 dark:border-gray-700/50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
             <div className="px-4 py-2 space-y-1">
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => navigate("/events")}
+                onMouseDown={() => {
+                  navigate("/events");
+                  toggleMobileMenu();
+                }}
               >
                 Events
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => navigate("/clubs")}
+                onMouseDown={() => {
+                  navigate("/clubs");
+                  toggleMobileMenu();
+                }}
               >
                 Clubs
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => navigate("/about")}
+                onMouseDown={() => {
+                  navigate("/about");
+                  toggleMobileMenu();
+                }}
               >
                 About
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                onMouseDown={() => navigate("/contact")}
+                onMouseDown={() => {
+                  navigate("/contact");
+                  toggleMobileMenu();
+                }}
               >
                 Contact
               </Button>
               <div className="border-t border-gray-200/50 dark:border-gray-700/50 my-2"></div>
 
-              {/* Mobile Auth Section */}
               {isSignedIn ? (
-                <div className="flex flex-col items-center py-3 space-y-3">
-                  <div className="w-full space-y-1">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                      onMouseDown={() => {
-                        navigate(CLERK_ROUTES.DASHBOARD);
-                        toggleMobileMenu();
-                      }}
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                      onMouseDown={() => {
-                        navigate(CLERK_ROUTES.USER_PROFILE);
-                        toggleMobileMenu();
-                      }}
-                    >
-                      <Settings className="h-4 w-4" />
-                      Profile Settings
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                      onMouseDown={() => signOut()}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </Button>
-                  </div>
+                <div className="flex flex-col items-center py-2 space-y-1">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    onMouseDown={() => {
+                      void handleLogout();
+                      toggleMobileMenu();
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </Button>
                 </div>
               ) : (
                 <Button
                   variant="default"
                   className="w-full justify-center text-sm font-medium"
                   onMouseDown={() => {
-                    navigate(CLERK_ROUTES.SIGN_IN);
+                    navigate("/login");
                     toggleMobileMenu();
                   }}
                 >

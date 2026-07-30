@@ -15,7 +15,6 @@ import {
   Check,
   Heart,
   Loader2,
-  Trash2,
   ExternalLink,
 } from "lucide-react";
 import { Event } from "@/features/events";
@@ -32,10 +31,7 @@ import {
 } from "@/shared/components/badges/EventBadges";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useApi } from "@/shared/hooks/useApi";
-import { useAdmin } from "@/shared/hooks/useAdmin";
+import { useAuthState } from "@/features/auth/hooks/useAuthState";
 import {
   useMyInterestedEvents,
   useToggleEventInterest,
@@ -43,6 +39,7 @@ import {
 
 interface EventsGridProps {
   data: Event[];
+  showPastFirst?: boolean;
   isSelectMode?: boolean;
   selectedEvents?: Set<string>;
   onToggleEvent?: (eventId: string) => void;
@@ -53,7 +50,7 @@ interface EventsGridProps {
 }
 
 const InterestButton = ({ event }: { event: Event }) => {
-  const { isSignedIn } = useAuth();
+  const { isSignedIn } = useAuthState();
   const navigate = useNavigate();
   const { data: interestedEvents } = useMyInterestedEvents();
   const toggleInterest = useToggleEventInterest(event.id);
@@ -62,7 +59,7 @@ const InterestButton = ({ event }: { event: Event }) => {
 
   const handleClick = () => {
     if (!isSignedIn) {
-      navigate("/auth/sign-in");
+      navigate("/login");
       return;
     }
 
@@ -93,6 +90,7 @@ const InterestButton = ({ event }: { event: Event }) => {
 const EventsGrid = memo(
   ({
     data,
+    showPastFirst = false,
     isSelectMode = false,
     selectedEvents = new Set(),
     onToggleEvent,
@@ -102,36 +100,22 @@ const EventsGrid = memo(
     isFetchingNextPage,
   }: EventsGridProps) => {
     const loadMoreRef = useRef<HTMLDivElement>(null);
-    const prevEventIdsRef = useRef<Set<number>>(new Set());
-    const { isAdmin } = useAdmin();
-    const { eventsAPIClient } = useApi();
-    const queryClient = useQueryClient();
-
-    // Delete event mutation (admin only)
-    const deleteEventMutation = useMutation({
-      mutationFn: async (eventId: number) => {
-        return eventsAPIClient.deleteEvent(eventId);
-      },
-      onSuccess: () => {
-        // Invalidate and refetch events
-        queryClient.invalidateQueries({ queryKey: ["events"] });
-      },
-    });
+    const prevEventIdsRef = useRef<Set<string>>(new Set());
 
     // Calculate new events and their stagger indices synchronously during render
     const newEventStagger = useMemo(() => {
       const previousEventIds = prevEventIdsRef.current;
 
       // Find newly added events in order they appear in data
-      const newEventsList: number[] = [];
+      const newEventsList: string[] = [];
       data.forEach((event) => {
-        if (!previousEventIds.has(event.id)) {
-          newEventsList.push(event.id);
+        if (!previousEventIds.has(event.occurrence_key)) {
+          newEventsList.push(event.occurrence_key);
         }
       });
 
       // Create a map of event ID to its stagger index
-      const staggerMap = new Map<number, number>();
+      const staggerMap = new Map<string, number>();
       newEventsList.forEach((id, index) => {
         staggerMap.set(id, index);
       });
@@ -141,7 +125,7 @@ const EventsGrid = memo(
 
     // Update the ref after render
     useEffect(() => {
-      const currentEventIds = new Set(data.map((e) => e.id));
+      const currentEventIds = new Set(data.map((e) => e.occurrence_key));
       prevEventIdsRef.current = currentEventIds;
     }, [data]);
 
@@ -191,8 +175,8 @@ const EventsGrid = memo(
     }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
     const renderEventCard = (event: Event) => {
-      const isSelected = selectedEvents.has(event.id.toString());
-      const staggerIndex = newEventStagger.get(event.id);
+      const isSelected = selectedEvents.has(event.occurrence_key);
+      const staggerIndex = newEventStagger.get(event.occurrence_key);
 
       // Calculate stagger delay for new events only
       // If staggerIndex exists, this is a new event
@@ -200,7 +184,7 @@ const EventsGrid = memo(
 
       return (
         <motion.div
-          key={event.id}
+          key={event.occurrence_key}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -215,14 +199,14 @@ const EventsGrid = memo(
             <Card
               className={`border-none rounded-xl shadow-none relative p-0 hover:shadow-lg dark:hover:shadow-gray-700 gap-0 h-full cursor-pointer ${isSelected ? "ring-2 ring-blue-500" : ""
                 }`}
-              onMouseDown={() => onToggleEvent?.(event.id.toString())}
+              onMouseDown={() => onToggleEvent?.(event.occurrence_key)}
             >
               {/* Selection Circle */}
               <div
                 className="absolute top-2 right-2 z-20 w-6 h-6 rounded-full border-2 border-white bg-gray-800/70 dark:bg-gray-200/70 flex items-center justify-center cursor-pointer"
                 onMouseDown={(e) => {
                   e.stopPropagation();
-                  onToggleEvent?.(event.id.toString());
+                  onToggleEvent?.(event.occurrence_key);
                 }}
               >
                 {isSelected && (
@@ -338,31 +322,6 @@ const EventsGrid = memo(
                   <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               )}
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1 text-xs h-8 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (
-                      confirm(
-                        `Delete "${event.title}"? This will also delete all associated event dates and cannot be undone.`
-                      )
-                    ) {
-                      deleteEventMutation.mutate(event.id);
-                    }
-                  }}
-                  disabled={deleteEventMutation.isPending}
-                >
-                  {deleteEventMutation.isPending ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-              )}
             </div>
           )}
         </CardContent>
@@ -370,18 +329,29 @@ const EventsGrid = memo(
     );
 
 
+    const sectionOrder = showPastFirst
+      ? [
+        "past",
+        "today",
+        "tomorrow",
+        "later this week",
+        "later this month",
+        "later",
+      ]
+      : [
+        "today",
+        "tomorrow",
+        "later this week",
+        "later this month",
+        "later",
+        "past",
+      ];
+
     return (
       <div className="space-y-8 mt-4">
         {/* Events Grid with Section Headers */}
         <div className="space-y-6">
-          {[
-            "past",
-            "today",
-            "tomorrow",
-            "later this week",
-            "later this month",
-            "later",
-          ].map((category) => {
+          {sectionOrder.map((category) => {
             const events = groupedEvents[category];
             if (events.length === 0) return null;
 

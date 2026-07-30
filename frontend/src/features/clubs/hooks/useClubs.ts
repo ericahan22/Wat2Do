@@ -3,6 +3,7 @@ import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { useApi } from "@/shared/hooks/useApi";
 import type { ClubsResponse } from "@/shared/api";
+import { DEFAULT_SCHOOL } from "@/shared/lib/school";
 
 export function useClubs() {
   const [searchParams] = useSearchParams();
@@ -18,9 +19,10 @@ export function useClubs() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<ClubsResponse, Error, ClubsResponse, string[], string | undefined>({
-    queryKey: ["clubs", searchTerm, categoryFilter],
+    queryKey: ["clubs", searchTerm, categoryFilter, DEFAULT_SCHOOL],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: Record<string, string | undefined> = {};
+      queryParams.school = DEFAULT_SCHOOL;
       
       if (pageParam) {
         queryParams.cursor = pageParam;
@@ -53,21 +55,8 @@ export function useClubs() {
   const totalCount = ((data as unknown as InfiniteData<ClubsResponse>)?.pages?.[0] as ClubsResponse | undefined)?.totalCount ?? 0;
 
   const uniqueCategories = useMemo(() => {
-    return [
-      "Academic",
-      "Athletics",
-      "Business and Entrepreneurial",
-      "Charitable, Community Service & International Development",
-      "Creative Arts, Dance and Music",
-      "Cultural",
-      "Environmental and Sustainability",
-      "Games, Recreational and Social",
-      "Health Promotion",
-      "Media, Publications and Web Development",
-      "Political and Social Awareness",
-      "Religious and Spiritual",
-    ];
-  }, []);
+    return Array.from(new Set(clubs.flatMap((club) => club.categories))).sort();
+  }, [clubs]);
 
   return {
     data: clubs,

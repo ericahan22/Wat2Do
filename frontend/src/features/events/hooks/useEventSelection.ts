@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useApi } from "@/shared/hooks/useApi";
+import type { Event } from "@/features/events/types/events";
 
-export function useEventSelection(view: "grid" | "calendar") {
+export function useEventSelection(view: "grid" | "calendar", events: Event[]) {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const { eventsAPIClient } = useApi();
@@ -39,8 +40,8 @@ export function useEventSelection(view: "grid" | "calendar") {
   };
 
   const exportToCalendar = async () => {
-    const eventIds = Array.from(selectedEvents).join(",");
-    const blob = await eventsAPIClient.exportEventsICS({ ids: eventIds });
+    const selected = events.filter((event) => selectedEvents.has(event.occurrence_key));
+    const blob = await eventsAPIClient.exportEventsICS(selected);
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -54,8 +55,8 @@ export function useEventSelection(view: "grid" | "calendar") {
   };
 
   const exportToGoogleCalendar = async () => {
-    const eventIds = Array.from(selectedEvents).join(",");
-    const data = await eventsAPIClient.getGoogleCalendarUrls({ ids: eventIds });
+    const selected = events.filter((event) => selectedEvents.has(event.occurrence_key));
+    const data = eventsAPIClient.getGoogleCalendarUrls(selected);
 
     data.urls.forEach((url) => {
       window.open(url, "_blank");

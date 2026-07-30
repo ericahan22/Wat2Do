@@ -8,7 +8,6 @@ import {
   QuickFilters,
 } from "@/features/events";
 import {
-  getTodayString,
   SEOHead,
   Tabs,
   TabsList,
@@ -18,11 +17,10 @@ import {
   FilterButton,
   useApi,
   Skeleton,
-  // JSONEditor,
+  DEFAULT_SCHOOL,
 } from "@/shared";
 import { Calendar, LayoutGrid, Sparkles, Heart, Clock } from "lucide-react";
 import SearchInput from "@/features/search/components/SearchInput";
-import NumberFlow from "@number-flow/react";
 import { EVENT_CATEGORIES } from "@/data/staticData";
 import { useKeyboardShortcuts } from "@/shared/hooks/useKeyboardShortcuts";
 
@@ -38,8 +36,8 @@ function EventsPage() {
 
   // Fetch the latest update timestamp
   const { data: latestUpdateData, isLoading: isLoadingLastUpdate } = useQuery({
-    queryKey: ["latestUpdate"],
-    queryFn: () => eventsAPIClient.getLatestUpdate(),
+    queryKey: ["latestUpdate", DEFAULT_SCHOOL],
+    queryFn: () => eventsAPIClient.getLatestUpdate(DEFAULT_SCHOOL),
     refetchOnWindowFocus: false,
   });
 
@@ -54,17 +52,16 @@ function EventsPage() {
 
   const {
     events,
-    totalCount,
     isLoading,
     error,
-    dtstart_utc,
     addedAt,
+    showAll,
     showInterested,
     searchTerm,
     categories,
     handleToggleNewEvents,
-    handleToggleInterested,
     handleToggleAllEvents,
+    handleToggleInterested,
     clearAllFilters,
     fetchNextPage,
     hasNextPage,
@@ -79,7 +76,7 @@ function EventsPage() {
     toggleEventSelection,
     exportToCalendar,
     exportToGoogleCalendar,
-  } = useEventSelection(view);
+  } = useEventSelection(view, events);
 
   // ESC key clears all filters and exit export mode
   const handleEscape = useCallback(() => {
@@ -91,25 +88,17 @@ function EventsPage() {
     onEscape: handleEscape,
   });
 
-  const todayString = getTodayString();
-  const isShowingPastEvents = Boolean(
-    dtstart_utc && dtstart_utc !== todayString
-  );
   const isShowingNewEvents = Boolean(addedAt);
-  const isShowingAllEvents = Boolean(dtstart_utc);
 
   const getEventTypeText = () => {
     if (searchTerm || categories) return "Found";
     if (showInterested) return "Interested";
+    if (showAll) return "Total";
     if (addedAt) return "New";
-    if (isShowingPastEvents) return "Total";
     return "Upcoming";
   };
 
-  // Use totalCount when available, except for interested filter which filters client-side
-  const displayCount = showInterested
-    ? events.length
-    : totalCount || events.length;
+  const displayCount = events.length;
 
   return (
     <>
@@ -135,10 +124,11 @@ function EventsPage() {
       <div className="flex flex-col gap-4">
         <div className="sm:text-left">
           <h1 className="sm:text-3xl text-2xl font-bold mb-2 -mt-3 sm:mt-0">
-            <NumberFlow
-              value={displayCount}
-              suffix={` ${getEventTypeText()} events`}
-            />
+            {isLoading ? (
+              <Skeleton className="h-9 w-52" />
+            ) : (
+              `${displayCount} ${getEventTypeText()} events`
+            )}
           </h1>
           <div className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
             {isLoadingLastUpdate ? (
@@ -200,7 +190,7 @@ function EventsPage() {
                 Newly Added
               </FilterButton>
               <FilterButton
-                isActive={isShowingAllEvents}
+                isActive={showAll}
                 onToggle={handleToggleAllEvents}
                 icon={<Clock className="h-4 w-4" />}
               >
@@ -229,6 +219,7 @@ function EventsPage() {
         <EventsContent
           view={view}
           data={events}
+          showPastFirst={showAll}
           isSelectMode={isSelectMode}
           selectedEvents={selectedEvents}
           onToggleEvent={toggleEventSelection}

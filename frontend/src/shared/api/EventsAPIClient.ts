@@ -1,29 +1,15 @@
-import type { EventSubmission } from '@/features/events/types/submission';
-import type { Event } from '@/features/events/types/events';
-import type { SubmissionFormData } from '@/features/events/schemas/submissionSchema';
-import BaseAPIClient from '@/shared/api/BaseAPIClient';
-
-// Re-export types for external use
-export type { Event, EventSubmission, SubmissionFormData };
+import type { Event, EventDate } from "@/features/events/types/events";
+import BaseAPIClient from "@/shared/api/BaseAPIClient";
 
 export interface EventsQueryParams {
   search?: string;
   categories?: string;
-  dtstart_utc?: string;
   added_at?: string;
+  start_utc?: string;
+  end_utc?: string;
   cursor?: string;
-  all?: boolean; // For calendar view - returns all events without pagination
-  ids?: string; // Comma-separated list of event IDs for export/calendar URLs
+  ids?: string;
   school?: string;
-}
-
-export interface EventSubmissionResponse {
-  id: number;
-  message: string;
-}
-
-export interface EventSubmissionsResponse {
-  submissions: EventSubmission[];
 }
 
 export interface EventsResponse {
@@ -33,251 +19,266 @@ export interface EventsResponse {
   totalCount: number;
 }
 
-// Helper function to build query string (DRY principle)
-function buildQueryString(params: EventsQueryParams): string {
-  const searchParams = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      searchParams.append(key, String(value));
-    }
+interface ApiOccurrence {
+  dtstart_utc: string;
+  dtend_utc?: string | null;
+}
+
+interface ApiEvent {
+  id: number;
+  organization_id?: number | null;
+  title: string;
+  description?: string | null;
+  location?: string | null;
+  occurrences?: ApiOccurrence[];
+  price?: number | null;
+  food?: string[] | null;
+  registration?: boolean;
+  source_image_url?: string | null;
+  organization_type?: string | null;
+  school?: string | null;
+  source_url?: string | null;
+  category?: string | null;
+  organization?: string | null;
+  organization_page?: string | null;
+  organization_ig?: string | null;
+  organization_discord?: string | null;
+  ig_handle?: string | null;
+  cancelled?: boolean;
+  added_at: string;
+}
+
+interface LatestAddedEvent {
+  title: string;
+  added_at: string;
+}
+
+interface ApiEventFeed {
+  items: ApiEvent[];
+  total: number;
+  page: number;
+  total_pages: number;
+  latest_added_event?: LatestAddedEvent | null;
+}
+
+function appendList(searchParams: URLSearchParams, key: string, value?: string): void {
+  value
+    ?.split(/[;,]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .forEach((item) => searchParams.append(key, item));
+}
+
+function buildFeedQuery(params: EventsQueryParams): string {
+  const searchParams = new URLSearchParams({
+    page: params.cursor || "1",
+    page_size: "100",
   });
+
+  if (params.school) searchParams.set("school", params.school);
+  if (params.search) searchParams.set("search", params.search);
+  if (params.start_utc) searchParams.set("start_utc", params.start_utc);
+  if (params.end_utc) searchParams.set("end_utc", params.end_utc);
+  if (params.added_at) searchParams.set("added_within_24h", "true");
+  appendList(searchParams, "categories", params.categories);
+  appendList(searchParams, "ids", params.ids);
+
   return searchParams.toString();
 }
 
-/**
- * Events API Client - Clean class pattern!
- * Takes BaseAPIClient as constructor parameter
- */
+function sortedOccurrences(event: ApiEvent): EventDate[] {
+  return (event.occurrences ?? [])
+    .map((occurrence) => ({
+      dtstart_utc: occurrence.dtstart_utc,
+      dtend_utc: occurrence.dtend_utc ?? null,
+    }))
+    .sort(
+      (first, second) =>
+        new Date(first.dtstart_utc).getTime() -
+        new Date(second.dtstart_utc).getTime(),
+    );
+}
+
+function representativeOccurrence(event: ApiEvent): EventDate {
+  const occurrences = sortedOccurrences(event);
+  if (occurrences.length === 0) {
+    return {
+      dtstart_utc: event.added_at,
+      dtend_utc: null,
+    };
+  }
+
+  const now = Date.now();
+  return (
+    occurrences.find(
+      (occurrence) => new Date(occurrence.dtstart_utc).getTime() >= now,
+    ) ?? occurrences[occurrences.length - 1]
+  );
+}
+
+function normalizeInstagramHandle(handle?: string | null): string | null {
+  if (!handle) return null;
+  try {
+    const url = new URL(handle);
+    if (!url.hostname.includes("instagram.com")) return null;
+    const username = url.pathname.split("/").filter(Boolean)[0];
+    return username ? `@${username}` : null;
+  } catch {
+    return handle.startsWith("@") ? handle : `@${handle}`;
+  }
+}
+
+function normalizeEvent(event: ApiEvent): Event {
+  const primaryDate = representativeOccurrence(event);
+  const occurrences = sortedOccurrences(event);
+
+  return {
+    occurrence_key: `${event.id}:${primaryDate.dtstart_utc}`,
+    id: event.id,
+    organization_id: event.organization_id ?? null,
+    title: event.title,
+    description: event.description ?? "",
+    location: event.location ?? "",
+    dtstart_utc: primaryDate.dtstart_utc,
+    dtend_utc: primaryDate.dtend_utc,
+    price: event.price ?? null,
+    food: event.food?.join(", ") ?? null,
+    registration: event.registration ?? false,
+    source_image_url: event.source_image_url ?? null,
+    club_type: event.organization_type ?? null,
+    category: event.category ?? null,
+    added_at: event.added_at,
+    school: event.school ?? null,
+    status: event.cancelled ? "CANCELLED" : "CONFIRMED",
+    ig_handle:
+      normalizeInstagramHandle(event.organization_ig) ??
+      normalizeInstagramHandle(event.ig_handle),
+    discord_handle: event.organization_discord ?? null,
+    x_handle: null,
+    tiktok_handle: null,
+    fb_handle: null,
+    source_url: event.source_url ?? event.organization_page ?? null,
+    display_handle: event.organization ?? event.ig_handle ?? "",
+    occurrences: occurrences.length ? occurrences : [primaryDate],
+  };
+}
+
+function escapeICS(value: string): string {
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+function toICSDate(value: string): string {
+  return new Date(value)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z");
+}
+
+function googleCalendarUrl(event: Event): string {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: event.title,
+    dates: `${toICSDate(event.dtstart_utc)}/${toICSDate(
+      event.dtend_utc ?? event.dtstart_utc,
+    )}`,
+    details: event.description || event.source_url || "",
+    location: event.location || "",
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 class EventsAPIClient {
-  /**
-   * @param {BaseAPIClient} apiClient A pre-configured instance of the base API client.
-   */
   constructor(private apiClient: BaseAPIClient) {}
 
-  /**
-   * Fetches events from the backend with cursor-based pagination.
-   * Corresponds to a GET request to /api/events/
-   */
   async getEvents(params: EventsQueryParams = {}): Promise<EventsResponse> {
-    const queryString = buildQueryString(params);
-    const endpoint = queryString ? `events/?${queryString}` : 'events/';
-    return this.apiClient.get(endpoint);
-  }
+    const feed = await this.apiClient.get<ApiEventFeed>(
+      `events/?${buildFeedQuery(params)}`,
+    );
+    const events = feed.items.map(normalizeEvent);
+    const hasMore = feed.page < feed.total_pages;
 
-  /**
-   * Fetches the latest update timestamp and event title from all events.
-   * Corresponds to a GET request to /api/events/latest-update/
-   */
-  async getLatestUpdate(): Promise<{ lastUpdated: string | null; latestEventTitle: string | null }> {
-    return this.apiClient.get('events/latest-update/');
-  }
-
-  /**
-   * Fetches a single event by its ID.
-   * Corresponds to a GET request to /api/events/{id}/
-   */
-  async getEvent(eventId: number): Promise<Event> {
-    return this.apiClient.get(`events/${eventId}/`);
-  }
-
-  /**
-   * Gets user's event submissions.
-   * Corresponds to a GET request to /api/events/my-submissions/
-   */
-  async getUserSubmissions(): Promise<EventSubmission[]> {
-    return this.apiClient.get('events/my-submissions/');
-  }
-
-  /**
-   * Gets all event submissions (admin).
-   * Corresponds to a GET request to /api/events/submissions/
-   */
-  async getSubmissions(): Promise<EventSubmission[]> {
-    return this.apiClient.get('events/submissions/');
-  }
-
-  /**
-   * Submits a new event for review.
-   * Corresponds to a POST request to /api/events/submit/
-   * Special handling for FormData (file uploads)
-   */
-  /**
-   * Extract event data from image.
-   * Corresponds to a POST request to /api/events/extract/
-   */
-  async extractEventFromScreenshot(screenshot: File): Promise<{
-    source_image_url: string;
-    title: string;
-    description?: string;
-    location: string;
-    price?: number;
-    food?: string;
-    registration: boolean;
-    occurrences: Array<{ dtstart_utc: string; dtend_utc?: string; tz?: string }>;
-    all_extracted: unknown[];
-  }> {
-    const dataForm = new FormData();
-    dataForm.append('screenshot', screenshot);
-    
-    const token = await this.apiClient.getAuthToken();
-    const headers: HeadersInit = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/extract/`, {
-      method: 'POST',
-      headers,
-      body: dataForm,
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to extract event data');
-    }
-    
-    return response.json();
-  }
-
-  async submitEvent(formData: SubmissionFormData): Promise<EventSubmissionResponse> {
-    // Payload is now flat - all event fields at top level
-    const payload = { ...formData };
-    
-    // For JSON payload
-    const token = await this.apiClient.getAuthToken();
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+    return {
+      results: events,
+      nextCursor: hasMore ? String(feed.page + 1) : null,
+      hasMore,
+      totalCount: feed.total,
     };
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/events/submit/`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    });
-    
-    if (!response.ok) {
-      let message = `Submission failed (status ${response.status})`;
-      try {
-        const errBody = await response.json();
-        if (typeof errBody?.message === 'string' && errBody.message.trim()) {
-          message = errBody.message;
-        }
-      } catch {
-        // ignore JSON parse errors
-      }
-      throw new Error(message);
-    }
-    
-    return response.json();
   }
 
-  /**
-   * Reviews a submission (admin).
-   * Corresponds to a POST request to /api/events/submissions/{id}/review/
-   */
-  async reviewSubmission(
-    submissionId: number,
-    action: 'approve' | 'reject',
-    eventData?: Record<string, unknown>
-  ): Promise<{ message: string }> {
-    // Event data is now passed flat at top level (not nested)
-    const payload: Record<string, unknown> = { action };
-    if (eventData) {
-      Object.assign(payload, eventData);
-    }
-    return this.apiClient.post(
-      `events/submissions/${submissionId}/review/`,
-      payload
+  async getLatestUpdate(
+    school?: string,
+  ): Promise<{ lastUpdated: string | null; latestEventTitle: string | null }> {
+    const searchParams = new URLSearchParams({
+      page: "1",
+      page_size: "1",
+      sort_by: "added_at",
+      sort_order: "desc",
+    });
+    if (school) searchParams.set("school", school);
+
+    const feed = await this.apiClient.get<ApiEventFeed>(
+      `events/?${searchParams.toString()}`,
+    );
+    return {
+      lastUpdated: feed.latest_added_event?.added_at ?? null,
+      latestEventTitle: feed.latest_added_event?.title ?? null,
+    };
+  }
+
+  async getEvent(eventId: number): Promise<Event> {
+    return normalizeEvent(
+      await this.apiClient.get<ApiEvent>(`events/${eventId}`),
     );
   }
 
-  /**
-   * Deletes a user's own submission.
-   * Corresponds to a DELETE request to /api/events/submissions/{id}/
-   */
-  async deleteSubmission(submissionId: number): Promise<{ message: string }> {
-    return this.apiClient.delete(`events/submissions/${submissionId}/`);
-  }
+  async exportEventsICS(events: Event[]): Promise<Blob> {
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//wat2do//legacy-v1//EN",
+      ...events.flatMap((event) => [
+        "BEGIN:VEVENT",
+        `UID:wat2do-${event.occurrence_key}@wat2do.ca`,
+        `DTSTAMP:${toICSDate(new Date().toISOString())}`,
+        `DTSTART:${toICSDate(event.dtstart_utc)}`,
+        `DTEND:${toICSDate(event.dtend_utc ?? event.dtstart_utc)}`,
+        `SUMMARY:${escapeICS(event.title)}`,
+        `DESCRIPTION:${escapeICS(event.description || event.source_url || "")}`,
+        `LOCATION:${escapeICS(event.location || "")}`,
+        "END:VEVENT",
+      ]),
+      "END:VCALENDAR",
+    ];
 
-  /**
-   * Exports events as ICS file.
-   * Corresponds to a GET request to /api/events/export.ics
-   * Special handling for file download
-   */
-  async exportEventsICS(params: EventsQueryParams = {}): Promise<Blob> {
-    const queryString = buildQueryString(params);
-    const endpoint = queryString ? `events/export.ics?${queryString}` : 'events/export.ics';
-    
-    const token = await this.apiClient.getAuthToken();
-    const headers: HeadersInit = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-    
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/${endpoint}`, {
-      method: 'GET',
-      headers,
+    return new Blob([lines.join("\r\n")], {
+      type: "text/calendar;charset=utf-8",
     });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response.blob();
   }
 
-  /**
-   * Gets Google Calendar URLs for events.
-   * Corresponds to a GET request to /api/events/google-calendar-urls/
-   */
-  async getGoogleCalendarUrls(params: EventsQueryParams = {}): Promise<{ urls: string[] }> {
-    const queryString = buildQueryString(params);
-    const endpoint = queryString ? `events/google-calendar-urls/?${queryString}` : 'events/google-calendar-urls/';
-    return this.apiClient.get(endpoint);
+  getGoogleCalendarUrls(events: Event[]): { urls: string[] } {
+    return { urls: events.map(googleCalendarUrl) };
   }
 
-
-  /**
-   * Gets the current user's interested event IDs.
-   * Corresponds to a GET request to /api/events/my-interests/
-   */
   async getMyInterestedEventIds(): Promise<{ event_ids: number[] }> {
-    return this.apiClient.get('events/my-interests/');
+    const eventIds =
+      await this.apiClient.get<number[]>("v1/saved-events/");
+    return { event_ids: eventIds };
   }
 
-  /**
-   * Mark interest in an event.
-   * Corresponds to a POST request to /api/events/{id}/interest/mark/
-   */
-  async markEventInterest(eventId: number): Promise<{ message: string; interested: boolean; interest_count: number }> {
-    return this.apiClient.post(`events/${eventId}/interest/mark/`);
+  async markEventInterest(eventId: number): Promise<{ interested: boolean }> {
+    await this.apiClient.put(`v1/saved-events/${eventId}`);
+    return { interested: true };
   }
 
-  /**
-   * Unmark interest in an event.
-   * Corresponds to a DELETE request to /api/events/{id}/interest/unmark/
-   */
-  async unmarkEventInterest(eventId: number): Promise<{ message: string; interested: boolean; interest_count: number }> {
-    return this.apiClient.delete(`events/${eventId}/interest/unmark/`);
-  }
-
-  /**
-   * Updates an event (submitter or admin only).
-   * Corresponds to a PUT request to /api/events/{id}/update/
-   */
-  async updateEvent(eventId: number, eventData: Record<string, unknown>): Promise<{ message: string; event_id: number }> {
-    return this.apiClient.put(`events/${eventId}/update/`, { event_data: eventData });
-  }
-
-  /**
-   * Deletes an event and all its related data (admin only).
-   * Corresponds to a DELETE request to /api/events/{id}/delete/
-   */
-  async deleteEvent(eventId: number): Promise<{ message: string }> {
-    return this.apiClient.delete(`events/${eventId}/delete/`);
+  async unmarkEventInterest(
+    eventId: number,
+  ): Promise<{ interested: boolean }> {
+    await this.apiClient.delete(`v1/saved-events/${eventId}`);
+    return { interested: false };
   }
 }
 

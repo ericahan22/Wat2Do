@@ -7,13 +7,13 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { ThemeProvider } from "@/shared/lib/theme";
-import { ClerkAppProvider } from "@/shared/components/ClerkAppProvider";
 import "@/app/index.css";
 import App from "@/app/App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { SEOHead, Toaster } from "@/shared";
 import { Analytics } from "@vercel/analytics/react";
 import { handleError } from "@/shared/lib/errorHandler";
+import { initializeAuthState } from "@/features/auth/hooks/useAuthState";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,15 +41,15 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <ThemeProvider>
-        <ClerkAppProvider>
-          <QueryClientProvider client={queryClient}>
-            <SEOHead />
-            <Analytics />
-            <App />
-            <Toaster />
-          </QueryClientProvider>
-        </ClerkAppProvider>
+        <QueryClientProvider client={queryClient}>
+          <SEOHead />
+          <Analytics />
+          <App />
+          <Toaster />
+        </QueryClientProvider>
       </ThemeProvider>
     </BrowserRouter>
   </StrictMode>
 );
+
+void initializeAuthState();

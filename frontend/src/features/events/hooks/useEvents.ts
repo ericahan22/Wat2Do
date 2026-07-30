@@ -1,27 +1,27 @@
 import { useMemo, useRef } from "react";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
 import { useDocumentTitle } from "@/shared/hooks/useDocumentTitle";
 import { useApi } from "@/shared/hooks/useApi";
-import { getTodayString } from "@/shared/lib/dateUtils";
 import { useMyInterestedEvents } from "./useEventInterest";
-import { DEFAULT_SCHOOL } from "@/features/events/constants/events";
+import { DEFAULT_SCHOOL } from "@/shared/lib/school";
+import { useAuthState } from "@/features/auth/hooks/useAuthState";
 import type { EventsResponse, EventsQueryParams } from "@/shared/api/EventsAPIClient";
 import type { Event } from "@/features/events";
+
+const ALL_EVENTS_START_UTC = "1970-01-01T00:00:00Z";
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  const { isSignedIn } = useAuthState();
   const { eventsAPIClient } = useApi();
   const searchTerm = searchParams.get("search") || "";
   const categories = searchParams.get("categories") || "";
-  const dtstart_utc = searchParams.get("dtstart_utc") || "";
   const addedAt = searchParams.get("added_at") || "";
+  const showAll = searchParams.get("all") === "true";
   const showInterested = searchParams.get("interested") === "true";
   const view = searchParams.get("view") || "grid";
-  const school = searchParams.get("school") || DEFAULT_SCHOOL;
 
   const { data: interestedEventIds } = useMyInterestedEvents();
 
@@ -43,15 +43,15 @@ export function useEvents() {
       "events",
       searchTerm,
       categories,
-      dtstart_utc,
       addedAt,
+      showAll ? "all" : "",
       view,
-      school,
+      DEFAULT_SCHOOL,
       showInterested ? "interested" : "",
     ],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
       const queryParams: EventsQueryParams = {
-        school,
+        school: DEFAULT_SCHOOL,
       };
 
       if (pageParam) {
@@ -66,23 +66,12 @@ export function useEvents() {
         queryParams.categories = categories;
       }
 
-      if (dtstart_utc) {
-        queryParams.dtstart_utc = dtstart_utc;
-      }
-
       if (addedAt) {
         queryParams.added_at = addedAt;
       }
 
-      // For calendar view, fetch all events
-      if (view === "calendar") {
-        queryParams.all = true;
-      }
-
-      // When viewing Interested, reveal all interested from 2025-01-01
-      if (showInterested) {
-        queryParams.all = true;
-        queryParams.dtstart_utc = "2025-01-01T00:00:00Z";
+      if (showAll) {
+        queryParams.start_utc = ALL_EVENTS_START_UTC;
       }
 
       return eventsAPIClient.getEvents(queryParams);
@@ -100,10 +89,6 @@ export function useEvents() {
     return infiniteData.pages.flatMap((page: EventsResponse) => page.results);
   }, [data]);
 
-  // Get total count from first page
-  const totalCount =
-    ((data as unknown as InfiniteData<EventsResponse>)?.pages?.[0] as EventsResponse | undefined)?.totalCount ?? 0;
-
   // Filter events by interested if the filter is active
   const filteredEvents = useMemo(() => {
     if (showInterested && interestedEventIds) {
@@ -115,18 +100,14 @@ export function useEvents() {
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
   const documentTitle = useMemo(() => {
+    const displayCount = filteredEvents.length;
     let title: string;
-
-    // Use totalCount if available and not filtering by interested (which filters client-side)
-    const displayCount = showInterested
-      ? filteredEvents.length
-      : totalCount || filteredEvents.length;
 
     if (searchTerm || categories) {
       title = `${displayCount} Found Events - Wat2Do`;
     } else if (showInterested) {
       title = `${displayCount} Interested Events - Wat2Do`;
-    } else if (dtstart_utc) {
+    } else if (showAll) {
       title = `${displayCount} Total Events - Wat2Do`;
     } else if (addedAt) {
       title = `${displayCount} New Events - Wat2Do`;
@@ -141,12 +122,11 @@ export function useEvents() {
     return previousTitleRef.current;
   }, [
     filteredEvents.length,
-    totalCount,
     isLoading,
     searchTerm,
     categories,
-    dtstart_utc,
     addedAt,
+    showAll,
     showInterested,
   ]);
 
@@ -156,22 +136,6 @@ export function useEvents() {
     setSearchParams((prev) => {
       const nextParams = new URLSearchParams(prev);
       nextParams.set("view", newView);
-      return nextParams;
-    });
-  };
-
-  const handleToggleStartDate = () => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-
-      const todayStr = getTodayString();
-
-      if (dtstart_utc && dtstart_utc !== todayStr) {
-        nextParams.delete("dtstart_utc");
-      } else {
-        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
-        nextParams.delete("interested");
-      }
       return nextParams;
     });
   };
@@ -187,8 +151,21 @@ export function useEvents() {
         const cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000); // past 24 hours
         const isoString = cutoffDate.toISOString();
         nextParams.set("added_at", isoString);
-        nextParams.delete("dtstart_utc");
       }
+      return nextParams;
+    });
+  };
+
+  const handleToggleAllEvents = () => {
+    setSearchParams((prev) => {
+      const nextParams = new URLSearchParams(prev);
+
+      if (showAll) {
+        nextParams.delete("all");
+      } else {
+        nextParams.set("all", "true");
+      }
+
       return nextParams;
     });
   };
@@ -196,7 +173,7 @@ export function useEvents() {
   const handleToggleInterested = () => {
     // Redirect to sign-in if user is not authenticated
     if (!isSignedIn) {
-      navigate("/auth/sign-in");
+      navigate("/login");
       return;
     }
 
@@ -206,23 +183,8 @@ export function useEvents() {
       if (showInterested) {
         // When deselecting interested, remove all filters to show upcoming events
         nextParams.delete("interested");
-        nextParams.delete("dtstart_utc");
       } else {
         nextParams.set("interested", "true");
-      }
-      return nextParams;
-    });
-  };
-
-  const handleToggleAllEvents = () => {
-    setSearchParams((prev) => {
-      const nextParams = new URLSearchParams(prev);
-      nextParams.delete("added_at");
-      // If "all" is already selected, deselect it
-      if (nextParams.get("dtstart_utc") === "2025-01-01T00:00:00Z") {
-        nextParams.delete("dtstart_utc");
-      } else {
-        nextParams.set("dtstart_utc", "2025-01-01T00:00:00Z");
       }
       return nextParams;
     });
@@ -236,6 +198,7 @@ export function useEvents() {
       nextParams.delete("search");
       nextParams.delete("categories");
       nextParams.delete("dtstart_utc");
+      nextParams.delete("all");
       nextParams.delete("added_at");
       nextParams.delete("interested");
       if (currentView) {
@@ -247,19 +210,17 @@ export function useEvents() {
 
   return {
     events: filteredEvents,
-    totalCount,
     isLoading,
     error,
     searchTerm,
     categories,
-    dtstart_utc,
     addedAt,
+    showAll,
     showInterested,
     handleViewChange,
-    handleToggleStartDate,
     handleToggleNewEvents,
-    handleToggleInterested,
     handleToggleAllEvents,
+    handleToggleInterested,
     clearAllFilters,
     fetchNextPage,
     hasNextPage,

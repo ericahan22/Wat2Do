@@ -6,6 +6,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "outDir": "./node_modules/.tmp/vite-config",
 
     /* Bundler mode */
     "moduleResolution": "bundler",

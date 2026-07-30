@@ -8,6 +8,7 @@ import { Card, Skeleton } from "@/shared";
 interface EventsContentProps {
   view: "grid" | "calendar";
   data: Event[];
+  showPastFirst?: boolean;
   isSelectMode: boolean;
   selectedEvents: Set<string>;
   onToggleEvent: (eventId: string) => void;
@@ -48,6 +49,7 @@ const EventsGridSkeleton = () => {
 const EventsContent: React.FC<EventsContentProps> = ({
   view,
   data,
+  showPastFirst = false,
   isSelectMode,
   selectedEvents,
   onToggleEvent,
@@ -75,6 +77,7 @@ const EventsContent: React.FC<EventsContentProps> = ({
     return (
       <EventsGrid
         data={data}
+        showPastFirst={showPastFirst}
         isSelectMode={isSelectMode}
         selectedEvents={selectedEvents}
         onToggleEvent={onToggleEvent}

@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://wat2do.io/api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

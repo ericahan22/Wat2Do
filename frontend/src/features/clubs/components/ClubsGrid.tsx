@@ -66,9 +66,9 @@ const ClubsGrid = memo(({ data, fetchNextPage, hasNextPage, isFetchingNextPage }
               )}
             </CardHeader>
             <CardContent className="p-3.5 pt-2.5 gap-2 flex flex-col h-full">
-              {/* Action Buttons */}
-              <div className="flex pt-2 w-full mt-auto">
-                {club.club_page ? (
+              {(club.club_page || club.ig || club.discord) && (
+                <div className="flex pt-2 w-full mt-auto">
+                  {club.club_page && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -85,14 +85,9 @@ const ClubsGrid = memo(({ data, fetchNextPage, hasNextPage, isFetchingNextPage }
                     <ExternalLink className="h-4 w-4" />
                     Website
                   </Button>
-                ) : (
-                  <div className="text-center py-2 w-full">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      No website available
-                    </p>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* Social Links */}
               {(club.ig || club.discord) && (

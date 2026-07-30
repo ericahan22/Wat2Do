@@ -4,7 +4,9 @@ export interface EventDate {
 }
 
 export interface Event {
+  occurrence_key: string;
   id: number;
+  organization_id: number | null;
   title: string;
   description: string;
   location: string;
@@ -15,6 +17,7 @@ export interface Event {
   registration: boolean;
   source_image_url: string | null;
   club_type: string | null;
+  category?: string | null;
   added_at: string;
   school: string | null;
   status: string; // Event status: PENDING, CONFIRMED, etc.
@@ -24,10 +27,8 @@ export interface Event {
   tiktok_handle: string | null;
   fb_handle: string | null;
   source_url: string | null;
-  display_handle: string; // Computed field from backend
-  interest_count: number; // Number of users interested in this event
+  display_handle: string; // Computed from the V2 response
   occurrences?: EventDate[]; // Multiple occurrence dates for recurring events
-  is_submitter?: boolean; // Whether the current user is the submitter of this event
 }
 
 export interface EventsResponse {

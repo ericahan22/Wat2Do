@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import NumberFlow from "@number-flow/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, useDocumentTitle, useCategoryParam, SEOHead, Skeleton } from "@/shared";
 import { useClubs, ClubsGrid } from "@/features/clubs";
 import SearchInput from "@/features/search/components/SearchInput";
@@ -64,7 +63,7 @@ function ClubsPage() {
       />
       <div className="sm:text-left">
         <h1 className="sm:text-3xl text-2xl font-bold mb-2">
-          <NumberFlow value={totalCount} suffix={" clubs"} />
+          {totalCount} clubs
         </h1>
         <p className="text-gray-600 dark:text-gray-400">Explore student clubs and organizations</p>
       </div>
@@ -90,18 +89,24 @@ function ClubsPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             {isLoading ? (
               <Skeleton className="h-6 w-40 inline-block" />
             ) : (
               `Showing ${data.length} of ${totalCount} clubs`
             )}
-          </p>
+          </div>
         </div>
       </div>
 
       {/* Loading state - show skeleton */}
       {isLoading && <ClubsGridSkeleton />}
+
+      {error && !isLoading && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+          Error loading clubs: {error.message}
+        </div>
+      )}
 
       {/* Clubs Grid */}
       {!isLoading && !error && (

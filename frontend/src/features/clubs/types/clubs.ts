@@ -5,6 +5,9 @@ export interface Club {
   club_page: string;
   ig: string;
   discord: string;
+  club_type: string;
+  logo_url: string | null;
+  school: string | null;
 }
 
 export interface ClubsResponse {

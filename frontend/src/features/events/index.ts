@@ -12,7 +12,6 @@ export { useEventSelection } from './hooks/useEventSelection';
 export type { Event, EventsResponse, EventView } from './types/events';
 
 // Constants
-export { EVENTS_PER_PAGE } from './constants/events';
 
 // Pages
 export { default as EventsPage } from './pages/EventsPage';

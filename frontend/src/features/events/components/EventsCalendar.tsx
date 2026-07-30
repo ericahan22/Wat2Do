@@ -8,7 +8,6 @@ import {
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { enUS } from "date-fns/locale/en-US";
-import { useLocalStorage } from "react-use";
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,6 +37,14 @@ const localizer = dateFnsLocalizer({
   getDay,
   locales,
 });
+
+const CALENDAR_VIEW_STORAGE_KEY = "eventsCalendarView";
+const CALENDAR_VIEWS: View[] = ["month", "week", "day"];
+
+const getInitialCalendarView = (): View => {
+  const savedView = localStorage.getItem(CALENDAR_VIEW_STORAGE_KEY) as View | null;
+  return savedView && CALENDAR_VIEWS.includes(savedView) ? savedView : "day";
+};
 
 const abbreviateLabel = (label: string): string => {
   const monthAbbreviations: Record<string, string> = {
@@ -209,8 +216,7 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Use react-use's useLocalStorage for view persistence, default to "day"
-  const [currentView, setCurrentView] = useLocalStorage<View>("eventsCalendarView", "day");
+  const [currentView, setCurrentView] = useState<View>(getInitialCalendarView);
 
   const [selectedEvent, setSelectedEvent] = useState<(Event & { start: Date; end: Date; title: string }) | null>(null);
   const [popupPosition, setPopupPosition] = useState<{ x: number; y: number } | null>(null);
@@ -225,6 +231,10 @@ const EventsCalendar: React.FC<{ events: Event[] }> = ({ events }) => {
   });
 
   // Auto-scroll to 4pm (16:00) in day and week view
+  useEffect(() => {
+    localStorage.setItem(CALENDAR_VIEW_STORAGE_KEY, currentView);
+  }, [currentView]);
+
   useEffect(() => {
     if (currentView === "day" || currentView === "week") {
       // Use a small timeout to ensure the calendar has rendered

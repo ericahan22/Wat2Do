@@ -1,124 +1,30 @@
-import { Routes, Route, Navigate, useParams } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { EventsPage } from "@/features/events";
 import EventDetailPage from "@/features/events/pages/EventDetailPage";
-import { SubmitEventPage } from "@/features/events/pages/SubmitEventPage";
-import { MySubmissionsPage } from "@/features/events/pages/MySubmissionsPage";
 import { ClubsPage } from "@/features/clubs";
-import { AdminPage, PromotionsPage, SubmissionsReviewPage, ScrapingDiagnosticsPage } from "@/features/admin";
-import { UnsubscribePage } from "@/features/newsletter";
-import { WaitlistPage } from "@/features/waitlist";
-import { PosterScanPage } from "@/features/posters/pages/PosterScanPage";
-import { SignInPage, SignUpPage, UserProfilePage } from "@/features/auth/pages";
+import { SignInPage } from "@/features/auth/pages";
 import {
-  ProtectedRoute,
-  ProtectedAdminRoute,
   Navbar,
   Footer,
+  NotFoundPage,
   AboutPage,
   ContactPage,
-  NotFoundPage,
-  TopBanner,
 } from "@/shared";
 import { BackToTopButton } from "@/shared/components/common/BackToTopButton";
-import { CLERK_ROUTES } from "@/shared/config/clerk";
-
-function LegacyEventRedirect() {
-  const { eventId } = useParams<{ eventId: string }>();
-
-  if (!eventId) {
-    return <Navigate to="/events" replace />;
-  }
-
-  return <Navigate to={`/events/${eventId}`} replace />;
-}
 
 function App() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
-      <TopBanner />
       <Navbar />
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6 min-w-0">
         <Routes>
           <Route path="/" element={<EventsPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/events/:eventId" element={<EventDetailPage />} />
-          <Route path="/event/:eventId" element={<LegacyEventRedirect />} />
-          <Route
-            path="/submit"
-            element={
-              <ProtectedRoute>
-                <SubmitEventPage />
-              </ProtectedRoute>
-            }
-          />
           <Route path="/clubs" element={<ClubsPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedAdminRoute>
-                <AdminPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/promotions"
-            element={
-              <ProtectedAdminRoute>
-                <PromotionsPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/submissions"
-            element={
-              <ProtectedAdminRoute>
-                <SubmissionsReviewPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route
-            path="/admin/scraping"
-            element={
-              <ProtectedAdminRoute>
-                <ScrapingDiagnosticsPage />
-              </ProtectedAdminRoute>
-            }
-          />
-          <Route path="/unsubscribe/:token" element={<UnsubscribePage />} />
-          <Route path="/waitlist/:schoolSlug" element={<WaitlistPage />} />
-          <Route path="/poster" element={<PosterScanPage />} />
-          <Route path="/poster/:posterId" element={<PosterScanPage />} />
-
-          {/* Clerk Auth Routes */}
-          <Route path={CLERK_ROUTES.SIGN_IN} element={<SignInPage />} />
-          <Route path={CLERK_ROUTES.SIGN_UP} element={<SignUpPage />} />
-          <Route
-            path={`${CLERK_ROUTES.USER_PROFILE}/*`}
-            element={
-              <ProtectedRoute allowAdmins={true}>
-                <UserProfilePage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path={CLERK_ROUTES.DASHBOARD}
-            element={
-              <ProtectedRoute>
-                <MySubmissionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/submissions"
-            element={
-              <ProtectedRoute>
-                <MySubmissionsPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/login" element={<SignInPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

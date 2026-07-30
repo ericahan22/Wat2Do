@@ -251,9 +251,9 @@ const AboutPage: React.FC = () => {
 
         <h2 className="text-2xl font-bold  mb-6">Start Exploring</h2>
         <p className=" mb-4">
-          Check Wat2Do regularly for new events as events are added (almost) live! Or, subscribe to our newsletter for
-          daily updates. Don't be afraid to attend events alone! The best
-          connections happen when you just show up.
+          Check Wat2Do regularly for new events as events are added (almost) live.
+          Don't be afraid to attend events alone! The best connections happen
+          when you just show up.
         </p>
         <p className="mb-8">
           (P.S. You can enter "random" in the search bar to generate a random upcoming event!)

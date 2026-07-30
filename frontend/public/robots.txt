@@ -4,10 +4,8 @@ Allow: /
 # Sitemap
 Sitemap: https://wat2do.ca/sitemap.xml
 
-# Disallow admin and sensitive areas
-Disallow: /admin/
+# Disallow non-page routes
 Disallow: /api/
-Disallow: /unsubscribe/
 
 # Allow all other content
 Allow: /events/

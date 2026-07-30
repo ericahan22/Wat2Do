@@ -1,7 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useUser } from "@clerk/clerk-react";
-import { toast } from "sonner";
 import {
   ArrowLeft,
   Calendar,
@@ -10,15 +7,12 @@ import {
   Utensils,
   ExternalLink,
   Users,
-  Check,
-  X,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { formatRelativeEventDateWithTime } from "@/shared/lib/dateUtils";
 import { EventStatusBadge, NewEventBadge, OrganizationBadge } from "@/shared/components/badges/EventBadges";
 import { Event } from "@/features/events/types/events";
-import { useApi } from "@/shared/hooks/useApi";
 
 interface EventPreviewProps {
   event: Event;
@@ -27,27 +21,6 @@ interface EventPreviewProps {
 
 export function EventPreview({ event }: EventPreviewProps) {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const isAdmin = user?.publicMetadata?.role === "admin";
-  const queryClient = useQueryClient();
-  const { eventsAPIClient } = useApi();
-
-  const reviewSubmissionMutation = useMutation({
-    mutationFn: async ({ action }: { action: "approve" | "reject" }) => {
-      if (!event?.id) {
-        throw new Error("No submission found");
-      }
-      return eventsAPIClient.reviewSubmission(event.id, action);
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["event", event.id] });
-      if (variables.action === "approve") {
-        toast.success("Event approved successfully");
-      } else {
-        toast.success("Event rejected");
-      }
-    },
-  });
 
   const handleBack = () => {
     if (window.history.state && window.history.state.idx > 0) {
@@ -61,14 +34,6 @@ export function EventPreview({ event }: EventPreviewProps) {
     if (event?.source_url) {
       window.open(event.source_url, "_blank");
     }
-  };
-
-  const handleApprove = () => {
-    reviewSubmissionMutation.mutate({ action: "approve" });
-  };
-
-  const handleReject = () => {
-    reviewSubmissionMutation.mutate({ action: "reject" });
   };
 
   return (
@@ -234,31 +199,6 @@ export function EventPreview({ event }: EventPreviewProps) {
                 </div>
               )}
             </div>
-
-            {/* Admin Action Buttons */}
-            {isAdmin && event.id && (
-              <div className="text-center pt-2 space-x-2">
-                <Button
-                  onClick={handleApprove}
-                  disabled={reviewSubmissionMutation.isPending}
-                  variant="default"
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Check className="h-4 w-4 mr-2" />
-                  {reviewSubmissionMutation.isPending
-                    ? "Approving..."
-                    : "Approve"}
-                </Button>
-                <Button
-                  onClick={handleReject}
-                  disabled={reviewSubmissionMutation.isPending}
-                  variant="destructive"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  {reviewSubmissionMutation.isPending ? "Rejecting..." : "Reject"}
-                </Button>
-              </div>
-            )}
 
             {/* Action Button */}
             {event.source_url && (

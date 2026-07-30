@@ -1,41 +1,16 @@
-// src/hooks/useApi.js
-import { useMemo } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-
-import BaseAPIClient from '@/shared/api/BaseAPIClient';
-import EventsAPIClient from '@/shared/api/EventsAPIClient';
-import NewsletterAPIClient from '@/shared/api/NewsletterAPIClient';
-import ClubsAPIClient from '@/shared/api/ClubsAPIClient';
-import AdminAPIClient from '@/shared/api/AdminAPIClient';
-import WaitlistAPIClient from '@/shared/api/WaitlistAPIClient';
-import PosterAPIClient from '@/shared/api/PosterAPIClient';
+import { useMemo } from "react";
+import BaseAPIClient, { getAccessToken } from "@/shared/api/BaseAPIClient";
+import EventsAPIClient from "@/shared/api/EventsAPIClient";
+import ClubsAPIClient from "@/shared/api/ClubsAPIClient";
 
 export const useApi = () => {
-  const { getToken } = useAuth();
-
-  // useMemo ensures we don't create new instances on every render
-  const apiClients = useMemo(() => {
-    // Pass a function that calls getToken. This ensures a fresh token is
-    // fetched for every request.
-    const baseApiClient = new BaseAPIClient(() => getToken());
-
-    // create instances once and reuse
+  return useMemo(() => {
+    const baseApiClient = new BaseAPIClient(async () => getAccessToken());
     const eventsAPIClient = new EventsAPIClient(baseApiClient);
-    const newsletterAPIClient = new NewsletterAPIClient(baseApiClient);
-    const clubsAPIClient = new ClubsAPIClient(baseApiClient);
-    const adminAPIClient = new AdminAPIClient(baseApiClient);
-    const waitlistAPIClient = new WaitlistAPIClient(baseApiClient);
-    const posterAPIClient = new PosterAPIClient(baseApiClient);
 
     return {
       eventsAPIClient,
-      newsletterAPIClient,
-      clubsAPIClient,
-      adminAPIClient,
-      waitlistAPIClient,
-      posterAPIClient,
+      clubsAPIClient: new ClubsAPIClient(baseApiClient),
     };
-  }, [getToken]);
-
-  return apiClients;
+  }, []);
 };
