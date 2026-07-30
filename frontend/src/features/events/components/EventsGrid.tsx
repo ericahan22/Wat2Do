@@ -302,7 +302,7 @@ const EventsGrid = memo(
           {!isSelectMode && (
             <div className="flex space-x-2 pt-2 w-full mt-auto">
               <InterestButton event={event} />
-              {event.source_url && (
+              {(event.ig_handle || event.source_url) && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -310,9 +310,15 @@ const EventsGrid = memo(
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (event.source_url) {
+
+                    // Prioritize Instagram URL, fallback to source_url
+                    const targetUrl = event.ig_handle
+                      ? `https://www.instagram.com/${event.ig_handle.replace(/^@+/, "")}/`
+                      : event.source_url;
+
+                    if (targetUrl) {
                       window.open(
-                        event.source_url,
+                        targetUrl,
                         "_blank",
                         "noopener,noreferrer"
                       );

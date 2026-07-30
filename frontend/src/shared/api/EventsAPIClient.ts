@@ -137,6 +137,10 @@ function normalizeEvent(event: ApiEvent): Event {
   const primaryDate = representativeOccurrence(event);
   const occurrences = sortedOccurrences(event);
 
+  const normalizedIg =
+    normalizeInstagramHandle(event.organization_ig) ??
+    normalizeInstagramHandle(event.ig_handle);
+
   return {
     occurrence_key: `${event.id}:${primaryDate.dtstart_utc}`,
     id: event.id,
@@ -155,15 +159,13 @@ function normalizeEvent(event: ApiEvent): Event {
     added_at: event.added_at,
     school: event.school ?? null,
     status: event.cancelled ? "CANCELLED" : "CONFIRMED",
-    ig_handle:
-      normalizeInstagramHandle(event.organization_ig) ??
-      normalizeInstagramHandle(event.ig_handle),
+    ig_handle: normalizedIg,
     discord_handle: event.organization_discord ?? null,
     x_handle: null,
     tiktok_handle: null,
     fb_handle: null,
     source_url: event.source_url ?? event.organization_page ?? null,
-    display_handle: event.organization ?? event.ig_handle ?? "",
+    display_handle: normalizedIg ?? event.organization ?? "",
     occurrences: occurrences.length ? occurrences : [primaryDate],
   };
 }

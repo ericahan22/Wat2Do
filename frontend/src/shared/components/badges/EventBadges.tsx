@@ -59,30 +59,33 @@ export function OrganizationBadge({
   event: Event;
   isSelectMode?: boolean;
 }) {
-  if (!event.display_handle) return null;
+  // Use ig_handle if available, otherwise fallback to display_handle
+  const rawHandle = event.ig_handle || event.display_handle;
+  if (!rawHandle) return null;
 
-  // Only link if display_handle is an ig_handle
-  const isInstagram = !!event.ig_handle && event.display_handle === event.ig_handle;
+  // Ensure it has a single leading @
+  const handleWithAt = rawHandle.startsWith("@") ? rawHandle : `@${rawHandle}`;
+  const isInstagram = !!event.ig_handle;
 
   return (
     <BadgeMask variant="bottom-left">
       <Badge
-        onMouseDown={() => {
-          if (!isSelectMode && isInstagram) {
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          if (!isSelectMode && event.ig_handle) {
+            const cleanUsername = event.ig_handle.replace(/^@+/, "");
             window.open(
-              `https://www.instagram.com/${event.display_handle}/`,
-              "_blank"
+              `https://www.instagram.com/${cleanUsername}/`,
+              "_blank",
+              "noopener,noreferrer"
             );
           }
         }}
         variant="outline"
         className={`font-extrabold${isInstagram ? " cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" : ""}`}
       >
-        {isInstagram
-          ? (event.display_handle.startsWith("@") ? event.display_handle : `@${event.display_handle}`)
-          : event.display_handle}
+        {handleWithAt}
       </Badge>
     </BadgeMask>
   );
 }
-

@@ -31,8 +31,13 @@ export function EventPreview({ event }: EventPreviewProps) {
   };
 
   const handleExternalLink = () => {
-    if (event?.source_url) {
-      window.open(event.source_url, "_blank");
+    // Prioritize Instagram URL, fallback to source_url
+    const targetUrl = event.ig_handle
+      ? `https://www.instagram.com/${event.ig_handle.replace(/^@+/, "")}/`
+      : event.source_url;
+
+    if (targetUrl) {
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -201,7 +206,7 @@ export function EventPreview({ event }: EventPreviewProps) {
             </div>
 
             {/* Action Button */}
-            {event.source_url && (
+            {(event.ig_handle || event.source_url) && (
               <div className="text-center pt-2">
                 <Button onClick={handleExternalLink}>
                   <ExternalLink className="h-4 w-4" />
