@@ -311,10 +311,12 @@ const EventsGrid = memo(
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // Prioritize Instagram URL, fallback to source_url
-                    const targetUrl = event.ig_handle
-                      ? `https://www.instagram.com/${event.ig_handle.replace(/^@+/, "")}/`
-                      : event.source_url;
+                    // Prioritize source_url (the actual post/link), fallback to Instagram profile
+                    const targetUrl =
+                      event.source_url ||
+                      (event.ig_handle
+                        ? `https://www.instagram.com/${event.ig_handle.replace(/^@+/, "")}/`
+                        : null);
 
                     if (targetUrl) {
                       window.open(
