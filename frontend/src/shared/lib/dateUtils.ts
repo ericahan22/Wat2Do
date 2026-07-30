@@ -48,6 +48,11 @@ export const getDateCategory = (
   | "later this month"
   | "later"
   | "past" => {
+  const endTime = new Date(endUtcString || startUtcString).getTime();
+  const now = Date.now();
+
+  if (endTime < now) return "past";
+
   const startDate = toMidnight(new Date(startUtcString)),
     endDate = toMidnight(endUtcString ? new Date(endUtcString) : startDate),
     todayDate = toMidnight(new Date()),
@@ -69,7 +74,6 @@ export const getDateCategory = (
     sameDay(startDate, tomorrowDate)
   )
     return "tomorrow";
-  if (endDate < todayDate) return "past";
   if (startDate <= endOfWeek) return "later this week";
   if (startDate <= endOfMonth) return "later this month";
   return "later";
