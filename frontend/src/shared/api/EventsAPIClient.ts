@@ -198,6 +198,9 @@ class EventsAPIClient {
     const feed = await this.apiClient.get<ApiEventFeed>(
       `events/?${buildFeedQuery(params)}`,
     );
+    if (!feed?.items) {
+      return { results: [], nextCursor: null, hasMore: false, totalCount: 0 };
+    }
     const events = feed.items.map(normalizeEvent);
     const hasMore = feed.page < feed.total_pages;
 
@@ -224,8 +227,8 @@ class EventsAPIClient {
       `events/?${searchParams.toString()}`,
     );
     return {
-      lastUpdated: feed.latest_added_event?.added_at ?? null,
-      latestEventTitle: feed.latest_added_event?.title ?? null,
+      lastUpdated: feed?.latest_added_event?.added_at ?? null,
+      latestEventTitle: feed?.latest_added_event?.title ?? null,
     };
   }
 
