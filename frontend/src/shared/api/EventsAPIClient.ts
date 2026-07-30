@@ -75,7 +75,9 @@ function buildFeedQuery(params: EventsQueryParams): string {
     page_size: "100",
   });
 
-  if (params.school_id) searchParams.set("school_id", params.school_id);
+  // Always enforce school_id, defaulting to "1" (UWaterloo)
+  searchParams.set("school_id", params.school_id || "1");
+
   if (params.search) searchParams.set("search", params.search);
   if (params.start_utc) searchParams.set("start_utc", params.start_utc);
   if (params.end_utc) searchParams.set("end_utc", params.end_utc);
@@ -216,15 +218,15 @@ class EventsAPIClient {
   }
 
   async getLatestUpdate(
-    school?: string,
+    school: string = "1",
   ): Promise<{ lastUpdated: string | null; latestEventTitle: string | null }> {
     const searchParams = new URLSearchParams({
       page: "1",
       page_size: "1",
       sort_by: "added_at",
       sort_order: "desc",
+      school_id: school, // Always force the school filter here too
     });
-    if (school) searchParams.set("school_id", school);
     const feed = await this.apiClient.get<ApiEventFeed>(
       `events/?${searchParams.toString()}`,
     );
