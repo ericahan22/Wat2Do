@@ -31,7 +31,6 @@ on:
 
 jobs:
   big_scrape:
-    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

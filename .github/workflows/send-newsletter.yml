@@ -7,7 +7,6 @@ on:
 
 jobs:
   send_newsletter:
-    if: ${{ false }}
     runs-on: ubuntu-latest
     env:
       PRODUCTION: '1'
@@ -65,6 +64,5 @@ jobs:
             backend/scripts/logs/
             backend/scripts/*.log
           retention-days: 30
-
 
 

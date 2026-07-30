@@ -18,7 +18,6 @@ on:
 
 jobs:
   process-post:
-    if: ${{ false }}
     runs-on: ubuntu-latest
     concurrency: 
       group: apify-scrape-group

@@ -12,7 +12,6 @@ on:
 
 jobs:
   build-push-and-redeploy:
-    if: ${{ false }}
     name: Build, Push to ECR, Deploy to ECS, and Cleanup Old Images
     runs-on: ubuntu-latest
     permissions:
