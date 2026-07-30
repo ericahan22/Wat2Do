@@ -9,7 +9,7 @@ export interface EventsQueryParams {
   end_utc?: string;
   cursor?: string;
   ids?: string;
-  school_id?: string;
+  school?: string;
 }
 
 export interface EventsResponse {
@@ -75,8 +75,8 @@ function buildFeedQuery(params: EventsQueryParams): string {
     page_size: "100",
   });
 
-  // Always enforce school_id, defaulting to "1" (UWaterloo)
-  searchParams.set("school_id", params.school_id || "1");
+  // Always enforce school, defaulting to "1" (uwaterloo)
+  searchParams.set("school", params.school || "1");
 
   if (params.search) searchParams.set("search", params.search);
   if (params.start_utc) searchParams.set("start_utc", params.start_utc);
@@ -206,33 +206,44 @@ class EventsAPIClient {
     if (!feed?.items) {
       return { results: [], nextCursor: null, hasMore: false, totalCount: 0 };
     }
-    const events = feed.items.map(normalizeEvent);
+
+    // Forcefully filter out any non-uwaterloo events on the client side
+    const uwaterlooEvents = feed.items.filter(
+      (item) => item.school === "uwaterloo"
+    );
+
+    const events = uwaterlooEvents.map(normalizeEvent);
     const hasMore = feed.page < feed.total_pages;
 
     return {
       results: events,
       nextCursor: hasMore ? String(feed.page + 1) : null,
       hasMore,
-      totalCount: feed.total,
+      totalCount: uwaterlooEvents.length,
     };
   }
 
   async getLatestUpdate(
-    school: string = "1",
+    school: string = "uwaterloo",
   ): Promise<{ lastUpdated: string | null; latestEventTitle: string | null }> {
     const searchParams = new URLSearchParams({
       page: "1",
       page_size: "1",
       sort_by: "added_at",
       sort_order: "desc",
-      school_id: school, // Always force the school filter here too
+      school: school,
     });
     const feed = await this.apiClient.get<ApiEventFeed>(
       `events/?${searchParams.toString()}`,
     );
+
+    // Ensure we only look at uwaterloo items
+    const validItems = feed?.items?.filter((item) => item.school === "uwaterloo") || [];
+    const latest = validItems[0] || feed?.latest_added_event;
+
     return {
-      lastUpdated: feed?.latest_added_event?.added_at ?? null,
-      latestEventTitle: feed?.latest_added_event?.title ?? null,
+      lastUpdated: latest?.added_at ?? null,
+      latestEventTitle: latest?.title ?? null,
     };
   }
 

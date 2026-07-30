@@ -78,7 +78,9 @@ export function OrganizationBadge({
         variant="outline"
         className={`font-extrabold${isInstagram ? " cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800" : ""}`}
       >
-        {isInstagram ? `@${event.display_handle}` : event.display_handle}
+        {isInstagram
+          ? (event.display_handle.startsWith("@") ? event.display_handle : `@${event.display_handle}`)
+          : event.display_handle}
       </Badge>
     </BadgeMask>
   );

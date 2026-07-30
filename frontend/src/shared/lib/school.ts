@@ -1,1 +1,1 @@
-export const DEFAULT_SCHOOL = "1";
+export const DEFAULT_SCHOOL = "uwaterloo";
