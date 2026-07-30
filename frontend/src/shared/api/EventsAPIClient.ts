@@ -9,7 +9,7 @@ export interface EventsQueryParams {
   end_utc?: string;
   cursor?: string;
   ids?: string;
-  school?: string;
+  school_id?: string;
 }
 
 export interface EventsResponse {
@@ -75,7 +75,7 @@ function buildFeedQuery(params: EventsQueryParams): string {
     page_size: "100",
   });
 
-  if (params.school) searchParams.set("school_id", params.school);
+  if (params.school_id) searchParams.set("school_id", params.school_id);
   if (params.search) searchParams.set("search", params.search);
   if (params.start_utc) searchParams.set("start_utc", params.start_utc);
   if (params.end_utc) searchParams.set("end_utc", params.end_utc);
@@ -118,14 +118,17 @@ function representativeOccurrence(event: ApiEvent): EventDate {
 
 function normalizeInstagramHandle(handle?: string | null): string | null {
   if (!handle) return null;
+  let username = handle.trim();
   try {
-    const url = new URL(handle);
-    if (!url.hostname.includes("instagram.com")) return null;
-    const username = url.pathname.split("/").filter(Boolean)[0];
-    return username ? `@${username}` : null;
+    const url = new URL(username);
+    if (url.hostname.includes("instagram.com")) {
+      username = url.pathname.split("/").filter(Boolean)[0] || "";
+    }
   } catch {
-    return handle.startsWith("@") ? handle : `@${handle}`;
+    // Not a valid URL, treat as raw handle/username
   }
+  const cleanName = username.replace(/^@+/, "");
+  return cleanName ? `@${cleanName}` : null;
 }
 
 function normalizeEvent(event: ApiEvent): Event {
