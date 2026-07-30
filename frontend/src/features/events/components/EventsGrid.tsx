@@ -311,16 +311,9 @@ const EventsGrid = memo(
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // Prioritize source_url (the actual post/link), fallback to Instagram profile
-                    const targetUrl =
-                      event.source_url ||
-                      (event.ig_handle
-                        ? `https://www.instagram.com/${event.ig_handle.replace(/^@+/, "")}/`
-                        : null);
-
-                    if (targetUrl) {
+                    if (event.source_url) {
                       window.open(
-                        targetUrl,
+                        event.source_url,
                         "_blank",
                         "noopener,noreferrer"
                       );
