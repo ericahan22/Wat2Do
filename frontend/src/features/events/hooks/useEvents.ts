@@ -10,6 +10,13 @@ import type { EventsResponse, EventsQueryParams } from "@/shared/api/EventsAPICl
 import type { Event } from "@/features/events";
 
 const ALL_EVENTS_START_UTC = "1970-01-01T00:00:00Z";
+const RANDOM_EVENT_SEARCH_QUERY = "random";
+
+function selectRandomEvent(events: Event[]): Event[] {
+  if (events.length === 0) return [];
+  const event = events[Math.floor(Math.random() * events.length)];
+  return event ? [event] : [];
+}
 
 export function useEvents() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +29,8 @@ export function useEvents() {
   const showAll = searchParams.get("all") === "true";
   const showInterested = searchParams.get("interested") === "true";
   const view = searchParams.get("view") || "grid";
+  const isRandomSearch =
+    searchTerm.trim().toLowerCase() === RANDOM_EVENT_SEARCH_QUERY;
 
   const { data: interestedEventIds } = useMyInterestedEvents();
 
@@ -58,7 +67,7 @@ export function useEvents() {
         queryParams.cursor = pageParam;
       }
 
-      if (searchTerm) {
+      if (searchTerm && !isRandomSearch) {
         queryParams.search = searchTerm;
       }
 
@@ -70,7 +79,7 @@ export function useEvents() {
         queryParams.added_at = addedAt;
       }
 
-      if (showAll) {
+      if (showAll && !isRandomSearch) {
         queryParams.start_utc = ALL_EVENTS_START_UTC;
       }
 
@@ -91,11 +100,12 @@ export function useEvents() {
 
   // Filter events by interested if the filter is active
   const filteredEvents = useMemo(() => {
-    if (showInterested && interestedEventIds) {
-      return events.filter((event: Event) => interestedEventIds.has(event.id));
-    }
-    return events;
-  }, [events, showInterested, interestedEventIds]);
+    const visibleEvents =
+      showInterested && interestedEventIds
+        ? events.filter((event: Event) => interestedEventIds.has(event.id))
+        : events;
+    return isRandomSearch ? selectRandomEvent(visibleEvents) : visibleEvents;
+  }, [events, showInterested, interestedEventIds, isRandomSearch]);
 
   const previousTitleRef = useRef<string>("Events - Wat2Do");
 
@@ -223,7 +233,7 @@ export function useEvents() {
     handleToggleInterested,
     clearAllFilters,
     fetchNextPage,
-    hasNextPage,
+    hasNextPage: isRandomSearch ? false : hasNextPage,
     isFetchingNextPage,
   };
 }
